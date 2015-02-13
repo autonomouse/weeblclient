@@ -65,6 +65,31 @@ class WebAppBuilder(object):
         # to write a new reporter, only a new mako template (althoughb feel 
         # free to add to the existing reporter).
         
+        '''
+            webapp to import in data                 
+                - affected pipelines
+                - job(s)
+                - bug number
+                - tags
+                - time 
+                - the other info arsenal cares about (Summary, Importance, 
+                    Status, Assignee, Owner, Created)
+                - states
+                - machines
+                - units
+                - vendors
+                - charms
+                - slaves
+                - ports
+                - xunit name/class (optional?)
+                - target file and/or regexp
+                - bootstrap_node jenkins (e.g. 'Building on master'; optional?)
+                - openstack release 
+                
+            Then keep only this info in a json file and leaving the rest to be 
+            overwritten...
+        '''
+        
         
             
     
