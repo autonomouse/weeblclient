@@ -26,7 +26,7 @@ def main():
     # Arsenal:
     file_path = os.path.abspath(os.path.dirname(__file__))
     arsenal_directory = os.path.abspath(os.path.join(file_path, 
-                                        "../arsenal/arsenal-devel/"))
+                                        "../arsenal-devel/"))
     arsenal_scripts = os.path.join(arsenal_directory, "scripts")
     arsenal_templates = os.path.join(arsenal_directory, "web/templates")
     arsenal_reports = os.path.join(arsenal_directory, "reports")
