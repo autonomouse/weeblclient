@@ -1,7 +1,9 @@
 #! /usr/bin/env python2
 
+import os
 import sys
 import json
+import yaml
 #from buginfo import BugInfo
 from CredentialStore import CredentialStore
 from launchpadlib.launchpad import Launchpad
@@ -12,8 +14,8 @@ def main():
     (project, title, json_loc, arsenal_scripts, arsenal_templates) = ('oil', 
     'OIL', '/home/darren/Repositories/Canonical/' + 
     'arsenal/arsenal-devel/reports/OIL/OIL.json', 
-    '/home/darren/Repositories/Canonical/arsenal/arsenal-devel/scripts', 
-    '/home/darren/Repositories/Canonical/arsenal/arsenal-devel/web/templates')
+    '/home/darren/Repositories/Canonical/webapp/trunk/arsenal-devel/scripts', 
+    '/home/darren/Repositories/Canonical/webapp/trunk/arsenal-devel/web/templates')
                   
     WebAppBuilder(project, title, json_loc, arsenal_scripts, 
                arsenal_templates)
@@ -24,11 +26,10 @@ class WebAppBuilder(object):
     def __init__(self, project, title, json_loc, arsenal_scripts, 
                arsenal_templates):        
         #buginfo = self.get_launchpad_creds(json_loc, project)
-        self.gen_webapp(title, json_loc, arsenal_scripts, arsenal_templates, 
-                        buginfo)
+        self.gen_webapp(title, json_loc, arsenal_scripts, arsenal_templates)
 
     def gen_webapp(self, title, json_loc, arsenal_scripts, 
-                   arsenal_templates, buginfo): 
+                   arsenal_templates): 
         """
             Uses doberman.reformer to collate all of the outputs from the 
             different refinery jobs and stick them in a single output location and 
@@ -57,34 +58,98 @@ class WebAppBuilder(object):
             for PS. Run this cron job on there and copy to the MAAS server then.
         """
         
+        self.combine_harvester()  # <- load up existing json file and pass in here as data
 
-        pass
-        # import pdb; pdb.set_trace()
+
+    def combine_harvester(self, data={}):
+        
+        json_loc = '/home/darren/Repositories/Canonical/webapp/trunk/mock_data/OIL.json'
+        stats_loc = '/home/darren/Repositories/Canonical/webapp/trunk/mock_data/oil-stats.json'
+        refinery_output_dir = '/home/darren/Repositories/Canonical/webapp/trunk/mock_data/reformer_output_daily'
+        
+        with open(json_loc) as jfile: 
+            lp_data = json.load(jfile).get('tasks')
+        
+        with open(stats_loc) as sfile: 
+            stats = json.load(sfile)
+        
+        bug_ranking_files = [output_file for output_file in 
+                             os.listdir(refinery_output_dir) if 'bug_ranking' 
+                             in output_file and 'all' not in output_file]
+        for bug_ranking in bug_ranking_files:
+            with open(os.path.join(refinery_output_dir, bug_ranking)) as bfile: 
+                key = (bug_ranking.split('.')[0].replace('bug_ranking', '')
+                       .strip('_'))
+
+                pipeline_ranking_data = yaml.load(bfile).get('pipelines')
+                for pipeline_ranking_datum in pipeline_ranking_data:
+                    bug_number = pipeline_ranking_datum[0]
+                    number = int(pipeline_ranking_datum[1])
+                    
+                    # bug number        
+                    
+                    if bug_number not in data:
+                        data[bug_number] = {}    
+                        
+                    bug_data = lp_data.get(bug_number)[0]
+                             
+                    # job(s)
+                    
+                    
+                    # tags
+                    data[bug_number]['tags'] =  bug_data['bug'].get('tags')
+                    
+                    # time 
+                    # the other info arsenal cares about (Summary, Importance, 
+                    #    Status, Assignee, Owner, Created)
+                    # states
+                    # machines
+                    # units
+                    # vendors
+                    # charms
+                    # slaves
+                    # ports
+                    # xunit name/class (optional?)
+                    # target file and/or regexp
+                    # bootstrap_node jenkins (e.g. 'Building on master'; optional?)
+                    # openstack release 
+                        
+                    
+                # affected pipelines
+                    
+                    
+                    '''
+                        
+                    if 'affected pipelines' not in data[bug_number]:
+                        data[bug_number]['affected pipelines'] = {}
+                        
+                    if pipeline not in data[bug_number]['affected pipelines']:
+                    '''    
+                        
+                        
+                        
+                        
+                    import pdb; pdb.set_trace()
+                    
+                    
+                    
+                    if pipeline not in bug_rankings[key]:
+                        bug_rankings[key][pipeline] = number
+                    else:
+                        import pdb; pdb.set_trace()
+                        # add together?
+                        # TODO but only if the data hasn't been seen before - how'd I do that then?
+        import pdb; pdb.set_trace()
+        #write out
+        
         # json_loc (OIL.json) and the output of reformer (which will be scp'd
         # over from a jenkins job) have everything we need, so we DO NOT need 
         # to write a new reporter, only a new mako template (althoughb feel 
         # free to add to the existing reporter).
         
         '''
-            webapp to import in data                 
-                - affected pipelines
-                - job(s)
-                - bug number
-                - tags
-                - time 
-                - the other info arsenal cares about (Summary, Importance, 
-                    Status, Assignee, Owner, Created)
-                - states
-                - machines
-                - units
-                - vendors
-                - charms
-                - slaves
-                - ports
-                - xunit name/class (optional?)
-                - target file and/or regexp
-                - bootstrap_node jenkins (e.g. 'Building on master'; optional?)
-                - openstack release 
+            webapp to import in data
+
                 
             Then keep only this info in a json file and leaving the rest to be 
             overwritten...
