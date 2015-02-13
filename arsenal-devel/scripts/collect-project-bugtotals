@@ -1,0 +1,110 @@
+#!/usr/bin/env python
+
+# Script to retrieve statistics about bugs for a project with various statuses
+
+import datetime
+import socket
+import simplejson as json
+from arsenal.arsenal_lib import *
+from optparse import OptionParser
+from lpltk import LaunchpadService
+from httplib import IncompleteRead
+from httplib2 import ServerNotFoundError
+
+usage = '''
+%prog [OPTIONS] <project-name>
+'''
+parser = OptionParser(usage=usage)
+parser.add_option(
+    '-d', '--debug',
+    action='store_true', dest='DEBUG', default=False,
+    help='Enable debugging output')
+(options, args) = parser.parse_args()
+
+if len(args) < 1:
+    parser.print_help()
+    sys.exit(1)
+
+project_name = args[0]
+
+try:
+    lp          = LaunchpadService(config={'read_only':True})
+    p           = lp.load_project(project_name)
+except:
+    sys.stderr.write("Error:  Could not access launchpad\n")
+    raise
+    sys.exit(7)
+if not p:
+    sys.stderr.write("Error:  Could not retrieve project from launchpad\n")
+    sys.exit(1)
+
+tag_sets    = [
+    {"name":"all",      "tags":"-omit"},
+    ]
+records = {
+    'timestamp-start': str(datetime.datetime.now()),
+    'team': p.display_name,
+    'data': [],
+    }
+
+# Retrieve the project's official tags list
+for tag in p.official_bug_tags:
+    tag_sets.append( { "name": tag, "tags": tag } )
+
+try:
+    statistics = {}
+
+    for tag_set in tag_sets:
+        n = tag_set['name']
+        tags = tag_set['tags'].split(' ')
+
+        tasks = p.searchTasks(tags = tags, tags_combinator = "All")
+        if len(list(tasks)) == 0:
+            # If there are no bug_tasks, don't bother recording them
+            continue
+        statistics[n+'-total'] = len(list(tasks))
+
+        tasks = p.searchTasks(status = 'New', tags = tags, tags_combinator = "All")
+        statistics[n+'-new'] = len(list(tasks))
+
+        tasks = p.searchTasks(status = 'Incomplete (without response)', tags = tags, tags_combinator = "All")
+        statistics[n+'-incomplete'] = len(list(tasks))
+
+        tasks = p.searchTasks(status = 'Incomplete (with response)', tags = tags, tags_combinator = "All")
+        statistics[n+'-responded'] = len(list(tasks))
+
+        tasks = p.searchTasks(status = 'Confirmed', status_upstream = None, tags = tags, tags_combinator = "All")
+        statistics[n+'-confirmed'] = len(list(tasks))
+
+        tasks = p.searchTasks(status = 'Triaged', status_upstream = None, tags = tags, tags_combinator = "All")
+        statistics[n+'-triaged'] = len(list(tasks))
+
+        tasks = p.searchTasks(has_patch = True, tags = tags, tags_combinator = "All")
+        statistics[n+'-has-patch'] = len(list(tasks))
+
+    if len(statistics)>0:
+        records['data'].append({project_name: statistics})
+
+except HTTPError, e:
+    if is_launchpad_down(e):
+        # TODO: Verify script has run successfully once in past day or so
+        sys.exit(7)
+    else:
+        sys.stderr.write("HTTPError Exception processing %s: %s\n" %(source_pkg, e))
+        raise
+except IncompleteRead as e:
+    # Launchpad got interrupted before it could give all the data (I guess)
+    # The following error message can be removed once it's verified to work
+    sys.stderr.write("IncompleteRead exception: %s" %(e))
+    sys.exit(7)
+except socket.error as e:
+    # Network is down.  Skip for now
+    sys.exit(7)
+except:
+    sys.stderr.write("Unknown exception encountered in collect-team-bugtotals")
+    raise
+
+records['timestamp-stop'] = str(datetime.datetime.now())
+
+print json.dumps(records, indent=4)
+

@@ -1,0 +1,119 @@
+#!/bin/bash
+
+. $(dirname $0)/../lib/arsenal.lib
+
+team=ubuntu-x-swat
+DESTDIR=${WEBSITE_DIR}/${team}/Reports
+
+datdir="${WEBSITE_DIR}/${team}/Data/BugStats"
+datfile="${WORK_DIR}/${team}/fulltotals.dat"
+json_files="${datdir}/bugtotals*.json"
+if [ -z "${json_files}" ]; then
+    continue
+fi
+${ARSENAL_SCRIPTS}/convert-bugtotal-data ${json_files} --columns xorg,xorg-server,libx11,libxcb,xkeyboard-config,mesa,nvidia-settings,nvidia-current,nvidia-graphics-drivers-180,nvidia-graphics-drivers-173,nvidia-graphics-drivers-96,xserver-xorg-video-nouveau,fglrx-installer,xserver-xorg-video-ati,xserver-xorg-video-r128,xserver-xorg-video-intel,xserver-xorg-video-openchrome,xserver-xorg-video-sis,xserver-xorg-video-savage,xserver-xorg-video-vesa,xserver-xorg-video-trident,xserver-xorg-input-evdev,xserver-xorg-input-synaptics,wacom-tools,x11-xserver-utils,Remainder > ${datfile}
+if [ $? != 0 ] || [ ! -f ${datfile} ]; then
+    die "Failed to generate bug total data ${datfile}"
+fi
+
+for i in $(seq 2 31); do
+    ls=$(( $i - 1 ))
+    data="$data \"${datfile}\" using 1:$i title column($i) with filledcurves ls $ls, "
+done
+data="$data \"${datfile}\" using 1:32 title column(32) with filledcurves ls -1"
+
+if [ -f "${WEBSITE_DIR}/${team}/totals.dat" ]; then
+    data="$data, \"${WEBSITE_DIR}/${team}/totals.dat\" using 1:2 title \"Total\" with lines ls -1 "
+fi
+
+file=totals.svg
+
+y_max=4000
+
+dbg "Plotting ${file}"
+gnuplot << EOF
+set title "Ubuntu Xorg Bug Triaging Activity"
+
+set term svg size 1280 800
+set style fill solid
+set palette maxcolors 256
+set style line  5 lt rgb "#eec73e"
+set style line  4 lt rgb "#f0a513"
+set style line  2 lt rgb "#fb8b00"
+set style line  6 lt rgb "#f44800"
+
+set style line 21 lt rgb "#fdff99"
+set style line 24 lt rgb "#ffff00"
+set style line 23 lt rgb "#fdca01"
+set style line 22 lt rgb "#986601"
+
+set style line  3 lt rgb "#f44800"
+#set style line  1 lt rgb "#fd3301"
+set style line  1 lt rgb "#666666"
+set style line  8 lt rgb "#d40000"
+set style line  7 lt rgb "#980101"
+
+set style line 13 lt rgb "#816647"
+set style line 16 lt rgb "#565248"
+set style line 15 lt rgb "#fdd99b"
+set style line 14 lt rgb "#d9bb7a"
+
+set style line 12 lt rgb "#aaccee"
+set style line 11 lt rgb "#6699cc"
+set style line 10 lt rgb "#336699"
+set style line  9 lt rgb "#003366"
+
+set style line 17 lt rgb "#b3defd"
+set style line 20 lt rgb "#0197fd"
+set style line 19 lt rgb "#0169c9"
+set style line 18 lt rgb "#013397"
+
+set style line 25 lt rgb "#ccff99"
+set style line 28 lt rgb "#98fc66"
+set style line 27 lt rgb "#339900"
+set style line 26 lt rgb "#015a01"
+
+set style line 29 lt rgb "#ff00ff"
+set style line 32 lt rgb "#6600cc"
+set style line 31 lt rgb "#002b3d"
+set style line 30 lt rgb "#ff9bff"
+
+set xdata time
+set timefmt "%Y%m%d"
+set autoscale
+set offsets 1, 1, 0, 0
+set yrange [0:${y_max}]
+set xrange ["20090101":]
+set grid xtics mxtics ytics mytics lw 0.1
+set xtics out border nomirror
+set ytics in border mirror
+set format x "%m/%Y"
+set mxtics
+set mytics
+
+set output "${WORK_DIR}/$file"
+set xlabel "Date"
+set ylabel "Total Reports"
+set key vertical inside left
+plot $data
+EOF
+
+retval=$?
+if [ $retval -ne 0 ]; then
+    die "($retval) Could not create graph $file" 1
+fi
+
+if [ ! -d ${DESTDIR} ]; then
+    mkdir ${DESTDIR}
+    retval=$?
+    if [ $retval != 0 ]; then
+        die "($retval) Could not create directory ${DESTDIR}" 1
+    fi
+fi
+
+dbg "Copying $file..."
+mv ${WORK_DIR}/$file ${DESTDIR}
+retval=$?
+if [ $retval -ne 0 ]; then
+    die "($retval) Could not upload $file" 1
+fi

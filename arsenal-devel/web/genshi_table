@@ -1,0 +1,34 @@
+#!/usr/bin/env python
+
+import os, sys
+from genshi.template import TemplateLoader
+
+loader = TemplateLoader(
+    os.path.join(os.path.dirname(__file__), 'templates'),
+    auto_reload=True
+)
+
+tmpl = loader.load('table.html')
+stream = tmpl.generate(
+    title='Hello world',
+    style='index',
+    data_size=42,
+    table_name="sample",
+    columns=[
+        {'title':'id',       'field':'id',       'format':'amount'},
+        {'title':'title',    'field':'title',    'format':'link',
+         'link_url':'http://launchpad.net/bugs/', 'link_field':'id'},
+        {'title':'username', 'field':'username', 'format':'text'},
+        {'title':'tags',     'field':'tags',     'format':'array'},
+    ],
+    data=[
+        {'id':123, 'title':'Foobar1', 'username':'Joe', 'url':'http://cnn.com', 'tags':['a', 'b', 'c']},
+        {'id':456, 'title':'Foobar2', 'username':'Joe', 'url':'http://cnn.com'},
+        {'id':789, 'title':'Foobar3', 'username':'Joe', 'url':'http://cnn.com', 'tags':['a', 'b', 'c']},
+        {'id':101, 'title':'Foobar4', 'username':'Bob', 'url':'http://cnn.com'},
+        {'id':202, 'title':'Foobar5', 'username':'Joe', 'url':'http://cnn.com', 'tags':['a', 'b', 'c']},
+        ],
+    data_update_date="2010-06-29"
+    )
+
+print stream.render('html', doctype='html')

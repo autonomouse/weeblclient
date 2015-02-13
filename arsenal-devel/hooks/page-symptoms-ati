@@ -1,0 +1,11 @@
+#!/bin/bash
+
+. $(dirname $0)/../lib/arsenal.lib
+
+json_filename=symptoms_ati.json
+html_filename=symptoms_ati.html
+
+if [ -s "${WEBSITE_DIR}/ubuntu-x-swat/Data/${json_filename}" ]; then
+    capture "${ARSENAL_SCRIPTS}/bug-listing.py --title=ATI&nbsp;bugs&nbsp;by&nbsp;symptom --show-symptoms ${WEBSITE_DIR}/ubuntu-x-swat/Data/${json_filename}" "ubuntu-x-swat/Reports" ${html_filename}
+fi
+

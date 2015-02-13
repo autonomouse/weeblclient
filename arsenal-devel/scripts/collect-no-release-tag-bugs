@@ -1,0 +1,70 @@
+#!/usr/bin/python
+
+# Retrieve bugs that aren't tagged with a release codename
+
+import sys
+import simplejson as json
+import datetime
+import socket
+from optparse import OptionParser
+from lpltk import LaunchpadService
+
+usage = '''
+%prog [options] <source-package> [source-package ...]
+'''
+parser = OptionParser(usage=usage)
+parser.add_option(
+    '-d', '--debug',
+    action='store_true', dest='DEBUG', default=False,
+    help='Enable debugging output')
+(options, args) = parser.parse_args()
+
+if len(args) < 1:
+    parser.print_help()
+    sys.exit(1)
+
+try:
+    source_pkgs = args
+    lp          = LaunchpadService(config={'read_only':True})
+    d           = lp.distributions['ubuntu']
+    records     = []
+    omit_tags   = ['-kubuntu', '-xubuntu', '-ppc', '-omit',
+                   '-breezy',   '-dapper',
+                   '-edgy',     '-feisty', '-gutsy',   '-hardy',
+                   '-intrepid', '-jaunty', '-karmic',  '-lucid',
+                   '-maverick', '-natty',  '-oneiric', '-precise']
+except:
+    sys.exit(7)
+
+for source_pkg in source_pkgs:
+    try:
+        s = d.get_source_package(source_pkg)
+        if not s:
+            sys.stderr.write("Error:  Could not get source package '%s'\n" %(source_pkg))
+            sys.exit(1)
+        for bugtask in s.search_tasks(tags=omit_tags, tags_combinator="All"):
+            if bugtask.importance == "Wishlist":
+                continue
+
+            if 'MASTER' in bugtask.bug.title:
+                continue
+
+            record = bugtask.to_dict()
+            record.update(bugtask.bug.to_dict())
+            records.append(record)
+
+    except socket.error as e:
+        # Network is down.  Skip for now
+        sys.exit(7)
+
+    except:
+        sys.stderr.write("Unknown exception encountered\n")
+        # TODO:  ValueError
+        raise
+
+keys = ['id', 'title', 'status', 'importance', 'karma', 'target']
+print json.dumps({
+    'keys':keys,
+    'bug_tasks':records,
+    'timestamp-stop':str(datetime.datetime.now())
+    }, indent=4)

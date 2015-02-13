@@ -1,0 +1,22 @@
+     <div id="globalfooter" class="clearfix" xml:lang="en" lang="en" dir="ltr">
+        <div id="colophon">
+          <a href="http://launchpad.net/arsenal/">What is Arsenal?</a>
+          
+        </div>
+        <div id="lp-arcana">
+            &copy;&nbsp;2004-2009&nbsp;<a href="http://canonical.com/">Canonical&nbsp;Ltd.</a>
+          |
+          <a href="http://launchpad.net/legal">Terms of use</a>
+          
+        </div>
+        
+      </div><!--id="globalfooter"-->
+
+    <div id="help-pane" class="invisible">
+      <div id="help-body">
+        <iframe id="help-pane-content" class="invisible"></iframe>
+      </div>
+      <div id="help-footer">
+        <span id="help-close"></span>
+      </div>
+    </div>

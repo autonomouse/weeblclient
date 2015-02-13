@@ -1,0 +1,11 @@
+# Bugs marked confirmed/triaged not yet forwarded upstream
+
+source.teams = ubuntu-x-swat
+
+require.status = Confirmed, Triaged
+require.tags = ${current_ubuntu_development_codename}, -omit, -kubuntu, -xubuntu,
+	     -ppc, -kernel-handoff-graphics
+require.order_by = date_last_message
+
+exclude.bug.excludes_all.importance = Wishlist
+exclude.bug_task.not_equal_to.is_complete_upstream = True

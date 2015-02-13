@@ -1,0 +1,94 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+from datetime import datetime
+from mako.template import Template
+from mako.lookup import TemplateLookup
+
+import sys, os
+sys.path.insert(0, os.path.realpath(
+        os.path.join(os.path.dirname(__file__), "..")))
+
+from arsenal import (ubuntu, utils, info)
+utils.debug.DEBUGGING = True
+
+class ReportRenderer(TemplateLookup):
+    def __init__(self, **kwargs):
+        TemplateLookup.__init__(self, **kwargs)
+
+    def serve_template(self, template_name, **kwargs):
+        assert(template_name)
+        tmpl = self.get_template(template_name)
+        return tmpl.render(**kwargs)
+
+if __name__ == "__main__":
+    datadir = utils.find_datadir('arsenal')
+    templates_dir = os.path.join(datadir, 'templates')
+
+    opt_hand = utils.OptionHandler(info, app_name=sys.argv[0], arg_names="<json-file> [json-file...]")
+    opt_hand.add('-d', '--debug', dest='debug',
+                 help='enable debug output',
+                 action='store_true', default=False,
+                 desc="Turns on verbose debugging output.")
+    opt_hand.add('-i', '--input-directory', dest='input',
+                 help='Mako template input directory',
+                 action='store', default=templates_dir,
+                 desc="Path Mako should look in to find templates.")
+    opt_hand.add('-M', '--module-cache', dest='mako_modules',
+                 help='Mako module cache directory',
+                 action='store', default='/tmp/mako-modules',
+                 desc="Path to temporary cache for Mako to store compiled templates.")
+    opt_hand.add('-o', '--output', dest='output',
+                 help='HTML output filename',
+                 action='store', default=None,
+                 desc="HTML filename where output should be written.")
+    opt_hand.add('-T', '--template', dest='template',
+                 help='template file name',
+                 action='store', default='bug_listing.mako',
+                 desc="Template file to use for generating results")
+    opt_hand.add('-t', '--title', dest='report_title',
+                 help='page title',
+                 action='store', default=None,
+                 desc="Text to use for the page title.  " +
+                 "If not defined, constructs title using input filename.")
+    opt_hand.add('-w', '--web-root', dest='web_root',
+                 help='Base URL for finding js/, css/, etc.',
+                 action='store', default='/Arsenal',
+                 desc="Absolute or relative web URL location for the root of the "
+                 "website.  The css/, img/, and js/ dirs will be referenced "
+                 "from here.")
+    options, args = opt_hand.parse_args()
+    if len(args)<1:
+        opt_hand.print_help()
+        sys.exit(1)
+
+    json_filename = args[0]
+    html_filename = options.output
+
+    data = "\n".join(utils.load_file(json_filename))
+
+    report = {
+        "title":         options.report_title,
+        "series":        ubuntu.series,
+        "importance":    ubuntu.importances,
+        "status":        ubuntu.status,
+        "assignees":     [], # TODO: team members
+        "team_order":    ["ubuntu-x-swat"],
+        }
+
+    RR = ReportRenderer(
+        directories      = [options.input],
+        module_directory = options.mako_modules,
+        collection_size  = 50)
+
+    # TODO: Add a filename arg
+    text = RR.serve_template(
+        options.template,
+        web_root         = options.web_root,
+        report           = report,
+        data             = data,
+        timestamp        = "%s UTC" %(utils.o2str(datetime.utcnow()))
+        )
+
+    print "Got some text ", len(text)
+# vi:set ts=4 sw=4 expandtab:

@@ -1,0 +1,24 @@
+{
+    "launchpad_config": {
+        "launchpad_client_name": "hwe-enablement-bug-reports",
+	"read_only": false
+    },
+    "search_criteria": [
+        {
+            "projects": [
+                "hwe-urbana"
+            ],
+            "status": [
+                "New",
+                "Incomplete",
+                "Incomplete (with response)",
+                "Incomplete (without response)",
+                "Confirmed",
+                "Triaged",
+                "In Progress",
+                "Fix Committed",
+                "Fix Released"
+            ]
+        }
+    ]
+}

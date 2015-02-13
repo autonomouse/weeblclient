@@ -1,0 +1,15 @@
+# Incomplete bugs with responses
+
+source.teams = ubuntu-x-swat
+
+require.status = Incomplete (with response)
+
+# Exclude bugs where comments since the bug was set to incomplete are
+# just from triager people.
+exclude.messages_since_status_change.contains_only.owner_usernames = ubuntu-x-swat.*
+
+quick = True
+
+# TODO: Include the comments starting from when the bug was last set to
+# incomplete.  We want to be able to display these in the web report.
+

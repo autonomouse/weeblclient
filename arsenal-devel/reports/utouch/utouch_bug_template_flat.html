@@ -1,0 +1,91 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:w="http://www.example.org/widgets"
+      xmlns:py="http://genshi.edgewall.org/">
+<head>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
+<title>uTouch bugs</title>
+<script type="text/javascript" src="jquery-latest.js"></script> 
+<script type="text/javascript" src="jquery.tablesorter.js"></script>
+<link title="light" rel="stylesheet" href="css/light-style.css" type="text/css" media="print, projection, screen" />
+<link title="dark"  rel="stylesheet" href="css/dark-style.css"  type="text/css" media="print, projection, screen" />
+</head>
+<body>
+
+<h1>List of bugs relevant to uTouch</h1>
+
+
+<table id="sorttable" class="tablesorter">
+  <thead>
+    <tr>
+      <th>Bug number</th>
+      <th>Description</th>
+      <th>Project</th>
+      <th>Status</th>
+      <th>Importance</th>
+      <th>Milestone</th>
+      <th>Assignee</th>
+    </tr>
+  </thead>
+  <tbody>
+  <py:for each="elem in buglist">
+  <py:for each="bug in elem[1]">
+  <py:for each="task in bug[3]">
+    <tr>
+      <td><a href="${bug[0]}"> ${bug[1]}</a></td>
+      <td>${bug[2]}</td>
+      <td>${task[0]}</td>
+      <td>${task[1]}</td>
+      <td class="${imp_to_class[task[2]]}">${task[2]}</td>
+      <td>${task[3]}</td>
+      <td>${task[4]}</td>
+    </tr>
+  </py:for>
+  </py:for>
+  </py:for>
+  </tbody>
+</table>
+
+<script type="text/javascript">
+$.tablesorter.addParser({
+       id: 'importance-sorter',
+       is: function(s) {
+           // return false so this parser is not auto detected
+           return false;
+       },
+       format: function(s) {
+           // format your data for normalization
+           return s.toLowerCase().replace(/critical/,6).replace(/high/,5).replace(/medium/,4).replace(/low/,3).replace(/wishlist/,2).replace(/undecided/,1).replace(/unknown/,0);
+       },
+       // set type, either numeric or text
+       type: 'numeric'
+   });
+
+$.tablesorter.addParser({
+    id: 'status-sorter',
+    is: function(s) {
+        // return false so this parser is not auto detected
+        return false;
+    },
+    format: function(s) {
+        // format your data for normalization
+            return s.toLowerCase().replace(/new/,12).replace(/incomplete/,11).replace(/confirmed/,10).replace(/triaged/,9).replace(/in progress/,8).replace(/fix committed/,7).replace(/fix released/,6).replace(/invalid/,5).replace(/won't fix/,4).replace(/confirmed/,3).replace(/opinion/,2).replace(/expired/,1).replace(/unknown/,0);
+    },
+    // set type, either numeric or text
+    type: 'numeric'
+});
+
+$(function() {
+    $("#sorttable").tablesorter({
+        headers: {
+            3: { sorter:'status-sorter' },
+            4: { sorter:'importance-sorter' }
+        },
+        sortList: [[4,1]] 
+    });
+});
+
+</script>
+</body>
+</html>

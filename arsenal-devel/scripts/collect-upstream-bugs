@@ -1,0 +1,219 @@
+#!/usr/bin/env python
+
+# Retrieve bugs fixed upstream with patches or git commits
+
+import urllib2
+import socket
+import datetime
+import simplejson as json
+from lxml import etree
+from lxml import objectify
+from optparse import OptionParser
+from arsenal.arsenal_lib import *
+from lpltk import LaunchpadService
+from httplib import BadStatusLine
+
+usage = '''
+%prog "Usage: %s [options] <open|fixed> <source-package> [source-package ...]
+'''
+parser = OptionParser(usage=usage)
+parser.add_option(
+    '-d', '--debug',
+    action='store_true', dest='DEBUG', default=False,
+    help='Enable debugging output')
+(options, args) = parser.parse_args()
+
+if len(args) < 2:
+    parser.print_help()
+    sys.exit(1)
+
+try:
+    upstream_status = args[0]
+    source_pkgs     = args[1:]
+    lp              = LaunchpadService(config={'read_only':True})
+    d               = lp.launchpad.distributions["ubuntu"]
+    records         = []
+except:
+    sys.exit(7)
+if not d:
+    sys.stderr.write("Error:  Could not retrieve project from launchpad\n")
+    sys.exit(1)
+
+try:
+    for source_pkg in source_pkgs:
+        s = d.getSourcePackage(name = source_pkg)
+
+        if upstream_status == 'fixed':
+            status = 'resolved_upstream'
+        elif upstream_status == 'open':
+            status = 'open_upstream'
+        for bugtask in s.searchTasks(status_upstream=status):
+            if ('MASTER' in bugtask.bug.title or
+                '[Needs ' in bugtask.bug.title):
+                continue
+
+            upstreams = []
+            for watch in bugtask.bug.bug_watches:
+                if upstream_status == 'fixed' and watch.remote_status != "RESOLVED FIXED":
+                    continue
+
+                # TODO: This tends to access fdo too frequently
+                continue
+                url = "http://bugs.freedesktop.org/show_bug.cgi?ctype=xml&id=%s" % (watch.remote_bug)
+                try:
+                    # TODO: fdo is only for xorg bugs...
+                    f = urllib2.urlopen(url)
+                    bugzilla_xml = f.read()
+                    if bugzilla_xml is None:
+                        continue
+                except BadStatusLine:
+                    sys.stderr.write("Exception encountered trying to urlopen(%s)\n" % (url))
+                    raise
+                except URLError:
+                    # Once and a while we fail to retrieve a bug for some reason,
+                    # probably just network congestion.  Ignore the error for now.
+                    #sys.stderr.write("Error encountered loading url %s\n" %(url))
+                    continue
+
+                try:
+                    root = objectify.fromstring(bugzilla_xml)
+                except:
+                    sys.stderr.write("Error accessing %s\n\n" %(url))
+                    sys.stderr.write("Read:\n%s\n\n" %(bugzilla_xml))
+                    raise
+                if root is None:
+                    continue
+
+                patches = []
+                if 'bug' not in root.__dict__:
+                    continue
+                bug = root.bug
+                if bug is None:
+                    continue
+
+                for a in bug.iterchildren(tag="attachment"):
+                    if not a.get("ispatch"):
+                        continue
+                    if a.get("isobsolete"):
+                        continue
+                    patch = {
+                        'id': a.attachid.text,
+                        'date': a.date.text,
+                        'desc': a.desc.text,
+                        'filename': a.filename.text,
+                        'type': a.type.text,
+                        'size': a.size.text
+                        }
+                    patches.append(patch)
+
+                git_commits = []
+                regex_hex   = re.compile('[0-9a-f]+[0-9][a-f]+[0-9a-f]+')
+                for msg in root.bug.iterchildren(tag="long_desc"):
+                    if not msg.thetext:
+                        continue
+                    commits = regex_hex.findall(msg.thetext.text)
+                    if len(commits) == 0:
+                        continue
+
+                    for s in commits:
+                        if len(s) != 40:
+                            continue
+
+                        commit = {
+                            'commit': s,
+                            'commenter': msg.who.text,
+                            'comment_date': msg.bug_when.text,
+                            'comment_text': msg.thetext.text
+                            }
+                        git_commits.append(commit)
+
+                if len(git_commits)==0 and len(patches)==0:
+                    continue
+
+                keywords = []
+                for keyword in root.bug.iterchildren(tag="keywords"):
+                    keywords.append(keyword.text)
+
+                ccs = []
+                for cc in root.bug.iterchildren(tag="cc"):
+                    ccs.append(cc.text)
+
+                reporter_name = None
+                if root.bug.reporter.get("name"):
+                    reporter_name = root.bug.reporter.get("name").encode("utf-8")
+
+                assignee_name = None
+                if root.bug.assigned_to.get("name"):
+                    assignee_name = root.bug.assigned_to.get("name").encode("utf-8")
+
+                date_last_changed = None
+                if watch.date_last_changed is not None:
+                    date_last_changed = watch.date_last_changed.ctime()
+
+                date_last_checked = None
+                if watch.date_last_checked is not None:
+                    date_last_checked = watch.date_last_checked.ctime()
+
+                upstream = {
+                    'id': watch.remote_bug,
+                    'url': watch.url,
+                    'title': watch.title,
+                    'short_desc': root.bug.short_desc.text,
+                    'product': root.bug.product.text,
+                    'component': root.bug.component.text,
+                    'version': root.bug.version.text,
+                    'platform': root.bug.rep_platform.text,
+                    'op_sys': root.bug.op_sys.text,
+                    'importance': watch.remote_importance,
+                    'remote_status': watch.remote_status,
+                    'status': root.bug.bug_status.text,
+                    'priority': root.bug.priority.text,
+                    'bug_severity': root.bug.bug_severity.text,
+                    'keywords': keywords,
+                    'date_last_changed': date_last_changed,
+                    'date_last_checked': date_last_checked,
+                    'assignee_name': assignee_name,
+                    'assignee_email': root.bug.assigned_to.text,
+                    'reporter_name': reporter_name,
+                    'reporter_email': root.bug.reporter.text,
+                    'cc': ccs,
+                    'git_commits': git_commits,
+                    'patches': patches
+                    }
+                upstreams.append(upstream)
+
+            date_closed = None
+            if bugtask.date_closed:
+                date_closed = bugtask.date_closed.ctime()
+
+            date_fix_released = None
+            if bugtask.date_fix_released:
+                date_fix_released = bugtask.date_fix_released.ctime()
+
+            arsenal_bug = ArsenalBug(bugtask.bug, lp.launchpad)
+            bugtask_dict = bugtask_as_dict(arsenal_bug, bugtask)
+            bugtask_dict['upstreams'] = upstreams
+
+            records.append(bugtask_dict)
+            #print bugtask.bug.id, " " + bugtask.status + " " + bugtask.bug.title
+
+except HTTPError, e:
+    if is_launchpad_down(e):
+        # TODO: Verify script has run successfully once in past day or so
+        sys.exit(7)
+    else:
+        sys.stderr.write("HTTPError Exception encountered: %s\n" %(e))
+        raise
+except socket.error as e:
+    # Network is down.  Skip for now
+    sys.exit(7)
+except:
+    sys.stderr.write("Unknown exception encountered in collect-team-bugtotals\n")
+    raise
+
+
+keys = ['id', 'title', 'status', 'importance']
+print json.dumps({'keys': keys,
+                  'bug_tasks': records,
+                  'timestamp-stop':str(datetime.datetime.now())
+                  }, indent=4)

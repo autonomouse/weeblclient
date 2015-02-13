@@ -1,0 +1,13 @@
+#!/bin/bash
+
+. $(dirname $0)/../lib/arsenal.lib
+
+file=upstream-fixed.json
+
+for team in `${ARSENAL_SCRIPTS}/desktop-teams`; do
+    packages=`${ARSENAL_SCRIPTS}/ls-team-subscribed-packages.py -t ${team}`
+    if [ ! -z "${packages}" ] ; then
+        capture "${ARSENAL_SCRIPTS}/collect-upstream-bugs fixed ${packages}" "${team}/Data" ${file}
+    fi
+done
+

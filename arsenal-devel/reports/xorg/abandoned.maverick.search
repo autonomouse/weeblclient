@@ -1,0 +1,19 @@
+# Bugs tagged maverick with no natty tag and no comments since natty
+# opened.  These are all obsolete bugs that can probably just be closed.
+
+# Note - this search benefits heavily from caching.  The first run will
+# be intensive, but after that the only changes should be dropping items
+# that get closed or commented on.
+
+# TODO: Need to ensure collect-bugs will exclude bugs not flagged in
+# this search from being included in the .json.
+
+source.teams = ubuntu-x-swat
+
+require.tags = maverick, -natty, -oneiric, -precise, -quantal, -patch
+require.created_since = 2010-05-06    # Start of maverick development
+
+exclude.bug.later_than.date_last_message = 2011-04-28  # natty release
+
+
+

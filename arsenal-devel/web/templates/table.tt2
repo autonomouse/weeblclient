@@ -1,0 +1,94 @@
+[%# table content template
+  #
+  # Expected Parameters:
+  # table_name:  ID for the table
+  # columns:     Collection of columns
+  #              + title
+  #              + colors
+  #              + field
+  #              + format: "integer", "array"
+  # sort_column: Column name to sort by
+  # data:        Collection of bugs or other data to be displayed in the table
+  #              + Fields as described by columns structure, above
+  # Optional Parameters:
+  # hiderows:    Collection of filters to hide rows based on criteria
+  #              + title
+  #              + table
+  #              + match
+  #              + colnum
+ %]
+
+[%# hiderows = [
+  # {
+  #   title  = "Hide unassigned bugs"
+  #   table  = "milestone-report"
+  #   match  = ""
+  #   colnum = 6
+  # }
+  # {
+  #   title  = "Hide milestone 'later'"
+  #   table  = "milestone-report"
+  #   match  = "<a href=\"https://launchpad.net/ubuntu/+milestone/later\">later</a>"
+  #   colnum = 7
+  # }
+  #]
+ -%]
+[% FOR item IN hiderows %]
+      <p>
+        <input type='checkbox' onclick='
+          if (this.checked) {
+            hiderows([% item.table %], [% item.column_number %], [% item.link %]);
+          } else {
+            showrows([% item.table %]);
+          }'> [% item.title %]
+      </p>
+[% END %]
+
+      <div>[% data.size %] results</div>
+      <table class="sortable listing" id="[% table_name %]">
+        <thead>
+          <tr>
+            [% FOREACH col IN columns %]<th>[% col.title %]</th>
+            [% END %]
+          </tr>
+        </thead>
+        <tbody id="[% table_name %]-content">
+          [%- FOREACH d IN data.sort(sort_column) %]
+          <tr[% IF d.class %] class="[% d.class %]"[% END %]>
+           [%- FOREACH col IN columns -%]
+            [%- IF col.colors -%]
+            <!-- TODO.  Also bold and row-content driven highlighting -->
+            [%- END -%]
+
+            [%- IF col.format == "integer" -%]
+              [%- value = d.${col.field} -%]
+              [%- class = "amount" -%]
+            [%- ELSIF col.format == "array" -%]
+              [%- value = d.${col.field}.join(', ') -%]
+            [%- ELSIF col.format == "ordered" -%]
+              [%- value = d.${col.field} FILTER remove('\d+ - ') -%]
+              [%- class = "text" -%]
+            [%- ELSE -%]
+              [%- value = d.${col.field} -%]
+              [%- class = "text" -%]
+            [%- END -%]
+
+            <td[% IF class %] class="[% class %]"[% END %]>
+            [%- IF col.link_url %]
+              <a href="[% col.link_url %][% d.${col.link_field} %]">[% value %]</a>
+            [%- ELSE -%]
+              [%- value -%]
+            [%- END -%]</td>
+           [%- END -%]
+
+          </tr>
+          [%- END -%]
+        </tbody>
+        <tfoot id="upstream-report-totals">
+          <tr>
+            [%- FOREACH col IN columns %]
+            <td class="amount"></td>
+            [%- END %]
+          </tr>
+        </tfoot>
+      </table>

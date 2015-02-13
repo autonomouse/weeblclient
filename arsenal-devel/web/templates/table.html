@@ -1,0 +1,49 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:xi="http://www.w3.org/2001/XInclude"
+      xmlns:py="http://genshi.edgewall.org/"
+      lang="en">
+  <xi:include href="layout.html" />
+  <head>
+    <title>$title</title>
+  </head>
+  <body id="document" class="$style">
+    <div id="mainarea">
+      <div id="container">
+        <!--[% IF show_navigation_tabs;
+   INCLUDE "templates/frame/navigation-tabs.tt2";
+   END %]-->
+        <div>
+          <h1>$title</h1>
+
+          <div>${len(data)} results</div>
+
+          <table py:if="data" border="1"
+                 class="sortable listing" id="$table_name">
+            <thead>
+              <tr>
+                <th py:for="column in columns">${column.title.capitalize()}</th>
+              </tr>
+            </thead>
+            <tbody id="$table_name-content">
+              <tr py:for="d in data">
+                <td py:for="c in columns" py:if="c.field in d" class="${c.format}">
+                  <a py:strip="'link_url' not in c or 'link_field' not in c" 
+                     href="${c.link_url}${d[c.link_field]}">
+                    <div py:choose="" py:strip="True">
+                      <span py:strip="True" py:when="isinstance(d[c.field], list)">${', '.join(d[c.field])}</span>
+                      <span py:strip="True" py:otherwise="">${d[c.field]}</span>
+                    </div>
+                  </a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div align="right">Data last updated: $data_update_date</div>
+          <div />
+        </div>
+        <div class="clear"></div>
+
+      </div><!--id="container"-->
+    </div><!--id="mainarea"-->
+  </body>
+</html>

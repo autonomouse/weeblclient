@@ -1,0 +1,13 @@
+#!/bin/bash
+
+. $(dirname $0)/../lib/arsenal.lib
+
+file=symptoms_ati.json
+
+if [ $(date -u +"%H") -eq 8 ] ; then
+    # Don't run during at 8:00 GMT because this is when launchpad tends to
+    # throw 502 errors
+    exit 0
+fi
+
+capture "${ARSENAL_SCRIPTS}/bugs-symptoms.py xserver-xorg-video-ati" "ubuntu-x-swat/Data" ${file}

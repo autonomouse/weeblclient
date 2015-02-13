@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:py="http://genshi.edgewall.org/" py:strip="">
+
+  <py:match path="head" once="true">
+    <head py:attrs="select('@*')">
+      <link rel="shortcut icon"
+            href="http://launchpad.net/@@/launchpad.png" />
+      <title py:with="title = list(select('title/text()'))">
+        Arsenal<py:if test="title">: ${title}</py:if>
+      </title>
+      <link rel="stylesheet"
+            href="http://blackwold/X/+icing/+style-slimmer.css"
+            type="text/css" />
+      <script type="text/javascript"
+              src="http://blackwold/X/+icing/rev7040/launchpad.js"></script>
+      ${select('*[local-name()!="title"]')}
+
+      <!--[% INCLUDE "templates/frame/head-atom-feeds.tt2" %]
+             [% INCLUDE "templates/frame/head-style.tt2" %]
+             [% INCLUDE "templates/frame/head-scripts.tt2" %]
+        -->
+    </head>
+  </py:match>
+
+  <py:match path="body" once="true">
+    <body py:attrs="select('@*')"><div id="wrap">
+        <!--[% INCLUDE "templates/frame/navigation-location-bar.tt2" %]-->
+      <div id="header">
+        <a href="/"><img src="http://blackwold/X/+icing/icon_pdt_ubuntu.gif"
+                         border="0"
+                         alt="Arsenal" /></a>
+      </div>
+      <div id="content">
+        ${select('*|text()')}
+      </div>
+      <div id="footer">
+        <hr />
+        <p class="legalese">&copy; 2010 Canonical Ltd.</p>
+      </div>
+    </div></body>
+  </py:match>
+
+</html>

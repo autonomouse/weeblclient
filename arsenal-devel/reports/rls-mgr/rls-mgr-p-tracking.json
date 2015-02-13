@@ -1,0 +1,34 @@
+{
+    "launchpad_config": {
+        "launchpad_client_name": "rls-mgr-reports", 
+        "read_only": false
+    }, 
+    "search_criteria": [
+        {
+            "distribution": "ubuntu", 
+            "series": [
+                "precise", 
+                "NONE"
+            ], 
+            "status": [
+                "New", 
+                "Confirmed", 
+                "Triaged", 
+                "Incomplete", 
+                "Incomplete (with response)", 
+                "Incomplete (without response)", 
+                "In Progress", 
+                "Fix Committed"
+            ], 
+            "tags": [
+                "rls-mgr-p-tracking"
+            ]
+        }
+    ], 
+    "tasks": {
+    }, 
+    "report": {
+        "title" : "",
+	"show_total_bugs" : true
+    }
+}

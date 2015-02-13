@@ -1,0 +1,287 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" dir="ltr">
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<title>
+<!-- *** Title Space *** -->
+</title>
+<link rel="shortcut icon" href="http://launchpad.net/@@/launchpad.png" />
+<link type="text/css" rel="stylesheet" media="screen, print" href="http://launchpad.net/+icing/rev13144/combo.css" />
+<style type="text/css">
+fieldset.collapsed div, fieldset div.collapsed {display: none;}
+</style>
+<noscript>
+<style type="text/css">
+fieldset.collapsible div, fieldset div.collapsed {display: block;}
+</style>
+</noscript>
+
+<script type="text/javascript" language="javascript">
+function changemenu() {
+var sPath = window.location.pathname;
+var sPage = sPath.substring(sPath.lastIndexOf('/') + 1);
+document.getElementById(sPage).setAttribute('class', 'active');
+}
+</script>
+<script type="text/javascript">
+var LP = {
+cache: {},
+links: {}
+};
+</script>
+<script type="text/javascript" src="http://launchpad.net/+icing/rev13144/MochiKit.js"></script>
+
+  <script type="text/javascript"
+          src="http://launchpad.net/+icing/rev13144/build/launchpad.js"></script>
+
+  <script type="text/javascript">var cookie_scope = '; Path=/; Secure; Domain=.launchpad.net';</script>
+
+  <script type="text/javascript">
+    // Define a global YUI sandbox that should be used by everyone.
+    var LPS = YUI({
+      // Don't try to fetch the loader module.
+      bootstrap: false,
+      // Don't try to fetch CSS files.
+      fetchCSS: false,
+      // Turn off combo loading.
+      combine: false,
+      // For paranoia, set a low timeout to not wait on loading a resource.
+      timeout: 50
+      });
+  </script>
+
+
+  <script id="base-layout-load-scripts" type="text/javascript">
+    LPS.use('node', 'event-delegate', 'lp', 'lp.app.links', function(Y) {
+        Y.on('load', function(e) {
+            sortables_init();
+            initInlineHelp();
+            Y.lp.activate_collapsibles();
+            activateFoldables();
+            activateConstrainBugExpiration();
+            Y.lp.app.links.check_valid_lp_links();
+        }, window);
+
+        // Hook up the function that dismisses the help window if we click
+        // anywhere outside of it.
+        Y.on('click', handleClickOnPage, window);
+
+        Y.on('lp:context:web_link:changed', function(e) {
+            window.location = e.new_value;
+        });
+    });
+  </script>
+
+    
+  <meta condition="not: view/should_show_bug_information" name="robots" content="noindex,nofollow" />
+  <script type="text/javascript">
+    LPS.use('lp.registry.structural_subscription', function(Y) {
+        var module = Y.lp.registry.structural_subscription;
+        Y.on('domready', function() {
+          module.setup({content_box: "#structural-subscription-content-box"});
+        });
+    });
+  </script>
+
+  </head>
+
+  <body id="document"
+        class="tab-bugs
+      main_side
+      public
+      yui3-skin-sam" onload="changemenu();">
+    <div class="yui-d0">
+      <div id="locationbar" class="login-logout">
+        
+
+<!---
+<div id="logincontrol">
+  <form action="/+logout" method="post">
+    <input type="hidden" name="loggingout" value="1" />
+    <a href="https://launchpad.net/people/+me" class="sprite person">person</a> &bull;
+    <input type="submit" name="logout" value="Log Out" />
+  </form>
+</div>
+-->
+
+      </div><!--id="locationbar"-->
+
+      <div id="watermark" class="watermark-apps-portlet">
+        <div class="flowed-block">
+          <a href="https://launchpad.net/ubuntu"><img alt="" width="64" height="64" src="https://launchpadlibrarian.net/49558155/64_logo.png" /></a>
+        </div>
+
+        <div class="flowed-block wide">
+          <h2>Ubuntu</h2>
+  <!-- Application Menu -->
+  <ul class="facetmenu">
+  </ul>
+
+        </div>
+      </div>
+
+      <div class="yui-t4">
+        <div id="maincontent" class="yui-main">
+          <div class="yui-b" dir="ltr">
+            <div class="context-publication">
+              <h1>
+              <!-- *** Title *** -->
+	      </h1>
+              <ol class="breadcrumbs">
+  <li>
+
+    <a href="https://launchpad.net/ubuntu">Ubuntu</a>
+  </li>
+  <li>
+    Bugs
+  </li>
+
+</ol>
+
+              <div id="registration" class="registering">
+                
+              </div>
+            </div>
+
+            
+            <div id="request-notifications">
+              
+            </div>
+
+            <div>
+    <div class="top-portlet">
+      
+          <div>
+            
+            <div>
+  
+
+  
+    <div class="lesser"><table style="width: 100%;" class="upper-batch-nav">
+  <tbody>
+  </tbody>
+</table>
+</div>
+    
+
+  <table class="sortable listing" id="buglisting">
+    <thead>
+      <tr>
+      <!-- *** Table Header Space *** -->
+      </tr>
+    </thead>
+    <tbody>
+      <!-- *** Table Body Space *** -->
+    </tbody>
+  </table>
+
+  
+    <div class="lesser"><table style="width: 100%;" class="lower-batch-nav">
+  <tbody>
+    <tr>
+      <td style="white-space: nowrap" class="batch-navigation-index">
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+  
+</div>
+
+          </div>
+
+      <div class="yui-u">
+        <div id="structural-subscription-content-box"></div>
+      </div>
+
+    </div>
+    
+  </div>
+          </div><!-- yui-b -->
+        </div><!-- yui-main -->
+
+
+        <div id="side-portlets" class="yui-b side">
+
+          
+    <div id="bug-portlets">
+      <div id="involvement" class="portlet involvement">
+	<!-- *** Last Paragraph Space *** -->
+  </div>
+
+</div>
+
+  <div class="portlet" id="portlet-tags">
+    <!-- *** Updated on *** -->
+  </div>
+        
+        
+       
+    </div>
+  
+        </div><!-- yui-b side -->
+
+      </div><!-- yui-t4 -->
+
+      
+  <div id="footer" class="footer">
+    <div class="lp-arcana">
+        <div class="lp-branding">
+          <a href="https://launchpad.net/"><img src="/@@/launchpad-logo-and-name-hierarchy.png" alt="Launchpad" /></a>
+          &nbsp;&bull;&nbsp;
+          <a href="https://launchpad.net/+tour">Take the tour</a>
+          &nbsp;&bull;&nbsp;
+
+          <a href="https://help.launchpad.net/">Read the guide</a>
+          &nbsp;
+          <form id="globalsearch" method="get"
+                accept-charset="UTF-8"
+                action="https://launchpad.net/+search">
+            <input type="search" id="search-text" name="field.text" />
+            <input type="submit" value="" class="icon-only sprite search-icon" />
+          </form>
+        </div>
+        
+  
+
+    </div>
+
+    <div class="colophon">
+      &copy; 2004-2011
+      <a href="http://canonical.com/">Canonical&nbsp;Ltd.</a>
+      &nbsp;&bull;&nbsp;
+      <a href="https://launchpad.net/legal">Terms of use</a>
+      &nbsp;&bull;&nbsp;
+      
+      <a href="/support">Contact Launchpad Support</a>
+
+      &nbsp;&bull;&nbsp;
+      <a href="http://identi.ca/launchpadstatus">System status</a>
+      <span id="lp-version">
+      &nbsp;&bull;&nbsp;
+        r13144
+        
+        
+        (<a href="https://code.launchpad.net/~launchpad-pqm/launchpad/stable/">get the code</a>)
+      </span>
+    </div>
+  </div>
+
+    </div><!-- yui-d0-->
+
+    <div id="help-pane" class="invisible">
+      <div id="help-body">
+        
+        <iframe id="help-pane-content" class="invisible" src="javascript:void(0);"></iframe>
+      </div>
+      <div id="help-footer">
+        <span id="help-close"></span>
+
+      </div>
+    </div>
+
+  </body>
+
+</html>
+
+

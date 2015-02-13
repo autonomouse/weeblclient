@@ -1,0 +1,13 @@
+# Untriaged bug reports with no comments
+
+# Note:  This is a long running query, even though it returns a small
+#        number of bugs.  Run it only infrequently, or make sure the
+#        require.status values correspond to a pre-cached query.
+
+source.teams = ubuntu-x-swat
+
+require.status = New, Confirmed, Incomplete (with response)
+
+exclude.bug.greater_than.message_count = 0
+
+quick = True

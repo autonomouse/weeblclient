@@ -1,0 +1,16 @@
+#!/bin/bash
+
+. $(dirname $0)/../lib/arsenal.lib
+
+BASE_DIR=/var/www/Arsenal
+
+blueprint=`basename $0`
+blueprint=${blueprint#page-blueprint-bugs-}
+
+json_filename="blueprint-${blueprint}.json"
+html_filename="blueprint-${blueprint}.html"
+team="ubuntu-x-swat"
+
+capture "${ARSENAL_SCRIPTS}/bug-listing.py --title=${blueprint}&nbsp;blueprint&nbsp;bugs&nbsp; --show-assignee --show-stats --show-releases --show-source ${BASE_DIR}/${team}/Data/${json_filename}" "$team/Reports" ${html_filename}
+
+

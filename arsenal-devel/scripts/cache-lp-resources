@@ -1,0 +1,335 @@
+#!/usr/bin/env python
+#
+
+import sys, os.path
+sys.path.insert(0, os.path.realpath(
+        os.path.join(os.path.dirname(__file__), "..")))
+
+from sys                                import argv, stdout
+from getopt                             import getopt, GetoptError
+from datetime                           import datetime
+import json
+import re
+
+from arsenal.dbg                        import Dbg
+from arsenal.utils                      import stdo, error, json_load, file_load, FileDoesntExist, dump, date_to_string, o2ascii
+from arsenal.cfg                        import Cfg, CfgError
+from arsenal.bugs                       import DeltaTime
+from arsenal.kernel_bug                 import KernelBug
+
+from lpltk.LaunchpadService             import LaunchpadService
+
+# CmdlineError
+#
+# The type of exception that will be raised by Cmdline.process() if there
+# are command line processing errors.
+#
+class CmdlineError(Exception):
+    # __init__
+    #
+    def __init__(self, error):
+        self.msg = error
+
+# Cmdline
+#
+class Cmdline:
+    """
+    Handle all the command line processing for the application.
+    """
+    # error
+    #
+    def error(self, e, defaults):
+        """
+        Simple helper which prints out an error message and then prints out the usage.
+        """
+        if e != '': error("%s\n" % e)
+        self.usage(defaults)
+
+    # usage
+    #
+    def usage(self, defaults):
+        """
+        Prints out the help text which explains the command line options.
+        """
+        stdo('    Usage:                                                                                   \n')
+        stdo('        %s [Options] <json-db-file>                                                          \n' % defaults['app_name'])
+        stdo('                                                                                             \n')
+        stdo('    Options:                                                                                 \n')
+        stdo('        --help           Prints this text.                                                   \n')
+        stdo('                                                                                             \n')
+        stdo('        --debug=<debug options>                                                              \n')
+        stdo('                         Performs additional output related to the option enabled and        \n')
+        stdo('                         the application defined support for the option.                     \n')
+        stdo('                                                                                             \n')
+        stdo('                         Recognized debug options:                                           \n')
+        stdo('                             enter                                                           \n')
+        stdo('                             leave                                                           \n')
+        stdo('                             verbose                                                         \n')
+        stdo('                             cfg                                                             \n')
+        stdo('                                                                                             \n')
+        stdo('       --csv=<package-to-team.csv>                                                           \n')
+        stdo('                                                                                             \n')
+        stdo('                                                                                             \n')
+        stdo('    Examples:                                                                                \n')
+        stdo('        %s iso-testing-bugs.json                                                             \n' % defaults['app_name'])
+        stdo('        %s --debug="enter,leave,verbose"                                                     \n' % defaults['app_name'])
+
+    # process
+    #
+    def process(self, argv, defaults):
+        """
+        This method is responsible for calling the getopt function to process the command
+        line. All parameters are processed into class variables for use by other methods.
+        """
+        result = True
+        try:
+            cfg = defaults
+            optsShort = ''
+            optsLong  = ['help', 'debug=', 'csv=']
+            opts, args = getopt(argv[1:], optsShort, optsLong)
+
+            for opt, val in opts:
+                if (opt == '--help'):
+                    raise CmdlineError('')
+
+                elif opt in ('--debug'):
+                    cfg['debug'] = val.split(',')
+                    for level in cfg['debug']:
+                        if level not in Dbg.levels:
+                            Dbg.levels.append(level)
+
+                elif opt in ('--csv'):
+                    cfg['project_to_team_csv_file'] = val
+
+            if result: # No errors yet
+                # There might be some bugs listed on the command line.
+                #
+                if len(args) > 0:
+                    cfg['json_file'] = args
+
+        except GetoptError, error:
+            raise CmdlineError(error)
+
+        # Verify we have all the command line options that are required.
+        #
+        if 'json_file' not in cfg:
+            raise CmdlineError("A single json data file must be specified.\n")
+
+        if len(cfg['json_file']) > 1:
+            raise CmdlineError("A single json data file must be specified.\n")
+
+        cfg['json_file'] = cfg['json_file'][0]
+
+        return cfg
+
+
+# Exit
+#
+class Exit():
+    """
+    If an error message has already been displayed and we want to just exit the app, this
+    exception is raised.
+    """
+    pass
+
+# UpdateIsoTestingBugsDB
+#
+class UpdateIsoTestingBugsDB():
+    """
+    Load a json file and a mako html template file, pass the resulting python object to
+    the mako template renderer. This is a general class that can take any json file and
+    any mako template file and produce an html file. The template file is, of course,
+    specific to the json data.
+    """
+
+    # __init__
+    #
+    def __init__(self, cfg):
+        Dbg.enter("UpdateIsoTestingBugsDB.__init__")
+
+        self.cfg    = cfg
+        self.milestone_date_xref = {}
+
+        Dbg.leave("UpdateIsoTestingBugsDB.__init__")
+
+    # initialize
+    #
+    def initialize(self):
+        """
+        A separate initialize that we can control when it gets called (not
+        when the object is instantiated).
+        """
+        Dbg.enter("UpdateIsoTestingBugsDB.initialize")
+
+        try:
+            # Process the command line arguments, and any configuration file options. Make sure
+            # that any required parameters have been provided.
+            #
+            self.cfg = Cfg.merge_options(defaults, self.cfg)
+
+            Dbg.verbose(' . Connecting to Launchpad\n')
+            defs = {}
+            defs['launchpad_client_name'] = 'rls-mgr-reports'
+            self.lp = LaunchpadService(defs)
+
+        except KeyboardInterrupt:
+            Dbg.leave("UpdateIsoTestingBugsDB.initialize")
+            raise Exit()
+
+        except CfgError as e:
+            error(e)
+            Dbg.leave("UpdateIsoTestingBugsDB.initialize")
+            raise Exit()
+
+        except FileDoesntExist as e:
+            e.print_std_error()
+            Dbg.leave("UpdateIsoTestingBugsDB.initialize")
+            raise Exit()
+
+        Dbg.leave("UpdateIsoTestingBugsDB.initialize")
+        return
+
+    # initialize_team_package_crossreference
+    #
+    def initialize_team_package_crossreference(self):
+        Dbg.enter("UpdateIsoTestingBugsDB.initialize_team_package_crossreference")
+
+        try:
+            csv_contents = file_load(self.cfg['project_to_team_csv_file'])
+            self.team_xref = {}
+             # The first line should be column headings
+            for line in csv_contents.split('\n')[1:]:
+                # We're only interested in the first two columns
+                try:
+                    (pkg, team, junk) = line.split(',', 2)
+                except ValueError:
+                    try:
+                        (pkg, team) = line.split(',')
+                    except ValueError:
+                        continue
+                self.team_xref.setdefault(pkg, [])
+                self.team_xref[pkg].append(team)
+        # if there is no project_to_team_csv_file lookup data in
+        # launchpad using team_name_xref
+        except KeyError:
+            self.team_xref = {
+            }
+
+            team_name_xref = {
+            }
+
+            for a_team in team_name_xref:
+                Dbg.verbose("%s\n" % a_team)
+                team = self.lp.launchpad.people[a_team]
+                for pkg in team.getBugSubscriberPackages():
+                    self.team_xref.setdefault(pkg, [])
+                    self.team_xref[pkg.name].apppend(team_name_xref[a_team])
+
+        Dbg.leave("UpdateIsoTestingBugsDB.initialize_team_package_crossreference")
+
+    # initial_milestone_date_crossreference
+    #
+    def initialize_milestone_date_crossreference(self, series):
+        Dbg.enter("UpdateIsoTestingBugsDB.initialize_milestone_date_crossreference")
+
+        s = series[0].title()
+        lp_distro = self.lp.distributions['ubuntu/%s' % series]
+        lp_active = lp_distro.all_milestones
+        for lp_milestone in lp_active:
+            if lp_milestone.date_targeted is None: continue
+            milestone = "%s %s" % (s, self.decode_milestone(lp_milestone.name))
+            self.milestone_date_xref[milestone] = date_to_string(lp_milestone.date_targeted)
+
+        Dbg.enter("UpdateIsoTestingBugsDB.initialize_milestone_date_crossreference")
+
+    def decode_milestone(self, milestone_name):
+        Dbg.enter("UpdateIsoTestingBugsDB.decode_milestone")
+
+        retval = ''
+        if 'alpha' in milestone_name or 'beta' in milestone_name:
+            fields = milestone_name.split('-')
+            which = fields[len(fields)-1]
+            if which.isdigit():
+                retval = '%s-%s' % (fields[len(fields)-2], which)
+            else:
+                retval = '%s-1' % (which)
+        else:
+            retval = 'release'
+
+        Dbg.leave("UpdateIsoTestingBugsDB.decode_milestone")
+        return retval
+
+    # determine_milestone_found
+    #
+    def determine_milestone_found(self, date):
+        Dbg.enter("UpdateIsoTestingBugsDB.determine_milestone_found")
+
+        retval = ''
+
+        comp = date.replace(tzinfo=None)
+        prev_milestone = ''
+        for m in sorted(self.milestone_date_xref):
+            if comp < self.milestone_date_xref[m]:
+                retval = prev_milestone
+                break
+            prev_milestone = m
+
+        Dbg.leave("UpdateIsoTestingBugsDB.determine_milestone_found")
+        return retval
+
+    # main
+    #
+    def main(self):
+        Dbg.enter("UpdateIsoTestingBugsDB.main")
+
+        try:
+            self.initialize()
+
+            self.initialize_team_package_crossreference()
+            # 2013-07-19 these should not be hardcoded, but include
+            # unsupported releases as it is used to determine when the
+            # bug was found
+            self.initialize_milestone_date_crossreference('lucid')
+            self.initialize_milestone_date_crossreference('maverick')
+            self.initialize_milestone_date_crossreference('natty')
+            self.initialize_milestone_date_crossreference('oneiric')
+            self.initialize_milestone_date_crossreference('precise')
+            self.initialize_milestone_date_crossreference('quantal')
+            self.initialize_milestone_date_crossreference('raring')
+            self.initialize_milestone_date_crossreference('saucy')
+
+            resources = {}
+            resources['team_xref'] = self.team_xref
+            resources['milestone_date_xref'] = self.milestone_date_xref
+
+            with open(self.cfg['json_file'], 'w') as f:
+                Dbg.verbose("Updating the database file.\n")
+                f.write(json.dumps(resources, sort_keys=True, indent=4))
+
+        # Handle the user presses <ctrl-C>.
+        #
+        except KeyboardInterrupt:
+            pass
+
+        except Exit:
+            pass
+
+        Dbg.leave("UpdateIsoTestingBugsDB.main")
+        return
+
+if __name__ == '__main__':
+    defaults = {}
+    defaults['app_name'] = argv[0]
+
+    # The cmdline processing is done here partially so the debug options
+    # can be processed right away.
+    #
+    cmdline = Cmdline()
+    try:
+        app = UpdateIsoTestingBugsDB(cmdline.process(argv, defaults))
+        app.main()
+    except CmdlineError as e:
+        cmdline.error(e.msg, defaults)
+
+# vi:set ts=4 sw=4 expandtab:
+

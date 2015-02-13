@@ -1,0 +1,16 @@
+#!/bin/bash
+
+. $(dirname $0)/../lib/arsenal.lib
+
+scriptname=$(basename $0)
+pagename=${scriptname#page-}
+
+html_filename=${pagename}_${TODAY}.html
+
+if [ ! -f $json ]; then
+    exit 1
+fi
+
+capture "${ARSENAL_SCRIPTS}/xorg-report" ${pagename} ${html_filename}
+
+relink_current ${html_filename} ${pagename} "${pagename}_current.html"

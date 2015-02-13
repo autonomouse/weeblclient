@@ -1,0 +1,162 @@
+#!/usr/bin/python
+
+# Retrieve bugs with patches
+
+import simplejson as json
+import datetime
+import socket
+from optparse import OptionParser
+from arsenal.arsenal_lib import *
+from lpltk import LaunchpadService
+
+from urllib2 import HTTPError
+from lazr.restfulclient.errors import ClientError
+
+opt_json  = True
+opt_debug = False
+
+usage = '''
+%prog [OPTIONS] <source-package> [source-package ...]
+'''
+parser = OptionParser(usage=usage)
+parser.add_option(
+    '-d', '--debug',
+    action='store_true', dest='DEBUG', default=False,
+    help='Enable debugging output')
+(options, args) = parser.parse_args()
+
+if len(args) < 1:
+    parser.print_help()
+    sys.exit(1)
+
+try:
+    source_pkgs = sys.argv[1:]
+    lp          = LaunchpadService(config={'read_only':True})
+    d           = lp.launchpad.distributions["ubuntu"]
+    records     = []
+except:
+    sys.exit(7)
+
+def debug(text):
+    if opt_debug:
+        sys.stderr.write(text + "\n")
+
+for source_pkg in source_pkgs:
+    if not d:
+        d = lp.launchpad.distributions["ubuntu"]
+    s = d.getSourcePackage(name = source_pkg)
+    if s is None:
+        debug("Error: Could not lookup source %s from launchpad" %(source_pkg))
+        continue
+    for bugtask in s.searchTasks(has_patch=True):
+        bug = ArsenalBug(bugtask.bug, lp.launchpad)
+        if bug.ubuntu_omittable():
+            continue
+
+        if bug.has_tag('patch-needswork'):
+            continue
+
+        if bugtask.status == "Fix Committed":
+            continue
+
+        # Exclude bugs with 'MASTER' in the title.  These tend to accumulate bad patches
+        if 'MASTER' in bug.title:
+            continue
+
+        debug("Examining bug %s" %(bug.id))
+        assignee = None
+        if bugtask.assignee:
+            assignee = bugtask.assignee.name
+
+        try:
+            # Scan attachments for the patch(es)
+            patches = []
+            latest_patch_age = None
+
+            for a in bugtask.bug.attachments:
+                if a.type != 'Patch':
+                    continue
+
+                hosted_file = a.data
+                fb = hosted_file.open()
+
+                debug("Processing patch %s" %(fb.filename))
+
+                t = a.message.date_created
+                now = t.now(t.tzinfo)
+                patch_age = 0 + (now - t).days
+                if latest_patch_age == None:
+                    latest_patch_age = patch_age
+                elif patch_age < latest_patch_age:
+                    latest_patch_age = patch_age
+
+                try:
+                    owner_name = a.message.owner.display_name.encode('utf-8')
+                except:
+                    owner_name = ''
+
+                patch = {
+                    'title':        a.title.encode('utf-8'),
+
+                    'subject':      a.message.subject.encode('utf-8'),
+                    'owner':        owner_name,
+                    'created':      t.ctime(),
+                    'age':          patch_age,
+
+                    'filename':     fb.filename,
+                    'len':          fb.len,
+                    'mode':         fb.mode,
+                    'content-type': fb.content_type
+                    }
+                patches.append(patch)
+
+            bugtask_dict = bugtask_as_dict(bug, bugtask)
+            bugtask_dict['assignee'] = assignee
+            bugtask_dict['patches'] = patches
+            bugtask_dict['patch_age'] = latest_patch_age
+
+            # Note bugs where ubuntu-sponsors is subscribed
+            try:
+                for subscription in bugtask.bug.subscriptions:
+                    try:
+                        if not subscription.person or subscription.person.private:
+                            continue
+                        if subscription.person.name is 'ubuntu-sponsors':
+                            bugtask_dict['sponsoring'] = True
+                    except ClientError, e:
+                        err_msg = str(e).split("\n")[0]
+                        if '410' in err_msg: # Gone - perhaps subscriber is deleted?
+                            continue
+                        else:
+                            sys.stderr.write("Got a ClientError:\n%s" %(e))
+                            raise
+            except:
+                # This may fail if person is a private team, even though we check .private
+                sys.stderr.write("Failure reviewing subscriptions for bug %d" %(bug.id))
+                raise
+
+            records.append(bugtask_dict)
+            if not opt_json:
+                debug("%s %s %s" %(bug.id, bugtask.status, bug.title))
+
+        except HTTPError, e:
+            if is_launchpad_down(e):
+                pass
+            else:
+                sys.stderr.write("HTTPError Exception processing %s: %s\n\n\n%s\n" %(
+                    source_pkg, dir(e), e))
+                raise
+        except socket.error as e:
+            # Network is down.  Skip for now
+            sys.exit(7)
+        except:
+            sys.stderr.write("Unknown exception encountered in collect-patch-bugs\n")
+            raise
+
+
+if opt_json:
+    keys = ['id', 'title', 'status', 'importance', 'page_age']
+    print json.dumps({'keys':keys,
+                      'bug_tasks':records,
+                      'timestamp-stop':str(datetime.datetime.now())
+                      }, indent=4)

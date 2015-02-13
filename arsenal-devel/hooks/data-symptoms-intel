@@ -1,0 +1,7 @@
+#!/bin/bash
+
+. $(dirname $0)/../lib/arsenal.lib
+
+file=symptoms_intel.json
+
+capture "${ARSENAL_SCRIPTS}/bugs-symptoms.py xserver-xorg-video-intel" "ubuntu-x-swat/Data" ${file}

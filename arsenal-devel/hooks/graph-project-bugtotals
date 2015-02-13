@@ -1,0 +1,134 @@
+#!/bin/bash
+
+. $(dirname $0)/../lib/arsenal.lib
+
+for project in inkscape ; do
+    datdir="${WEBSITE_DIR}/${project}/Data/BugStats"
+    reportdir="${WEBSITE_DIR}/${project}/Reports"
+
+    if [ ! -e ${datadir} ]; then
+	continue
+    fi
+
+    mkdir -p ${WORK_DIR}/${project}
+    mkdir -p ${datdir}
+    mkdir -p ${reportdir}
+
+    for type in tags importance status; do
+        data=""
+        datfile="${WORK_DIR}/${project}/bugtotals-${type}.dat"
+        graphfile="${WORK_DIR}/${project}/totals-${type}.svg"
+
+        cols=""
+        if [ ${type} = 'importance' ] ; then
+            cols="--columns Undecided,Wishlist,Low,Medium,High,Critical"
+        elif [ ${type} = 'status' ] ; then
+            cols="--columns New,Incomplete,Responded,Confirmed,Triaged"
+        fi
+
+        # Use json files in $datdir to generate $datfile
+        json_files=${datdir}/*.json
+        # echo "${ARSENAL_SCRIPTS}/convert-bugtotal-data ${datdir}/*.json --type ${type} > ${datfile}"
+        #${ARSENAL_SCRIPTS}/convert-bugtotal-data ${json_files} --type ${type} ${cols} > ${datfile}
+        ${ARSENAL_SCRIPTS}/convert-bugtotal-data ${json_files} ${cols} > ${datfile}
+
+        tot=$(head -n 1 ${datfile} | wc -w)
+	if [ $tot -lt 2 ]; then
+	    continue
+	fi
+        n=$(( $tot - 1 ))
+        for i in $(seq 2 $n); do
+            ls=$(( $i - 1 ))
+            data="$data \"${datfile}\" using 1:$i title column($i) with filledcurves ls $ls, "
+        done
+        data="$data \"${datfile}\" using 1:${tot} title column(${tot}) with filledcurves ls ${n}"
+
+        if [ ${project} = 'inkscape' ]; then
+            y_max=5000
+        elif [ ${project} = 'gtg' ]; then
+            y_max=500
+        fi
+
+        gnuplot << EOF
+set title "Bug Reports for ${project}"
+
+set term svg size 1280 800
+set style fill solid
+set palette maxcolors 256
+set style line  5 lt rgb "#eec73e"
+set style line  8 lt rgb "#f0a513"
+set style line  7 lt rgb "#fb8b00"
+set style line  6 lt rgb "#f44800"
+
+set style line 21 lt rgb "#fdff99"
+set style line 24 lt rgb "#ffff00"
+set style line 23 lt rgb "#fdca01"
+set style line 22 lt rgb "#986601"
+
+set style line  9 lt rgb "#f44800"
+set style line 12 lt rgb "#fd3301"
+set style line 11 lt rgb "#d40000"
+set style line 10 lt rgb "#980101"
+
+set style line 13 lt rgb "#816647"
+set style line 16 lt rgb "#565248"
+set style line 15 lt rgb "#fdd99b"
+set style line 14 lt rgb "#d9bb7a"
+
+set style line  1 lt rgb "#aaccee"
+set style line  4 lt rgb "#6699cc"
+set style line  3 lt rgb "#336699"
+set style line  2 lt rgb "#003366"
+
+set style line 17 lt rgb "#b3defd"
+set style line 20 lt rgb "#0197fd"
+set style line 19 lt rgb "#0169c9"
+set style line 18 lt rgb "#013397"
+
+set style line 25 lt rgb "#ccff99"
+set style line 28 lt rgb "#98fc66"
+set style line 27 lt rgb "#339900"
+set style line 26 lt rgb "#015a01"
+
+set style line 29 lt rgb "#ff00ff"
+set style line 32 lt rgb "#6600cc"
+set style line 31 lt rgb "#002b3d"
+set style line 30 lt rgb "#aa9bff"
+
+set style line 31 lt rgb "#ffccee"
+set style line 34 lt rgb "#ff99cc"
+set style line 33 lt rgb "#ff6699"
+set style line 32 lt rgb "#ff3366"
+
+set xdata time
+set timefmt "%Y%m%d"
+set autoscale
+set offsets 1, 1, 0, 0
+set yrange [0:${y_max}]
+set grid xtics mxtics ytics mytics lw 0.1
+set xtics out border nomirror
+set ytics in border mirror
+set format x "%m/%d"
+set mxtics
+set mytics
+
+set output "${graphfile}"
+set xlabel "Date"
+set ylabel "Total Reports"
+set key vertical outside
+plot $data
+EOF
+
+        retval=$?
+        if [ $retval -ne 0 ]; then
+            die "Error:  ($retval) Could not create graph ${graphfile}" 1
+        fi
+
+        dbg "Copying ${graphfile} to ${reportdir}/..."
+        mv ${graphfile} ${reportdir}
+        retval=$?
+        if [ $retval -ne 0 ]; then
+            die "($retval) Could not upload ${graphfile}" 1
+        fi
+    done
+done

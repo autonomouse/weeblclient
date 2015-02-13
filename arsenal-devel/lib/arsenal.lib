@@ -1,0 +1,143 @@
+# Configuration
+if [ -f /etc/arsenal/arsenal.conf ] ; then
+    . /etc/arsenal/arsenal.conf
+fi
+if [ -f /etc/arsenal/site.conf ] ; then
+    . /etc/arsenal/site.conf
+fi
+
+# Defaults
+ADMIN=${ADMIN:-"root@localhost.localdomain"}
+CYCLE=${CYCLE:-0}
+DEBUG=${DEBUG:-0}
+SEQUENCE=${SEQUENCE:-0}
+SCRIPT_PAUSE=${SCRIPT_PAUSE:-5}
+CYCLE_PAUSE=${CYCLE_PAUSE:-300}
+ARSENAL_SCRIPTS=${ARSENAL_SCRIPTS:-/usr/local/bin}
+WORK_DIR=${WORK_DIR:-/tmp}
+WEBSITE_DIR=${WEBSITE_DIR:-/var/www/Arsenal}
+
+# Add ARSENAL_SCRIPTS to path if it isn't already
+if [[ "$PATH" != *${ARSENAL_SCRIPTS}* ]]; then
+   PATH=${PATH}:${ARSENAL_SCRIPTS}
+fi
+
+# Convenience date strings
+THISYEAR=`date +%Y`
+TODAY=`date +%Y%m%d`
+NOW=`date +%H%M`
+Q=$(( 1 + ( `date +%-m` - 1) / 3 ))
+QUARTER=${THISYEAR}-Q${Q}
+QSTART=(0000 0101 0401 0701 1001)
+QEND=(0000 0331 0630 0930 1231)
+QUARTER_START=`date +%y`"${QSTART[$Q]}"
+QUARTER_END=`date +%y`"${QEND[$Q]}"
+
+dbg() {
+    if [ $DEBUG -gt 0 ]; then
+        echo $1
+    fi
+}
+
+warn() {
+    echo "Warning:  $1" 1>&2
+}
+
+die() {
+    msg=$1
+    code=${2:-1}
+
+    echo "Error:  $msg" 1>&2
+    exit $code
+}
+
+# Runs a script, captures its output, and stores it in the given file in
+# the website.
+capture() {
+    retr=$1
+    dest=$2
+    file=$3
+
+    if [ -z "$retr" -o -z "$file" ]; then
+        dbg "Invalid arguments to capture()"
+        return 1
+    fi
+
+    if [ ! -d ${WORK_DIR} ] ; then
+        mkdir ${WORK_DIR}
+        retval=$?
+        if [ $retval -ne 0 ]; then
+            die "($retval) Could not create directory ${WORK_DIR}" 1
+        fi
+    fi
+
+    ftmp=$(tempfile -d ${WORK_DIR} -p ${file})
+    dbg "Creating $file at ${ftmp}"
+    $retr > ${ftmp}
+    retval=$?
+    if [ $retval -ne 0 ]; then
+        rm -f ${ftmp}
+
+        if [ $retval -eq 7 ]; then
+            # To us retval 7 means "Transient launchpad failure" so don't send
+            # an error message in this case.
+            exit $retval
+
+            # TODO:  Check the timestamp on the last update to the file,
+            #        and if it has not been updated within the past day,
+            #        issue an error message
+
+        else
+            die "($retval) Could not create ${file} at ${ftmp}" 2
+
+        fi
+    fi
+    if [ ! -s ${ftmp} ]; then
+        die "(0) Failed to generate ${file} at ${ftmp}" 2
+    fi
+
+    if [ ! -d ${WEBSITE_DIR}/${dest} ] ; then
+        mkdir -p ${WEBSITE_DIR}/${dest}
+        retval=$?
+        if [ $retval -ne 0 ]; then
+            rm -f ${ftmp}
+            die "($retval) Could not create directory ${WEBSITE_DIR}/${dest}" 3
+        fi
+    fi
+
+    dbg "Installing new $file into site..."
+    cp ${ftmp} ${WEBSITE_DIR}/${dest}/${file}
+    retval=$?
+    if [ $retval -ne 0 ]; then
+        die "($retval) Could not install ${ftmp} to ${dest}" 4
+    fi
+    rm -f ${ftmp}
+
+    dbg "Setting permissions on $file..."
+    chmod a+r ${WEBSITE_DIR}/${dest}/${file}
+    retval=$?
+    if [ $retval -ne 0 ]; then
+        die "($retval) Could not set permissions on ${file}" 5
+    fi
+}
+
+relink_current() {
+    source=$1
+    dest=$2
+    link=$3
+
+    dbg "Relinking $link to $source..."
+    ln -fs $source  ${WEBSITE_DIR}/${dest}/${link}
+    retval=$?
+    if [ $retval -ne 0 ]; then
+        die "($retval) Could not relink file" 10
+    fi
+}
+
+
+# Standard command line option handling
+while getopts "c:" opt $*; do
+    case "$opt" in
+        c) CYCLE=2 ;;
+    esac
+done

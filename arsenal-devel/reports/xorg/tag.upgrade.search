@@ -1,0 +1,5 @@
+source.teams = ubuntu-x-swat
+
+require.tags = upgrade
+
+quick = True

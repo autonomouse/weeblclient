@@ -1,0 +1,13 @@
+# Retrieve bugs with patches
+
+source.teams = ubuntu-x-swat
+
+require.status = New, Incomplete (with response), Confirmed, Triaged
+require.has_patch = True
+require.tags = -omit, -kubuntu, -xubuntu, -ppc, -patch-needswork, -kernel-handoff-graphics
+
+# TODO: Omit MASTER bugs
+exclude.bug.excludes_all.importance = Wishlist
+
+# TODO: Make sure all details about the patch(es) are included
+quick = True

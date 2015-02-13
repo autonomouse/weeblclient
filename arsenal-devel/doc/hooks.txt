@@ -1,0 +1,23 @@
+                        === Hook Scripts ===
+
+Arsenal iteratively executes each of the 'hook' scripts listed in a
+hooks directory.
+
+It is the responsibility of each script to determine whether the
+conditions are appropriate for it to be run.  Simpleminded scripts may
+just choose to run each time they are invoked.  Scripts that perform
+heavier processing may check the change date on one of its output files
+to see if sufficient time has passed to warrant updating it.
+
+Each script is also passed a numerical argument --cycle that it can use
+to limit how frequently it should be run.  For instance, a long running
+script might choose to run every 10th cycle.  The cycle frequency can be
+tuned by the site administer via /etc/arsenal/arsenal.conf or
+/etc/arsenal/site.conf, so this provides the user with a single-knob
+method of scaling up or down the run frequency to balance load
+vs. freshness.
+
+The main process will sleep for a (configurable) period after all
+scripts have had a chance to run.  It will also sleep for a
+(configurable, typically brief) period between each script.
+

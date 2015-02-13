@@ -1,0 +1,9 @@
+# All X bugs assigned to X team members
+
+source.teams = ubuntu-x-swat
+
+require.assignee = canonical-x.*, canonical-x, ubuntu-x-swat, xorg-edgers
+
+exclude.owner.less_than.karma = 500
+
+quick = True

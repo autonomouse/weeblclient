@@ -1,0 +1,146 @@
+[%# main page template
+  #
+  # Expected Parameters:
+  #  * title
+  #  * content
+ %]
+[%- style = "tab-bugs onecolumn" -%]
+[%- show_navigation_tabs = 1 -%]
+[%- breadcrumbs = [
+      {
+        title   = ""
+        link    = "http://launchpad.net/"
+        img_alt = "Launchpad"
+        img_url = "http://launchpad.net/@@/launchpad-logo-and-name-hierarchy.png"
+        img_h_w = ""
+      }
+      {
+        title   = " Ubuntu"
+        link    = "https://launchpad.net/ubuntu"
+        img_alt = ""
+        img_url = "https://launchpadlibrarian.net/6100649/ubuntu_emblem.png"
+        img_h_w = "width=\"14\" height=\"14\""
+      }
+      {
+        title   = "Ubuntu-X"
+        name    = "ubuntu-x-swat"
+        link    = "http://launchpad.net/~ubuntu-x-swat"
+        img_alt = "Ubuntu-X"
+        img_url = "https://launchpadlibrarian.net/10145811/X_cursor_14.png"
+        img_h_w = "width=\"14\" height=\"14\""
+      }
+    ];
+    team_title  = breadcrumbs.2.title;
+    team_name   = breadcrumbs.2.name;
+    ubuntu_releases = [
+      { name     = 'lucid' }
+      { name     = 'maverick' }
+      { name     = 'natty' }
+      { name     = 'oneiric' }
+    ];
+    selected_release = ubuntu_releases.3;
+    packages = [
+      { name     = "intel" }
+      { name     = "ati"   }
+    ];
+    selected_package = packages.0;
+    reports = [
+      {
+        name     = "workqueue"
+        class    = "branches"
+        title    = "Bugs needing action by $team_title"
+        link     = "/Arsenal/Reports/$team_name/workqueue-${selected_release.name}.html"
+        subtabs  = 'releases'
+        subtab_link_template = "/Arsenal/Reports/$team_name/workqueue-[TAB].html"
+      }
+      {
+        name     = "fixes"
+        class    = "bugs"
+        title    = "Fixes needing review/incorporation by $team_title"
+        link     = "/Arsenal/Reports/$team_name/patches.html"
+      }
+      {
+        name     = "milestones"
+        class    = "specifications"
+        title    = "Targeted bugs for $team_title"
+        link     = "/Arsenal/Reports/$team_name/milestone-bugs.html"
+      }
+      {
+        name     = "vips"
+        class    = "translations"
+        title    = "Bugs for $team_title from reporters with high karma"
+        link     = "/Arsenal/Reports/$team_name/high-karma-bugs.html"
+      }
+      {
+        name     = "symptoms"
+        class    = "answers"
+        title    = "Bugs organized by symptoms for $team_title"
+        link     = "/Arsenal/Reports/$team_name/symptoms_${selected_package.name}.html"
+        subtabs  = 'packages'
+        subtab_link_template = "/Arsenal/Reports/$team_name/symptoms_[TAB].html"
+      }
+      {
+        name     = "package-versions"
+        class    = "overview"
+        title    = "Package version status that $team_title is involved with"
+        link     = "/Arsenal/Reports/$team_name/versions-current.html"
+      }
+    ];
+    selected_report = reports.0;
+ -%]
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" dir="ltr">
+  <head>
+    <title>[% title %]</title>
+    <link rel="shortcut icon" href="http://launchpad.net/@@/launchpad.png" />
+
+[% INCLUDE "templates/frame/head-atom-feeds.tt2" %]
+[% INCLUDE "templates/frame/head-style.tt2" %]
+[% INCLUDE "templates/frame/head-scripts.tt2" %]
+
+  </head>
+  <body id="document" class="[% style %]">
+[% INCLUDE "templates/frame/navigation-location-bar.tt2"
+     report       = selected_report.name
+     selected_tab = selected_release.name
+     package      = selected_package.name
+     tabs         = reports %]
+
+    <div id="mainarea">
+      <div id="container">
+
+[% IF selected_report.subtab_link_template != '';
+   IF selected_report.subtabs == 'releases';
+     tabs = ubuntu_releases;
+     selected_tab = selected_release.name;
+   ELSIF selected_report.subtabs == 'packages';
+     tabs = packages;
+     selected_package = selected_package.name;
+   END;
+   INCLUDE "templates/frame/navigation-tabs.tt2"
+     selected_tab  = selected_release.name
+     tabs          = ubuntu_releases
+     link_template = selected_report.subtab_link_template;
+   END %]
+
+        <div>
+        <h1>[% title %]</h1>
+[% content %]
+        <div />
+
+        <div class="clearfix">
+          <div id="lp-arcana">
+            <p align="right">Last updated: [% last_updated %]</p>
+          </div>
+        </div>
+
+        </div>
+        <div class="clear"></div>
+      </div><!--id="container"-->
+    </div><!--id="mainarea"-->
+
+[% INCLUDE "templates/frame/global-footer.tt2" %]
+  </body>
+</html>
+<!-- Based on UI of Launchpad 2.1.9 (r7040) -->

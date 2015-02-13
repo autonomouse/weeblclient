@@ -1,0 +1,19 @@
+#!/usr/bin/perl
+
+# Eventually we want to replace this with launchpadlib logic
+# See https://bugs.edge.launchpad.net/launchpad/+bug/281443
+
+use strict;
+use LWP::Simple;
+
+my $content = get("https://bugs.launchpad.net/~ubuntu-x-swat/+packagebugs");
+if (! $content) {
+    die "Could not retrieve +packagebugs\n";
+    # If this fails, try using getprint() to see the error
+}
+foreach my $line (split /\n/, $content) {
+    if ($line =~ m|ubuntu-x-swat.*>(.+) in ubuntu</a>|i) {
+        print "$1\n";
+    }
+}
+

@@ -1,0 +1,17 @@
+#!/bin/bash
+
+ARSENAL_SCRIPTS="../../scripts"
+ARSENAL_TEMPLATES="../../web/templates"
+
+set -e
+
+for jfid in *.json; do
+    title=${jfid%%.json}
+    title=${title^}
+    echo $title
+    ${ARSENAL_SCRIPTS}/reporter \
+	--title=$title \
+	--template=${ARSENAL_TEMPLATES}/bugs-by-tag.mako \
+    $jfid > ${jfid/.json/.html}
+    
+done

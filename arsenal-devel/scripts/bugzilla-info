@@ -1,0 +1,131 @@
+#!/usr/bin/env python
+
+import json
+import optparse
+import re
+import sgmllib
+import urllib
+
+class BugzillaParser(sgmllib.SGMLParser):
+    interesting_tags = [
+        {
+            'name' : 'td',
+            'attrs' : {
+                'id' : r'^title$'
+            },
+            'key' : 'title',
+        },
+        {
+            'name' : 'td',
+            'attrs' : {
+                'id' : r'^field_container_product$'
+            },
+            'key' : 'product',
+        },
+        {
+            'name' : 'td',
+            'attrs' : {
+                'id' : r'^bz_field_status$'
+            },
+            'key' : 'status',
+        },
+        {
+            'name' : 'p',
+            'attrs' : {
+                'class' : r'^subheader$'
+            },
+            'key' : 'subtitle',
+        },
+        {
+            'name' : 'p',
+            'attrs' : {
+                'class' : r'^header_addl_info$'
+            },
+            'key' : 'last_modified',
+        },
+        {
+            'name' : 'a',
+            'attrs' : {
+                'name' : r'^a(\d*)$',
+                'href' : r'^attachment\.cgi\?id=.*$',
+            },
+            'key' : 'attachment_%s',
+        }
+    ]
+
+    def __init__(self, verbose=0):
+        sgmllib.SGMLParser.__init__(self, verbose)
+
+        self.bug = {}
+        self.current_tag = False
+        self.current_key = False
+
+    def __match_attrs(self, attrs, interesting_attrs, backrefs):
+        match = True
+        for (interesting_key, interesting_value) in \
+                interesting_attrs.items():
+            value = attrs.get(interesting_key, '')
+            result = re.search(interesting_value, value)
+            if result:
+                backrefs.extend(result.groups())
+            else:
+                match = False
+
+        return match
+
+    def parse(self, contents):
+        self.feed(contents)
+        self.close()
+
+        for (key, value) in self.bug.items():
+            self.bug[key] = value.strip()
+
+    def unknown_starttag(self, tag, attrs_list):
+        attrs = dict(attrs_list)
+
+        for interesting_tag in BugzillaParser.interesting_tags:
+            if interesting_tag['name'] != tag:
+                continue
+
+            backrefs = []
+            if self.__match_attrs(attrs, interesting_tag['attrs'], backrefs):
+                self.current_tag = interesting_tag['name']
+                self.current_key = interesting_tag['key'] % tuple(backrefs)
+
+    def unknown_endtag(self, tag):
+        if tag == self.current_tag:
+            self.current_tag = False
+            self.current_key = False
+
+    def handle_data(self, data):
+        if self.current_tag:
+            key = self.current_key
+            if self.bug.has_key(key):
+                self.bug[key] = self.bug[key] + data
+            else:
+                self.bug[key] = data
+
+if __name__ == '__main__':
+    usage = '''
+    %prog [-j] <URL>
+    Example: %prog -j https://bugzilla.redhat.com/show_bug.cgi?id=477955
+    '''
+
+    parser = optparse.OptionParser(usage=usage)
+    parser.add_option('-j', '--json',
+                      action='store_true', dest='json', default=False,
+                      help='Output bug details in JSON')
+    (options, args) = parser.parse_args()
+
+    if len(args) < 1:
+        parser.print_help()
+
+    file = urllib.urlopen(args[0])
+    contents = file.read()
+    bugzilla_parser = BugzillaParser()
+    bugzilla_parser.parse(contents)
+
+    if options.json:
+        print json.dumps(bugzilla_parser.bug, sort_keys=True, indent=4)
+    else:
+        print bugzilla_parser.bug['subtitle']

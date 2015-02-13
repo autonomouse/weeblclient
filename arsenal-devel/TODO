@@ -1,0 +1,19 @@
+TODO List
+=========
+ * Reimplement remaining perl scripts into python
+
+ * Look for any xorg-specific or kernel-specific tags, comments, etc.
+   and create command line options to allow overriding those.
+
+ * Permit specification of team-specific values in /etc config file
+
+ * Add exception handling to collect-* and process-* scripts
+   (see collect-patch-bugs as an example)
+
+ * Set up unittest framework
+
+ * Set up pydoctor support for generating API docs
+
+ * Make collect-patch-bugs also include bug reports that the team is
+   subscribed to directly (for cases where team is not subscribed to the
+   source package the bug is reported against).

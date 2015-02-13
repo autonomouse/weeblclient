@@ -1,0 +1,11 @@
+#teams = ubuntu-x-swat
+
+source.packages = xserver-xorg-video-intel
+
+require.max_days_since_modified = 7
+
+
+exclude.owner.less_than.karma = 2500
+exclude.owner.contains_any.super_teams = ubuntu-x-swat
+
+quick = True

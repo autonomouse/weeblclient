@@ -1,0 +1,129 @@
+#!/bin/bash
+
+. $(dirname $0)/../lib/arsenal.lib
+
+for team in $(${ARSENAL_SCRIPTS}/desktop-teams); do
+    if [ ! -e "${WEBSITE_DIR}/${team}/Data" ]; then
+	continue
+    fi
+
+    for series in $(current-ubuntu-development-codename && current-ubuntu-supported-releases); do
+        data=""
+        datdir="${WEBSITE_DIR}/${team}/Data/BugStats"
+        datfile="${WORK_DIR}/${team}/bugtotals-${series}.dat"
+        graphfile="${WORK_DIR}/${team}/totals-${series}.svg"
+        reportdir="${WEBSITE_DIR}/${team}/Reports"
+
+        mkdir -p ${WORK_DIR}/${team}
+        mkdir -p ${reportdir}
+
+        # Use json files in $datdir to generate $datfile
+        json_files=${datdir}/*.json
+        if [ -z "${json_files}" ]; then
+            continue
+        fi
+        ${ARSENAL_SCRIPTS}/convert-bugtotal-data --series ${series} ${json_files} > ${datfile}
+
+        tot=$(head -n 1 ${datfile} | wc -w)
+        if [ $tot -lt 2 ]; then
+            exit 1
+        fi
+        n=$(( $tot - 1 ))
+        for i in $(seq 2 $n); do
+            ls=$(( $i - 1 ))
+            data="$data \"${datfile}\" using 1:$i title column($i) with filledcurves ls $ls, "
+        done
+        data="$data \"${datfile}\" using 1:${tot} title column(${tot}) with filledcurves ls ${n}"
+
+        y_max=500
+
+        gnuplot << EOF
+set title "Ubuntu Xorg Bug Reports for ${series}"
+
+set term svg size 1280 800
+set style fill solid
+set palette maxcolors 256
+set style line  5 lt rgb "#eec73e"
+set style line  8 lt rgb "#f0a513"
+set style line  7 lt rgb "#fb8b00"
+set style line  6 lt rgb "#f44800"
+
+set style line 21 lt rgb "#fdff99"
+set style line 24 lt rgb "#ffff00"
+set style line 23 lt rgb "#fdca01"
+set style line 22 lt rgb "#986601"
+
+set style line  9 lt rgb "#f44800"
+set style line 12 lt rgb "#fd3301"
+set style line 11 lt rgb "#d40000"
+set style line 10 lt rgb "#980101"
+
+set style line 13 lt rgb "#816647"
+set style line 16 lt rgb "#565248"
+set style line 15 lt rgb "#fdd99b"
+set style line 14 lt rgb "#d9bb7a"
+
+set style line  1 lt rgb "#aaccee"
+set style line  4 lt rgb "#6699cc"
+set style line  3 lt rgb "#336699"
+set style line  2 lt rgb "#003366"
+
+set style line 17 lt rgb "#b3defd"
+set style line 20 lt rgb "#0197fd"
+set style line 19 lt rgb "#0169c9"
+set style line 18 lt rgb "#013397"
+
+set style line 25 lt rgb "#ccff99"
+set style line 28 lt rgb "#98fc66"
+set style line 27 lt rgb "#339900"
+set style line 26 lt rgb "#015a01"
+
+set style line 29 lt rgb "#ff00ff"
+set style line 32 lt rgb "#6600cc"
+set style line 31 lt rgb "#002b3d"
+set style line 30 lt rgb "#aa9bff"
+
+set style line 31 lt rgb "#ffccee"
+set style line 34 lt rgb "#ff99cc"
+set style line 33 lt rgb "#ff6699"
+set style line 32 lt rgb "#ff3366"
+
+set xdata time
+set timefmt "%Y%m%d"
+set autoscale
+set offsets 1, 1, 0, 0
+set yrange [0:${y_max}]
+set grid xtics mxtics ytics mytics lw 0.1
+set xtics out border nomirror
+set ytics in border mirror
+set format x "%m/%d"
+set mxtics
+set mytics
+
+set output "${graphfile}"
+set xlabel "Date"
+set ylabel "Total Reports"
+set key vertical outside
+plot $data
+EOF
+
+        retval=$?
+        if [ $retval -ne 0 ]; then
+            die "Error:  ($retval) Could not create graph ${graphfile}" 1
+        fi
+
+        dbg "Postprocessing to add hyperlinks"
+        mv ${graphfile} ${graphfile}.orig
+        ${ARSENAL_SCRIPTS}/linkify-gnuplot-svg ${graphfile}.orig --series=${series} --current=${datdir}/${current_datafile} > ${graphfile}
+        if [ $retval -ne 0 ]; then
+            mv ${graphfile}.orig ${graphfile}
+        fi
+
+        dbg "Copying ${graphfile} to ${reportdir}/..."
+        mv ${graphfile} ${reportdir}
+        retval=$?
+        if [ $retval -ne 0 ]; then
+            die "($retval) Could not upload ${graphfile}" 1
+        fi
+    done
+done

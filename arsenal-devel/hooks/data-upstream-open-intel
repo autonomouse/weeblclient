@@ -1,0 +1,10 @@
+#!/bin/bash
+
+. $(dirname $0)/../lib/arsenal.lib
+
+file=upstream-open-intel.json
+
+team='ubuntu-x-swat'
+packages='xserver-xorg-video-intel'
+capture "${ARSENAL_SCRIPTS}/collect-upstream-bugs open ${packages}" "${team}/Data" ${file}
+

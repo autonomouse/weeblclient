@@ -1,0 +1,218 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+import sys
+import os.path
+sys.path.insert(0, os.path.realpath(
+        os.path.join(os.path.dirname(__file__), "..")))
+
+# TODO: Load more paths from ~/.config/arsenal/config
+from lpltk import LaunchpadService
+from lpltk.bug_task import BugTask
+from lpltk.person import Person
+
+import arsenal
+from arsenal import filters
+from arsenal.utils.debug import *
+from arsenal.utils.lists import to_list
+from arsenal.utils.json_io import JsonIO
+arsenal.utils.debug.DEBUGGING = True
+
+def fetch_bug_if_updated(new_bug, old_bug_dict):
+    '''Returns dict of the lpltk new_bug.
+
+    If it has not been updated compared with old_bug_dict, it
+    returns that instead, avoiding the launchpad lookup and
+    dict conversion.'''
+    if old_bug_dict is not None:
+        old_updated = old_bug_dict.get('date_last_updated', None)
+        new_updated = new_bug.date_last_updated.ctime()
+        if new_updated == old_updated:
+            # Just reuse the old data; it hasn't changed in launchpad
+            return old_bug_dict
+    return new_bug.to_dict(quick=search.quick)
+
+# TODO: Perhaps it would be clearer in the searches to
+#       list as require. rather than filters?
+#       Or maybe exclude. ?  Or both?
+
+def check_filters(filt, bugtask):
+    '''Dynamically applies filters against a given bug task.
+
+    For a filter such as "exclude.messages.equal_to.non_owner_count",
+    the noun is "messages", the op is "equal_to", and the prop is
+    "non_owner_count".  The get_noun_property() routine is used to get
+    the current prop value from the noun, and then this is compared
+    against the required value using the compare() routine.
+
+    This routine returns True or False depending on whether the
+    criteria is all met or not.
+    '''
+    for noun in filt.keys():
+        for op in filt[noun].keys():
+            for prop in filt[noun][op].keys():
+                requirement = filt[noun][op][prop]
+                value = filters.get_noun_property(bugtask, noun, prop)
+                if value is None:
+                    # Indeterminant
+                    if prop in ['is_complete_upstream', 'date_fix_released']:
+                        pass # Suppress warning, this is normal for this property
+                    else:
+                        warn("Property %s returned no value for bug #%s" %(prop, bug_id))
+                    continue
+                elif filters.compare(value, op, requirement):
+                    return False
+    return True
+
+def searchable(search, lp):
+    '''Returns the lpltk objects for the search.source field.
+
+    This routine parses the search.source field and yields the lpltk
+    object(s) that supports the search_task() interface.
+    '''
+    # TODO: Also support sourcing from blueprints
+    assert(search.distribution)
+    d = lp.distributions[search.distribution]
+    if 'packages' in search.source:
+        if '*' == search.source['packages']:
+            # Just return the distro as we'll be searching all packages in it
+            yield d
+            return
+
+        for package_name in to_list(search.source['packages']):
+            dbg(package_name)
+            s = d.get_source_package(package_name)
+            if not s:
+                warn("Could not retrieve package %s from launchpad" %(package_name))
+                continue
+            yield s
+
+    elif 'teams' in search.source:
+        finished_packages = []
+        for team_name in to_list(search.source['teams']):
+            team = lp.person(team_name)
+            for pkg in team.subscribed_package_names:
+                if pkg in finished_packages:
+                    # We've already processed this one
+                    continue
+                dbg(pkg)
+                s = d.get_source_package(pkg)
+                if not s:
+                    warn("Could not retrieve package %s from launchpad for team %s" %(pkg, team_name))
+                    continue
+                finished_packages.append(s)
+                yield s
+
+    elif 'projects' in search.source:
+        for project_name in to_list(search.source):
+            project = lp.projects[project_name]
+            if not project:
+                warn("Could not retrieve project %s from launchpad" %(project))
+                continue
+            yield project
+
+    else:
+        die("No source defined")
+
+
+def query_launchpad(search):
+    '''Performs a search query against launchpad.
+
+    Returns results as a dict of serializable dicts.
+
+    If cache (a copy of data from a previous run) is provided, it will
+    try to use data from it and only pull from launchpad if the bug has
+    changed.
+    '''
+    lp = LaunchpadService()
+    results = {}
+
+    # TODO: Limit the search to bugs modified since the cache was last updated.
+    for s in searchable(search, lp):
+        for criteria in search.criteria(lp):
+            # If a search has recently been done using this same criteria, use it as a cache
+            criteria_hash = hash(frozenset(criteria))
+            # TODO: Verify that projects, source packages, etc. have distinct filepaths in cache
+            filepath = '%s/%s-%s.json' %(search.cache_dir, s.uri, criteria_hash)
+            jio = JsonIO(filepath)
+            try:
+                cache = jio.read()
+            except arsenal.utils.file_io.FileDoesntExist, e:
+                cache = {}
+
+            new_cache = {}
+            for bugtask in s.search_tasks(**criteria):
+                bug_id = unicode(bugtask.bug.id)
+
+                # Retrieve the bug from launchpad or our cache
+                dbg(bug_id, bugtask.status, bugtask.bug.owner.display_name)
+                new_cache[bug_id] = fetch_bug_if_updated(bugtask.bug, cache.get(bug_id,None))
+
+                # Update the appropriate task with the newly received information
+                sibling_tasks = new_cache[bug_id].get('tasks', [])
+                tasks = []
+                for sibling in sibling_tasks:
+                    if sibling["target"] == bugtask.target:
+                        # Pull down latest data from launchpad and replace the old task data
+                        tasks.append(bugtask.to_dict())
+                    else:
+                        tasks.append(sibling)
+                new_cache[bug_id]['tasks'] = tasks
+
+                if check_filters(search.exclude, bugtask):
+                    results[bug_id] = new_cache[bug_id]
+
+            # Update the cache
+            jio.write(new_cache)
+    return results
+
+
+if __name__ == '__main__':
+    from arsenal.utils import (
+        FileDoesntExist,
+        OptionHandler,
+        dicts_equal,
+        )
+    from arsenal.utils.json_io import JsonIO
+
+    opt_hand = OptionHandler(arsenal.info, app_name=sys.argv[0], arg_names="<rpt-file>")
+    opt_hand.add('-d', '--debug', dest='debug',
+                 help='enable debug output',
+                 action='store_true', default=False,
+                 desc="Turns on verbose debugging output.")
+    opt_hand.add('-o', '--output', dest='output',
+                 help='JSON output filename',
+                 action='store', default=None,
+                 desc="JSON filename where output should be written.")
+    options, args = opt_hand.parse_args()
+    if len(args)<1:
+        opt_hand.print_help()
+        sys.exit(1)
+    search_filename = args[0]
+    json_filename = options.output
+
+    # Load up report config
+    search = arsenal.SearchParameters(search_filename)
+    search.app_name = opt_hand.app_name
+    search.data_dir = options.output
+    #search.quick = options.quick
+    #search.quiet = options.quiet
+    #search.force_reload = options.force_reload
+    #search.include_private = options.include_private
+
+    # Retrieve bugs from launchpad
+    results = query_launchpad(search)
+    if not results:
+        dbg("No results")
+
+    jio = JsonIO(json_filename)
+    jio.write(results)
+    print "%s updated with new data" %(jio.filename)
+    # TODO: Output JSON data if any data has changed
+    #if not dicts_equal(results, old_data):  # TODO: Need to load up old_data
+    #    jio.write(results)
+    #    print "%s updated with new data" %(jio.filename)
+    #else:
+    #    print "%s is unchanged" %(jio.filename)
+
+# vi:set ts=4 sw=4 expandtab:

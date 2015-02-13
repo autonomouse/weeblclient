@@ -1,0 +1,9 @@
+# Bugs with large numbers of dupes, filed against development release
+
+source.teams = ubuntu-x-swat
+
+require.tags = ${current_ubuntu_development_codename}
+require.status = New, Confirmed, Incomplete, Triaged, Won't Fix,
+	         Fix Released, Fix Committed, Invalid, Expired, Opinion
+
+exclude.bug.less_than.duplicates_count = 10

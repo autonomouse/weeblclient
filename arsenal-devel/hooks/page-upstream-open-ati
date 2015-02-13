@@ -1,0 +1,22 @@
+#!/bin/bash
+
+. $(dirname $0)/../lib/arsenal.lib
+
+tag=`basename $0`
+tag=${tag#page-}
+
+html_filename=${tag}.html
+json_filename=${tag}.json
+
+BASE_DIR=/var/www/Arsenal
+
+if [ ! -f $json ]; then
+    exit 1
+fi
+
+team='ubuntu-x-swat'
+if [ -f "${BASE_DIR}/${team}/Data/${json_filename}" ]; then
+    capture "${ARSENAL_SCRIPTS}/bug-listing.py --show-assignee --show-last-message-age --title=${team}&nbsp;Bugs&nbsp;Open&nbsp;Upstream&nbsp;for&nbsp;ATI&nbsp;Radeon --show-source ${BASE_DIR}/${team}/Data/${json_filename}" "$team/Reports" ${html_filename}
+fi
+
+

@@ -1,0 +1,34 @@
+{
+    "launchpad_config": {
+        "bot": true, 
+        "launchpad_client_name": "oil-test-catalog", 
+        "launchpad_link": "https://bugs.launchpad.net/oil/", 
+        "launchpad_services_root": "production", 
+        "read_only": false
+    }, 
+    "report": {
+        "show_total_bugs": true, 
+        "title": "oil"
+    }, 
+    "search_criteria": [
+        {
+            "project": "oil", 
+            "series": [
+                "NONE"
+            ], 
+            "status": [
+                "New", 
+                "Confirmed", 
+                "Triaged", 
+                "Incomplete", 
+                "Incomplete (with response)", 
+                "Incomplete (without response)", 
+                "In Progress", 
+                "Fix Committed"
+            ], 
+            "tags": []
+        }
+    ], 
+    "tasks": {}, 
+    "update_timestamp": "Thursday, 12. February 2015 12:20 UTC"
+}

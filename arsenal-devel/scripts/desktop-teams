@@ -1,0 +1,16 @@
+#!/bin/bash
+
+cat <<EOF
+ubuntu-x-swat
+mozilla-bugs
+compiz
+ubuntu-audio
+desktop-bugs
+openoffice-pkgs
+unity-team
+indicator-applet-developers
+EOF
+
+# Other teams subscribing to groups of packages maybe worth tracking later:
+#pkg-games
+#

@@ -1,0 +1,14 @@
+# Bugs that have been forwarded upstream and that have patches attached
+# to the upstream bug, and aren't already being worked.
+
+source.teams = ubuntu-x-swat
+
+require.status = New, Incomplete (with response), Confirmed, Triaged, In Progress
+require.tags = -kernel-handoff-graphics, -omit,	  -kubuntu, -xubuntu, -ppc
+require.status_upstream = resolved_upstream
+
+exclude.bug_task.equal_to.is_complete_upstream = False
+
+# TODO: Extract comments on the upstream bug from past month
+
+quick = True
