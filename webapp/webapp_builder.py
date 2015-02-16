@@ -97,7 +97,7 @@ class WebAppBuilder(object):
                     
                     
                     # tags
-                    data[bug_number]['tags'] =  bug_data['bug'].get('tags')
+                    data[bug_number]['tags'] = bug_data['bug'].get('tags')
                     
                     # time 
                     # the other info arsenal cares about (Summary, Importance, 
@@ -115,7 +115,7 @@ class WebAppBuilder(object):
                     # openstack release 
                         
                     
-                # affected pipelines
+                    # affected pipelines
                     
                     
                     '''
