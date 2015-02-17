@@ -86,37 +86,21 @@ class WebAppBuilder(object):
                     bug_number = pipeline_ranking_datum[0]
                     number = int(pipeline_ranking_datum[1])
                     
-                    # bug number        
-                    
+                    # Bug number:
                     if bug_number not in data:
                         data[bug_number] = {}    
                         
-                    bug_data = lp_data.get(bug_number)[0]
-                             
-                    # job(s)
-                    
-                    
-                    # tags
-                    data[bug_number]['tags'] = bug_data['bug'].get('tags')
-                    
-                    # time 
-                    # the other info arsenal cares about (Summary, Importance, 
-                    #    Status, Assignee, Owner, Created)
-                    # states
-                    # machines
-                    # units
-                    # vendors
-                    # charms
-                    # slaves
-                    # ports
-                    # xunit name/class (optional?)
-                    # target file and/or regexp
-                    # bootstrap_node jenkins (e.g. 'Building on master'; optional?)
-                    # openstack release 
+                    # Get data from Launchpad:  
+                    bug_data = lp_data.get(bug_number)
+                    if bug_data:
+                        data = self.extract_data_from_lp(bug_data, data)   
                         
-                    
-                    # affected pipelines
-                    
+                    # Get data from Launchpad:  
+                    output = ''
+                    if output:
+                        data = self.extract_data_from_doberman_output(bug_data,
+                                                                      data)
+                    import pdb; pdb.set_trace()
                     
                     '''
                         
@@ -126,19 +110,16 @@ class WebAppBuilder(object):
                     if pipeline not in data[bug_number]['affected pipelines']:
                     '''    
                         
-                        
-                        
-                        
-                    import pdb; pdb.set_trace()
-                    
-                    
-                    
+                    # import pdb; pdb.set_trace()
+                                        
+                    '''
                     if pipeline not in bug_rankings[key]:
                         bug_rankings[key][pipeline] = number
                     else:
                         import pdb; pdb.set_trace()
                         # add together?
                         # TODO but only if the data hasn't been seen before - how'd I do that then?
+                    '''
         import pdb; pdb.set_trace()
         #write out
         
@@ -154,8 +135,63 @@ class WebAppBuilder(object):
             Then keep only this info in a json file and leaving the rest to be 
             overwritten...
         '''
+
+    def extract_data_from_lp(self, bug_data, data):
+        """ """
         
+        bug_data = bug_data[0]
         
+        title = bug_data.get('title')
+        summary = title.split('"')[1]
+        bug_num = title.split('"')[0].split('#')[1].split(' ')[0]
+        
+        data[bug_number]['tags'] = bug_data['bug'].get('tags')
+        data[bug_number]['summary'] = summary
+        data[bug_number]['bug_number'] = bug_num
+        data[bug_number]['importance'] = bug_data.get('importance')
+        data[bug_number]['status'] = bug_data.get('status')
+        data[bug_number]['assignee'] = bug_data.get('assignee')
+        data[bug_number]['owner'] = bug_data.get('owner')
+        data[bug_number]['created'] = \
+            bug_data['bug'].get('date_created')
+        data[bug_number]['web_link'] = bug_data.get('web_link') 
+        
+        return data      
+        
+    def extract_data_from_doberman_output(self, output, data):
+        import pdb; pdb.set_trace()
+        # time 
+        #data[bug_number][''] = bug_data.get('')
+        
+        # Get data from Doberman output: 
+        
+        # job(s)
+        
+        # states
+        
+        # machines
+        
+        # units
+        
+        # vendors
+        
+        # charms
+        
+        # slaves
+        
+        # ports
+        
+        # xunit name/class (optional?)
+        
+        # target file and/or regexp
+        
+        # bootstrap_node jenkins (e.g. 'Building on master'; optional?)
+        
+        # openstack release                         
+        
+        # affected pipelines
+        
+        return data
             
     
 if __name__ == "__main__":
