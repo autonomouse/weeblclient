@@ -1,8 +1,0 @@
-source.teams = ubuntu-x-swat
-
-require.status = Fix Released
-require.max_days_since_modified = 7
-
-exclude.bug_task.max_days_since.date_fix_released = 7
-
-quick = True

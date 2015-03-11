@@ -1,7 +1,0 @@
-#!/bin/bash
-
-. $(dirname $0)/../lib/arsenal.lib
-
-mockup=/home/bryce/src/Arsenal/arsenal/mockup/index.html
-
-cp $mockup $WEBSITE_DIR/

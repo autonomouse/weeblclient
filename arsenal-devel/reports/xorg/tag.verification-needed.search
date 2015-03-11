@@ -1,5 +1,0 @@
-source.teams = ubuntu-x-swat
-
-require.tags = verification-needed
-
-quick = True

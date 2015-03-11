@@ -1,8 +1,0 @@
-#!/bin/bash
-
-CONTRIB=/home/bryce/src/Arsenal/arsenal/contrib
-SCRIPTS=/home/bryce/src/Arsenal/arsenal/scripts
-
-$CONTRIB/report-intel-upstream.py
-
-

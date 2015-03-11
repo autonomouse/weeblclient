@@ -1,7 +1,0 @@
-# Bugs with large numbers of dupes, filed against development release
-
-source.teams = ubuntu-x-swat
-
-require.tags = ${current_ubuntu_development_codename}, -kernel-handoff-graphics
-
-exclude.bug.less_than.users_affected_count_with_dupes = 10

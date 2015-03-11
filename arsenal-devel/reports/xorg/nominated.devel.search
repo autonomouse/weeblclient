@@ -1,9 +1,0 @@
-# Bugs targeted to the current stable release
-
-source.teams = ubuntu-x-swat
-
-require.nominated_for = ${current_ubuntu_release_codename}
-
-quick = True
-
-

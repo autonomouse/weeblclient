@@ -1,6 +1,0 @@
-Package: 
-Version: 
-Severity: #http://www.debian.org/Bugs/Developer#severities
-Tags: #patch, security http://www.debian.org/Bugs/Developer#tags
-User: ubuntu-devel@lists.ubuntu.com
-Usertags: origin-ubuntu intrepid #ubuntu-patch https://wiki.ubuntu.com/Bugs/Debian/Usertagging

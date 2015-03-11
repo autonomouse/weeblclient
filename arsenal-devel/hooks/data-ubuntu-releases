@@ -1,7 +1,0 @@
-#!/bin/bash
-
-. $(dirname $0)/../lib/arsenal.lib
-
-file=ubuntu-releases.json
-
-capture ${ARSENAL_SCRIPTS}/collect-ubuntu-releases "/" ${file}
