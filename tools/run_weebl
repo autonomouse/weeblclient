@@ -1,0 +1,1 @@
+WEEBL_ROOT=`pwd` PYTHONPATH=$PYTHONPATH:`pwd` python weebl/scripts/webapp.py
