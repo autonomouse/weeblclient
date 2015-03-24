@@ -71,3 +71,4 @@ def specific_machine_history(request, machine):
     data = {'title': 'specific_machine_history',
             'machine': machine,}
     return render(request, 'specific_machine_history.html', data)
+
