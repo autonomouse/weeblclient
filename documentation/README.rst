@@ -33,30 +33,23 @@ Django Installation
     - sudo apt-get install python3-django/vivid 
     - source: http://askubuntu.com/questions/569339/install-vagrant-version-1-5-or-greater-on-14-10
 
-
 Postgres Installation
 ~~~~~~~~~~~~~~~~~~~~~
 
-The tests will not work until you have set up a database on your machine for it to connect to
-
-Install Postgres
-sudo apt-get install postgresql
-sudo apt-get install python3-psycopg2
-
-sudo su - postgres
-
-createdb bugs_database
-createuser user -P
-psql
-GRANT ALL PRIVILEGES ON DATABASE bugs_database TO "user";
-ALTER USER "user" CREATEDB;
-createdb bugs_database
-
-exit (Cntl-D) and exit
-
-then 
-
-weebl/manage.py syncdb
+- The tests will not work until you have set up a database on your machine for it to connect to
+- Install Postgres
+    - sudo apt-get install postgresql
+    - sudo apt-get install python3-psycopg2
+- sudo su - postgres
+    | createdb bugs_database
+    | createuser user -P
+    | psql
+    | GRANT ALL PRIVILEGES ON DATABASE bugs_database TO "user";
+    | ALTER USER "user" CREATEDB;
+    | createdb bugs_database
+    | exit (Cntl-D) and exit
+- then
+    | weebl/manage.py syncdb
 
 Selenium Installation
 ~~~~~~~~~~~~~~~~~~~~~
