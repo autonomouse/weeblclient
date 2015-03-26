@@ -27,64 +27,37 @@
         </div>
         
         
-        <div>
-            <h2>Top ten bugs:</h2>
-            
-            <h3>Top ten deploy bugs:</h3>
-            <table border="1">
-                <tr>
-                    <td>Bug ID</td>
-                    <td>pipeline_start</td>
-                    <td>pipeline_deploy</td>
-                    <td>Number of hits</td>
-                </tr>
-                {% for bug_id, value in staging.deploy_ranking.items %}
-                <tr>
-                    <td>{{bug_id}}</td>
-                    <td>{{value.pipeline_start}}</td>
-                    <td>{{value.pipeline_deploy}}</td>
-                    <td>{{value.hits}}</td>
-                </tr>
+        
+        {% for key, environment in environments.items %}
+            <div>
+                <h2>Top ten {{ environment.name }} bugs:</h2>                
+                {% for job, rank in environment.rankings.items %}                   
+                    
+                    <h3>{{ job }} bugs:</h3>
+                    <table border="1">
+                        <tr>
+                            <td>Bug ID</td>
+                            <td>pipeline_start</td>
+                            <td>pipeline_deploy</td>
+                            <td>Number of hits</td>
+                        </tr>
+                        {% for bug_id, value in rank.items %}
+                        <tr>
+                            <td>{{bug_id}}</td>
+                            <td>{{value.pipeline_start}}</td>
+                            <td>{{value.pipeline_deploy}}</td>
+                            <td>{{value.hits}}</td>
+                        </tr>
+                        {% endfor %}
+                        
+                    </table>  
+                    
+                    
                 {% endfor %}
-            </table>
-            
-            <h3>Top ten prepare bugs:</h3>
-            <table border="1">
-                <tr>
-                    <td>Bug ID</td>
-                    <td>pipeline_start</td>
-                    <td>pipeline_prepare</td>
-                    <td>Number of hits</td>
-                </tr>
-                {% for bug_id, value in staging.prepare_ranking.items %}
-                <tr>
-                    <td>{{bug_id}}</td>
-                    <td>{{value.pipeline_start}}</td>
-                    <td>{{value.pipeline_prepare}}</td>
-                    <td>{{value.hits}}</td>
-                </tr>
-                {% endfor %}
-            </table>
-            
-            <h3>Top ten tempest bugs:</h3>
-            <table border="1">
-                <tr>
-                    <td>Bug ID</td>
-                    <td>pipeline_start</td>
-                    <td>test_tempest_smoke</td>
-                    <td>Number of hits</td>
-                </tr>
-                {% for bug_id, value in staging.tempest_ranking.items %}
-                <tr>
-                    <td>{{bug_id}}</td>
-                    <td>{{value.pipeline_start}}</td>
-                    <td>{{value.test_tempest_smoke}}</td>
-                    <td>{{value.hits}}</td>
-                </tr>
-                {% endfor %}
-            </table>
-            <hr/>
-        </div>
+                <hr/>
+            </div>
+        {% endfor %}
+
         
     </body>
 </html>

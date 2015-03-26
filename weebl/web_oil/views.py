@@ -67,9 +67,10 @@ def load_data(environment, data):
             tempest_paabn_ranking[key] = paabn.get(key, {})
             tempest_paabn_ranking[key]['hits'] = hits
         
-        data['environments'][environment]['deploy_ranking'] = deploy_paabn_ranking
-        data['environments'][environment]['prepare_ranking'] = prepare_paabn_ranking
-        data['environments'][environment]['tempest_ranking'] = tempest_paabn_ranking
+        data['environments'][environment]['rankings'] = {}
+        data['environments'][environment]['rankings']['deploy'] = deploy_paabn_ranking
+        data['environments'][environment]['rankings']['prepare'] = prepare_paabn_ranking
+        data['environments'][environment]['rankings']['tempest'] = tempest_paabn_ranking
     
     return data
 
