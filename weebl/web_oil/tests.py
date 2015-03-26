@@ -1,9 +1,9 @@
-from django.test import TestCase
 from web_oil.views import (main_page, job_specific_bugs_list)
 from django.http import HttpRequest
+from common_test_methods import Tests
 
-# Create your tests here.
-class DevSmokeTests(TestCase):
+
+class DevSmokeTests(Tests):
 
     def test_main_page(self):
         request = HttpRequest()

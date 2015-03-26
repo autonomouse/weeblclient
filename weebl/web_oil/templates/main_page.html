@@ -5,5 +5,86 @@
 
     <body>
         {{ title }}
+        <hr/>
+        
+        {% for key, environment in environments.items %}
+            <div>
+                <h2>{{ environment.name }}:</h2>
+                <p>OIL is: {{ environment.oil_state }} </p>
+                <p>Overall success rate: {{ environment.success_rate |floatformat:"2" }}% </p>
+                <p>Deploy success rate: {{ environment.deploy |floatformat:"2" }}% </p>
+                <p>Prepare success rate: {{ environment.prepare |floatformat:"2" }}% </p>
+                <p>Tempest success rate: {{ environment.tempest |floatformat:"2" }}%</p>
+                <p>Last updated: {{ environment.timestamp }}</p>
+                <hr/>
+            </div>
+        {% endfor %}
+        
+        <div>
+            <h2>Breakdown by category:</h2>
+            <p> [Nothing to see here - move along] </p>
+            <hr/>
+        </div>
+        
+        
+        <div>
+            <h2>Top ten bugs:</h2>
+            
+            <h3>Top ten deploy bugs:</h3>
+            <table border="1">
+                <tr>
+                    <td>Bug ID</td>
+                    <td>pipeline_start</td>
+                    <td>pipeline_deploy</td>
+                    <td>Number of hits</td>
+                </tr>
+                {% for bug_id, value in staging.deploy_ranking.items %}
+                <tr>
+                    <td>{{bug_id}}</td>
+                    <td>{{value.pipeline_start}}</td>
+                    <td>{{value.pipeline_deploy}}</td>
+                    <td>{{value.hits}}</td>
+                </tr>
+                {% endfor %}
+            </table>
+            
+            <h3>Top ten prepare bugs:</h3>
+            <table border="1">
+                <tr>
+                    <td>Bug ID</td>
+                    <td>pipeline_start</td>
+                    <td>pipeline_prepare</td>
+                    <td>Number of hits</td>
+                </tr>
+                {% for bug_id, value in staging.prepare_ranking.items %}
+                <tr>
+                    <td>{{bug_id}}</td>
+                    <td>{{value.pipeline_start}}</td>
+                    <td>{{value.pipeline_prepare}}</td>
+                    <td>{{value.hits}}</td>
+                </tr>
+                {% endfor %}
+            </table>
+            
+            <h3>Top ten tempest bugs:</h3>
+            <table border="1">
+                <tr>
+                    <td>Bug ID</td>
+                    <td>pipeline_start</td>
+                    <td>test_tempest_smoke</td>
+                    <td>Number of hits</td>
+                </tr>
+                {% for bug_id, value in staging.tempest_ranking.items %}
+                <tr>
+                    <td>{{bug_id}}</td>
+                    <td>{{value.pipeline_start}}</td>
+                    <td>{{value.test_tempest_smoke}}</td>
+                    <td>{{value.hits}}</td>
+                </tr>
+                {% endfor %}
+            </table>
+            <hr/>
+        </div>
+        
     </body>
 </html>
