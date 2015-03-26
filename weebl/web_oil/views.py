@@ -1,8 +1,15 @@
 import sys
 import os
 import yaml
+import operator
 from django.shortcuts import render
 
+
+# TODO: This shouldn't be hard-coded here:
+files = {'pipeline_deploy': 'bug_ranking_pipeline_deploy.yml',
+         'pipeline_prepare': 'bug_ranking_pipeline_prepare.yml',
+         'test_tempest_smoke': 'bug_ranking_test_tempest_smoke.yml'}
+root_data_directory = "./data"
 
 def get_yaml(file_location):
     """ Return data from yaml file. """
@@ -12,77 +19,95 @@ def get_yaml(file_location):
 
     with open(file_location, 'r') as oil_file:
         return yaml.load(oil_file)
-        
-def request_current_oil_status(environment):
-    # TODO
-    pass
-    
-def load_data(environment, data):
+
+def oil_status(environment):
+    """ Request current oil status. """
+    # TODO: is OIL up/down?
+    status = "DOWN (not really - this isn't implemented yet)"
+    return status
+
+def load_data(environment, root_data_directory, data):
     """ Load up oilstats, timestamp and bug_ranking data. """
-    
+
+    data_location = '{}/{}'.format(root_data_directory, environment)
+
     if 'environments' not in data:
         data['environments'] = {}
-    data['environments'][environment] = {'name': environment}
-    
-    data_location = './data/{}'.format(environment)        
 
+    data['environments'][environment] = {'name': environment, 'rankings': {}}
+
+    # Get the date/time oil-stats was run:
+    timestamp = get_yaml(os.path.join(data_location, 'timestamp'))
+    data['environments'][environment]['timestamp'] = timestamp
+
+    # Request current oil status
+    data['environments'][environment]['oil_state'] = oil_status(environment)
+
+    # Get oil-stats data:
     oil_stats = get_yaml(os.path.join(data_location, 'oil-stats.yml'))
-    deploy_ranking = get_yaml(os.path.join(data_location,
-                              'bug_ranking_pipeline_deploy.yml'))
-    prepare_ranking = get_yaml(os.path.join(data_location,
-                               'bug_ranking_pipeline_prepare.yml'))
-    tempest_ranking = get_yaml(os.path.join(data_location,
-                               'bug_ranking_test_tempest_smoke.yml'))
+    if oil_stats:
+        data['environments'][environment]['success_rate'] = \
+            str(round(oil_stats['overall']['success rate'], 2)) + "%"
+    else:
+        data['environments'][environment]['success_rate'] = "?"
+
+    # Get pipelines and associated build numbers file:
     paabn = get_yaml(os.path.join(data_location,
                      'pipelines_and_associated_build_numbers.yml'))
-    timestamp = get_yaml(os.path.join(data_location, 'timestamp'))
-    
-    # Put relevant data into data:
-    data['environments'][environment]['timestamp'] = timestamp
-    data['environments'][environment]['oil_state'] = "DOWN (not really - this isn't implemented yet)"
 
-    if oil_stats:
-        data['environments'][environment]['success_rate'] = oil_stats['overall']['success rate']
-        data['environments'][environment]['deploy'] = oil_stats['jobs']['pipeline_deploy']['success rate']
-        data['environments'][environment]['prepare'] = oil_stats['jobs']['pipeline_prepare']['success rate']
-        data['environments'][environment]['tempest'] = \
-            oil_stats['jobs']['test_tempest_smoke']['success rate']
-
-        deploy_ranking = dict(deploy_ranking) if deploy_ranking else {}
-        prepare_ranking = dict(prepare_ranking) if prepare_ranking else {}
-        tempest_ranking = dict(tempest_ranking) if tempest_ranking else {}
-        
-        deploy_paabn_ranking = {}
-        for key, hits in deploy_ranking.items():
-            deploy_paabn_ranking[key] = paabn.get(key, {})
-            deploy_paabn_ranking[key]['hits'] = hits    
-        
-        prepare_paabn_ranking = {}
-        for key, hits in prepare_ranking.items():
-            prepare_paabn_ranking[key] = paabn.get(key, {})
-            prepare_paabn_ranking[key]['hits'] = hits
+    # Get data:
+    for jobname, yaml in files.items():
+        job_ranking = get_yaml(os.path.join(data_location, yaml))
+        job_ranking = dict(job_ranking) if job_ranking else {}
+        if oil_stats:
+            data['environments'][environment][jobname] = \
+            str(round(oil_stats['jobs'][jobname]['success rate'], 2)) + "%"
+        else:
+            data['environments'][environment][jobname] = "?"
+        paabn_ranking = {}
+        data['environments'][environment]['rankings'][jobname] = {}
+        for key, hits in job_ranking.items():
+            data['environments'][environment]['rankings'][jobname][key] = hits
             
-        tempest_paabn_ranking = {}
-        for key, hits in tempest_ranking.items():
-            tempest_paabn_ranking[key] = paabn.get(key, {})
-            tempest_paabn_ranking[key]['hits'] = hits
-        
-        data['environments'][environment]['rankings'] = {}
-        data['environments'][environment]['rankings']['deploy'] = deploy_paabn_ranking
-        data['environments'][environment]['rankings']['prepare'] = prepare_paabn_ranking
-        data['environments'][environment]['rankings']['tempest'] = tempest_paabn_ranking
-    
+        bugs = [ranking for count, ranking in enumerate(job_ranking.items())]
+        sorted_bugs = sorted(bugs, key=operator.itemgetter(1), reverse=True)
+        data['environments'][environment]['rankings'][jobname] = sorted_bugs
+    return data
+
+def load_top_ten_data(environment, root_data_directory, data, mock_data=None):
+    """ Restrict data loaded up to only the top ten by number of hits. """
+    if not mock_data:
+        data = load_data(environment, root_data_directory, data)
+    else:
+        data = mock_data # used for unit testing
+    for env, values in data['environments'].items():
+        if 'rankings' not in values:
+            continue
+        for job, rankings in values['rankings'].items():
+            tmp_dict = {}
+            top_ten = [ranking for count, ranking in 
+                       enumerate(rankings) if count < 10]
+            sorted_top10 = sorted(top_ten, key=operator.itemgetter(1), 
+                                  reverse=True)
+            data['environments'][env]['rankings'][job] = sorted_top10
     return data
 
 def main_page(request):
-    
     data = {'title': 'main_page'}
-    data = load_data('staging', data)
-    data = load_data('prodstack', data)
+    for env_folder, parent, files in os.walk(root_data_directory):
+        if env_folder == root_data_directory:
+            continue
+        environment = env_folder.split('/')[-1]
+        data = load_top_ten_data(environment, root_data_directory, data)
     return render(request, 'main_page.html', data)
 
 def job_specific_bugs_list(request, job):
     data = {'title': 'job_specific_bugs_list',
             'job': job,}
+    for env_folder, parent, files in os.walk(root_data_directory):
+        if env_folder == root_data_directory:
+            continue
+        environment = env_folder.split('/')[-1]
+        data = load_data(environment, root_data_directory, data)
     return render(request, 'job_specific_bugs_list.html', data)
 
