@@ -1,14 +1,27 @@
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
     <head>
-    <title>{{ title }}</title>
+        <link href="../static//bootstrap.css" rel="stylesheet" type="text/css">
+        <link href="../static//ubuntu.css" rel="stylesheet" type="text/css">
+        <title>{{ title }}</title>
     </head>
 
     <body>
-        {{ title }}
-        <hr/>
+                
+        <div id='title'>
+            <div class='topbar'>
+                <div style="width:600px;margin-left:25px;margin-top:11px;display:block;float:left;">
+                    <a href='/'><img src='../static//ubuntu_openstack_interoperability_lab.png'/></a>
+                </div>
+                <div class='user_info'>
+                    <h1>{{ title }}</h1>
+                </div>                
+            </div>
+        </div>
         
         {% for key, environment in environments.items %}
-            <div>
+            <div id='main_content' class='main_content'>
                 <h2>{{ environment.name }}:</h2>
                 <p>OIL is: {{ environment.oil_state }} </p>
                 <p>Overall success rate: {{ environment.success_rate }} </p>
@@ -20,7 +33,7 @@
             </div>
         {% endfor %}
         
-        <div>
+        <div id='main_content' class='main_content'>
             <h2>Breakdown by category:</h2>
             <p> [Nothing to see here - move along] </p>
             <hr/>
@@ -28,8 +41,10 @@
                 
         
         {% for key, environment in environments.items %}
-            <div>
-                <h2>Top ten {{ environment.name }} bugs:</h2>                
+            <div id='main_content' class='main_content'>
+                <p></p>
+                <h2>Top ten {{ environment.name }} bugs:</h2> 
+                <p></p>
                 {% for job, rank in environment.rankings.items %}                   
                     
                     <h3><a href="/job/{{ job }}">{{ job }} bugs</a>:</h3>
@@ -45,6 +60,8 @@
                         </tr>
                         {% endfor %}                        
                     </table>  
+                    <p></p>
+                    <p></p>
                     
                 {% endfor %}
                 <hr/>
