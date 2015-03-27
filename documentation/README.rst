@@ -56,7 +56,14 @@ Selenium Installation
 
  - *This section needs updating to avoid the use of pip*
  - sudo pip3 install selenium 
- - Run tests using:
-    | ./run_tests.sh unit
-    
+
+Running tests
+~~~~~~~~~~~~~
+ 
+- Run functional (webdriver) tests using:
+| ./run_tests.sh func
+- Run unit tests using:
+| ./run_tests.sh unit
+- Run linter using:
+| ./run_tests.sh lint
 
