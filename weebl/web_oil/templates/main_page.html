@@ -1,73 +1,13 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+{% extends "base.html" %}
 
-<html xmlns="http://www.w3.org/1999/xhtml">
-    <head>
-        <link href="../static//bootstrap.css" rel="stylesheet" type="text/css">
-        <link href="../static//ubuntu.css" rel="stylesheet" type="text/css">
-        <title>{{ title }}</title>
-    </head>
+{% block page_title %}{{ title }}{% endblock %}
+{% block title %}{{ title }}{% endblock %}
 
-    <body>
-                
-        <div id='title'>
-            <div class='topbar'>
-                <div style="width:600px;margin-left:25px;margin-top:11px;display:block;float:left;">
-                    <a href='/'><img src='../static//ubuntu_openstack_interoperability_lab.png'/></a>
-                </div>
-                <div class='user_info'>
-                    <h1>{{ title }}</h1>
-                </div>                
-            </div>
-        </div>
-        
-        {% for key, environment in environments.items %}
-            <div id='main_content' class='main_content'>
-                <h2>{{ environment.name }}:</h2>
-                <p>OIL is: {{ environment.oil_state }} </p>
-                <p>Overall success rate: {{ environment.success_rate }} </p>
-                <p>Pipeline_deploy success rate: {{ environment.pipeline_deploy }} </p>
-                <p>Pipeline_prepare success rate: {{ environment.pipeline_prepare }} </p>
-                <p>Test_tempest_smoke success rate: {{ environment.test_tempest_smoke }}</p>
-                <p>Last updated: {{ environment.timestamp }}</p>
-                <hr/>
-            </div>
-        {% endfor %}
-        
-        <div id='main_content' class='main_content'>
-            <h2>Breakdown by category:</h2>
-            <p> [Nothing to see here - move along] </p>
-            <hr/>
-        </div>
-                
-        
-        {% for key, environment in environments.items %}
-            <div id='main_content' class='main_content'>
-                <p></p>
-                <h2>Top ten {{ environment.name }} bugs:</h2> 
-                <p></p>
-                {% for job, rank in environment.rankings.items %}                   
-                    
-                    <h3><a href="/job/{{ job }}">{{ job }} bugs</a>:</h3>
-                    <table border="1">
-                        <tr>
-                            <td>Bug ID</td>
-                            <td>Number of hits</td>
-                        </tr>
-                        {% for bug_id, hits in rank %}
-                        <tr>
-                            <td>{{bug_id}}</td>
-                            <td>{{hits}}</td>
-                        </tr>
-                        {% endfor %}                        
-                    </table>  
-                    <p></p>
-                    <p></p>
-                    
-                {% endfor %}
-                <hr/>
-            </div>
-        {% endfor %}
+{% block filters %}{% endblock %}
+{% block main %}
+    {% block oil_stats %}{% include "base_oil_stats.html" %}{% endblock %}
+    {% block breakdown %}{% include "base_breakdown.html" %}{% endblock %}
+    {% block bugs %}{% include "base_top_ten_bugs.html" %}{% endblock %}
+    {% block charts %}{% include "base_charts.html" %}{% endblock %}
+{% endblock %}
 
-        
-    </body>
-</html>

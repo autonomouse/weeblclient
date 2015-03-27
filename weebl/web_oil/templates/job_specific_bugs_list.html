@@ -1,35 +1,10 @@
-<html>
-    <head>
-    <title>{{ title }} - {{ job }}</title>
-    </head>
+{% extends "base.html" %}
 
-    <body>
-        {{ title }} - {{ job }}                
-        
-        {% for key, environment in environments.items %}
-            <div>
-                <h2>All {{ environment.name }} bugs:</h2>                
-                {% for jobname, rank in environment.rankings.items %}         
-                    {% if jobname == job %}                   
-                    
-                    <table border="1">
-                        <tr>
-                            <td>Bug ID</td>
-                            <td>Number of hits</td>
-                        </tr>
-                        {% for bug_id, hits in rank %}
-                        <tr>
-                            <td>{{bug_id}}</td>
-                            <td>{{hits}}</td>
-                        </tr>
-                        {% endfor %}                        
-                    </table>  
-                    {% endif %}
-                {% endfor %}
-                <hr/>
-            </div>
-        {% endfor %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block title %}{{ title }}{% endblock %}
 
-        
-    </body>
-</html>
+{% block filters %}{% endblock %}
+{% block main %}
+    {% block oil_stats %}{% include "base_oil_stats.html" %}{% endblock %}
+    {% block bugs %}{% include "base_bugs.html" %}{% endblock %}
+{% endblock %}
