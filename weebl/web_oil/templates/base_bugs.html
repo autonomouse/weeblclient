@@ -1,0 +1,25 @@
+
+{% for key, environment in environments.items %}
+    <div id='main_content' class='main_content'>
+        <h2>All {{ environment.name }} bugs:</h2>                
+        {% for jobname, rank in environment.rankings.items %}         
+            {% if jobname == job %}                   
+            
+            <table border="1">
+                <tr>
+                    <td>Bug ID</td>
+                    <td>Number of hits</td>
+                </tr>
+                {% for bug_id, hits in rank %}
+                <tr>
+                    <td>{{bug_id}}</td>
+                    <td>{{hits}}</td>
+                </tr>
+                {% endfor %}                        
+            </table>  
+            {% endif %}
+        {% endfor %}
+        <hr/>
+    </div>
+{% endfor %}
+

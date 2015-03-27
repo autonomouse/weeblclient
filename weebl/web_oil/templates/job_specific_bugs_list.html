@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block page_title %}{{ title }}{% endblock %}
+{% block title %}{{ job }}{% endblock %}
+
+{% block filters %}{% endblock %}
+{% block main %}
+    {% block oil_stats %}{% include "base_oil_stats.html" %}{% endblock %}
+    {% block bugs %}{% include "base_bugs.html" %}{% endblock %}
+{% endblock %}

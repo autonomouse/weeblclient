@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block page_title %}{{ title }}{% endblock %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block filters %}{% endblock %}
+{% block main %}
+    {% block oil_stats %}{% include "base_oil_stats.html" %}{% endblock %}
+    {% block breakdown %}{% include "base_breakdown.html" %}{% endblock %}
+    {% block bugs %}{% include "base_top_ten_bugs.html" %}{% endblock %}
+    {% block charts %}{% include "base_charts.html" %}{% endblock %}
+{% endblock %}
+
