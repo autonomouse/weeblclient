@@ -1,4 +1,4 @@
-from web_oil.views import (main_page, job_specific_bugs_list)
+from oilserver.views import (main_page, job_specific_bugs_list)
 from django.http import HttpRequest
 from common_test_methods import Tests
 
@@ -16,4 +16,3 @@ class DevSmokeTests(Tests):
         response = job_specific_bugs_list(request, job)
         self.assertIn(b'job_specific_bugs_list', response.content)
         self.assertIn(b'pipeline_deploy', response.content)
-

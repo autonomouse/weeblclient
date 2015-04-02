@@ -1,6 +1,6 @@
 #!/bin/bash -e
 PROJECT=weebl
-APPS=(web_oil)
+APPS=(oilserver)
 
 if echo "$@" | grep -q "lint" ; then
   echo "Running flake8 lint tests..."

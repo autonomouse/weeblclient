@@ -9,7 +9,7 @@ import os
 
 class WebOilTestCase(TestCase):
 
-    SETUP = ['python3 weebl/manage.py syncdb --noinput',]
+    SETUP = ['python3 weebl/manage.py syncdb --noinput', ]
     RUNSERVER = 'python3 weebl/manage.py runserver'
     HOST = 'http://localhost:8000'
 
