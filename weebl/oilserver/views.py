@@ -46,7 +46,7 @@ def load_data(environment, root_data_directory, data):
     data['environments'][environment]['oil_state'] = oil_status(environment)
 
     # Get oil-stats data:
-    oil_stats = get_yaml(os.path.join(data_location, 'oil-stats.yml'))
+    oil_stats = get_yaml(os.path.join(data_location, 'oil-stats.yaml'))
     if oil_stats:
         data['environments'][environment]['success_rate'] = \
             str(round(oil_stats['overall']['success rate'], 2)) + "%"
