@@ -1,9 +1,9 @@
 #!/bin/bash
-# Should be run from top of source tree with local doberman in PYTHONPATH
+# Should be run from top of source tree with local weebl in PYTHONPATH
 rm -rf *.egg-info
 [[ -n "$(bzr status)" ]] && echo "Repo not clean" && exit 1
 distro=${1:-"precise"}
-version="$(python -c "import doberman; print doberman.__version__")"
+version="$(python3 -c "import weebl; print(weebl.__version__)")"
 echo $version
 bzr_rev=$(bzr revno)
 dch -b -D $distro \
@@ -18,4 +18,4 @@ bzr uncommit --force
 bzr revert
 rm -rf *.egg-info
 [[ ! $rc ]] && echo "Build failed" && exit 1
-echo "Run: dput ppa:oil-ci/oil-ci ../doberman*bzr${bzr_rev}*.changes"
+echo "Run: dput ppa:oil-ci/oil-ci ../weebl*bzr${bzr_rev}*.changes"

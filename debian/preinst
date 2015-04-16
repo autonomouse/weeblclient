@@ -1,0 +1,9 @@
+#!/bin/bash
+set -e
+
+# stop django server
+if [ -f /etc/init.d/django ]
+then
+  invoke-rc.d django stop
+fi
+

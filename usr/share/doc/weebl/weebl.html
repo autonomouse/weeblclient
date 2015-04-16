@@ -1,0 +1,104 @@
+<h1 id="preamble">Preamble</h1>
+<ul>
+<li>This section document the Weebl project.</li>
+<li><dl>
+<dt>To build html version, run:</dt>
+<dd><p>pandoc usr/share/doc/weebl/weebl.rst -o usr/share/doc/weebl/weebl.html</p>
+</dd>
+</dl></li>
+<li><dl>
+<dt>Then this doc can be viewed as a webpage:</dt>
+<dd><p>firefox usr/share/doc/weebl/weebl.html</p>
+</dd>
+</dl></li>
+</ul>
+<h1 id="requirements">Requirements</h1>
+<ul>
+<li>Python 3</li>
+<li>Django 1.7</li>
+<li>PostgreSQL 9.4</li>
+<li>Selenium 2</li>
+</ul>
+<h1 id="initial-set-up">Initial set up</h1>
+<h2 id="installation-of-django-1.7-on-pre-vivid-releases">Installation of Django 1.7 on pre-vivid releases</h2>
+<ul>
+<li><dl>
+<dt>To avoid using pip, I did this:</dt>
+<dd><ul>
+<li><dl>
+<dt>cat &lt;&lt;EOF | sudo tee /etc/apt/preferences.d/vivid-manual-only</dt>
+<dd><p>Package: *<br />Pin: release n=vivid<br />Pin-Priority: 99<br />EOF - grep 'sutopics' /etc/apt/sources.list<br />sudo tee /etc/apt/sources.list.d/vivid.list</p>
+</dd>
+</dl></li>
+<li>sudo sed 's/utopic/vivid/g' -i /etc/apt/sources.list.d/vivid.list</li>
+<li>sudo apt-get update</li>
+<li>apt-cache policy python3-django</li>
+<li>sudo apt-get install python-django-common/vivid</li>
+<li>sudo apt-get install python3-sqlparse/vivid</li>
+<li>sudo apt-get install python3-django/vivid</li>
+<li>source: <a href="http://askubuntu.com/questions/569339/install-vagrant-version-1-5-or-greater-on-14-10">http://askubuntu.com/questions/569339/install-vagrant-version-1-5-or-greater-on-14-10</a></li>
+</ul>
+</dd>
+</dl></li>
+</ul>
+<h2 id="postgres-installation">Postgres Installation</h2>
+<ul>
+<li>The tests will not work until you have set up a database on your machine for it to connect to</li>
+<li><dl>
+<dt>Install Postgres</dt>
+<dd><ul>
+<li>sudo apt-get install postgresql</li>
+<li>sudo apt-get install python3-psycopg2</li>
+</ul>
+</dd>
+</dl></li>
+<li><dl>
+<dt>sudo su - postgres</dt>
+<dd><p>createdb bugs_database<br />createuser user -P<br />psql<br />GRANT ALL PRIVILEGES ON DATABASE bugs_database TO &quot;user&quot;;<br />ALTER USER &quot;user&quot; CREATEDB;<br />createdb bugs_database<br />exit (Cntl-D) and exit</p>
+</dd>
+</dl></li>
+<li><dl>
+<dt>then</dt>
+<dd><p>weebl/manage.py syncdb</p>
+</dd>
+</dl></li>
+</ul>
+<h2 id="selenium-installation">Selenium Installation</h2>
+<blockquote>
+<ul>
+<li><em>This section needs updating to avoid the use of pip</em></li>
+<li>sudo pip3 install selenium</li>
+</ul>
+</blockquote>
+<h2 id="running-tests">Running tests</h2>
+<p>- Run functional (webdriver) tests using: | ./run_tests.sh func - Run unit tests using: | ./run_tests.sh unit - Run linter using: | ./run_tests.sh lint</p>
+<h1 id="making-changes-and-packaging-weebl">Making Changes and Packaging Weebl</h1>
+<ul>
+<li><a href="http://www.laurentluce.com/posts/hello-world/">http://www.laurentluce.com/posts/hello-world/</a></li>
+<li>Update changelog</li>
+<li><dl>
+<dt>Create a duplicate of changelog called changelog.Debian</dt>
+<dd><p>cp changelog changelog.Debian</p>
+</dd>
+</dl></li>
+<li><dl>
+<dt>Copy these files over to usr/share/doc/weebl/ and compress them:</dt>
+<dd><p>cp changelog usr/share/doc/weebl/<br />mv changelog.Debian usr/share/doc/weebl/<br />gzip -f --best usr/share/doc/weebl/changelog<br />gzip -f --best usr/share/doc/weebl/changelog.Debian</p>
+</dd>
+</dl></li>
+<li><dl>
+<dt>Fix permissions of package files:</dt>
+<dd><p>find . -type d | xargs chmod 0755</p>
+</dd>
+</dl></li>
+<li><dl>
+<dt>Create the package (this assumes the weebl directory is called trunk and the version number is 0.0.1-0ubuntu1):</dt>
+<dd><p>cd ..<br />fakeroot dpkg-deb --build trunk<br />mv trunk.deb weebl_0.0.1-0ubuntu1.deb</p>
+</dd>
+</dl></li>
+<li><dl>
+<dt>Check package for errors:</dt>
+<dd><p>lintian weebl_0.0.1-0ubuntu1.deb</p>
+</dd>
+</dl></li>
+</ul>

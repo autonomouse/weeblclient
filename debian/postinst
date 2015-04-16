@@ -1,0 +1,17 @@
+#!/bin/sh
+set -e
+
+# Source debconf library.
+. /usr/share/debconf/confmodule
+
+db_get weebl/username
+username="$RET"
+# do what you want with this username
+
+# register django
+update-rc.d django defaults 90 >/dev/null
+# start django
+invoke-rc.d django start
+
+db_stop
+

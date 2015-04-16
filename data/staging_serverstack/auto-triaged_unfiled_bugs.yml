@@ -1,0 +1,1609 @@
+pipelines:
+  2f52d8f1-304a-4950-b694-ac6ce3513b68:
+    unfiled-3cdd3e9c-537c-4d05-8f9a-902a9b196f71:
+      Crude-Analysis timestamp: 2015-April-13 15:16:26.260472
+      Jenkins timestamp: null
+      additional info:
+        bootstrap_node:
+          jenkins: Building remotely on ci-oil-slave7-0 (ci-oil-slave7)
+          machine: Unknown
+          openstack release: icehouse
+          state: Unknown
+        target file: console.txt
+        text: artifacts/pipeline_start/1699/pipeline_deploy_console.txt
+      build: '1699'
+      charms: []
+      duplicates:
+      - 2f52d8f1-304a-4950-b694-ac6ce3513b68
+      job: pipeline_deploy
+      link to jenkins: http://10.245.162.86:8080//job/pipeline_deploy/1699/console
+      link to test-catalog: http://10.5.0.164:7890
+      machines: []
+      match text: "Traceback (most recent call last):\n  File \"/usr/bin/oil-ci\"\
+        , line X, in <module>\n    load_entry_point('canonical-oil==X.X.XX', 'console_scripts',\
+        \ 'oil-ci')()\n  File \"/usr/lib/pythonX.X/dist-packages/oil_ci/cli/ci/main.py\"\
+        , line XXX, in main\n    return utils.run(sys.argv, categories)\n  File \"\
+        /usr/lib/pythonX.X/dist-packages/oil_ci/common/cliutils.py\", line XXX, in\
+        \ run\n    ret = fn(*fn_args, **fn_kwargs)\n  File \"/usr/lib/pythonX.X/dist-packages/oil_ci/cli/ci/main.py\"\
+        , line XX, in run_config\n    environment=environment)\n  File \"/usr/lib/pythonX.X/dist-packages/oil_ci/cli/api.py\"\
+        , line XXX, in generate_run_config\n    deploy_yaml = yaml.load(deploy.deployment.yaml(environment))\n\
+        \  File \"/usr/lib/pythonX.X/dist-packages/oil_ci/deploy/deployment.py\",\
+        \ line XXX, in yaml\n    dyaml = self.render_yaml_template(environment, dyaml)\n\
+        \  File \"/usr/lib/pythonX.X/dist-packages/oil_ci/deploy/deployment.py\",\
+        \ line XXX, in render_yaml_template\n    out = template.render(ctxt)\n  File\
+        \ \"/usr/lib/pythonX.X/dist-packages/jinjaX/environment.py\", line XXX, in\
+        \ render\n    return self.environment.handle_exception(exc_info, True)\n \
+        \ File \"<template>\", line XXX, in top-level template code\n  File \"/usr/lib/pythonX.X/dist-packages/oil_ci/deploy/dynamic_context.py\"\
+        , line XXX, in get_dataports\n    creds = get_maas_creds(self.env)\n  File\
+        \ \"/usr/lib/pythonX.X/dist-packages/oil_ci/deploy/dynamic_context.py\", line\
+        \ XX, in get_maas_creds\n    maas_login(env, maas_host, maas_oauth)\n  File\
+        \ \"/usr/lib/pythonX.X/dist-packages/oil_ci/common/maas.py\", line XX, in\
+        \ maas_login\n    stderr=subprocess.STDOUT)\n  File \"/usr/lib/pythonX.X/subprocess.py\"\
+        , line XXX, in check_call\n    raise CalledProcessError(retcode, cmd)\nsubprocess.CalledProcessError:\
+        \ Command '['maas-cli', 'login', u'ci-oil-slaveX', 'http://XX.XXX.X.XX/MAAS',\
+        \ 'MaqtpWdVHAXwHkvCtL:ztWRQXEdMsXGhAUPjw:pLmCmcpdLwTXwEDQfWrukvmXXvreYDhE']'\
+        \ returned non-zero exit status X\n+ cp -av run_config artifacts/run_config\n\
+        cp: cannot stat `run_config': No such file or directory\n+ cp -av oil_nodes\
+        \ artifacts/oil_nodes\n`oil_nodes' -> `artifacts/oil_nodes'\n+ oil-ci do deploy\
+        \ --environment ci-oil-slaveX --run_config artifacts/run_config --artifacts_dir\
+        \ ./artifacts\n Traceback (most recent call last):\n  File \"/usr/bin/oil-ci\"\
+        , line X, in <module>\n    load_entry_point('canonical-oil==X.X.XX', 'console_scripts',\
+        \ 'oil-ci')()\n  File \"/usr/lib/pythonX.X/dist-packages/oil_ci/cli/ci/main.py\"\
+        , line XXX, in main\n    return utils.run(sys.argv, categories)\n  File \"\
+        /usr/lib/pythonX.X/dist-packages/oil_ci/common/cliutils.py\", line XXX, in\
+        \ run\n    ret = fn(*fn_args, **fn_kwargs)\n  File \"/usr/lib/pythonX.X/dist-packages/oil_ci/cli/ci/main.py\"\
+        , line XXX, in deploy\n    artifacts_dir=artifacts_dir)\n  File \"/usr/lib/pythonX.X/dist-packages/oil_ci/cli/api.py\"\
+        , line XX, in do_deploy\n    deployment_params = deployment_config(config)\n\
+        \  File \"/usr/lib/pythonX.X/dist-packages/oil_ci/cli/api.py\", line XX, in\
+        \ deployment_config\n    config = run_config(path)['deploy']\n  File \"/usr/lib/pythonX.X/dist-packages/oil_ci/cli/api.py\"\
+        , line XX, in run_config\n    return yaml.load(open(path).read())\nIOError:\
+        \ [Errno X] No such file or directory: u'artifacts/run_config'\n+ rc=X\n+\
+        \ echo 'Deployment returned: X'\nDeployment returned: X\n+ [[ X == X ]]\n\
+        + test-catalog -p AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE -t /etc/oil-ci/test-catalog-auth.json\n\
+        \ Traceback (most recent call last):\n  File \"/usr/bin/oil-ci\", line X,\
+        \ in <module>\n    load_entry_point('canonical-oil==X.X.XX', 'console_scripts',\
+        \ 'oil-ci')()\n  File \"/usr/lib/pythonX.X/dist-packages/oil_ci/cli/ci/main.py\"\
+        , line XXX, in main\n    return utils.run(sys.argv, categories)\n  File \"\
+        /usr/lib/pythonX.X/dist-packages/oil_ci/common/cliutils.py\", line XXX, in\
+        \ run\n    ret = fn(*fn_args, **fn_kwargs)\n  File \"/usr/lib/pythonX.X/dist-packages/oil_ci/cli/ci/main.py\"\
+        , line XX, in pipeline_tags\n    api.generate_pipeline_tags(nodes=nodes, juju=juju,\
+        \ out=out)\n  File \"/usr/lib/pythonX.X/dist-packages/oil_ci/cli/api.py\"\
+        , line XXX, in generate_pipeline_tags\n    mapping = HardwareMapper(nodes_f=nodes,\
+        \ juju_f=juju).get_service_map()\n  File \"/usr/lib/pythonX.X/dist-packages/oil_ci/cli/hardware_map.py\"\
+        , line XX, in __init__\n    self.juju = load_file(juju_f)\n  File \"/usr/lib/pythonX.X/dist-packages/oil_ci/cli/hardware_map.py\"\
+        , line XX, in load_file\n    with open(filename) as file_:\nIOError: [Errno\
+        \ X] No such file or directory: u'artifacts/juju_status.yaml'\n+ test-catalog\
+        \ -B AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE artifacts/mapping.json -t /etc/oil-ci/test-catalog-auth.json\n\
+        \  "
+      pipeline_id: 2f52d8f1-304a-4950-b694-ac6ce3513b68
+      ports: []
+      regexps: NO REGEX - UNFILED/UNMATCHED BUG
+      slaves: []
+      states: []
+      status: FAILURE
+      units: []
+      vendors: []
+  36df8332-ac59-4089-8c42-f8d2fe783146:
+    unfiled-11452197-a938-4aa6-8616-c7a74298d50c:
+      Crude-Analysis timestamp: 2015-April-13 19:30:37.704789
+      Jenkins timestamp: null
+      additional info:
+        bootstrap_node: &id001
+          jenkins: Building on master
+          openstack release: icehouse
+        target file: tempest_xunit.xml
+        text: 'An object with that identifier already exists
+
+          Details: {u''NeutronError'': {u''message'': u''No more IP addresses available
+          on network 39d1db43-e8de-48ab-8407-71f23ce79eb9.'', u''type'': u''IpAddressGenerationFailure'',
+          u''detail'': u''''}}
+
+          -------------------- >> '
+        xunit class: <nose.suite
+        xunit name: ContextSuite context=VolumesListTest>:setup
+      build: '432'
+      charms: &id002 []
+      duplicates:
+      - 36df8332-ac59-4089-8c42-f8d2fe783146
+      - 36df8332-ac59-4089-8c42-f8d2fe783146
+      - 36df8332-ac59-4089-8c42-f8d2fe783146
+      - 36df8332-ac59-4089-8c42-f8d2fe783146
+      job: test_tempest_smoke
+      link to jenkins: http://10.245.162.86:8080//job/test_tempest_smoke/432/console
+      link to test-catalog: http://10.5.0.164:7890
+      machines: &id003 []
+      match text: ' [] ["Failure'', u''detail'': u''''}}"]'
+      pipeline_id: 36df8332-ac59-4089-8c42-f8d2fe783146
+      ports: &id004 []
+      regexps: NO REGEX - UNFILED/UNMATCHED BUG
+      slaves: &id005 []
+      states: &id006 []
+      status: FAILURE
+      units: &id007 []
+      vendors: &id008 []
+    unfiled-29b484df-c085-42e6-b9d1-f6b033b331d7:
+      Crude-Analysis timestamp: 2015-April-13 19:30:37.704789
+      Jenkins timestamp: null
+      additional info:
+        bootstrap_node: *id001
+        target file: tempest_xunit.xml
+        text: 'Object not found
+
+          Details: <itemNotFound code="404" xmlns="http://docs.openstack.org/compute/api/v1.1"><message>FloatingIpPoolNotFound:
+          Floating ip pool not found.</message></itemNotFound>
+
+          -------------------- >> '
+        xunit class: <nose.suite
+        xunit name: ContextSuite context=ServerRescueTestXML>:setup
+      build: '432'
+      charms: *id002
+      duplicates:
+      - 36df8332-ac59-4089-8c42-f8d2fe783146
+      job: test_tempest_smoke
+      link to jenkins: http://10.245.162.86:8080//job/test_tempest_smoke/432/console
+      link to test-catalog: http://10.5.0.164:7890
+      machines: *id003
+      match text: null
+      pipeline_id: 36df8332-ac59-4089-8c42-f8d2fe783146
+      ports: *id004
+      regexps: NO REGEX - UNFILED/UNMATCHED BUG
+      slaves: *id005
+      states: *id006
+      status: FAILURE
+      units: *id007
+      vendors: *id008
+    unfiled-4775a431-eed4-4b0e-9817-02fa9713f4cd:
+      Crude-Analysis timestamp: 2015-April-13 19:30:37.704789
+      Jenkins timestamp: null
+      additional info:
+        bootstrap_node: *id001
+        target file: tempest_xunit.xml
+        text: 'Endpoint not found
+
+          Details: computev3
+
+          -------------------- >> '
+        xunit class: <nose.suite
+        xunit name: ContextSuite context=ServersV3TestJSON>:setup
+      build: '432'
+      charms: *id002
+      duplicates:
+      - 36df8332-ac59-4089-8c42-f8d2fe783146
+      job: test_tempest_smoke
+      link to jenkins: http://10.245.162.86:8080//job/test_tempest_smoke/432/console
+      link to test-catalog: http://10.5.0.164:7890
+      machines: *id003
+      match text: null
+      pipeline_id: 36df8332-ac59-4089-8c42-f8d2fe783146
+      ports: *id004
+      regexps: NO REGEX - UNFILED/UNMATCHED BUG
+      slaves: *id005
+      states: *id006
+      status: FAILURE
+      units: *id007
+      vendors: *id008
+    unfiled-6a37c582-cb92-4b60-aa82-164066a9252e:
+      Crude-Analysis timestamp: 2015-April-13 19:30:37.704789
+      Jenkins timestamp: null
+      additional info:
+        bootstrap_node: *id001
+        target file: tempest_xunit.xml
+        text: 'Endpoint not found
+
+          Details: computev3
+
+          -------------------- >> '
+        xunit class: <nose.suite
+        xunit name: ContextSuite context=ServersV3TestManualDisk>:setup
+      build: '432'
+      charms: *id002
+      duplicates:
+      - 36df8332-ac59-4089-8c42-f8d2fe783146
+      job: test_tempest_smoke
+      link to jenkins: http://10.245.162.86:8080//job/test_tempest_smoke/432/console
+      link to test-catalog: http://10.5.0.164:7890
+      machines: *id003
+      match text: null
+      pipeline_id: 36df8332-ac59-4089-8c42-f8d2fe783146
+      ports: *id004
+      regexps: NO REGEX - UNFILED/UNMATCHED BUG
+      slaves: *id005
+      states: *id006
+      status: FAILURE
+      units: *id007
+      vendors: *id008
+    unfiled-7816e181-8fd0-4d58-afc8-27e6bdb1ddaf:
+      Crude-Analysis timestamp: 2015-April-13 19:30:37.704789
+      Jenkins timestamp: null
+      additional info:
+        bootstrap_node: *id001
+        target file: tempest_xunit.xml
+        text: 'Endpoint not found
+
+          Details: computev3
+
+          -------------------- >> '
+        xunit class: <nose.suite
+        xunit name: ContextSuite context=ServersV3TestXML>:setup
+      build: '432'
+      charms: *id002
+      duplicates:
+      - 36df8332-ac59-4089-8c42-f8d2fe783146
+      job: test_tempest_smoke
+      link to jenkins: http://10.245.162.86:8080//job/test_tempest_smoke/432/console
+      link to test-catalog: http://10.5.0.164:7890
+      machines: *id003
+      match text: null
+      pipeline_id: 36df8332-ac59-4089-8c42-f8d2fe783146
+      ports: *id004
+      regexps: NO REGEX - UNFILED/UNMATCHED BUG
+      slaves: *id005
+      states: *id006
+      status: FAILURE
+      units: *id007
+      vendors: *id008
+    unfiled-7cf6edff-4e02-4443-9adf-b90671dc77a3:
+      Crude-Analysis timestamp: 2015-April-13 19:30:37.704789
+      Jenkins timestamp: null
+      additional info:
+        bootstrap_node: *id001
+        target file: tempest_xunit.xml
+        text: "Empty attachments:\n  pythonlogging:''\n\nTraceback (most recent call\
+          \ last):\n  File \"/tmp/tmpBHraZd/tempest/tempest/thirdparty/boto/test_ec2_volumes.py\"\
+          , line 58, in test_create_volume_from_snapshot\n    self.assertVolumeStatusWait(volume,\
+          \ \"available\")\n  File \"/tmp/tmpBHraZd/tempest/tempest/thirdparty/boto/test.py\"\
+          , line 359, in assertVolumeStatusWait\n    state = self.waitVolumeStatus(lfunction,\
+          \ wait_for)\n  File \"/tmp/tmpBHraZd/tempest/tempest/thirdparty/boto/test.py\"\
+          , line 348, in waitVolumeStatus\n    self.valid_volume_status)\n  File \"\
+          /tmp/tmpBHraZd/tempest/tempest/thirdparty/boto/test.py\", line 330, in state_wait_gone\n\
+          \    state = state_wait(lfunction, final_set, valid_set)\n  File \"/tmp/tmpBHraZd/tempest/tempest/thirdparty/boto/utils/wait.py\"\
+          , line 52, in state_wait\n    (dtime, final_set, status))\nAssertionError:\
+          \ State change timeout exceeded!(120s) While waitingfor set(['available',\
+          \ '_GONE']) at \"creating\"\n"
+        xunit class: tempest.thirdparty.boto.test_ec2_volumes.EC2VolumesTest
+        xunit name: test_create_volume_from_snapshot[gate,smoke]
+      build: '432'
+      charms: *id002
+      duplicates:
+      - 36df8332-ac59-4089-8c42-f8d2fe783146
+      - 36df8332-ac59-4089-8c42-f8d2fe783146
+      job: test_tempest_smoke
+      link to jenkins: http://10.245.162.86:8080//job/test_tempest_smoke/432/console
+      link to test-catalog: http://10.5.0.164:7890
+      machines: *id003
+      match text: "Traceback (most recent call last):\n  File \"/tmp/tmpBHraZd/tempest/tempest/thirdparty/boto/test_ecX_volumes.py\"\
+        , line XX, in test_create_volume_from_snapshot\n    self.assertVolumeStatusWait(volume,\
+        \ \"available\")\n  File \"/tmp/tmpBHraZd/tempest/tempest/thirdparty/boto/test.py\"\
+        , line XXX, in assertVolumeStatusWait\n    state = self.waitVolumeStatus(lfunction,\
+        \ wait_for)\n  File \"/tmp/tmpBHraZd/tempest/tempest/thirdparty/boto/test.py\"\
+        , line XXX, in waitVolumeStatus\n    self.valid_volume_status)\n  File \"\
+        /tmp/tmpBHraZd/tempest/tempest/thirdparty/boto/test.py\", line XXX, in state_wait_gone\n\
+        \    state = state_wait(lfunction, final_set, valid_set)\n  File \"/tmp/tmpBHraZd/tempest/tempest/thirdparty/boto/utils/wait.py\"\
+        , line XX, in state_wait\n    (dtime, final_set, status))\nAssertionError:\
+        \ State change timeout exceeded!(XXXs) While waitingfor set(['available',\
+        \ '_GONE']) at \"creating\"\n  "
+      pipeline_id: 36df8332-ac59-4089-8c42-f8d2fe783146
+      ports: *id004
+      regexps: NO REGEX - UNFILED/UNMATCHED BUG
+      slaves: *id005
+      states: *id006
+      status: FAILURE
+      units: *id007
+      vendors: *id008
+    unfiled-8389c871-73a0-4787-b651-9808391d8695:
+      Crude-Analysis timestamp: 2015-April-13 19:30:37.704789
+      Jenkins timestamp: null
+      additional info:
+        bootstrap_node: *id001
+        target file: tempest_xunit.xml
+        text: "pythonlogging:'': {{{\n2015-04-13 18:31:47,315 Request: POST http://10.245.48.193:5000/v2.0/tokens\n\
+          2015-04-13 18:31:47,315 Request Headers: {'Content-Type': 'application/json'}\n\
+          2015-04-13 18:31:47,316 Request Body: {\"auth\": {\"tenantName\": \"AttachInterfacesTestJSON-tempest-47367444-tenant\"\
+          , \"passwordCredentials\": {\"username\": \"AttachInterfacesTestJSON-tempest-47367444-user\"\
+          , \"password\": \"pass\"}}}\n2015-04-13 18:31:47,611 Response Status: 200\n\
+          2015-04-13 18:31:47,612 Response Headers: {'content-length': '4108', 'date':\
+          \ 'Mon, 13 Apr 2015 18:31:47 GMT', 'content-type': 'application/json', 'vary':\
+          \ 'X-Auth-Token', 'connection': 'close', 'x-distribution': 'Ubuntu'}\n2015-04-13\
+          \ 18:31:47,612 Response Body: {\"access\": {\"token\": {\"issued_at\": \"\
+          2015-04-13T18:31:47.427527\", \"expires\": \"2015-04-13T19:31:47Z\", \"\
+          id\": \"a42a510d767e4a2fad97f190ae1adb6c\", \"tenant\": {\"description\"\
+          : \"AttachInterfacesTestJSON-tempest-47367444-tenant-desc\", \"enabled\"\
+          : true, \"id\": \"651f4179bf784748b6e984a949ec6ec2\", \"name\": \"AttachInterfacesTestJSON-tempest-47367444-tenant\"\
+          }}, \"serviceCatalog\": [{\"endpoints\": [{\"adminURL\": \"http://10.245.0.171:8774/v2/651f4179bf784748b6e984a949ec6ec2\"\
+          , \"region\": \"RegionOne\", \"internalURL\": \"http://10.245.0.171:8774/v2/651f4179bf784748b6e984a949ec6ec2\"\
+          , \"id\": \"09f85e4332ac47acad17a38005bb1087\", \"publicURL\": \"http://gytrash.oil:8774/v2/651f4179bf784748b6e984a949ec6ec2\"\
+          }], \"endpoints_links\": [], \"type\": \"compute\", \"name\": \"nova\"},\
+          \ {\"endpoints\": [{\"adminURL\": \"http://10.245.0.171:9696\", \"region\"\
+          : \"RegionOne\", \"internalURL\": \"http://10.245.0.171:9696\", \"id\":\
+          \ \"2d64cd4ca8e84375a58787aa082d3e83\", \"publicURL\": \"http://gytrash.oil:9696\"\
+          }], \"endpoints_links\": [], \"type\": \"network\", \"name\": \"quantum\"\
+          }, {\"endpoints\": [{\"adminURL\": \"http://10.245.0.171:3333\", \"region\"\
+          : \"RegionOne\", \"internalURL\": \"http://10.245.0.171:3333\", \"id\":\
+          \ \"4f07a4e5b05b46fca967a5f43d27bfd3\", \"publicURL\": \"http://gytrash.oil:3333\"\
+          }], \"endpoints_links\": [], \"type\": \"s3\", \"name\": \"s3\"}, {\"endpoints\"\
+          : [{\"adminURL\": \"http://10.245.48.152:9292\", \"region\": \"RegionOne\"\
+          , \"internalURL\": \"http://10.245.48.152:9292\", \"id\": \"9ced3071576443acb005db06963a8453\"\
+          , \"publicURL\": \"http://10.245.48.152:9292\"}], \"endpoints_links\": [],\
+          \ \"type\": \"image\", \"name\": \"glance\"}, {\"endpoints\": [{\"adminURL\"\
+          : \"http://10.245.48.160:8777\", \"region\": \"RegionOne\", \"internalURL\"\
+          : \"http://10.245.48.160:8777\", \"id\": \"04fbf35e5e46403ebc87a75d76979c87\"\
+          , \"publicURL\": \"http://10.245.48.160:8777\"}], \"endpoints_links\": [],\
+          \ \"type\": \"metering\", \"name\": \"ceilometer\"}, {\"endpoints\": [{\"\
+          adminURL\": \"http://10.245.48.146:8000/v1\", \"region\": \"RegionOne\"\
+          , \"internalURL\": \"http://10.245.48.146:8000/v1\", \"id\": \"3747b466e4f1413c9fd4a370e0d884df\"\
+          , \"publicURL\": \"http://10.245.48.146:8000/v1\"}], \"endpoints_links\"\
+          : [\n2015-04-13 18:31:47,612 Large body (4108) md5 summary: 694952219ca1d1dd5f43c75b09424e49\n\
+          2015-04-13 18:31:47,613 Request: POST http://gytrash.oil:8774/v2/651f4179bf784748b6e984a949ec6ec2/servers\n\
+          2015-04-13 18:31:47,613 Request Headers: {'Content-Type': 'application/json',\
+          \ 'Accept': 'application/json', 'X-Auth-Token': u'a42a510d767e4a2fad97f190ae1adb6c'}\n\
+          2015-04-13 18:31:47,613 Request Body: {\"server\": {\"flavorRef\": \"2\"\
+          , \"name\": \"AttachInterfacesTestJSON-instance-tempest-2001891905\", \"\
+          imageRef\": \"348320d3-61d5-4520-bda0-8c9bc90462a4\"}}\n2015-04-13 18:31:49,939\
+          \ Response Status: 202\n2015-04-13 18:31:49,940 Nova request id: req-01c394ef-9cb1-4b0c-9b7e-ea0729ea544d\n\
+          2015-04-13 18:31:49,940 Response Headers: {'content-length': '438', 'location':\
+          \ 'http://gytrash.oil:8774/v2/651f4179bf784748b6e984a949ec6ec2/servers/e8fec1db-c63b-4058-89cb-5371cc468ddb',\
+          \ 'date': 'Mon, 13 Apr 2015 18:31:49 GMT', 'content-type': 'application/json',\
+          \ 'connection': 'close'}\n2015-04-13 18:31:49,941 Response Body: {\"server\"\
+          : {\"security_groups\": [{\"name\": \"default\"}], \"OS-DCF:diskConfig\"\
+          : \"MANUAL\", \"id\": \"e8fec1db-c63b-4058-89cb-5371cc468ddb\", \"links\"\
+          : [{\"href\": \"http://gytrash.oil:8774/v2/651f4179bf784748b6e984a949ec6ec2/servers/e8fec1db-c63b-4058-89cb-5371cc468ddb\"\
+          , \"rel\": \"self\"}, {\"href\": \"http://gytrash.oil:8774/651f4179bf784748b6e984a949ec6ec2/servers/e8fec1db-c63b-4058-89cb-5371cc468ddb\"\
+          , \"rel\": \"bookmark\"}], \"adminPass\": \"cZAhPA74bXAb\"}}\n2015-04-13\
+          \ 18:31:49,941 Request: GET http://gytrash.oil:8774/v2/651f4179bf784748b6e984a949ec6ec2/servers/e8fec1db-c63b-4058-89cb-5371cc468ddb\n\
+          2015-04-13 18:31:49,941 Request Headers: {'X-Auth-Token': u'a42a510d767e4a2fad97f190ae1adb6c'}\n\
+          2015-04-13 18:31:50,110 Response Status: 200\n2015-04-13 18:31:50,111 Nova\
+          \ request id: req-96d6dba0-a90e-442e-aae1-94c6cd3d6006\n2015-04-13 18:31:50,112\
+          \ Response Headers: {'content-length': '1338', 'content-location': u'http://gytrash.oil:8774/v2/651f4179bf784748b6e984a949ec6ec2/servers/e8fec1db-c63b-4058-89cb-5371cc468ddb',\
+          \ 'date': 'Mon, 13 Apr 2015 18:31:50 GMT', 'content-type': 'application/json',\
+          \ 'connection': 'close'}\n2015-04-13 18:31:50,112 Response Body: {\"server\"\
+          : {\"status\": \"BUILD\", \"updated\": \"2015-04-13T18:31:49Z\", \"hostId\"\
+          : \"\", \"addresses\": {}, \"links\": [{\"href\": \"http://gytrash.oil:8774/v2/651f4179bf784748b6e984a949ec6ec2/servers/e8fec1db-c63b-4058-89cb-5371cc468ddb\"\
+          , \"rel\": \"self\"}, {\"href\": \"http://gytrash.oil:8774/651f4179bf784748b6e984a949ec6ec2/servers/e8fec1db-c63b-4058-89cb-5371cc468ddb\"\
+          , \"rel\": \"bookmark\"}], \"key_name\": null, \"image\": {\"id\": \"348320d3-61d5-4520-bda0-8c9bc90462a4\"\
+          , \"links\": [{\"href\": \"http://gytrash.oil:8774/651f4179bf784748b6e984a949ec6ec2/images/348320d3-61d5-4520-bda0-8c9bc90462a4\"\
+          , \"rel\": \"bookmark\"}]}, \"OS-EXT-STS:task_state\": \"scheduling\", \"\
+          OS-EXT-STS:vm_state\": \"building\", \"OS-SRV-USG:launched_at\": null, \"\
+          flavor\": {\"id\": \"2\", \"links\": [{\"href\": \"http://gytrash.oil:8774/651f4179bf784748b6e984a949ec6ec2/flavors/2\"\
+          , \"rel\": \"bookmark\"}]}, \"id\": \"e8fec1db-c63b-4058-89cb-5371cc468ddb\"\
+          , \"OS-SRV-USG:terminated_at\": null, \"OS-EXT-AZ:availability_zone\": \"\
+          nova\", \"user_id\": \"27f1ae33a12a41619e1a0be5a20a9fd6\", \"name\": \"\
+          AttachInterfacesTestJSON-instance-tempest-2001891905\", \"created\": \"\
+          2015-04-13T18:31:49Z\", \"tenant_id\": \"651f4179bf784748b6e984a949ec6ec2\"\
+          , \"OS-DCF:diskConfig\": \"MANUAL\", \"os-extended-volumes:volumes_attached\"\
+          : [], \"accessIPv4\": \"\", \"accessIPv6\": \"\", \"progress\": 0, \"OS-EXT-STS:power_state\"\
+          : 0, \"config_drive\": \"\", \"metadata\": {}}}\n2015-04-13 18:32:00,122\
+          \ Request: GET http://gytrash.oil:8774/v2/651f4179bf784748b6e984a949ec6ec2/servers/e8fec1db-c63b-4058-89cb-5371cc468ddb\n\
+          2015-04-13 18:32:00,123 Request Headers: {'X-Auth-Token': u'a42a510d767e4a2fad97f190ae1adb6c'}\n\
+          2015-04-13 18:32:00,263 Response Status: 200\n2015-04-13 18:32:00,263 Nova\
+          \ request id: req-678248c6-b083-4990-ab91-a1f110bc7596\n2015-04-13 18:32:00,264\
+          \ Response Headers: {'content-length': '1404', 'content-location': u'http://gytrash.oil:8774/v2/651f4179bf784748b6e984a949ec6ec2/servers/e8fec1db-c63b-4058-89cb-5371cc468ddb',\
+          \ 'date': 'Mon, 13 Apr 2015 18:32:00 GMT', 'content-type': 'application/json',\
+          \ 'connection': 'close'}\n2015-04-13 18:32:00,264 Response Body: {\"server\"\
+          : {\"status\": \"BUILD\", \"updated\": \"2015-04-13T18:31:59Z\", \"hostId\"\
+          : \"09083e77064c4a1106c917521cd3f8749302170b1958076b3515fa83\", \"addresses\"\
+          : {}, \"links\": [{\"href\": \"http://gytrash.oil:8774/v2/651f4179bf784748b6e984a949ec6ec2/servers/e8fec1db-c63b-4058-89cb-5371cc468ddb\"\
+          , \"rel\": \"self\"}, {\"href\": \"http://gytrash.oil:8774/651f4179bf784748b6e984a949ec6ec2/servers/e8fec1db-c63b-4058-89cb-5371cc468ddb\"\
+          , \"rel\": \"bookmark\"}], \"key_name\": null, \"image\": {\"id\": \"348320d3-61d5-4520-bda0-8c9bc90462a4\"\
+          , \"links\": [{\"href\": \"http://gytrash.oil:8774/651f4179bf784748b6e984a949ec6ec2/images/348320d3-61d5-4520-bda0-8c9bc90462a4\"\
+          , \"rel\": \"bookmark\"}]}, \"OS-EXT-STS:task_state\": \"block_device_mapping\"\
+          , \"OS-EXT-STS:vm_state\": \"building\", \"OS-SRV-USG:launched_at\": null,\
+          \ \"flavor\": {\"id\": \"2\", \"links\": [{\"href\": \"http://gytrash.oil:8774/651f4179bf784748b6e984a949ec6ec2/flavors/2\"\
+          , \"rel\": \"bookmark\"}]}, \"id\": \"e8fec1db-c63b-4058-89cb-5371cc468ddb\"\
+          , \"OS-SRV-USG:terminated_at\": null, \"OS-EXT-AZ:availability_zone\": \"\
+          nova\", \"user_id\": \"27f1ae33a12a41619e1a0be5a20a9fd6\", \"name\": \"\
+          AttachInterfacesTestJSON-instance-tempest-2001891905\", \"created\": \"\
+          2015-04-13T18:31:49Z\", \"tenant_id\": \"651f4179bf784748b6e984a949ec6ec2\"\
+          , \"OS-DCF:diskConfig\": \"MANUAL\", \"os-extended-volumes:volumes_attached\"\
+          : [], \"accessIPv4\": \"\", \"accessIPv6\": \"\", \"progress\": 0, \"OS-EXT-STS:power_state\"\
+          : 0, \"config_drive\": \"\", \"metadata\": {}}}\n2015-04-13 18:32:00,264\
+          \ State transition \"BUILD/scheduling\" ==> \"BUILD/block_device_mapping\"\
+          \ after 10 second wait\n2015-04-13 18:32:10,275 Request: GET http://gytrash.oil:8774/v2/651f4179bf784748b6e984a949ec6ec2/servers/e8fec1db-c63b-4058-89cb-5371cc468ddb\n\
+          2015-04-13 18:32:10,275 Request Headers: {'X-Auth-Token': u'a42a510d767e4a2fad97f190ae1adb6c'}\n\
+          2015-04-13 18:32:10,449 Response Status: 200\n2015-04-13 18:32:10,450 Nova\
+          \ request id: req-74635f19-61f0-40b2-a990-1b731b4ce569\n2015-04-13 18:32:10,450\
+          \ Response Headers: {'content-length': '1434', 'content-location': u'http://gytrash.oil:8774/v2/651f4179bf784748b6e984a949ec6ec2/servers/e8fec1db-c63b-4058-89cb-5371cc468ddb',\
+          \ 'date': 'Mon, 13 Apr 2015 18:32:10 GMT', 'content-type': 'application/json',\
+          \ 'connection': 'close'}\n2015-04-13 18:32:10,450 Response Body: {\"server\"\
+          : {\"status\": \"BUILD\", \"updated\": \"2015-04-13T18:32:07Z\", \"hostId\"\
+          : \"0d1cf63d65d16b2303c4f5696d51c9cad313662a84b2c008ae385442\", \"addresses\"\
+          : {}, \"links\": [{\"href\": \"http://gytrash.oil:8774/v2/651f4179bf784748b6e984a949ec6ec2/servers/e8fec1db-c63b-4058-89cb-5371cc468ddb\"\
+          , \"rel\": \"self\"}, {\"href\": \"http://gytrash.oil:8774/651f4179bf784748b6e984a949ec6ec2/servers/e8fec1db-c63b-4058-89cb-5371cc468ddb\"\
+          , \"rel\": \"bookmark\"}], \"key_name\": null, \"image\": {\"id\": \"348320d3-61d5-4520-bda0-8c9bc90462a4\"\
+          , \"links\": [{\"href\": \"http://gytrash.oil:8774/651f4179bf784748b6e984a949ec6ec2/images/348320d3-61d5-4520-bda0-8c9bc90462a4\"\
+          , \"rel\": \"bookmark\"}]}, \"OS-EXT-STS:task_state\": \"spawning\", \"\
+          OS-EXT-STS:vm_state\": \"building\", \"OS-SRV-USG:launched_at\": null, \"\
+          flavor\": {\"id\": \"2\", \"links\": [{\"href\": \"http://gytrash.oil:8774/651f4179bf784748b6e984a949ec6ec2/flavors/2\"\
+          , \"rel\": \"bookmark\"}]}, \"id\": \"e8fec1db-c63b-4058-89cb-5371cc468ddb\"\
+          , \"security_groups\": [{\"name\": \"default\"}], \"OS-SRV-USG:terminated_at\"\
+          : null, \"OS-EXT-AZ:availability_zone\": \"nova\", \"user_id\": \"27f1ae33a12a41619e1a0be5a20a9fd6\"\
+          , \"name\": \"AttachInterfacesTestJSON-instance-tempest-2001891905\", \"\
+          created\": \"2015-04-13T18:31:49Z\", \"tenant_id\": \"651f4179bf784748b6e984a949ec6ec2\"\
+          , \"OS-DCF:diskConfig\": \"MANUAL\", \"os-extended-volumes:volumes_attached\"\
+          : [], \"accessIPv4\": \"\", \"accessIPv6\": \"\", \"progress\": 0, \"OS-EXT-STS:power_state\"\
+          : 0, \"config_drive\": \"\", \"metadata\": {}}}\n2015-04-13 18:32:10,451\
+          \ State transition \"BUILD/block_device_mapping\" ==> \"BUILD/spawning\"\
+          \ after 20 second wait\n2015-04-13 18:32:20,461 Request: GET http://gytrash.oil:8774/v2/651f4179bf784748b6e984a949ec6ec2/servers/e8fec1db-c63b-4058-89cb-5371cc468ddb\n\
+          2015-04-13 18:32:20,462 Request Headers: {'X-Auth-Token': u'a42a510d767e4a2fad97f190ae1adb6c'}\n\
+          2015-04-13 18:32:20,659 Response Status: 200\n2015-04-13 18:32:20,659 Nova\
+          \ request id: req-f272eb5c-b017-459d-b19b-0507edc6eaee\n2015-04-13 18:32:20,660\
+          \ Response Headers: {'content-length': '1551', 'content-location': u'http://gytrash.oil:8774/v2/651f4179bf784748b6e984a949ec6ec2/servers/e8fec1db-c63b-4058-89cb-5371cc468ddb',\
+          \ 'date': 'Mon, 13 Apr 2015 18:32:20 GMT', 'content-type': 'application/json',\
+          \ 'connection': 'close'}\n2015-04-13 18:32:20,660 Response Body: {\"server\"\
+          : {\"status\": \"ERROR\", \"updated\": \"2015-04-13T18:32:11Z\", \"hostId\"\
+          : \"0d1cf63d65d16b2303c4f5696d51c9cad313662a84b2c008ae385442\", \"addresses\"\
+          : {}, \"links\": [{\"href\": \"http://gytrash.oil:8774/v2/651f4179bf784748b6e984a949ec6ec2/servers/e8fec1db-c63b-4058-89cb-5371cc468ddb\"\
+          , \"rel\": \"self\"}, {\"href\": \"http://gytrash.oil:8774/651f4179bf784748b6e984a949ec6ec2/servers/e8fec1db-c63b-4058-89cb-5371cc468ddb\"\
+          , \"rel\": \"bookmark\"}], \"key_name\": null, \"image\": {\"id\": \"348320d3-61d5-4520-bda0-8c9bc90462a4\"\
+          , \"links\": [{\"href\": \"http://gytrash.oil:8774/651f4179bf784748b6e984a949ec6ec2/images/348320d3-61d5-4520-bda0-8c9bc90462a4\"\
+          , \"rel\": \"bookmark\"}]}, \"OS-EXT-STS:task_state\": null, \"OS-EXT-STS:vm_state\"\
+          : \"error\", \"OS-SRV-USG:launched_at\": null, \"flavor\": {\"id\": \"2\"\
+          , \"links\": [{\"href\": \"http://gytrash.oil:8774/651f4179bf784748b6e984a949ec6ec2/flavors/2\"\
+          , \"rel\": \"bookmark\"}]}, \"id\": \"e8fec1db-c63b-4058-89cb-5371cc468ddb\"\
+          , \"OS-SRV-USG:terminated_at\": null, \"OS-EXT-AZ:availability_zone\": \"\
+          nova\", \"user_id\": \"27f1ae33a12a41619e1a0be5a20a9fd6\", \"name\": \"\
+          AttachInterfacesTestJSON-instance-tempest-2001891905\", \"created\": \"\
+          2015-04-13T18:31:49Z\", \"tenant_id\": \"651f4179bf784748b6e984a949ec6ec2\"\
+          , \"OS-DCF:diskConfig\": \"MANUAL\", \"os-extended-volumes:volumes_attached\"\
+          : [], \"accessIPv4\": \"\", \"accessIPv6\": \"\", \"fault\": {\"message\"\
+          : \"No valid host was found. Exceeded max scheduling attempts 3 for instance\
+          \ e8fec1db-c63b-4058-89cb-5371cc468ddb\", \"code\": 500, \"created\": \"\
+          2015-04-13T18:32:11Z\"}, \"OS-EXT-STS:power_state\": 0, \"config_drive\"\
+          : \"\", \"metadata\": {}}}\n2015-04-13 18:32:20,660 State transition \"\
+          BUILD/spawning\" ==> \"ERROR/None\" after 30 second wait\n2015-04-13 18:32:20,661\
+          \ Request: DELETE http://gytrash.oil:8774/v2/651f4179bf784748b6e984a949ec6ec2/servers/e8fec1db-c63b-4058-89cb-5371cc468ddb\n\
+          2015-04-13 18:32:20,661 Request Headers: {'X-Auth-Token': u'a42a510d767e4a2fad97f190ae1adb6c'}\n\
+          2015-04-13 18:32:21,321 Response Status: 204\n2015-04-13 18:32:21,321 Nova\
+          \ request id: req-b66c9ffd-2d57-41ff-a182-76f204c81a99\n2015-04-13 18:32:21,322\
+          \ Response Headers: {'content-length': '0', 'date': 'Mon, 13 Apr 2015 18:32:21\
+          \ GMT', 'content-type': 'application/json', 'connection': 'close'}\n}}}\n\
+          \nTraceback (most recent call last):\n  File \"/tmp/tmpBHraZd/tempest/tempest/api/compute/servers/test_attach_interfaces.py\"\
+          , line 99, in test_create_list_show_delete_interfaces\n    server, ifs =\
+          \ self._create_server_get_interfaces()\n  File \"/tmp/tmpBHraZd/tempest/tempest/api/compute/servers/test_attach_interfaces.py\"\
+          , line 45, in _create_server_get_interfaces\n    resp, server = self.create_test_server(wait_until='ACTIVE')\n\
+          \  File \"/tmp/tmpBHraZd/tempest/tempest/api/compute/base.py\", line 146,\
+          \ in create_test_server\n    raise ex\nBuildErrorException: Server e8fec1db-c63b-4058-89cb-5371cc468ddb\
+          \ failed to build and is in ERROR status\n\n-------------------- >> "
+        xunit class: tempest.api.compute.servers.test_attach_interfaces.AttachInterfacesTestJSON
+        xunit name: test_create_list_show_delete_interfaces[gate,smoke]
+      build: '432'
+      charms: *id002
+      duplicates:
+      - 36df8332-ac59-4089-8c42-f8d2fe783146
+      job: test_tempest_smoke
+      link to jenkins: http://10.245.162.86:8080//job/test_tempest_smoke/432/console
+      link to test-catalog: http://10.5.0.164:7890
+      machines: *id003
+      match text: "Traceback (most recent call last):\n  File \"/tmp/tmpBHraZd/tempest/tempest/api/compute/servers/test_attach_interfaces.py\"\
+        , line XX, in test_create_list_show_delete_interfaces\n    server, ifs = self._create_server_get_interfaces()\n\
+        \  File \"/tmp/tmpBHraZd/tempest/tempest/api/compute/servers/test_attach_interfaces.py\"\
+        , line XX, in _create_server_get_interfaces\n    resp, server = self.create_test_server(wait_until='ACTIVE')\n\
+        \  File \"/tmp/tmpBHraZd/tempest/tempest/api/compute/base.py\", line XXX,\
+        \ in create_test_server\n    raise ex\nBuildErrorException: Server eXfecXdb-cXXb-XXXX-XXcb-XXXXccXXXddb\
+        \ failed to build and is in ERROR status\n\n-------------------- >>   "
+      pipeline_id: 36df8332-ac59-4089-8c42-f8d2fe783146
+      ports: *id004
+      regexps: NO REGEX - UNFILED/UNMATCHED BUG
+      slaves: *id005
+      states: *id006
+      status: FAILURE
+      units: *id007
+      vendors: *id008
+    unfiled-d1bc7562-7f69-4d30-810a-e1a78e1dfc20:
+      Crude-Analysis timestamp: 2015-April-13 19:30:37.704789
+      Jenkins timestamp: null
+      additional info:
+        bootstrap_node: *id001
+        target file: tempest_xunit.xml
+        text: "pythonlogging:'': {{{\n2015-04-13 18:32:25,911 Request: POST http://10.245.48.193:5000/v2.0/tokens\n\
+          2015-04-13 18:32:25,911 Request Headers: {'Content-Type': 'application/json'}\n\
+          2015-04-13 18:32:25,912 Request Body: {\"auth\": {\"tenantName\": \"AttachInterfacesTestXML-tempest-1384642248-tenant\"\
+          , \"passwordCredentials\": {\"username\": \"AttachInterfacesTestXML-tempest-1384642248-user\"\
+          , \"password\": \"pass\"}}}\n2015-04-13 18:32:26,182 Response Status: 200\n\
+          2015-04-13 18:32:26,182 Response Headers: {'content-length': '4112', 'date':\
+          \ 'Mon, 13 Apr 2015 18:32:26 GMT', 'content-type': 'application/json', 'vary':\
+          \ 'X-Auth-Token', 'connection': 'close', 'x-distribution': 'Ubuntu'}\n2015-04-13\
+          \ 18:32:26,183 Response Body: {\"access\": {\"token\": {\"issued_at\": \"\
+          2015-04-13T18:32:26.024984\", \"expires\": \"2015-04-13T19:32:26Z\", \"\
+          id\": \"c71bbdb7d1a34382b9746e09de6eea1e\", \"tenant\": {\"description\"\
+          : \"AttachInterfacesTestXML-tempest-1384642248-tenant-desc\", \"enabled\"\
+          : true, \"id\": \"78f382fd2204437ab130a0cd601cd377\", \"name\": \"AttachInterfacesTestXML-tempest-1384642248-tenant\"\
+          }}, \"serviceCatalog\": [{\"endpoints\": [{\"adminURL\": \"http://10.245.0.171:8774/v2/78f382fd2204437ab130a0cd601cd377\"\
+          , \"region\": \"RegionOne\", \"internalURL\": \"http://10.245.0.171:8774/v2/78f382fd2204437ab130a0cd601cd377\"\
+          , \"id\": \"09f85e4332ac47acad17a38005bb1087\", \"publicURL\": \"http://gytrash.oil:8774/v2/78f382fd2204437ab130a0cd601cd377\"\
+          }], \"endpoints_links\": [], \"type\": \"compute\", \"name\": \"nova\"},\
+          \ {\"endpoints\": [{\"adminURL\": \"http://10.245.0.171:9696\", \"region\"\
+          : \"RegionOne\", \"internalURL\": \"http://10.245.0.171:9696\", \"id\":\
+          \ \"2d64cd4ca8e84375a58787aa082d3e83\", \"publicURL\": \"http://gytrash.oil:9696\"\
+          }], \"endpoints_links\": [], \"type\": \"network\", \"name\": \"quantum\"\
+          }, {\"endpoints\": [{\"adminURL\": \"http://10.245.0.171:3333\", \"region\"\
+          : \"RegionOne\", \"internalURL\": \"http://10.245.0.171:3333\", \"id\":\
+          \ \"4f07a4e5b05b46fca967a5f43d27bfd3\", \"publicURL\": \"http://gytrash.oil:3333\"\
+          }], \"endpoints_links\": [], \"type\": \"s3\", \"name\": \"s3\"}, {\"endpoints\"\
+          : [{\"adminURL\": \"http://10.245.48.152:9292\", \"region\": \"RegionOne\"\
+          , \"internalURL\": \"http://10.245.48.152:9292\", \"id\": \"9ced3071576443acb005db06963a8453\"\
+          , \"publicURL\": \"http://10.245.48.152:9292\"}], \"endpoints_links\": [],\
+          \ \"type\": \"image\", \"name\": \"glance\"}, {\"endpoints\": [{\"adminURL\"\
+          : \"http://10.245.48.160:8777\", \"region\": \"RegionOne\", \"internalURL\"\
+          : \"http://10.245.48.160:8777\", \"id\": \"04fbf35e5e46403ebc87a75d76979c87\"\
+          , \"publicURL\": \"http://10.245.48.160:8777\"}], \"endpoints_links\": [],\
+          \ \"type\": \"metering\", \"name\": \"ceilometer\"}, {\"endpoints\": [{\"\
+          adminURL\": \"http://10.245.48.146:8000/v1\", \"region\": \"RegionOne\"\
+          , \"internalURL\": \"http://10.245.48.146:8000/v1\", \"id\": \"3747b466e4f1413c9fd4a370e0d884df\"\
+          , \"publicURL\": \"http://10.245.48.146:8000/v1\"}], \"endpoints_links\"\
+          :\n2015-04-13 18:32:26,183 Large body (4112) md5 summary: a5151f2424a32a185a95d9744f9d6ebe\n\
+          2015-04-13 18:32:26,183 Request: POST http://gytrash.oil:8774/v2/78f382fd2204437ab130a0cd601cd377/servers\n\
+          2015-04-13 18:32:26,184 Request Headers: {'Content-Type': 'application/xml',\
+          \ 'Accept': 'application/xml', 'X-Auth-Token': u'c71bbdb7d1a34382b9746e09de6eea1e'}\n\
+          2015-04-13 18:32:26,184 Request Body: <?xml version=\"1.0\" encoding=\"\
+          UTF-8\"?>\n<server flavorRef=\"2\" xmlns=\"http://docs.openstack.org/compute/api/v1.1\"\
+          \ name=\"AttachInterfacesTestXML-instance-tempest-1476668957\" imageRef=\"\
+          348320d3-61d5-4520-bda0-8c9bc90462a4\"/>\n2015-04-13 18:32:27,622 Response\
+          \ Status: 202\n2015-04-13 18:32:27,622 Nova request id: req-342b218d-957b-4b8b-8528-2019a36fc4ae\n\
+          2015-04-13 18:32:27,623 Response Headers: {'content-length': '665', 'location':\
+          \ 'http://gytrash.oil:8774/v2/78f382fd2204437ab130a0cd601cd377/servers/41f46158-0582-4256-93e5-b93e78336b43',\
+          \ 'date': 'Mon, 13 Apr 2015 18:32:27 GMT', 'content-type': 'application/xml',\
+          \ 'connection': 'close'}\n2015-04-13 18:32:27,623 Response Body: <?xml version='1.0'\
+          \ encoding='UTF-8'?>\n<server xmlns:OS-DCF=\"http://docs.openstack.org/compute/ext/disk_config/api/v1.1\"\
+          \ xmlns:atom=\"http://www.w3.org/2005/Atom\" xmlns=\"http://docs.openstack.org/compute/api/v1.1\"\
+          \ id=\"41f46158-0582-4256-93e5-b93e78336b43\" adminPass=\"cKvRkCb5Y7U6\"\
+          \ OS-DCF:diskConfig=\"MANUAL\"><metadata/><atom:link href=\"http://gytrash.oil:8774/v2/78f382fd2204437ab130a0cd601cd377/servers/41f46158-0582-4256-93e5-b93e78336b43\"\
+          \ rel=\"self\"/><atom:link href=\"http://gytrash.oil:8774/78f382fd2204437ab130a0cd601cd377/servers/41f46158-0582-4256-93e5-b93e78336b43\"\
+          \ rel=\"bookmark\"/><security_groups><security_group name=\"default\"/></security_groups></server>\n\
+          2015-04-13 18:32:27,624 Request: GET http://gytrash.oil:8774/v2/78f382fd2204437ab130a0cd601cd377/servers/41f46158-0582-4256-93e5-b93e78336b43\n\
+          2015-04-13 18:32:27,624 Request Headers: {'Content-Type': 'application/xml',\
+          \ 'Accept': 'application/xml', 'X-Auth-Token': u'c71bbdb7d1a34382b9746e09de6eea1e'}\n\
+          2015-04-13 18:32:27,788 Response Status: 200\n2015-04-13 18:32:27,788 Nova\
+          \ request id: req-aa5facbd-58d3-4d2c-9bca-73ac5da5b2d2\n2015-04-13 18:32:27,789\
+          \ Response Headers: {'content-length': '1906', 'content-location': u'http://gytrash.oil:8774/v2/78f382fd2204437ab130a0cd601cd377/servers/41f46158-0582-4256-93e5-b93e78336b43',\
+          \ 'date': 'Mon, 13 Apr 2015 18:32:27 GMT', 'content-type': 'application/xml',\
+          \ 'connection': 'close'}\n2015-04-13 18:32:27,789 Response Body: <?xml version='1.0'\
+          \ encoding='UTF-8'?>\n<server xmlns:os-extended-volumes=\"http://docs.openstack.org/compute/ext/extended_volumes/api/v1.1\"\
+          \ xmlns:OS-EXT-IPS=\"http://docs.openstack.org/compute/ext/extended_ips/api/v1.1\"\
+          \ xmlns:atom=\"http://www.w3.org/2005/Atom\" xmlns:OS-DCF=\"http://docs.openstack.org/compute/ext/disk_config/api/v1.1\"\
+          \ xmlns:OS-EXT-IPS-MAC=\"http://docs.openstack.org/compute/ext/extended_ips_mac/api/v1.1\"\
+          \ xmlns:OS-SRV-USG=\"http://docs.openstack.org/compute/ext/server_usage/api/v1.1\"\
+          \ xmlns:OS-EXT-STS=\"http://docs.openstack.org/compute/ext/extended_status/api/v1.1\"\
+          \ xmlns:OS-EXT-AZ=\"http://docs.openstack.org/compute/ext/extended_availability_zone/api/v2\"\
+          \ xmlns=\"http://docs.openstack.org/compute/api/v1.1\" status=\"BUILD\"\
+          \ updated=\"2015-04-13T18:32:27Z\" hostId=\"\" name=\"AttachInterfacesTestXML-instance-tempest-1476668957\"\
+          \ created=\"2015-04-13T18:32:26Z\" userId=\"f99167e2fc5348a7aefd5b9d5b15c51e\"\
+          \ tenantId=\"78f382fd2204437ab130a0cd601cd377\" accessIPv4=\"\" accessIPv6=\"\
+          \" progress=\"0\" id=\"41f46158-0582-4256-93e5-b93e78336b43\" key_name=\"\
+          None\" config_drive=\"\" OS-SRV-USG:terminated_at=\"None\" OS-SRV-USG:launched_at=\"\
+          None\" OS-EXT-STS:vm_state=\"building\" OS-EXT-STS:task_state=\"scheduling\"\
+          \ OS-EXT-STS:power_state=\"0\" OS-EXT-AZ:availability_zone=\"nova\" OS-DCF:diskConfig=\"\
+          MANUAL\"><image id=\"348320d3-61d5-4520-bda0-8c9bc90462a4\"><atom:link href=\"\
+          http://gytrash.oil:8774/78f382fd2204437ab130a0cd601cd377/images/348320d3-61d5-4520-bda0-8c9bc90462a4\"\
+          \ rel=\"bookmark\"/></image><flavor id=\"2\"><atom:link href=\"http://gytrash.oil:8774/78f382fd2204437ab130a0cd601cd377/flavors/2\"\
+          \ rel=\"bookmark\"/></flavor><metadata/><addresses/><atom:link href=\"http://gytrash.oil:8774/v2/78f382fd2204437ab130a0cd601cd377/servers/41f46158-0582-4256-93e5-b93e78336b43\"\
+          \ rel=\"self\"/><atom:link href=\"http://gytrash.oil:8774/78f382fd2204437ab130a0cd601cd377/servers/41f46158-0582-4256-93e5-b93e78336b43\"\
+          \ rel=\"bookmark\"/></server>\n2015-04-13 18:32:37,794 Request: GET http://gytrash.oil:8774/v2/78f382fd2204437ab130a0cd601cd377/servers/41f46158-0582-4256-93e5-b93e78336b43\n\
+          2015-04-13 18:32:37,794 Request Headers: {'Content-Type': 'application/xml',\
+          \ 'Accept': 'application/xml', 'X-Auth-Token': u'c71bbdb7d1a34382b9746e09de6eea1e'}\n\
+          2015-04-13 18:32:37,969 Response Status: 200\n2015-04-13 18:32:37,970 Nova\
+          \ request id: req-1acba9be-22be-46a6-a5a6-f9a637ea8ee2\n2015-04-13 18:32:37,970\
+          \ Response Headers: {'content-length': '2027', 'content-location': u'http://gytrash.oil:8774/v2/78f382fd2204437ab130a0cd601cd377/servers/41f46158-0582-4256-93e5-b93e78336b43',\
+          \ 'date': 'Mon, 13 Apr 2015 18:32:37 GMT', 'content-type': 'application/xml',\
+          \ 'connection': 'close'}\n2015-04-13 18:32:37,971 Response Body: <?xml version='1.0'\
+          \ encoding='UTF-8'?>\n<server xmlns:os-extended-volumes=\"http://docs.openstack.org/compute/ext/extended_volumes/api/v1.1\"\
+          \ xmlns:OS-EXT-IPS=\"http://docs.openstack.org/compute/ext/extended_ips/api/v1.1\"\
+          \ xmlns:atom=\"http://www.w3.org/2005/Atom\" xmlns:OS-DCF=\"http://docs.openstack.org/compute/ext/disk_config/api/v1.1\"\
+          \ xmlns:OS-EXT-IPS-MAC=\"http://docs.openstack.org/compute/ext/extended_ips_mac/api/v1.1\"\
+          \ xmlns:OS-SRV-USG=\"http://docs.openstack.org/compute/ext/server_usage/api/v1.1\"\
+          \ xmlns:OS-EXT-STS=\"http://docs.openstack.org/compute/ext/extended_status/api/v1.1\"\
+          \ xmlns:OS-EXT-AZ=\"http://docs.openstack.org/compute/ext/extended_availability_zone/api/v2\"\
+          \ xmlns=\"http://docs.openstack.org/compute/api/v1.1\" status=\"BUILD\"\
+          \ updated=\"2015-04-13T18:32:37Z\" hostId=\"8d6848d728eefb4b4bd1bf5daa9f9b9b41fa6f093c729a2408bb2912\"\
+          \ name=\"AttachInterfacesTestXML-instance-tempest-1476668957\" created=\"\
+          2015-04-13T18:32:26Z\" userId=\"f99167e2fc5348a7aefd5b9d5b15c51e\" tenantId=\"\
+          78f382fd2204437ab130a0cd601cd377\" accessIPv4=\"\" accessIPv6=\"\" progress=\"\
+          0\" id=\"41f46158-0582-4256-93e5-b93e78336b43\" key_name=\"None\" config_drive=\"\
+          \" OS-SRV-USG:terminated_at=\"None\" OS-SRV-USG:launched_at=\"None\" OS-EXT-STS:vm_state=\"\
+          building\" OS-EXT-STS:task_state=\"spawning\" OS-EXT-STS:power_state=\"\
+          0\" OS-EXT-AZ:availability_zone=\"nova\" OS-DCF:diskConfig=\"MANUAL\"><image\
+          \ id=\"348320d3-61d5-4520-bda0-8c9bc90462a4\"><atom:link href=\"http://gytrash.oil:8774/78f382fd2204437ab130a0cd601cd377/images/348320d3-61d5-4520-bda0-8c9bc90462a4\"\
+          \ rel=\"bookmark\"/></image><flavor id=\"2\"><atom:link href=\"http://gytrash.oil:8774/78f382fd2204437ab130a0cd601cd377/flavors/2\"\
+          \ rel=\"bookmark\"/></flavor><metadata/><addresses/><atom:link href=\"http://gytrash.oil:8774/v2/78f382fd2204437ab130a0cd601cd377/servers/41f46158-0582-4256-93e5-b93e78336b43\"\
+          \ rel=\"self\"/><atom:link href=\"http://gytrash.oil:8774/78f382fd2204437ab130a0cd601cd377/servers/41f46158-0582-4256-93e5-b93e78336b43\"\
+          \ rel=\"bookmark\"/><security_groups><security_group name=\"default\"/></security_groups></server>\n\
+          2015-04-13 18:32:37,976 State transition \"BUILD/scheduling\" ==> \"BUILD/spawning\"\
+          \ after 10 second wait\n2015-04-13 18:32:47,987 Request: GET http://gytrash.oil:8774/v2/78f382fd2204437ab130a0cd601cd377/servers/41f46158-0582-4256-93e5-b93e78336b43\n\
+          2015-04-13 18:32:47,987 Request Headers: {'Content-Type': 'application/xml',\
+          \ 'Accept': 'application/xml', 'X-Auth-Token': u'c71bbdb7d1a34382b9746e09de6eea1e'}\n\
+          2015-04-13 18:32:48,158 Response Status: 200\n2015-04-13 18:32:48,158 Nova\
+          \ request id: req-281c1a38-84dc-47ab-b008-e1208629965e\n2015-04-13 18:32:48,158\
+          \ Response Headers: {'content-length': '2027', 'content-location': u'http://gytrash.oil:8774/v2/78f382fd2204437ab130a0cd601cd377/servers/41f46158-0582-4256-93e5-b93e78336b43',\
+          \ 'date': 'Mon, 13 Apr 2015 18:32:48 GMT', 'content-type': 'application/xml',\
+          \ 'connection': 'close'}\n2015-04-13 18:32:48,159 Response Body: <?xml version='1.0'\
+          \ encoding='UTF-8'?>\n<server xmlns:os-extended-volumes=\"http://docs.openstack.org/compute/ext/extended_volumes/api/v1.1\"\
+          \ xmlns:OS-EXT-IPS=\"http://docs.openstack.org/compute/ext/extended_ips/api/v1.1\"\
+          \ xmlns:atom=\"http://www.w3.org/2005/Atom\" xmlns:OS-DCF=\"http://docs.openstack.org/compute/ext/disk_config/api/v1.1\"\
+          \ xmlns:OS-EXT-IPS-MAC=\"http://docs.openstack.org/compute/ext/extended_ips_mac/api/v1.1\"\
+          \ xmlns:OS-SRV-USG=\"http://docs.openstack.org/compute/ext/server_usage/api/v1.1\"\
+          \ xmlns:OS-EXT-STS=\"http://docs.openstack.org/compute/ext/extended_status/api/v1.1\"\
+          \ xmlns:OS-EXT-AZ=\"http://docs.openstack.org/compute/ext/extended_availability_zone/api/v2\"\
+          \ xmlns=\"http://docs.openstack.org/compute/api/v1.1\" status=\"BUILD\"\
+          \ updated=\"2015-04-13T18:32:47Z\" hostId=\"cda8c5e2edaa58dc9d2f3c4c95140a93e89d95dbbc513588929c50fe\"\
+          \ name=\"AttachInterfacesTestXML-instance-tempest-1476668957\" created=\"\
+          2015-04-13T18:32:26Z\" userId=\"f99167e2fc5348a7aefd5b9d5b15c51e\" tenantId=\"\
+          78f382fd2204437ab130a0cd601cd377\" accessIPv4=\"\" accessIPv6=\"\" progress=\"\
+          0\" id=\"41f46158-0582-4256-93e5-b93e78336b43\" key_name=\"None\" config_drive=\"\
+          \" OS-SRV-USG:terminated_at=\"None\" OS-SRV-USG:launched_at=\"None\" OS-EXT-STS:vm_state=\"\
+          building\" OS-EXT-STS:task_state=\"spawning\" OS-EXT-STS:power_state=\"\
+          0\" OS-EXT-AZ:availability_zone=\"nova\" OS-DCF:diskConfig=\"MANUAL\"><image\
+          \ id=\"348320d3-61d5-4520-bda0-8c9bc90462a4\"><atom:link href=\"http://gytrash.oil:8774/78f382fd2204437ab130a0cd601cd377/images/348320d3-61d5-4520-bda0-8c9bc90462a4\"\
+          \ rel=\"bookmark\"/></image><flavor id=\"2\"><atom:link href=\"http://gytrash.oil:8774/78f382fd2204437ab130a0cd601cd377/flavors/2\"\
+          \ rel=\"bookmark\"/></flavor><metadata/><addresses/><atom:link href=\"http://gytrash.oil:8774/v2/78f382fd2204437ab130a0cd601cd377/servers/41f46158-0582-4256-93e5-b93e78336b43\"\
+          \ rel=\"self\"/><atom:link href=\"http://gytrash.oil:8774/78f382fd2204437ab130a0cd601cd377/servers/41f46158-0582-4256-93e5-b93e78336b43\"\
+          \ rel=\"bookmark\"/><security_groups><security_group name=\"default\"/></security_groups></server>\n\
+          2015-04-13 18:32:58,170 Request: GET http://gytrash.oil:8774/v2/78f382fd2204437ab130a0cd601cd377/servers/41f46158-0582-4256-93e5-b93e78336b43\n\
+          2015-04-13 18:32:58,171 Request Headers: {'Content-Type': 'application/xml',\
+          \ 'Accept': 'application/xml', 'X-Auth-Token': u'c71bbdb7d1a34382b9746e09de6eea1e'}\n\
+          2015-04-13 18:32:58,363 Response Status: 200\n2015-04-13 18:32:58,364 Nova\
+          \ request id: req-fb224773-c68d-43ed-af8e-4108cf7df15c\n2015-04-13 18:32:58,364\
+          \ Response Headers: {'content-length': '2148', 'content-location': u'http://gytrash.oil:8774/v2/78f382fd2204437ab130a0cd601cd377/servers/41f46158-0582-4256-93e5-b93e78336b43',\
+          \ 'date': 'Mon, 13 Apr 2015 18:32:58 GMT', 'content-type': 'application/xml',\
+          \ 'connection': 'close'}\n2015-04-13 18:32:58,364 Response Body: <?xml version='1.0'\
+          \ encoding='UTF-8'?>\n<server xmlns:os-extended-volumes=\"http://docs.openstack.org/compute/ext/extended_volumes/api/v1.1\"\
+          \ xmlns:OS-EXT-IPS=\"http://docs.openstack.org/compute/ext/extended_ips/api/v1.1\"\
+          \ xmlns:atom=\"http://www.w3.org/2005/Atom\" xmlns:OS-DCF=\"http://docs.openstack.org/compute/ext/disk_config/api/v1.1\"\
+          \ xmlns:OS-EXT-IPS-MAC=\"http://docs.openstack.org/compute/ext/extended_ips_mac/api/v1.1\"\
+          \ xmlns:OS-SRV-USG=\"http://docs.openstack.org/compute/ext/server_usage/api/v1.1\"\
+          \ xmlns:OS-EXT-STS=\"http://docs.openstack.org/compute/ext/extended_status/api/v1.1\"\
+          \ xmlns:OS-EXT-AZ=\"http://docs.openstack.org/compute/ext/extended_availability_zone/api/v2\"\
+          \ xmlns=\"http://docs.openstack.org/compute/api/v1.1\" status=\"ERROR\"\
+          \ updated=\"2015-04-13T18:32:49Z\" hostId=\"cda8c5e2edaa58dc9d2f3c4c95140a93e89d95dbbc513588929c50fe\"\
+          \ name=\"AttachInterfacesTestXML-instance-tempest-1476668957\" created=\"\
+          2015-04-13T18:32:26Z\" userId=\"f99167e2fc5348a7aefd5b9d5b15c51e\" tenantId=\"\
+          78f382fd2204437ab130a0cd601cd377\" accessIPv4=\"\" accessIPv6=\"\" id=\"\
+          41f46158-0582-4256-93e5-b93e78336b43\" key_name=\"None\" config_drive=\"\
+          \" OS-SRV-USG:terminated_at=\"None\" OS-SRV-USG:launched_at=\"None\" OS-EXT-STS:vm_state=\"\
+          error\" OS-EXT-STS:task_state=\"None\" OS-EXT-STS:power_state=\"0\" OS-EXT-AZ:availability_zone=\"\
+          nova\" OS-DCF:diskConfig=\"MANUAL\"><image id=\"348320d3-61d5-4520-bda0-8c9bc90462a4\"\
+          ><atom:link href=\"http://gytrash.oil:8774/78f382fd2204437ab130a0cd601cd377/images/348320d3-61d5-4520-bda0-8c9bc90462a4\"\
+          \ rel=\"bookmark\"/></image><flavor id=\"2\"><atom:link href=\"http://gytrash.oil:8774/78f382fd2204437ab130a0cd601cd377/flavors/2\"\
+          \ rel=\"bookmark\"/></flavor><fault code=\"500\" created=\"2015-04-13T18:32:49Z\"\
+          ><message>No valid host was found. Exceeded max scheduling attempts 3 for\
+          \ instance 41f46158-0582-4256-93e5-b93e78336b43</message><details>None</details></fault><metadata/><addresses/><atom:link\
+          \ href=\"http://gytrash.oil:8774/v2/78f382fd2204437ab130a0cd601cd377/servers/41f46158-0582-4256-93e5-b93e78336b43\"\
+          \ rel=\"self\"/><atom:link href=\"http://gytrash.oil:8774/78f3\n2015-04-13\
+          \ 18:32:58,364 Large body (2148) md5 summary: e17e02cd99ef952da03f084cbf22189d\n\
+          2015-04-13 18:32:58,365 State transition \"BUILD/spawning\" ==> \"ERROR/None\"\
+          \ after 31 second wait\n2015-04-13 18:32:58,365 Request: DELETE http://gytrash.oil:8774/v2/78f382fd2204437ab130a0cd601cd377/servers/41f46158-0582-4256-93e5-b93e78336b43\n\
+          2015-04-13 18:32:58,366 Request Headers: {'X-Auth-Token': u'c71bbdb7d1a34382b9746e09de6eea1e'}\n\
+          2015-04-13 18:32:59,073 Response Status: 204\n2015-04-13 18:32:59,073 Nova\
+          \ request id: req-aa7175b1-4d06-4465-94ca-ac36f287425b\n2015-04-13 18:32:59,074\
+          \ Response Headers: {'content-length': '0', 'date': 'Mon, 13 Apr 2015 18:32:58\
+          \ GMT', 'content-type': 'application/json', 'connection': 'close'}\n}}}\n\
+          \nTraceback (most recent call last):\n  File \"/tmp/tmpBHraZd/tempest/tempest/api/compute/servers/test_attach_interfaces.py\"\
+          , line 99, in test_create_list_show_delete_interfaces\n    server, ifs =\
+          \ self._create_server_get_interfaces()\n  File \"/tmp/tmpBHraZd/tempest/tempest/api/compute/servers/test_attach_interfaces.py\"\
+          , line 45, in _create_server_get_interfaces\n    resp, server = self.create_test_server(wait_until='ACTIVE')\n\
+          \  File \"/tmp/tmpBHraZd/tempest/tempest/api/compute/base.py\", line 146,\
+          \ in create_test_server\n    raise ex\nBuildErrorException: Server 41f46158-0582-4256-93e5-b93e78336b43\
+          \ failed to build and is in ERROR status\n\n-------------------- >> "
+        xunit class: tempest.api.compute.servers.test_attach_interfaces.AttachInterfacesTestXML
+        xunit name: test_create_list_show_delete_interfaces[gate,smoke]
+      build: '432'
+      charms: *id002
+      duplicates:
+      - 36df8332-ac59-4089-8c42-f8d2fe783146
+      job: test_tempest_smoke
+      link to jenkins: http://10.245.162.86:8080//job/test_tempest_smoke/432/console
+      link to test-catalog: http://10.5.0.164:7890
+      machines: *id003
+      match text: "Traceback (most recent call last):\n  File \"/tmp/tmpBHraZd/tempest/tempest/api/compute/servers/test_attach_interfaces.py\"\
+        , line XX, in test_create_list_show_delete_interfaces\n    server, ifs = self._create_server_get_interfaces()\n\
+        \  File \"/tmp/tmpBHraZd/tempest/tempest/api/compute/servers/test_attach_interfaces.py\"\
+        , line XX, in _create_server_get_interfaces\n    resp, server = self.create_test_server(wait_until='ACTIVE')\n\
+        \  File \"/tmp/tmpBHraZd/tempest/tempest/api/compute/base.py\", line XXX,\
+        \ in create_test_server\n    raise ex\nBuildErrorException: Server XXfXXXXX-XXXX-XXXX-XXeX-bXXeXXXXXbXX\
+        \ failed to build and is in ERROR status\n\n-------------------- >>   "
+      pipeline_id: 36df8332-ac59-4089-8c42-f8d2fe783146
+      ports: *id004
+      regexps: NO REGEX - UNFILED/UNMATCHED BUG
+      slaves: *id005
+      states: *id006
+      status: FAILURE
+      units: *id007
+      vendors: *id008
+    unfiled-f69d0239-40d6-45de-be28-857aa4d93ed0:
+      Crude-Analysis timestamp: 2015-April-13 19:30:37.704789
+      Jenkins timestamp: null
+      additional info:
+        bootstrap_node: *id001
+        target file: tempest_xunit.xml
+        text: "pythonlogging:'': {{{\n2015-04-13 18:53:31,688 Request: POST http://10.245.48.193:5000/v2.0/tokens\n\
+          2015-04-13 18:53:31,688 Request Headers: {'Content-Type': 'application/json'}\n\
+          2015-04-13 18:53:31,688 Request Body: {\"auth\": {\"tenantName\": \"VolumesGetTestJSON-tempest-1298528806-tenant\"\
+          , \"passwordCredentials\": {\"username\": \"VolumesGetTestJSON-tempest-1298528806-user\"\
+          , \"password\": \"pass\"}}}\n2015-04-13 18:53:32,026 Response Status: 200\n\
+          2015-04-13 18:53:32,026 Response Headers: {'content-length': '4092', 'date':\
+          \ 'Mon, 13 Apr 2015 18:53:32 GMT', 'content-type': 'application/json', 'vary':\
+          \ 'X-Auth-Token', 'connection': 'close', 'x-distribution': 'Ubuntu'}\n2015-04-13\
+          \ 18:53:32,027 Response Body: {\"access\": {\"token\": {\"issued_at\": \"\
+          2015-04-13T18:53:31.826584\", \"expires\": \"2015-04-13T19:53:31Z\", \"\
+          id\": \"39fa256a2d864dfc903585e1cdf4a864\", \"tenant\": {\"description\"\
+          : \"VolumesGetTestJSON-tempest-1298528806-tenant-desc\", \"enabled\": true,\
+          \ \"id\": \"a4ab1428945e45e48d7a9f131b928d57\", \"name\": \"VolumesGetTestJSON-tempest-1298528806-tenant\"\
+          }}, \"serviceCatalog\": [{\"endpoints\": [{\"adminURL\": \"http://10.245.0.171:8774/v2/a4ab1428945e45e48d7a9f131b928d57\"\
+          , \"region\": \"RegionOne\", \"internalURL\": \"http://10.245.0.171:8774/v2/a4ab1428945e45e48d7a9f131b928d57\"\
+          , \"id\": \"09f85e4332ac47acad17a38005bb1087\", \"publicURL\": \"http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57\"\
+          }], \"endpoints_links\": [], \"type\": \"compute\", \"name\": \"nova\"},\
+          \ {\"endpoints\": [{\"adminURL\": \"http://10.245.0.171:9696\", \"region\"\
+          : \"RegionOne\", \"internalURL\": \"http://10.245.0.171:9696\", \"id\":\
+          \ \"2d64cd4ca8e84375a58787aa082d3e83\", \"publicURL\": \"http://gytrash.oil:9696\"\
+          }], \"endpoints_links\": [], \"type\": \"network\", \"name\": \"quantum\"\
+          }, {\"endpoints\": [{\"adminURL\": \"http://10.245.0.171:3333\", \"region\"\
+          : \"RegionOne\", \"internalURL\": \"http://10.245.0.171:3333\", \"id\":\
+          \ \"4f07a4e5b05b46fca967a5f43d27bfd3\", \"publicURL\": \"http://gytrash.oil:3333\"\
+          }], \"endpoints_links\": [], \"type\": \"s3\", \"name\": \"s3\"}, {\"endpoints\"\
+          : [{\"adminURL\": \"http://10.245.48.152:9292\", \"region\": \"RegionOne\"\
+          , \"internalURL\": \"http://10.245.48.152:9292\", \"id\": \"9ced3071576443acb005db06963a8453\"\
+          , \"publicURL\": \"http://10.245.48.152:9292\"}], \"endpoints_links\": [],\
+          \ \"type\": \"image\", \"name\": \"glance\"}, {\"endpoints\": [{\"adminURL\"\
+          : \"http://10.245.48.160:8777\", \"region\": \"RegionOne\", \"internalURL\"\
+          : \"http://10.245.48.160:8777\", \"id\": \"04fbf35e5e46403ebc87a75d76979c87\"\
+          , \"publicURL\": \"http://10.245.48.160:8777\"}], \"endpoints_links\": [],\
+          \ \"type\": \"metering\", \"name\": \"ceilometer\"}, {\"endpoints\": [{\"\
+          adminURL\": \"http://10.245.48.146:8000/v1\", \"region\": \"RegionOne\"\
+          , \"internalURL\": \"http://10.245.48.146:8000/v1\", \"id\": \"3747b466e4f1413c9fd4a370e0d884df\"\
+          , \"publicURL\": \"http://10.245.48.146:8000/v1\"}], \"endpoints_links\"\
+          : [], \"type\n2015-04-13 18:53:32,027 Large body (4092) md5 summary: 974e2b18e28fd3c66f0aa0500036a070\n\
+          2015-04-13 18:53:32,028 Request: POST http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes\n\
+          2015-04-13 18:53:32,028 Request Headers: {'Content-Type': 'application/json',\
+          \ 'Accept': 'application/json', 'X-Auth-Token': u'39fa256a2d864dfc903585e1cdf4a864'}\n\
+          2015-04-13 18:53:32,029 Request Body: {\"volume\": {\"metadata\": {\"Type\"\
+          : \"work\"}, \"display_name\": \"Volume-json--tempest-1291979375\", \"size\"\
+          : 1}}\n2015-04-13 18:53:32,685 Response Status: 200\n2015-04-13 18:53:32,686\
+          \ Nova request id: req-2e7e7dbb-831a-48e8-a137-8907ce717aa2\n2015-04-13\
+          \ 18:53:32,686 Response Headers: {'content-length': '333', 'location': 'http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c',\
+          \ 'date': 'Mon, 13 Apr 2015 18:53:32 GMT', 'content-type': 'application/json',\
+          \ 'connection': 'close'}\n2015-04-13 18:53:32,686 Response Body: {\"volume\"\
+          : {\"status\": \"creating\", \"displayDescription\": null, \"availabilityZone\"\
+          : \"nova\", \"displayName\": \"Volume-json--tempest-1291979375\", \"attachments\"\
+          : [{}], \"volumeType\": \"None\", \"snapshotId\": null, \"metadata\": {\"\
+          Type\": \"work\"}, \"id\": \"f2256d48-2ce9-484c-87a5-67bd1719203c\", \"\
+          createdAt\": \"2015-04-13T18:53:32.248732\", \"size\": 1}}\n2015-04-13 18:53:32,687\
+          \ Request: GET http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c\n\
+          2015-04-13 18:53:32,687 Request Headers: {'X-Auth-Token': u'39fa256a2d864dfc903585e1cdf4a864'}\n\
+          2015-04-13 18:53:32,837 Response Status: 200\n2015-04-13 18:53:32,838 Nova\
+          \ request id: req-a3fca6f3-e31a-4624-888f-ae9ce6d15a8c\n2015-04-13 18:53:32,838\
+          \ Response Headers: {'content-length': '333', 'content-location': u'http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c',\
+          \ 'date': 'Mon, 13 Apr 2015 18:53:32 GMT', 'content-type': 'application/json',\
+          \ 'connection': 'close'}\n2015-04-13 18:53:32,838 Response Body: {\"volume\"\
+          : {\"status\": \"creating\", \"displayDescription\": null, \"availabilityZone\"\
+          : \"nova\", \"displayName\": \"Volume-json--tempest-1291979375\", \"attachments\"\
+          : [{}], \"volumeType\": \"None\", \"snapshotId\": null, \"metadata\": {\"\
+          Type\": \"work\"}, \"id\": \"f2256d48-2ce9-484c-87a5-67bd1719203c\", \"\
+          createdAt\": \"2015-04-13T18:53:32.000000\", \"size\": 1}}\n2015-04-13 18:53:42,845\
+          \ Request: GET http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c\n\
+          2015-04-13 18:53:42,845 Request Headers: {'X-Auth-Token': u'39fa256a2d864dfc903585e1cdf4a864'}\n\
+          2015-04-13 18:53:42,990 Response Status: 200\n2015-04-13 18:53:42,990 Nova\
+          \ request id: req-f2673b27-9f8e-471b-bb8d-046e236811c7\n2015-04-13 18:53:42,991\
+          \ Response Headers: {'content-length': '333', 'content-location': u'http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c',\
+          \ 'date': 'Mon, 13 Apr 2015 18:53:42 GMT', 'content-type': 'application/json',\
+          \ 'connection': 'close'}\n2015-04-13 18:53:42,991 Response Body: {\"volume\"\
+          : {\"status\": \"creating\", \"displayDescription\": null, \"availabilityZone\"\
+          : \"nova\", \"displayName\": \"Volume-json--tempest-1291979375\", \"attachments\"\
+          : [{}], \"volumeType\": \"None\", \"snapshotId\": null, \"metadata\": {\"\
+          Type\": \"work\"}, \"id\": \"f2256d48-2ce9-484c-87a5-67bd1719203c\", \"\
+          createdAt\": \"2015-04-13T18:53:32.000000\", \"size\": 1}}\n2015-04-13 18:53:53,001\
+          \ Request: GET http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c\n\
+          2015-04-13 18:53:53,002 Request Headers: {'X-Auth-Token': u'39fa256a2d864dfc903585e1cdf4a864'}\n\
+          2015-04-13 18:53:53,173 Response Status: 200\n2015-04-13 18:53:53,173 Nova\
+          \ request id: req-12d0f613-557c-45fc-bce6-dd23add4a054\n2015-04-13 18:53:53,173\
+          \ Response Headers: {'content-length': '333', 'content-location': u'http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c',\
+          \ 'date': 'Mon, 13 Apr 2015 18:53:53 GMT', 'content-type': 'application/json',\
+          \ 'connection': 'close'}\n2015-04-13 18:53:53,174 Response Body: {\"volume\"\
+          : {\"status\": \"creating\", \"displayDescription\": null, \"availabilityZone\"\
+          : \"nova\", \"displayName\": \"Volume-json--tempest-1291979375\", \"attachments\"\
+          : [{}], \"volumeType\": \"None\", \"snapshotId\": null, \"metadata\": {\"\
+          Type\": \"work\"}, \"id\": \"f2256d48-2ce9-484c-87a5-67bd1719203c\", \"\
+          createdAt\": \"2015-04-13T18:53:32.000000\", \"size\": 1}}\n2015-04-13 18:54:03,184\
+          \ Request: GET http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c\n\
+          2015-04-13 18:54:03,185 Request Headers: {'X-Auth-Token': u'39fa256a2d864dfc903585e1cdf4a864'}\n\
+          2015-04-13 18:54:03,348 Response Status: 200\n2015-04-13 18:54:03,349 Nova\
+          \ request id: req-5dda4b2f-4b87-41b0-b3c9-4e5e3a3bf456\n2015-04-13 18:54:03,349\
+          \ Response Headers: {'content-length': '333', 'content-location': u'http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c',\
+          \ 'date': 'Mon, 13 Apr 2015 18:54:03 GMT', 'content-type': 'application/json',\
+          \ 'connection': 'close'}\n2015-04-13 18:54:03,349 Response Body: {\"volume\"\
+          : {\"status\": \"creating\", \"displayDescription\": null, \"availabilityZone\"\
+          : \"nova\", \"displayName\": \"Volume-json--tempest-1291979375\", \"attachments\"\
+          : [{}], \"volumeType\": \"None\", \"snapshotId\": null, \"metadata\": {\"\
+          Type\": \"work\"}, \"id\": \"f2256d48-2ce9-484c-87a5-67bd1719203c\", \"\
+          createdAt\": \"2015-04-13T18:53:32.000000\", \"size\": 1}}\n2015-04-13 18:54:13,360\
+          \ Request: GET http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c\n\
+          2015-04-13 18:54:13,361 Request Headers: {'X-Auth-Token': u'39fa256a2d864dfc903585e1cdf4a864'}\n\
+          2015-04-13 18:54:13,491 Response Status: 200\n2015-04-13 18:54:13,491 Nova\
+          \ request id: req-291fb139-8c7c-4a4f-b80f-a91467fb82d3\n2015-04-13 18:54:13,491\
+          \ Response Headers: {'content-length': '333', 'content-location': u'http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c',\
+          \ 'date': 'Mon, 13 Apr 2015 18:54:13 GMT', 'content-type': 'application/json',\
+          \ 'connection': 'close'}\n2015-04-13 18:54:13,492 Response Body: {\"volume\"\
+          : {\"status\": \"creating\", \"displayDescription\": null, \"availabilityZone\"\
+          : \"nova\", \"displayName\": \"Volume-json--tempest-1291979375\", \"attachments\"\
+          : [{}], \"volumeType\": \"None\", \"snapshotId\": null, \"metadata\": {\"\
+          Type\": \"work\"}, \"id\": \"f2256d48-2ce9-484c-87a5-67bd1719203c\", \"\
+          createdAt\": \"2015-04-13T18:53:32.000000\", \"size\": 1}}\n2015-04-13 18:54:23,502\
+          \ Request: GET http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c\n\
+          2015-04-13 18:54:23,503 Request Headers: {'X-Auth-Token': u'39fa256a2d864dfc903585e1cdf4a864'}\n\
+          2015-04-13 18:54:23,654 Response Status: 200\n2015-04-13 18:54:23,655 Nova\
+          \ request id: req-d2dad8c3-53ac-47b6-b493-7a34ea99408c\n2015-04-13 18:54:23,655\
+          \ Response Headers: {'content-length': '333', 'content-location': u'http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c',\
+          \ 'date': 'Mon, 13 Apr 2015 18:54:23 GMT', 'content-type': 'application/json',\
+          \ 'connection': 'close'}\n2015-04-13 18:54:23,655 Response Body: {\"volume\"\
+          : {\"status\": \"creating\", \"displayDescription\": null, \"availabilityZone\"\
+          : \"nova\", \"displayName\": \"Volume-json--tempest-1291979375\", \"attachments\"\
+          : [{}], \"volumeType\": \"None\", \"snapshotId\": null, \"metadata\": {\"\
+          Type\": \"work\"}, \"id\": \"f2256d48-2ce9-484c-87a5-67bd1719203c\", \"\
+          createdAt\": \"2015-04-13T18:53:32.000000\", \"size\": 1}}\n2015-04-13 18:54:33,666\
+          \ Request: GET http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c\n\
+          2015-04-13 18:54:33,666 Request Headers: {'X-Auth-Token': u'39fa256a2d864dfc903585e1cdf4a864'}\n\
+          2015-04-13 18:54:33,817 Response Status: 200\n2015-04-13 18:54:33,817 Nova\
+          \ request id: req-ebb3e7c7-fd04-47b9-9f96-d04d7e5162c2\n2015-04-13 18:54:33,817\
+          \ Response Headers: {'content-length': '333', 'content-location': u'http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c',\
+          \ 'date': 'Mon, 13 Apr 2015 18:54:33 GMT', 'content-type': 'application/json',\
+          \ 'connection': 'close'}\n2015-04-13 18:54:33,817 Response Body: {\"volume\"\
+          : {\"status\": \"creating\", \"displayDescription\": null, \"availabilityZone\"\
+          : \"nova\", \"displayName\": \"Volume-json--tempest-1291979375\", \"attachments\"\
+          : [{}], \"volumeType\": \"None\", \"snapshotId\": null, \"metadata\": {\"\
+          Type\": \"work\"}, \"id\": \"f2256d48-2ce9-484c-87a5-67bd1719203c\", \"\
+          createdAt\": \"2015-04-13T18:53:32.000000\", \"size\": 1}}\n2015-04-13 18:54:43,828\
+          \ Request: GET http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c\n\
+          2015-04-13 18:54:43,829 Request Headers: {'X-Auth-Token': u'39fa256a2d864dfc903585e1cdf4a864'}\n\
+          2015-04-13 18:54:43,954 Response Status: 200\n2015-04-13 18:54:43,954 Nova\
+          \ request id: req-c9af7d40-aa39-4f6e-8580-bffe771c520f\n2015-04-13 18:54:43,954\
+          \ Response Headers: {'content-length': '333', 'content-location': u'http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c',\
+          \ 'date': 'Mon, 13 Apr 2015 18:54:43 GMT', 'content-type': 'application/json',\
+          \ 'connection': 'close'}\n2015-04-13 18:54:43,955 Response Body: {\"volume\"\
+          : {\"status\": \"creating\", \"displayDescription\": null, \"availabilityZone\"\
+          : \"nova\", \"displayName\": \"Volume-json--tempest-1291979375\", \"attachments\"\
+          : [{}], \"volumeType\": \"None\", \"snapshotId\": null, \"metadata\": {\"\
+          Type\": \"work\"}, \"id\": \"f2256d48-2ce9-484c-87a5-67bd1719203c\", \"\
+          createdAt\": \"2015-04-13T18:53:32.000000\", \"size\": 1}}\n2015-04-13 18:54:53,965\
+          \ Request: GET http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c\n\
+          2015-04-13 18:54:53,966 Request Headers: {'X-Auth-Token': u'39fa256a2d864dfc903585e1cdf4a864'}\n\
+          2015-04-13 18:54:54,140 Response Status: 200\n2015-04-13 18:54:54,141 Nova\
+          \ request id: req-bd72f575-f745-48a3-910a-ac5ed35afe67\n2015-04-13 18:54:54,141\
+          \ Response Headers: {'content-length': '333', 'content-location': u'http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c',\
+          \ 'date': 'Mon, 13 Apr 2015 18:54:54 GMT', 'content-type': 'application/json',\
+          \ 'connection': 'close'}\n2015-04-13 18:54:54,141 Response Body: {\"volume\"\
+          : {\"status\": \"creating\", \"displayDescription\": null, \"availabilityZone\"\
+          : \"nova\", \"displayName\": \"Volume-json--tempest-1291979375\", \"attachments\"\
+          : [{}], \"volumeType\": \"None\", \"snapshotId\": null, \"metadata\": {\"\
+          Type\": \"work\"}, \"id\": \"f2256d48-2ce9-484c-87a5-67bd1719203c\", \"\
+          createdAt\": \"2015-04-13T18:53:32.000000\", \"size\": 1}}\n2015-04-13 18:55:04,152\
+          \ Request: GET http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c\n\
+          2015-04-13 18:55:04,152 Request Headers: {'X-Auth-Token': u'39fa256a2d864dfc903585e1cdf4a864'}\n\
+          2015-04-13 18:55:04,298 Response Status: 200\n2015-04-13 18:55:04,299 Nova\
+          \ request id: req-70a8d046-d115-4b6f-9fda-0fdb60dd2b95\n2015-04-13 18:55:04,299\
+          \ Response Headers: {'content-length': '333', 'content-location': u'http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c',\
+          \ 'date': 'Mon, 13 Apr 2015 18:55:04 GMT', 'content-type': 'application/json',\
+          \ 'connection': 'close'}\n2015-04-13 18:55:04,299 Response Body: {\"volume\"\
+          : {\"status\": \"creating\", \"displayDescription\": null, \"availabilityZone\"\
+          : \"nova\", \"displayName\": \"Volume-json--tempest-1291979375\", \"attachments\"\
+          : [{}], \"volumeType\": \"None\", \"snapshotId\": null, \"metadata\": {\"\
+          Type\": \"work\"}, \"id\": \"f2256d48-2ce9-484c-87a5-67bd1719203c\", \"\
+          createdAt\": \"2015-04-13T18:53:32.000000\", \"size\": 1}}\n2015-04-13 18:55:14,310\
+          \ Request: GET http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c\n\
+          2015-04-13 18:55:14,310 Request Headers: {'X-Auth-Token': u'39fa256a2d864dfc903585e1cdf4a864'}\n\
+          2015-04-13 18:55:14,454 Response Status: 200\n2015-04-13 18:55:14,455 Nova\
+          \ request id: req-68de1c05-c9ec-4663-a448-743cf7f565cf\n2015-04-13 18:55:14,455\
+          \ Response Headers: {'content-length': '333', 'content-location': u'http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c',\
+          \ 'date': 'Mon, 13 Apr 2015 18:55:14 GMT', 'content-type': 'application/json',\
+          \ 'connection': 'close'}\n2015-04-13 18:55:14,455 Response Body: {\"volume\"\
+          : {\"status\": \"creating\", \"displayDescription\": null, \"availabilityZone\"\
+          : \"nova\", \"displayName\": \"Volume-json--tempest-1291979375\", \"attachments\"\
+          : [{}], \"volumeType\": \"None\", \"snapshotId\": null, \"metadata\": {\"\
+          Type\": \"work\"}, \"id\": \"f2256d48-2ce9-484c-87a5-67bd1719203c\", \"\
+          createdAt\": \"2015-04-13T18:53:32.000000\", \"size\": 1}}\n2015-04-13 18:55:24,466\
+          \ Request: GET http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c\n\
+          2015-04-13 18:55:24,466 Request Headers: {'X-Auth-Token': u'39fa256a2d864dfc903585e1cdf4a864'}\n\
+          2015-04-13 18:55:24,597 Response Status: 200\n2015-04-13 18:55:24,598 Nova\
+          \ request id: req-d216519e-aaad-43be-854b-6a97757b3d65\n2015-04-13 18:55:24,598\
+          \ Response Headers: {'content-length': '333', 'content-location': u'http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c',\
+          \ 'date': 'Mon, 13 Apr 2015 18:55:24 GMT', 'content-type': 'application/json',\
+          \ 'connection': 'close'}\n2015-04-13 18:55:24,598 Response Body: {\"volume\"\
+          : {\"status\": \"creating\", \"displayDescription\": null, \"availabilityZone\"\
+          : \"nova\", \"displayName\": \"Volume-json--tempest-1291979375\", \"attachments\"\
+          : [{}], \"volumeType\": \"None\", \"snapshotId\": null, \"metadata\": {\"\
+          Type\": \"work\"}, \"id\": \"f2256d48-2ce9-484c-87a5-67bd1719203c\", \"\
+          createdAt\": \"2015-04-13T18:53:32.000000\", \"size\": 1}}\n2015-04-13 18:55:34,609\
+          \ Request: GET http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c\n\
+          2015-04-13 18:55:34,609 Request Headers: {'X-Auth-Token': u'39fa256a2d864dfc903585e1cdf4a864'}\n\
+          2015-04-13 18:55:34,753 Response Status: 200\n2015-04-13 18:55:34,754 Nova\
+          \ request id: req-12d0ad31-0d6c-4211-9954-3b4469ed3bac\n2015-04-13 18:55:34,754\
+          \ Response Headers: {'content-length': '333', 'content-location': u'http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c',\
+          \ 'date': 'Mon, 13 Apr 2015 18:55:34 GMT', 'content-type': 'application/json',\
+          \ 'connection': 'close'}\n2015-04-13 18:55:34,754 Response Body: {\"volume\"\
+          : {\"status\": \"creating\", \"displayDescription\": null, \"availabilityZone\"\
+          : \"nova\", \"displayName\": \"Volume-json--tempest-1291979375\", \"attachments\"\
+          : [{}], \"volumeType\": \"None\", \"snapshotId\": null, \"metadata\": {\"\
+          Type\": \"work\"}, \"id\": \"f2256d48-2ce9-484c-87a5-67bd1719203c\", \"\
+          createdAt\": \"2015-04-13T18:53:32.000000\", \"size\": 1}}\n2015-04-13 18:55:44,765\
+          \ Request: GET http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c\n\
+          2015-04-13 18:55:44,766 Request Headers: {'X-Auth-Token': u'39fa256a2d864dfc903585e1cdf4a864'}\n\
+          2015-04-13 18:55:44,897 Response Status: 200\n2015-04-13 18:55:44,898 Nova\
+          \ request id: req-9efeea59-b8b8-4f62-a77f-c367f707b9d5\n2015-04-13 18:55:44,898\
+          \ Response Headers: {'content-length': '333', 'content-location': u'http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c',\
+          \ 'date': 'Mon, 13 Apr 2015 18:55:44 GMT', 'content-type': 'application/json',\
+          \ 'connection': 'close'}\n2015-04-13 18:55:44,898 Response Body: {\"volume\"\
+          : {\"status\": \"creating\", \"displayDescription\": null, \"availabilityZone\"\
+          : \"nova\", \"displayName\": \"Volume-json--tempest-1291979375\", \"attachments\"\
+          : [{}], \"volumeType\": \"None\", \"snapshotId\": null, \"metadata\": {\"\
+          Type\": \"work\"}, \"id\": \"f2256d48-2ce9-484c-87a5-67bd1719203c\", \"\
+          createdAt\": \"2015-04-13T18:53:32.000000\", \"size\": 1}}\n2015-04-13 18:55:54,902\
+          \ Request: GET http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c\n\
+          2015-04-13 18:55:54,902 Request Headers: {'X-Auth-Token': u'39fa256a2d864dfc903585e1cdf4a864'}\n\
+          2015-04-13 18:55:55,028 Response Status: 200\n2015-04-13 18:55:55,028 Nova\
+          \ request id: req-6c5e327f-fa0f-4fb7-906b-3374b653e9b0\n2015-04-13 18:55:55,028\
+          \ Response Headers: {'content-length': '333', 'content-location': u'http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c',\
+          \ 'date': 'Mon, 13 Apr 2015 18:55:54 GMT', 'content-type': 'application/json',\
+          \ 'connection': 'close'}\n2015-04-13 18:55:55,028 Response Body: {\"volume\"\
+          : {\"status\": \"creating\", \"displayDescription\": null, \"availabilityZone\"\
+          : \"nova\", \"displayName\": \"Volume-json--tempest-1291979375\", \"attachments\"\
+          : [{}], \"volumeType\": \"None\", \"snapshotId\": null, \"metadata\": {\"\
+          Type\": \"work\"}, \"id\": \"f2256d48-2ce9-484c-87a5-67bd1719203c\", \"\
+          createdAt\": \"2015-04-13T18:53:32.000000\", \"size\": 1}}\n2015-04-13 18:56:05,030\
+          \ Request: GET http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c\n\
+          2015-04-13 18:56:05,030 Request Headers: {'X-Auth-Token': u'39fa256a2d864dfc903585e1cdf4a864'}\n\
+          2015-04-13 18:56:05,156 Response Status: 200\n2015-04-13 18:56:05,157 Nova\
+          \ request id: req-1803c826-f923-415c-b501-2f36805db09c\n2015-04-13 18:56:05,157\
+          \ Response Headers: {'content-length': '333', 'content-location': u'http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c',\
+          \ 'date': 'Mon, 13 Apr 2015 18:56:05 GMT', 'content-type': 'application/json',\
+          \ 'connection': 'close'}\n2015-04-13 18:56:05,157 Response Body: {\"volume\"\
+          : {\"status\": \"creating\", \"displayDescription\": null, \"availabilityZone\"\
+          : \"nova\", \"displayName\": \"Volume-json--tempest-1291979375\", \"attachments\"\
+          : [{}], \"volumeType\": \"None\", \"snapshotId\": null, \"metadata\": {\"\
+          Type\": \"work\"}, \"id\": \"f2256d48-2ce9-484c-87a5-67bd1719203c\", \"\
+          createdAt\": \"2015-04-13T18:53:32.000000\", \"size\": 1}}\n2015-04-13 18:56:15,161\
+          \ Request: GET http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c\n\
+          2015-04-13 18:56:15,162 Request Headers: {'X-Auth-Token': u'39fa256a2d864dfc903585e1cdf4a864'}\n\
+          2015-04-13 18:56:15,314 Response Status: 200\n2015-04-13 18:56:15,314 Nova\
+          \ request id: req-3ef481f3-96cf-4b9c-8bca-aad3a21a1785\n2015-04-13 18:56:15,314\
+          \ Response Headers: {'content-length': '333', 'content-location': u'http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c',\
+          \ 'date': 'Mon, 13 Apr 2015 18:56:15 GMT', 'content-type': 'application/json',\
+          \ 'connection': 'close'}\n2015-04-13 18:56:15,314 Response Body: {\"volume\"\
+          : {\"status\": \"creating\", \"displayDescription\": null, \"availabilityZone\"\
+          : \"nova\", \"displayName\": \"Volume-json--tempest-1291979375\", \"attachments\"\
+          : [{}], \"volumeType\": \"None\", \"snapshotId\": null, \"metadata\": {\"\
+          Type\": \"work\"}, \"id\": \"f2256d48-2ce9-484c-87a5-67bd1719203c\", \"\
+          createdAt\": \"2015-04-13T18:53:32.000000\", \"size\": 1}}\n2015-04-13 18:56:25,325\
+          \ Request: GET http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c\n\
+          2015-04-13 18:56:25,326 Request Headers: {'X-Auth-Token': u'39fa256a2d864dfc903585e1cdf4a864'}\n\
+          2015-04-13 18:56:25,461 Response Status: 200\n2015-04-13 18:56:25,461 Nova\
+          \ request id: req-2167c11e-e1b6-46d7-b21f-093c74fe881f\n2015-04-13 18:56:25,461\
+          \ Response Headers: {'content-length': '333', 'content-location': u'http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c',\
+          \ 'date': 'Mon, 13 Apr 2015 18:56:25 GMT', 'content-type': 'application/json',\
+          \ 'connection': 'close'}\n2015-04-13 18:56:25,462 Response Body: {\"volume\"\
+          : {\"status\": \"creating\", \"displayDescription\": null, \"availabilityZone\"\
+          : \"nova\", \"displayName\": \"Volume-json--tempest-1291979375\", \"attachments\"\
+          : [{}], \"volumeType\": \"None\", \"snapshotId\": null, \"metadata\": {\"\
+          Type\": \"work\"}, \"id\": \"f2256d48-2ce9-484c-87a5-67bd1719203c\", \"\
+          createdAt\": \"2015-04-13T18:53:32.000000\", \"size\": 1}}\n2015-04-13 18:56:35,472\
+          \ Request: GET http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c\n\
+          2015-04-13 18:56:35,472 Request Headers: {'X-Auth-Token': u'39fa256a2d864dfc903585e1cdf4a864'}\n\
+          2015-04-13 18:56:35,598 Response Status: 200\n2015-04-13 18:56:35,598 Nova\
+          \ request id: req-425f1b66-fe24-4537-986c-358117589204\n2015-04-13 18:56:35,598\
+          \ Response Headers: {'content-length': '333', 'content-location': u'http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c',\
+          \ 'date': 'Mon, 13 Apr 2015 18:56:35 GMT', 'content-type': 'application/json',\
+          \ 'connection': 'close'}\n2015-04-13 18:56:35,598 Response Body: {\"volume\"\
+          : {\"status\": \"creating\", \"displayDescription\": null, \"availabilityZone\"\
+          : \"nova\", \"displayName\": \"Volume-json--tempest-1291979375\", \"attachments\"\
+          : [{}], \"volumeType\": \"None\", \"snapshotId\": null, \"metadata\": {\"\
+          Type\": \"work\"}, \"id\": \"f2256d48-2ce9-484c-87a5-67bd1719203c\", \"\
+          createdAt\": \"2015-04-13T18:53:32.000000\", \"size\": 1}}\n2015-04-13 18:56:45,601\
+          \ Request: GET http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c\n\
+          2015-04-13 18:56:45,601 Request Headers: {'X-Auth-Token': u'39fa256a2d864dfc903585e1cdf4a864'}\n\
+          2015-04-13 18:56:45,726 Response Status: 200\n2015-04-13 18:56:45,727 Nova\
+          \ request id: req-f12246c6-034a-400b-aee0-6ebbb2b3f36e\n2015-04-13 18:56:45,727\
+          \ Response Headers: {'content-length': '333', 'content-location': u'http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c',\
+          \ 'date': 'Mon, 13 Apr 2015 18:56:45 GMT', 'content-type': 'application/json',\
+          \ 'connection': 'close'}\n2015-04-13 18:56:45,727 Response Body: {\"volume\"\
+          : {\"status\": \"creating\", \"displayDescription\": null, \"availabilityZone\"\
+          : \"nova\", \"displayName\": \"Volume-json--tempest-1291979375\", \"attachments\"\
+          : [{}], \"volumeType\": \"None\", \"snapshotId\": null, \"metadata\": {\"\
+          Type\": \"work\"}, \"id\": \"f2256d48-2ce9-484c-87a5-67bd1719203c\", \"\
+          createdAt\": \"2015-04-13T18:53:32.000000\", \"size\": 1}}\n2015-04-13 18:56:55,730\
+          \ Request: GET http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c\n\
+          2015-04-13 18:56:55,730 Request Headers: {'X-Auth-Token': u'39fa256a2d864dfc903585e1cdf4a864'}\n\
+          2015-04-13 18:56:55,862 Response Status: 200\n2015-04-13 18:56:55,862 Nova\
+          \ request id: req-1c3cc11c-4a79-4742-9a9d-a9ac9b367ccd\n2015-04-13 18:56:55,862\
+          \ Response Headers: {'content-length': '333', 'content-location': u'http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c',\
+          \ 'date': 'Mon, 13 Apr 2015 18:56:55 GMT', 'content-type': 'application/json',\
+          \ 'connection': 'close'}\n2015-04-13 18:56:55,863 Response Body: {\"volume\"\
+          : {\"status\": \"creating\", \"displayDescription\": null, \"availabilityZone\"\
+          : \"nova\", \"displayName\": \"Volume-json--tempest-1291979375\", \"attachments\"\
+          : [{}], \"volumeType\": \"None\", \"snapshotId\": null, \"metadata\": {\"\
+          Type\": \"work\"}, \"id\": \"f2256d48-2ce9-484c-87a5-67bd1719203c\", \"\
+          createdAt\": \"2015-04-13T18:53:32.000000\", \"size\": 1}}\n2015-04-13 18:57:05,873\
+          \ Request: GET http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c\n\
+          2015-04-13 18:57:05,874 Request Headers: {'X-Auth-Token': u'39fa256a2d864dfc903585e1cdf4a864'}\n\
+          2015-04-13 18:57:05,999 Response Status: 200\n2015-04-13 18:57:06,000 Nova\
+          \ request id: req-1fdd9982-6e89-4645-903b-df0a79e3773c\n2015-04-13 18:57:06,000\
+          \ Response Headers: {'content-length': '333', 'content-location': u'http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c',\
+          \ 'date': 'Mon, 13 Apr 2015 18:57:05 GMT', 'content-type': 'application/json',\
+          \ 'connection': 'close'}\n2015-04-13 18:57:06,000 Response Body: {\"volume\"\
+          : {\"status\": \"creating\", \"displayDescription\": null, \"availabilityZone\"\
+          : \"nova\", \"displayName\": \"Volume-json--tempest-1291979375\", \"attachments\"\
+          : [{}], \"volumeType\": \"None\", \"snapshotId\": null, \"metadata\": {\"\
+          Type\": \"work\"}, \"id\": \"f2256d48-2ce9-484c-87a5-67bd1719203c\", \"\
+          createdAt\": \"2015-04-13T18:53:32.000000\", \"size\": 1}}\n2015-04-13 18:57:16,011\
+          \ Request: GET http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c\n\
+          2015-04-13 18:57:16,011 Request Headers: {'X-Auth-Token': u'39fa256a2d864dfc903585e1cdf4a864'}\n\
+          2015-04-13 18:57:16,136 Response Status: 200\n2015-04-13 18:57:16,137 Nova\
+          \ request id: req-668835e0-37a9-4db1-8620-c111057b84a2\n2015-04-13 18:57:16,137\
+          \ Response Headers: {'content-length': '333', 'content-location': u'http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c',\
+          \ 'date': 'Mon, 13 Apr 2015 18:57:16 GMT', 'content-type': 'application/json',\
+          \ 'connection': 'close'}\n2015-04-13 18:57:16,137 Response Body: {\"volume\"\
+          : {\"status\": \"creating\", \"displayDescription\": null, \"availabilityZone\"\
+          : \"nova\", \"displayName\": \"Volume-json--tempest-1291979375\", \"attachments\"\
+          : [{}], \"volumeType\": \"None\", \"snapshotId\": null, \"metadata\": {\"\
+          Type\": \"work\"}, \"id\": \"f2256d48-2ce9-484c-87a5-67bd1719203c\", \"\
+          createdAt\": \"2015-04-13T18:53:32.000000\", \"size\": 1}}\n2015-04-13 18:57:26,146\
+          \ Request: GET http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c\n\
+          2015-04-13 18:57:26,146 Request Headers: {'X-Auth-Token': u'39fa256a2d864dfc903585e1cdf4a864'}\n\
+          2015-04-13 18:57:26,272 Response Status: 200\n2015-04-13 18:57:26,272 Nova\
+          \ request id: req-e45e905a-bd54-48a6-8884-a7122b0caf7a\n2015-04-13 18:57:26,273\
+          \ Response Headers: {'content-length': '333', 'content-location': u'http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c',\
+          \ 'date': 'Mon, 13 Apr 2015 18:57:26 GMT', 'content-type': 'application/json',\
+          \ 'connection': 'close'}\n2015-04-13 18:57:26,273 Response Body: {\"volume\"\
+          : {\"status\": \"creating\", \"displayDescription\": null, \"availabilityZone\"\
+          : \"nova\", \"displayName\": \"Volume-json--tempest-1291979375\", \"attachments\"\
+          : [{}], \"volumeType\": \"None\", \"snapshotId\": null, \"metadata\": {\"\
+          Type\": \"work\"}, \"id\": \"f2256d48-2ce9-484c-87a5-67bd1719203c\", \"\
+          createdAt\": \"2015-04-13T18:53:32.000000\", \"size\": 1}}\n2015-04-13 18:57:36,284\
+          \ Request: GET http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c\n\
+          2015-04-13 18:57:36,284 Request Headers: {'X-Auth-Token': u'39fa256a2d864dfc903585e1cdf4a864'}\n\
+          2015-04-13 18:57:36,417 Response Status: 200\n2015-04-13 18:57:36,417 Nova\
+          \ request id: req-d65bc28e-3b3b-470a-98ce-341f0f773417\n2015-04-13 18:57:36,418\
+          \ Response Headers: {'content-length': '333', 'content-location': u'http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c',\
+          \ 'date': 'Mon, 13 Apr 2015 18:57:36 GMT', 'content-type': 'application/json',\
+          \ 'connection': 'close'}\n2015-04-13 18:57:36,418 Response Body: {\"volume\"\
+          : {\"status\": \"creating\", \"displayDescription\": null, \"availabilityZone\"\
+          : \"nova\", \"displayName\": \"Volume-json--tempest-1291979375\", \"attachments\"\
+          : [{}], \"volumeType\": \"None\", \"snapshotId\": null, \"metadata\": {\"\
+          Type\": \"work\"}, \"id\": \"f2256d48-2ce9-484c-87a5-67bd1719203c\", \"\
+          createdAt\": \"2015-04-13T18:53:32.000000\", \"size\": 1}}\n2015-04-13 18:57:46,429\
+          \ Request: GET http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c\n\
+          2015-04-13 18:57:46,430 Request Headers: {'X-Auth-Token': u'39fa256a2d864dfc903585e1cdf4a864'}\n\
+          2015-04-13 18:57:46,555 Response Status: 200\n2015-04-13 18:57:46,555 Nova\
+          \ request id: req-aa363c7c-e149-422e-a394-726a6184ebd9\n2015-04-13 18:57:46,555\
+          \ Response Headers: {'content-length': '333', 'content-location': u'http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c',\
+          \ 'date': 'Mon, 13 Apr 2015 18:57:46 GMT', 'content-type': 'application/json',\
+          \ 'connection': 'close'}\n2015-04-13 18:57:46,556 Response Body: {\"volume\"\
+          : {\"status\": \"creating\", \"displayDescription\": null, \"availabilityZone\"\
+          : \"nova\", \"displayName\": \"Volume-json--tempest-1291979375\", \"attachments\"\
+          : [{}], \"volumeType\": \"None\", \"snapshotId\": null, \"metadata\": {\"\
+          Type\": \"work\"}, \"id\": \"f2256d48-2ce9-484c-87a5-67bd1719203c\", \"\
+          createdAt\": \"2015-04-13T18:53:32.000000\", \"size\": 1}}\n2015-04-13 18:57:56,558\
+          \ Request: GET http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c\n\
+          2015-04-13 18:57:56,559 Request Headers: {'X-Auth-Token': u'39fa256a2d864dfc903585e1cdf4a864'}\n\
+          2015-04-13 18:57:56,692 Response Status: 200\n2015-04-13 18:57:56,692 Nova\
+          \ request id: req-e4f8c6e9-5186-4445-b9c8-ca0bb7bc72fc\n2015-04-13 18:57:56,692\
+          \ Response Headers: {'content-length': '333', 'content-location': u'http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c',\
+          \ 'date': 'Mon, 13 Apr 2015 18:57:56 GMT', 'content-type': 'application/json',\
+          \ 'connection': 'close'}\n2015-04-13 18:57:56,693 Response Body: {\"volume\"\
+          : {\"status\": \"creating\", \"displayDescription\": null, \"availabilityZone\"\
+          : \"nova\", \"displayName\": \"Volume-json--tempest-1291979375\", \"attachments\"\
+          : [{}], \"volumeType\": \"None\", \"snapshotId\": null, \"metadata\": {\"\
+          Type\": \"work\"}, \"id\": \"f2256d48-2ce9-484c-87a5-67bd1719203c\", \"\
+          createdAt\": \"2015-04-13T18:53:32.000000\", \"size\": 1}}\n2015-04-13 18:58:06,703\
+          \ Request: GET http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c\n\
+          2015-04-13 18:58:06,704 Request Headers: {'X-Auth-Token': u'39fa256a2d864dfc903585e1cdf4a864'}\n\
+          2015-04-13 18:58:06,835 Response Status: 200\n2015-04-13 18:58:06,836 Nova\
+          \ request id: req-ff7de07e-b4be-4144-b68f-314ad8f29bfa\n2015-04-13 18:58:06,836\
+          \ Response Headers: {'content-length': '333', 'content-location': u'http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c',\
+          \ 'date': 'Mon, 13 Apr 2015 18:58:06 GMT', 'content-type': 'application/json',\
+          \ 'connection': 'close'}\n2015-04-13 18:58:06,836 Response Body: {\"volume\"\
+          : {\"status\": \"creating\", \"displayDescription\": null, \"availabilityZone\"\
+          : \"nova\", \"displayName\": \"Volume-json--tempest-1291979375\", \"attachments\"\
+          : [{}], \"volumeType\": \"None\", \"snapshotId\": null, \"metadata\": {\"\
+          Type\": \"work\"}, \"id\": \"f2256d48-2ce9-484c-87a5-67bd1719203c\", \"\
+          createdAt\": \"2015-04-13T18:53:32.000000\", \"size\": 1}}\n2015-04-13 18:58:16,847\
+          \ Request: GET http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c\n\
+          2015-04-13 18:58:16,847 Request Headers: {'X-Auth-Token': u'39fa256a2d864dfc903585e1cdf4a864'}\n\
+          2015-04-13 18:58:16,973 Response Status: 200\n2015-04-13 18:58:16,974 Nova\
+          \ request id: req-a7f4532d-cdfd-4ff5-afe7-f9ad0750c803\n2015-04-13 18:58:16,974\
+          \ Response Headers: {'content-length': '333', 'content-location': u'http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c',\
+          \ 'date': 'Mon, 13 Apr 2015 18:58:16 GMT', 'content-type': 'application/json',\
+          \ 'connection': 'close'}\n2015-04-13 18:58:16,974 Response Body: {\"volume\"\
+          : {\"status\": \"creating\", \"displayDescription\": null, \"availabilityZone\"\
+          : \"nova\", \"displayName\": \"Volume-json--tempest-1291979375\", \"attachments\"\
+          : [{}], \"volumeType\": \"None\", \"snapshotId\": null, \"metadata\": {\"\
+          Type\": \"work\"}, \"id\": \"f2256d48-2ce9-484c-87a5-67bd1719203c\", \"\
+          createdAt\": \"2015-04-13T18:53:32.000000\", \"size\": 1}}\n2015-04-13 18:58:26,985\
+          \ Request: GET http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c\n\
+          2015-04-13 18:58:26,985 Request Headers: {'X-Auth-Token': u'39fa256a2d864dfc903585e1cdf4a864'}\n\
+          2015-04-13 18:58:27,118 Response Status: 200\n2015-04-13 18:58:27,118 Nova\
+          \ request id: req-750114c5-87b7-45fc-a5ee-9abcdada6dea\n2015-04-13 18:58:27,118\
+          \ Response Headers: {'content-length': '333', 'content-location': u'http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c',\
+          \ 'date': 'Mon, 13 Apr 2015 18:58:27 GMT', 'content-type': 'application/json',\
+          \ 'connection': 'close'}\n2015-04-13 18:58:27,119 Response Body: {\"volume\"\
+          : {\"status\": \"creating\", \"displayDescription\": null, \"availabilityZone\"\
+          : \"nova\", \"displayName\": \"Volume-json--tempest-1291979375\", \"attachments\"\
+          : [{}], \"volumeType\": \"None\", \"snapshotId\": null, \"metadata\": {\"\
+          Type\": \"work\"}, \"id\": \"f2256d48-2ce9-484c-87a5-67bd1719203c\", \"\
+          createdAt\": \"2015-04-13T18:53:32.000000\", \"size\": 1}}\n2015-04-13 18:58:37,128\
+          \ Request: GET http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c\n\
+          2015-04-13 18:58:37,129 Request Headers: {'X-Auth-Token': u'39fa256a2d864dfc903585e1cdf4a864'}\n\
+          2015-04-13 18:58:37,277 Response Status: 200\n2015-04-13 18:58:37,277 Nova\
+          \ request id: req-afba23c2-a77d-4225-8b87-ab42c0f1c738\n2015-04-13 18:58:37,278\
+          \ Response Headers: {'content-length': '333', 'content-location': u'http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c',\
+          \ 'date': 'Mon, 13 Apr 2015 18:58:37 GMT', 'content-type': 'application/json',\
+          \ 'connection': 'close'}\n2015-04-13 18:58:37,278 Response Body: {\"volume\"\
+          : {\"status\": \"creating\", \"displayDescription\": null, \"availabilityZone\"\
+          : \"nova\", \"displayName\": \"Volume-json--tempest-1291979375\", \"attachments\"\
+          : [{}], \"volumeType\": \"None\", \"snapshotId\": null, \"metadata\": {\"\
+          Type\": \"work\"}, \"id\": \"f2256d48-2ce9-484c-87a5-67bd1719203c\", \"\
+          createdAt\": \"2015-04-13T18:53:32.000000\", \"size\": 1}}\n2015-04-13 18:58:37,285\
+          \ Request: DELETE http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c\n\
+          2015-04-13 18:58:37,285 Request Headers: {'X-Auth-Token': u'39fa256a2d864dfc903585e1cdf4a864'}\n\
+          2015-04-13 18:58:37,879 Response Status: 202\n2015-04-13 18:58:37,879 Nova\
+          \ request id: req-17cb22c7-3040-43f9-8a96-f3d96998db87\n2015-04-13 18:58:37,880\
+          \ Response Headers: {'content-length': '0', 'date': 'Mon, 13 Apr 2015 18:58:37\
+          \ GMT', 'content-type': 'text/html; charset=UTF-8', 'connection': 'close'}\n\
+          2015-04-13 18:58:37,880 Request: GET http://gytrash.oil:8774/v2/a4ab1428945e45e48d7a9f131b928d57/os-volumes/f2256d48-2ce9-484c-87a5-67bd1719203c\n\
+          2015-04-13 18:58:37,880 Request Headers: {'X-Auth-Token': u'39fa256a2d864dfc903585e1cdf4a864'}\n\
+          2015-04-13 18:58:37,935 Response Status: 404\n2015-04-13 18:58:37,936 Nova\
+          \ request id: req-3be404fc-769b-4d44-890e-95bd5e3bc83f\n2015-04-13 18:58:37,936\
+          \ Response Headers: {'content-length': '78', 'date': 'Mon, 13 Apr 2015 18:58:37\
+          \ GMT', 'content-type': 'application/json; charset=UTF-8', 'connection':\
+          \ 'close'}\n2015-04-13 18:58:37,936 Response Body: {\"itemNotFound\": {\"\
+          message\": \"The resource could not be found.\", \"code\": 404}}\n}}}\n\n\
+          Traceback (most recent call last):\n  File \"/tmp/tmpBHraZd/tempest/tempest/api/compute/volumes/test_volumes_get.py\"\
+          , line 56, in test_volume_create_get_delete\n    self.client.wait_for_volume_status(volume['id'],\
+          \ 'available')\n  File \"/tmp/tmpBHraZd/tempest/tempest/services/compute/json/volumes_extensions_client.py\"\
+          , line 104, in wait_for_volume_status\n    raise exceptions.TimeoutException(message)\n\
+          TimeoutException: Request timed out\nDetails: Volume Volume-json--tempest-1291979375\
+          \ failed to reach available status within the required time (300 s).\n\n\
+          -------------------- >> "
+        xunit class: tempest.api.compute.volumes.test_volumes_get.VolumesGetTestJSON
+        xunit name: test_volume_create_get_delete[gate,smoke]
+      build: '432'
+      charms: *id002
+      duplicates:
+      - 36df8332-ac59-4089-8c42-f8d2fe783146
+      - 36df8332-ac59-4089-8c42-f8d2fe783146
+      job: test_tempest_smoke
+      link to jenkins: http://10.245.162.86:8080//job/test_tempest_smoke/432/console
+      link to test-catalog: http://10.5.0.164:7890
+      machines: *id003
+      match text: "Traceback (most recent call last):\n  File \"/tmp/tmpBHraZd/tempest/tempest/api/compute/volumes/test_volumes_get.py\"\
+        , line XX, in test_volume_create_get_delete\n    self.client.wait_for_volume_status(volume['id'],\
+        \ 'available')\n  File \"/tmp/tmpBHraZd/tempest/tempest/services/compute/json/volumes_extensions_client.py\"\
+        , line XXX, in wait_for_volume_status\n    raise exceptions.TimeoutException(message)\n\
+        TimeoutException: Request timed out\nDetails: Volume Volume-json--tempest-XXXXXXXXXX\
+        \ failed to reach available status within the required time (XXX s).\n\n--------------------\
+        \ >>   "
+      pipeline_id: 36df8332-ac59-4089-8c42-f8d2fe783146
+      ports: *id004
+      regexps: NO REGEX - UNFILED/UNMATCHED BUG
+      slaves: *id005
+      states: *id006
+      status: FAILURE
+      units: *id007
+      vendors: *id008
+  3f09357f-78bd-456d-855a-2650d14f61a4:
+    unfiled-9356c4ce-cf68-4d2d-918e-c2aaa1645485:
+      Crude-Analysis timestamp: 2015-April-13 15:13:09.934601
+      Jenkins timestamp: null
+      additional info:
+        bootstrap_node:
+          jenkins: Building on master
+          machine: Unknown
+          openstack release: icehouse
+          state: Unknown
+        target file: console.txt
+        text: artifacts/pipeline_start/1695/pipeline_deploy_console.txt
+      build: '1695'
+      charms: []
+      duplicates:
+      - 3f09357f-78bd-456d-855a-2650d14f61a4
+      job: pipeline_deploy
+      link to jenkins: http://10.245.162.86:8080//job/pipeline_deploy/1695/console
+      link to test-catalog: http://10.5.0.164:7890
+      machines: []
+      match text: "Traceback (most recent call last):\n  File \"/usr/bin/oil-ci\"\
+        , line X, in <module>\n    load_entry_point('canonical-oil==X.X.XX', 'console_scripts',\
+        \ 'oil-ci')()\n  File \"/usr/lib/pythonX.X/dist-packages/oil_ci/cli/ci/main.py\"\
+        , line XXX, in main\n    return utils.run(sys.argv, categories)\n  File \"\
+        /usr/lib/pythonX.X/dist-packages/oil_ci/common/cliutils.py\", line XXX, in\
+        \ run\n    ret = fn(*fn_args, **fn_kwargs)\n  File \"/usr/lib/pythonX.X/dist-packages/oil_ci/cli/ci/main.py\"\
+        , line XX, in pipeline_tags\n    api.generate_pipeline_tags(nodes=nodes, juju=juju,\
+        \ out=out)\n  File \"/usr/lib/pythonX.X/dist-packages/oil_ci/cli/api.py\"\
+        , line XXX, in generate_pipeline_tags\n    mapping = HardwareMapper(nodes_f=nodes,\
+        \ juju_f=juju).get_service_map()\n  File \"/usr/lib/pythonX.X/dist-packages/oil_ci/cli/hardware_map.py\"\
+        , line XX, in __init__\n    self.juju = load_file(juju_f)\n  File \"/usr/lib/pythonX.X/dist-packages/oil_ci/cli/hardware_map.py\"\
+        , line XX, in load_file\n    with open(filename) as file_:\nIOError: [Errno\
+        \ X] No such file or directory: u'artifacts/juju_status.yaml'\n+ test-catalog\
+        \ -B AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE artifacts/mapping.json -t /etc/oil-ci/test-catalog-auth.json\n\
+        \ Traceback (most recent call last):\n  File \"/usr/bin/oil-ci\", line X,\
+        \ in <module>\n    load_entry_point('canonical-oil==X.X.XX', 'console_scripts',\
+        \ 'oil-ci')()\n  File \"/usr/lib/pythonX.X/dist-packages/oil_ci/cli/ci/main.py\"\
+        , line XXX, in main\n    return utils.run(sys.argv, categories)\n  File \"\
+        /usr/lib/pythonX.X/dist-packages/oil_ci/common/cliutils.py\", line XXX, in\
+        \ run\n    ret = fn(*fn_args, **fn_kwargs)\n  File \"/usr/lib/pythonX.X/dist-packages/oil_ci/cli/ci/main.py\"\
+        , line XX, in run_config\n    environment=environment)\n  File \"/usr/lib/pythonX.X/dist-packages/oil_ci/cli/api.py\"\
+        , line XXX, in generate_run_config\n    deploy_yaml = yaml.load(deploy.deployment.yaml(environment))\n\
+        \  File \"/usr/lib/pythonX.X/dist-packages/oil_ci/deploy/deployment.py\",\
+        \ line XXX, in yaml\n    dyaml = self.render_yaml_template(environment, dyaml)\n\
+        \  File \"/usr/lib/pythonX.X/dist-packages/oil_ci/deploy/deployment.py\",\
+        \ line XXX, in render_yaml_template\n    out = template.render(ctxt)\n  File\
+        \ \"/usr/lib/pythonX.X/dist-packages/jinjaX/environment.py\", line XXX, in\
+        \ render\n    return self.environment.handle_exception(exc_info, True)\n \
+        \ File \"<template>\", line XXX, in top-level template code\n  File \"/usr/lib/pythonX.X/dist-packages/oil_ci/deploy/dynamic_context.py\"\
+        , line XXX, in get_dataports\n    creds = get_maas_creds(self.env)\n  File\
+        \ \"/usr/lib/pythonX.X/dist-packages/oil_ci/deploy/dynamic_context.py\", line\
+        \ XX, in get_maas_creds\n    maas_login(env, maas_host, maas_oauth)\n  File\
+        \ \"/usr/lib/pythonX.X/dist-packages/oil_ci/common/maas.py\", line XX, in\
+        \ maas_login\n    stderr=subprocess.STDOUT)\n  File \"/usr/lib/pythonX.X/subprocess.py\"\
+        , line XXX, in check_call\n    raise CalledProcessError(retcode, cmd)\nsubprocess.CalledProcessError:\
+        \ Command '['maas-cli', 'login', 'maas', 'http://XX.XXX.X.XX/MAAS', 'gegruMRuuCmRXjMgNe:fbsrKfqXpXaXEvXLrY:zxFwYXXhXRgXRzKvZFuCXXVvegyWrFkR']'\
+        \ returned non-zero exit status X\n+ cp -av run_config artifacts/run_config\n\
+        cp: cannot stat `run_config': No such file or directory\n+ cp -av oil_nodes\
+        \ artifacts/oil_nodes\n`oil_nodes' -> `artifacts/oil_nodes'\n+ oil-ci do deploy\
+        \ --run_config artifacts/run_config --artifacts_dir ./artifacts\n Traceback\
+        \ (most recent call last):\n  File \"/usr/bin/oil-ci\", line X, in <module>\n\
+        \    load_entry_point('canonical-oil==X.X.XX', 'console_scripts', 'oil-ci')()\n\
+        \  File \"/usr/lib/pythonX.X/dist-packages/oil_ci/cli/ci/main.py\", line XXX,\
+        \ in main\n    return utils.run(sys.argv, categories)\n  File \"/usr/lib/pythonX.X/dist-packages/oil_ci/common/cliutils.py\"\
+        , line XXX, in run\n    ret = fn(*fn_args, **fn_kwargs)\n  File \"/usr/lib/pythonX.X/dist-packages/oil_ci/cli/ci/main.py\"\
+        , line XXX, in deploy\n    artifacts_dir=artifacts_dir)\n  File \"/usr/lib/pythonX.X/dist-packages/oil_ci/cli/api.py\"\
+        , line XX, in do_deploy\n    deployment_params = deployment_config(config)\n\
+        \  File \"/usr/lib/pythonX.X/dist-packages/oil_ci/cli/api.py\", line XX, in\
+        \ deployment_config\n    config = run_config(path)['deploy']\n  File \"/usr/lib/pythonX.X/dist-packages/oil_ci/cli/api.py\"\
+        , line XX, in run_config\n    return yaml.load(open(path).read())\nIOError:\
+        \ [Errno X] No such file or directory: u'artifacts/run_config'\n+ rc=X\n+\
+        \ echo 'Deployment returned: X'\nDeployment returned: X\n+ [[ X == X ]]\n\
+        + test-catalog -p AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE -t /etc/oil-ci/test-catalog-auth.json\n\
+        \  "
+      pipeline_id: 3f09357f-78bd-456d-855a-2650d14f61a4
+      ports: []
+      regexps: NO REGEX - UNFILED/UNMATCHED BUG
+      slaves: []
+      states: []
+      status: FAILURE
+      units: []
+      vendors: []
+  5f97003f-6833-4240-b11c-5815888dccaf:
+    unfiled-5b12fec3-69a9-4a1f-81e8-7703dc03264c:
+      Crude-Analysis timestamp: 2015-April-13 17:38:48.919554
+      Jenkins timestamp: null
+      additional info:
+        bootstrap_node:
+          jenkins: Building on master
+          openstack release: icehouse
+        target file: console.txt
+        text: artifacts/pipeline_start/503/pipeline_prepare_console.txt
+      build: '503'
+      charms: []
+      duplicates:
+      - 5f97003f-6833-4240-b11c-5815888dccaf
+      job: pipeline_prepare
+      link to jenkins: http://10.245.162.86:8080//job/pipeline_prepare/503/console
+      link to test-catalog: http://10.5.0.164:7890
+      machines: []
+      match text: "Traceback (most recent call last):\n  File \"/usr/lib/pythonX.X/dist-packages/oil_ci/cli/api.py\"\
+        , line XXX, in do_prep\n    rc = prepper.do_prep()\n  File \"/usr/lib/pythonX.X/dist-packages/oil_ci/prepare/oil_prepper.py\"\
+        , line XXX, in do_prep\n    raise exception.OILPreparationFailure(m)\nOILPreparationFailure:\
+        \ Failed to prepare deployed cloud\nBuild step 'Execute shell' marked build\
+        \ as failure\nArchiving artifacts\nPerforming Post build task...\nMatch found\
+        \ for :Archiving artifacts : True\nLogical operation result is TRUE\nRunning\
+        \ script  : #!/bin/bash -x\n. ./pipeline_parameters\n\n# archive the results.\n\
+        oil-ci do archive --pipeline_id $PIPELINE_ID --artifacts_dir ./artifacts\n\
+        \n[workspace] $ /bin/bash -x /tmp/hudsonXXXXXXXXXXXXXXXXXXX.sh\n+ . ./pipeline_parameters\n\
+        ++ export OPENSTACK_RELEASE=icehouse\n++ OPENSTACK_RELEASE=icehouse\n++ export\
+        \ COMPUTE=nova-lxc\n++ COMPUTE=nova-lxc\n++ export BLOCK_STORAGE=cinder-iscsi\n\
+        ++ BLOCK_STORAGE=cinder-iscsi\n++ export IMAGE_STORAGE=glance-swift\n++ IMAGE_STORAGE=glance-swift\n\
+        ++ export PIPELINE_ID=AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE\n++ PIPELINE_ID=AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE\n\
+        ++ export NETWORKING=neutron-nsx\n++ NETWORKING=neutron-nsx\n++ export UBUNTU_RELEASE=precise\n\
+        ++ UBUNTU_RELEASE=precise\n+ oil-ci do archive --pipeline_id AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE\
+        \ --artifacts_dir ./artifacts\n Traceback (most recent call last):\n  File\
+        \ \"/usr/lib/pythonX.X/dist-packages/oil_ci/prepare/oil_prepper.py\", line\
+        \ XXX, in do_prep\n    img = self.prepare_image()\n  File \"/usr/lib/pythonX.X/dist-packages/oil_ci/prepare/oil_prepper.py\"\
+        , line XX, in prepare_image\n    return prepare_image(params, self.os_creds)\n\
+        \  File \"/usr/lib/pythonX.X/dist-packages/oil_ci/prepare/image.py\", line\
+        \ XX, in prepare_image\n    return image.publish_image(**params)\n  File \"\
+        /usr/lib/pythonX.X/dist-packages/oil_ci/openstack/image.py\", line XX, in\
+        \ publish_image\n    img.update(is_public=is_public, data=open(path, 'rb'))\n\
+        IOError: [Errno XX] Permission denied: '/mnt/images/lxc/precise-server-cloudimg-amdXX.img'\n\
+        \  "
+      pipeline_id: 5f97003f-6833-4240-b11c-5815888dccaf
+      ports: []
+      regexps: NO REGEX - UNFILED/UNMATCHED BUG
+      slaves: []
+      states: []
+      status: FAILURE
+      units: []
+      vendors: []
+  7be0499b-bbfb-46bb-94e4-e31217eebccc:
+    unfiled-0dd2db6a-4b79-4e90-a87e-a980928c189c:
+      Crude-Analysis timestamp: 2015-April-13 17:54:45.849443
+      Jenkins timestamp: null
+      additional info:
+        bootstrap_node: &id009
+          jenkins: Building remotely on ci-oil-slave2-0 (ci-oil-slave2)
+          openstack release: icehouse
+        target file: tempest_xunit.xml
+        text: 'Endpoint not found
+
+          Details: computev3
+
+          -------------------- >> '
+        xunit class: <nose.suite
+        xunit name: ContextSuite context=ServersV3TestXML>:setup
+      build: '431'
+      charms: &id010 []
+      duplicates:
+      - 7be0499b-bbfb-46bb-94e4-e31217eebccc
+      job: test_tempest_smoke
+      link to jenkins: http://10.245.162.86:8080//job/test_tempest_smoke/431/console
+      link to test-catalog: http://10.5.0.164:7890
+      machines: &id011 []
+      match text: null
+      pipeline_id: 7be0499b-bbfb-46bb-94e4-e31217eebccc
+      ports: &id012 []
+      regexps: NO REGEX - UNFILED/UNMATCHED BUG
+      slaves: &id013 []
+      states: &id014 []
+      status: FAILURE
+      units: &id015 []
+      vendors: &id016 []
+    unfiled-4ad68e72-9258-4f03-96dc-4d44cae7a479:
+      Crude-Analysis timestamp: 2015-April-13 17:54:45.849443
+      Jenkins timestamp: null
+      additional info:
+        bootstrap_node: *id009
+        target file: tempest_xunit.xml
+        text: 'Server 884e9070-9f4a-4a15-b4be-9bb3a2311013 failed to build and is
+          in ERROR status
+
+          -------------------- >> '
+        xunit class: <nose.suite
+        xunit name: ContextSuite context=ServerAddressesTestXML>:setup
+      build: '431'
+      charms: *id010
+      duplicates:
+      - 7be0499b-bbfb-46bb-94e4-e31217eebccc
+      - 36df8332-ac59-4089-8c42-f8d2fe783146
+      - 36df8332-ac59-4089-8c42-f8d2fe783146
+      - 36df8332-ac59-4089-8c42-f8d2fe783146
+      - 7be0499b-bbfb-46bb-94e4-e31217eebccc
+      - 7be0499b-bbfb-46bb-94e4-e31217eebccc
+      - 36df8332-ac59-4089-8c42-f8d2fe783146
+      - 36df8332-ac59-4089-8c42-f8d2fe783146
+      - 7be0499b-bbfb-46bb-94e4-e31217eebccc
+      - 7be0499b-bbfb-46bb-94e4-e31217eebccc
+      - 7be0499b-bbfb-46bb-94e4-e31217eebccc
+      - 7be0499b-bbfb-46bb-94e4-e31217eebccc
+      - 7be0499b-bbfb-46bb-94e4-e31217eebccc
+      - 7be0499b-bbfb-46bb-94e4-e31217eebccc
+      - 7be0499b-bbfb-46bb-94e4-e31217eebccc
+      - 7be0499b-bbfb-46bb-94e4-e31217eebccc
+      - 36df8332-ac59-4089-8c42-f8d2fe783146
+      - 36df8332-ac59-4089-8c42-f8d2fe783146
+      - 36df8332-ac59-4089-8c42-f8d2fe783146
+      - 36df8332-ac59-4089-8c42-f8d2fe783146
+      - 7be0499b-bbfb-46bb-94e4-e31217eebccc
+      - 7be0499b-bbfb-46bb-94e4-e31217eebccc
+      - 36df8332-ac59-4089-8c42-f8d2fe783146
+      - 36df8332-ac59-4089-8c42-f8d2fe783146
+      job: test_tempest_smoke
+      link to jenkins: http://10.245.162.86:8080//job/test_tempest_smoke/431/console
+      link to test-catalog: http://10.5.0.164:7890
+      machines: *id011
+      match text: ' [''ERROR status''] [''failed to build and is in ERROR status'']'
+      pipeline_id: 7be0499b-bbfb-46bb-94e4-e31217eebccc
+      ports: *id012
+      regexps: NO REGEX - UNFILED/UNMATCHED BUG
+      slaves: *id013
+      states: *id014
+      status: FAILURE
+      units: *id015
+      vendors: *id016
+    unfiled-9a20d061-2a65-421c-8313-0708afbbafbe:
+      Crude-Analysis timestamp: 2015-April-13 17:54:45.849443
+      Jenkins timestamp: null
+      additional info:
+        bootstrap_node: *id009
+        target file: tempest_xunit.xml
+        text: 'Endpoint not found
+
+          Details: computev3
+
+          -------------------- >> '
+        xunit class: <nose.suite
+        xunit name: ContextSuite context=ServersV3TestManualDisk>:setup
+      build: '431'
+      charms: *id010
+      duplicates:
+      - 7be0499b-bbfb-46bb-94e4-e31217eebccc
+      job: test_tempest_smoke
+      link to jenkins: http://10.245.162.86:8080//job/test_tempest_smoke/431/console
+      link to test-catalog: http://10.5.0.164:7890
+      machines: *id011
+      match text: null
+      pipeline_id: 7be0499b-bbfb-46bb-94e4-e31217eebccc
+      ports: *id012
+      regexps: NO REGEX - UNFILED/UNMATCHED BUG
+      slaves: *id013
+      states: *id014
+      status: FAILURE
+      units: *id015
+      vendors: *id016
+    unfiled-f086f872-c021-49fb-858a-0ebaac09ae3d:
+      Crude-Analysis timestamp: 2015-April-13 17:54:45.849443
+      Jenkins timestamp: null
+      additional info:
+        bootstrap_node: *id009
+        target file: tempest_xunit.xml
+        text: 'Endpoint not found
+
+          Details: computev3
+
+          -------------------- >> '
+        xunit class: <nose.suite
+        xunit name: ContextSuite context=ServersV3TestJSON>:setup
+      build: '431'
+      charms: *id010
+      duplicates:
+      - 7be0499b-bbfb-46bb-94e4-e31217eebccc
+      job: test_tempest_smoke
+      link to jenkins: http://10.245.162.86:8080//job/test_tempest_smoke/431/console
+      link to test-catalog: http://10.5.0.164:7890
+      machines: *id011
+      match text: null
+      pipeline_id: 7be0499b-bbfb-46bb-94e4-e31217eebccc
+      ports: *id012
+      regexps: NO REGEX - UNFILED/UNMATCHED BUG
+      slaves: *id013
+      states: *id014
+      status: FAILURE
+      units: *id015
+      vendors: *id016
+  9b8f9fa2-d92e-478d-b23d-b068cbcfdccf:
+    unfiled-e0e14885-0733-4af0-99b9-6e2bb7a84324:
+      Crude-Analysis timestamp: 2015-April-13 19:52:48.504939
+      Jenkins timestamp: null
+      additional info:
+        bootstrap_node:
+          jenkins: Building on master
+          machine: Unknown
+          openstack release: icehouse
+          state: Unknown
+        target file: console.txt
+        text: artifacts/pipeline_start/1732/pipeline_deploy_console.txt
+      build: '1732'
+      charms: []
+      duplicates:
+      - 9b8f9fa2-d92e-478d-b23d-b068cbcfdccf
+      - 9c7b8003-aad0-4208-9d94-9b41fc82773c
+      - 76cf9bad-50ca-48bc-8e51-88a7008f982d
+      - a9585c22-cab3-42c2-8aba-77a68816a41b
+      - 66cc1d27-6083-4516-9c76-403605ac0f1b
+      - 7ed3cbdc-4e0d-4e3d-9541-7e41c336a487
+      - 9899d0bb-e0b9-41c3-a8a0-1216d588e79d
+      - 55d43435-0073-4c3c-afc7-7f9e21e15bd2
+      - bbcd9f2d-469e-409a-b52a-c75a0f33c7eb
+      - c6abfff4-6036-4395-a739-4d93736bfcc5
+      - 37668e7f-2848-427e-a4f5-42b9a0c47a39
+      - e9f21c71-cf01-4d32-8e44-bd5713bd61b1
+      - 5b0636b7-5cf3-48ac-931c-e5cba7bb58db
+      - 464cc217-c51a-484b-8af0-af840edd16f9
+      - 7255999a-e3c8-448a-86b3-98a5ca7282f2
+      - 0fed5bee-50cd-4dfc-b90a-012ab43d3148
+      - e4942ba9-6179-441b-b96d-29ca499f66d1
+      - 3dddb3dc-e64e-4a19-8b38-82ab82df3c1a
+      - 0c26072c-e515-43fe-9965-1cb78fbb2596
+      - 6beb8b70-f8e0-43ac-b037-84c0f5d74e44
+      - 9fe7779c-73bb-4b7a-93f1-bd2d33c7ff0f
+      - ef7cc113-e66c-472c-b409-65ffc79414fe
+      - 2bcdf70a-081d-4cfa-92a4-c7b7e3921f0a
+      - e9fd6008-85bf-49fa-80dc-b037a2823837
+      - b19617fe-291b-4af8-a18f-a1010991b01d
+      - 0cd58569-2cef-4c87-a9e2-d1992ff17770
+      - dae63adf-066f-47cb-a310-3738073fa15b
+      - 7ba414b3-89e1-4f68-86b3-d3d27dd35f83
+      - 7f6dc445-46e7-4129-81eb-22e5a727f237
+      - 2e3d7294-2f64-440a-8eca-3ae85610e58e
+      - 8580afa2-a806-4032-998b-13024909008a
+      - 54b5f7a7-4418-4d5c-b691-c3f0f9e6aa0e
+      - a052b256-d856-4fc9-876d-741496e03896
+      - b4387b8e-1fa6-4cbe-b81a-5e34a152949b
+      - 4d6e5db1-a06b-46b8-bb41-d6df5ea3dbc2
+      - 576262e2-b69d-401f-9ae0-bfdd0485e0d6
+      - 7db9b446-7491-4b6d-a8a4-e45cdb419a60
+      - 3b17232c-ddd6-42e8-9027-cd1ded0aff16
+      - 082e46b7-bf3c-46e3-b8e5-a26643755cfb
+      - e40e6810-f4d9-4e65-ab61-81fa6c112f5b
+      - 1033b38a-7fc7-4f82-bd12-bc571f2862d5
+      - 8ff9bbf2-8e28-4b0d-b851-daaa0dbc9d22
+      - 02ec9e40-4cc5-4582-9576-668ef3e2c656
+      - 7742910c-b797-4299-89ec-7f1e0cbd8616
+      - e74fa0e5-4370-4f33-bfd8-aeabc4be55d9
+      - 0555e8d6-c60a-40ea-b0b9-4b0bac918ab1
+      - 8fb57510-8ab3-45a7-a756-37a34f96f377
+      - ef007404-f567-462a-ad5f-8b2c6862cda4
+      - 882a888e-7d84-478d-a223-918cfc94690d
+      - 9f3577fb-4f73-4f1e-ac97-2d5958e107a3
+      - f93ef09a-e6d0-432d-8d18-7cdc6a56fe3c
+      - 64cbe5a2-9d29-4782-a20c-26575fb1a669
+      - ff8f8cd5-a0dd-414d-a8ca-1a53a1433ecd
+      - 85306f84-4541-4397-b2dc-769bf4f446d8
+      - bc126fb8-2f70-4018-bc54-dc87c6d80548
+      - ae89ea10-6e4b-4b9b-a51a-934e73cb1ac2
+      - 1648eb76-3976-49e7-8a8d-c643293f4cd0
+      - 8298ad15-f93a-4138-82ef-60e6c554ebaa
+      - ecf4d43d-6296-44d2-930c-0220ca812113
+      - c3b31a6f-2c75-43f5-a508-126b5424a279
+      - 2c697d40-061b-4075-afe2-0b492dccbe43
+      - 37b1975c-1b80-4788-b4ae-edb2c839ddc8
+      - 7895abc5-7df0-4c96-8ef8-145d5e0578c5
+      - 02cdb6d0-300b-43ec-a999-7713e3bb73d9
+      - b3f256b2-0a5a-4b6d-b476-050cae21018e
+      - 69f49c16-10ab-40bc-8c28-1b90a3469a82
+      - 6f3ca382-e4dc-46d7-9bdf-d4c8e7d5ba4d
+      - bc924fa8-bb4d-4502-bc9c-02d978390709
+      - 72629b2b-8d80-4a84-af46-5fa1b6db76f4
+      - 7cdc278c-5513-481b-a5a3-ccd1e9019f5f
+      - e5da748f-7496-419f-a2eb-103ff22181b7
+      - 09585928-954a-47f3-8d90-d1f9752547ef
+      - cd181789-46d9-4565-847b-3290fca366ab
+      - 2d8fceb5-67e4-4cbe-bf6d-d36a67907824
+      - 8e93f6f7-c880-4e60-8b20-08b71124114d
+      - ede9f4fe-c425-43f0-86a8-358f6ca24e6f
+      - 54a74c17-66c4-4419-8483-5c3fcc4ec2d9
+      - 632f7b93-afdd-403c-acd4-448b08f6b93d
+      - c80c6497-8789-4ca5-a682-d62c307aff6f
+      - 592555eb-0af8-427c-af2d-021f35e2ba69
+      - 8be17b44-a55b-490b-957f-27d5f15114f2
+      - 27d68896-87cb-41ff-a2c4-35cb470040bc
+      - 00fbe2f9-f4d3-4562-9858-4206e311be97
+      - a37f4383-2e8e-458a-aa39-d2aeb6d18c1f
+      - 30036432-d6d7-4202-af54-df267c93a08f
+      - 6b1c2402-ca6e-4b6d-a049-a3529006546f
+      - dbd82ad2-b42f-465a-81a0-be9d19c9b93f
+      - 4eeeb7cf-a86d-4a28-b980-7a933c6dcfe2
+      - 59395cd9-d03e-45bc-8423-0747160bfdba
+      - e082d69c-fe73-41ce-8a78-fca35b97a2bc
+      - 2561a3cd-7ff3-436f-a9f8-f0178d02b6e5
+      - a37b87a6-41d1-4e4d-bdc4-60da9ea95226
+      - 38dab341-7e7c-40d8-beb4-f9b6af723d2e
+      - ec9c34a3-4863-45b1-af47-c43541f99600
+      - 69114c92-16dc-4655-920f-47c0a4b8ea99
+      - 24cc4a50-96e6-4019-bc60-3d90e2968826
+      - 2731978b-0cd8-4407-95d4-f26613a9e8ad
+      - 801b8351-519d-4ea2-8c37-6b0a7c754b88
+      - 3ea8bed6-4787-4d8e-841f-203dc8ff01a6
+      - 965d8b27-203c-4a85-9a65-bad5112e8716
+      - 13939f70-fe32-4cd9-a0a6-9910641545de
+      - 1657e9d9-df1a-4472-a650-10c828037cc0
+      - 662df9af-bda1-4363-aad2-23fae9ff4671
+      job: pipeline_deploy
+      link to jenkins: http://10.245.162.86:8080//job/pipeline_deploy/1732/console
+      link to test-catalog: http://10.5.0.164:7890
+      machines: []
+      match text: "Traceback (most recent call last):\n  File \"/usr/bin/oil-ci\"\
+        , line X, in <module>\n    load_entry_point('canonical-oil==X.X.XX', 'console_scripts',\
+        \ 'oil-ci')()\n  File \"/usr/lib/pythonX.X/dist-packages/oil_ci/cli/ci/main.py\"\
+        , line XXX, in main\n    return utils.run(sys.argv, categories)\n  File \"\
+        /usr/lib/pythonX.X/dist-packages/oil_ci/common/cliutils.py\", line XXX, in\
+        \ run\n    ret = fn(*fn_args, **fn_kwargs)\n  File \"/usr/lib/pythonX.X/dist-packages/oil_ci/cli/ci/main.py\"\
+        , line XX, in pipeline_tags\n    api.generate_pipeline_tags(nodes=nodes, juju=juju,\
+        \ out=out)\n  File \"/usr/lib/pythonX.X/dist-packages/oil_ci/cli/api.py\"\
+        , line XXX, in generate_pipeline_tags\n    mapping = HardwareMapper(nodes_f=nodes,\
+        \ juju_f=juju).get_service_map()\n  File \"/usr/lib/pythonX.X/dist-packages/oil_ci/cli/hardware_map.py\"\
+        , line XX, in __init__\n    self.juju = load_file(juju_f)\n  File \"/usr/lib/pythonX.X/dist-packages/oil_ci/cli/hardware_map.py\"\
+        , line XX, in load_file\n    with open(filename) as file_:\nIOError: [Errno\
+        \ X] No such file or directory: u'artifacts/juju_status.yaml'\n+ test-catalog\
+        \ -B AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE artifacts/mapping.json -t /etc/oil-ci/test-catalog-auth.json\n\
+        \  "
+      pipeline_id: 9b8f9fa2-d92e-478d-b23d-b068cbcfdccf
+      ports: []
+      regexps: NO REGEX - UNFILED/UNMATCHED BUG
+      slaves: []
+      states: []
+      status: FAILURE
+      units: []
+      vendors: []

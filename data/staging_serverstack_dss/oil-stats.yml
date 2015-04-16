@@ -1,0 +1,11 @@
+jobs:
+  pipeline_deploy: {build objects: 326, completed builds: 324, end date: !!timestamp '2015-03-26
+      20:47:48', end job: 1016, fails: 156, passes: 168, start date: !!timestamp '2015-03-19
+      21:24:40', start job: 690, still running: 2, success rate: 51.85185185185185}
+  pipeline_prepare: {build objects: 168, completed builds: 168, end date: !!timestamp '2015-03-26
+      20:43:09', end job: 453, fails: 23, passes: 145, start date: !!timestamp '2015-03-19
+      22:06:43', start job: 285, still running: 0, success rate: 86.30952380952381}
+  test_tempest_smoke: {build objects: 145, end date: !!timestamp '2015-03-26 20:44:09',
+    end job: 385, good builds: 0, skipped: 0, start date: !!timestamp '2015-03-19
+      22:07:32', start job: 240, success rate: 0, total: 0, total without skipped: 0}
+overall: {success rate: 44.75308641975309, tempest builds: 145, total jobs: 324}
