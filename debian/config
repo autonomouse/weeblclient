@@ -1,9 +1,0 @@
-#!/bin/sh -e
-
-# Source debconf library.
-. /usr/share/debconf/confmodule
-
-# server type?
-db_input critical djangoapp/username || true
-db_go
-

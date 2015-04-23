@@ -1,5 +1,0 @@
-Template: djangoapp/username
-Type: string
-Description: Username:
-This package requires your full name.
-

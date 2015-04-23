@@ -1,9 +1,9 @@
 from oilserver.views import (main_page, job_specific_bugs_list)
 from django.http import HttpRequest
-from common_test_methods import Tests
+from common_test_methods import WeeblTestCase
 
 
-class DevSmokeTests(Tests):
+class DevSmokeTests(WeeblTestCase):
 
     def test_main_page(self):
         request = HttpRequest()

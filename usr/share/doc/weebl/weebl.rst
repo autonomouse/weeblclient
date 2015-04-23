@@ -10,24 +10,32 @@ Preamble
 Requirements
 ============
 
+- Ubuntu 15.04 (Vivid Vervet)
 - Python 3
 - Django 1.7
 - PostgreSQL 9.4
-- Selenium 2
 
 Initial set up
 ==============
 
+Development Notes
+~~~~~~~~~~~~~~~~~
+
+- During this development phase, please note the following.
+    - The installation instructions below are for the development branch only. Once the deployment and packaging branches are merged in, and vivid is released, the following will not be necessary.
+    - A prepopulated testing database will be added, and also a makefile to automatically set up a database deploy will be added, removing the need to do any of this manually.
+
+
 Installation of Django 1.7 on pre-vivid releases
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-- To avoid using pip, I did this: 
-    - cat <<EOF | sudo tee /etc/apt/preferences.d/vivid-manual-only 
+- To avoid using pip and instead use vivid repositories on earlier releases (such as utopic), do the following: 
+    - sudo vi /etc/apt/preferences.d/vivid-manual-only 
         | Package: * 
         | Pin: release n=vivid 
-        | Pin-Priority: 99 
-        | EOF - grep '\sutopic\s' /etc/apt/sources.list 
-        | sudo tee /etc/apt/sources.list.d/vivid.list 
+        | Pin-Priority: 99  
+        
+    - grep '\sutopic\s' /etc/apt/sources.list | sudo tee /etc/apt/sources.list.d/vivid.list
     - sudo sed 's/utopic/vivid/g' -i /etc/apt/sources.list.d/vivid.list 
     - sudo apt-get update 
     - apt-cache policy python3-django 
@@ -35,6 +43,22 @@ Installation of Django 1.7 on pre-vivid releases
     - sudo apt-get install python3-sqlparse/vivid 
     - sudo apt-get install python3-django/vivid 
     - source: http://askubuntu.com/questions/569339/install-vagrant-version-1-5-or-greater-on-14-10
+
+Dependencies
+~~~~~~~~~~~~
+
+- These modules will eventually be automatically installed as part of the packaging branch (This information will then be found in debian/control). At which time, these instructions will be updated. During development, however, the following will need to be installed:
+    - python3 (>= 3.4.0) 
+    - python3-django (>= 1.7.0) 
+    - postgresql-9.4
+    - python3-django-tastypie
+    - python3-yaml
+    - python3-mimeparse
+    - python3-dateutil
+    - python3-requests
+    - python3-psycopg2
+    - apache2
+     
 
 Postgres Installation
 ~~~~~~~~~~~~~~~~~~~~~
@@ -54,21 +78,23 @@ Postgres Installation
 - then
     | weebl/manage.py syncdb
 
-Selenium Installation
-~~~~~~~~~~~~~~~~~~~~~
-
- - *This section needs updating to avoid the use of pip*
- - sudo pip3 install selenium 
-
 Running tests
 ~~~~~~~~~~~~~
  
-- Run functional (webdriver) tests using:
-| ./run_tests.sh func
 - Run unit tests using:
 | ./run_tests.sh unit
 - Run linter using:
 | ./run_tests.sh lint
+
+- When Selenium2 for Python3 is supported in the vivid repositories, you will be able to run functional (webdriver) tests using:
+| ./run_tests.sh func
+
+
+Deployment
+~~~~~~~~~~
+
+- Weebl is not yet production ready (these instrutions will be updated with Apache hosting instructions as Weebl is developed), and so it is currently deployed using django's built-in server:
+    | sudo ./weebl/manage.py runserver 0.0.0.0:8000
 
 
 Making Changes and Packaging Weebl

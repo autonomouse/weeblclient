@@ -1,1 +1,1 @@
-WEEBL_ROOT=`pwd` PYTHONPATH=$PYTHONPATH:`pwd` python weebl/scripts/webapp.py
+WEEBL_ROOT=`pwd` PYTHONPATH=$PYTHONPATH:`pwd` weebl/manage.py runserver 0.0.0.0:8000

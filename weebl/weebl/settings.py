@@ -10,17 +10,20 @@ https://docs.djangoproject.com/en/1.7/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+import utils
 
+cfg = utils.get_config()
+MODE = utils.get_mode()
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.7/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'd)nfvgqd2efxi9c9#99v%y&s6e3=ia3a9srw+wphvchub*gr@#'
+SECRET_KEY = cfg.get(MODE, 'secret_key')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = cfg.get(MODE, 'debug_mode')
 
 TEMPLATE_DEBUG = True
 
@@ -37,7 +40,6 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'oilserver',
-    'functional_tests',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -57,15 +59,16 @@ WSGI_APPLICATION = 'weebl.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.7/ref/settings/#databases
-
+port_str = cfg.get(MODE, 'database_port')
+PORT = port_str if port_str not in ['None', 'none'] else ''
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'bugs_database',
-        'USER': 'user',
-        'PASSWORD': 'password',
-        'HOST': 'localhost',
-        'PORT': ''
+        'ENGINE': cfg.get(MODE, 'database_engine'),
+        'NAME': cfg.get(MODE, 'database_name'),
+        'USER': cfg.get(MODE, 'database_user'),
+        'PASSWORD': cfg.get(MODE, 'database_password'),
+        'HOST': cfg.get(MODE, 'database_host'),
+        'PORT': PORT
     }
 }
 

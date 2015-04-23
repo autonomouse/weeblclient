@@ -1,10 +1,10 @@
 
-{% for key, environment in environments.items %}
+{% for key, environment in env.items %}
     <div id='main_content' class='main_content'>
         <p></p>
         <h2>Top ten {{ environment.name }} bugs:</h2>
-        <p></p>
-        {% for job, rank in environment.rankings.items %}
+        <p></p>          
+        {% for job, rank in environment.tframe.rankings.items %}
 
             <h3><a href="/job/{{ job }}">{{ job }} bugs</a>:</h3>
             <table border="1">

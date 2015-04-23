@@ -1,6 +1,0 @@
-#!/bin/bash
-set -e
-
-# stop django server
-invoke-rc.d django stop
-

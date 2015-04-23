@@ -20,6 +20,24 @@
                 </div>
             </div>
         </div>
+        {% for key, environment in env.items %}
+            <div id='main_content' class='main_content'>
+                <h2>{{ environment.name }}:</h2>
+                {% if environment.oil_state == 'critical' %}
+                    <p>OIL is <span style="color:red">DOWN</span></p>
+                {% elif environment.oil_state == 'warning' %}
+                    <p>OIL is <span style="color:orange">UNSTABLE</span></p>
+                {% else %}
+                    <p>OIL is <span style="color:green">UP</span></p>
+                {% endif %}
+                <p>Overall success rate: {{ environment.tframe.success_rate }}% </p>
+                <p>Pipeline_deploy success rate: {{ environment.tframe.job_success_rates.pipeline_deploy }}% </p>
+                <p>Pipeline_prepare success rate: {{ environment.tframe.job_success_rates.pipeline_prepare }}% </p>
+                <p>Test_tempest_smoke success rate: {{ environment.tframe.job_success_rates.test_tempest_smoke }}%</p>
+                <p>Last updated: {{ environment.tframe.timestamp }}</p>
+                <hr/>
+            </div>
+        {% endfor %}
 
         {% block main %}{% endblock %}
 
