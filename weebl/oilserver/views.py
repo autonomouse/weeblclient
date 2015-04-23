@@ -108,27 +108,34 @@ def get_bug_ranking_data(data_location, tframe, limit=None):
     return tframe
         
 
-def acquire_data(environment, root_data_directory, time_range='daily', 
+def get_common_data(environments, root_data_directory, time_range='daily', 
                  limit=None):
     """Get all relevant data."""
     data = namedtuple('data','')
-    data.env = {environment: namedtuple('env','')}
-    data.env[environment].name = environment
-    data.env[environment].tframe = namedtuple('tframe','')
+    data.env = {}
+    for environment in environments:
+        data.env[environment] = namedtuple('env','')
+        data.env[environment].name = environment
+        data.env[environment].tframe = namedtuple('tframe','')
 
-    env_data_location = os.path.join(root_data_directory, environment)
-    time_range_data_location = os.path.join(env_data_location, time_range)
-        
-    data.title = 'main_page'
-    data.env[environment] = get_current_oil_state(env_data_location, 
-                                                   data.env[environment])    
-    tframe = data.env[environment].tframe
-    tframe = get_timestamp(time_range_data_location, tframe)
-    tframe = get_oil_stats(time_range_data_location, tframe)
-    tframe = get_bug_ranking_data(time_range_data_location, tframe, limit)
-    return convert_named_tuple_to_dict(data)
+        env_data_location = os.path.join(root_data_directory, environment)
+        time_range_data_location = os.path.join(env_data_location, time_range)
+            
+        data.title = 'main_page'
+        try:
+            data.env[environment] = get_current_oil_state(env_data_location, 
+                                                          data.env[environment])
+        except AbsentYamlError:
+            data.env[environment].oil_state = 'critical'
+            data.env[environment].oil_situation = ["No report_status file found"]
 
-def convert_named_tuple_to_dict(data):
+        tframe = data.env[environment].tframe
+        tframe = get_timestamp(time_range_data_location, tframe)
+        tframe = get_oil_stats(time_range_data_location, tframe)
+        tframe = get_bug_ranking_data(time_range_data_location, tframe, limit)
+    return data
+    
+def conv_to_dict(data):
     """Converts from those multi-level namedtuples that seemed such a good idea 
     at the time back into a dictionary.
     
@@ -166,29 +173,24 @@ def convert_named_tuple_to_dict(data):
             if type(value) == dict:
                 for key2, value2 in value.items():
                     if type(value2) == type:
-                        value2 = convert_named_tuple_to_dict(value2)
+                        value2 = conv_to_dict(value2)
                     out[key][key2] = value2
             else:
                 out[key] = value
     return out
     
 
-def main_page(request):
-    for env_folder in os.listdir(root_data_directory):
-        environment = os.path.basename(env_folder)
-        # Show daily results and limit the number of bugs to the top ten:
-        data = acquire_data(environment, root_data_directory, 
-                            time_range='daily', limit=10) 
-    return render(request, 'main_page.html', data)
+def main_page(request, time_range='daily'):
+    environments = os.listdir(root_data_directory)
+    # Show (daily?) results and limit the number of bugs to the top ten:
+    data = get_common_data(environments, root_data_directory, time_range, 10)
+    return render(request, 'main_page.html', conv_to_dict(data))
 
 
-def job_specific_bugs_list(request, job):
-    data = {'title': 'job_specific_bugs_list',
-            'job': job, }
-    for env_folder, parent, files in os.walk(root_data_directory):
-        if env_folder == root_data_directory:
-            continue
-        environment = os.path.basename(env_folder)
-        data = load_data(environment, root_data_directory, data)
-    return render(request, 'job_specific_bugs_list.html', data)
+def job_specific_bugs_list(request, job, time_range='daily'):
+    # TODO: environments should be an argument, really, defaulting to all
+    environments = os.listdir(root_data_directory)
+    data = get_common_data(environments, root_data_directory, time_range)
+    data.job = job
+    return render(request, 'job_specific_bugs_list.html', conv_to_dict(data))
 

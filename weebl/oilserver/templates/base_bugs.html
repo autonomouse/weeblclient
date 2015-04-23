@@ -1,8 +1,8 @@
 
-{% for key, environment in environments.items %}
+{% for key, environment in env.items %}
     <div id='main_content' class='main_content'>
         <h2>All {{ environment.name }} bugs:</h2>                
-        {% for jobname, rank in environment.rankings.items %}         
+        {% for jobname, rank in environment.tframe.rankings.items %}         
             {% if jobname == job %}                   
             
             <table border="1">
@@ -22,4 +22,3 @@
         <hr/>
     </div>
 {% endfor %}
-
