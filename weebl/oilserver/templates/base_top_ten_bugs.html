@@ -2,11 +2,12 @@
 {% for key, environment in env.items %}
     <div id='main_content' class='main_content'>
         <p></p>
-        <h2>Top ten {{ environment.name }} bugs:</h2>
+        <h2>Top ten {{ job }} {{ environment.name }} bugs ({{ time_range }}):</h2>   
         <p></p>          
         {% for job, rank in environment.tframe.rankings.items %}
 
-            <h3><a href="/job/{{ job }}">{{ job }} bugs</a>:</h3>
+            <h3><a href="/job/{{ job }}/{{ time_range }}/{{ environment.name }}">{{ job }} bugs</a>:</h3>
+            
             <table border="1">
                 <tr>
                     <td>Bug ID</td>

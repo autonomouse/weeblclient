@@ -3,7 +3,8 @@
 {% block page_title %}{{ title }}{% endblock %}
 {% block title %}{{ job }}{% endblock %}
 
-{% block filters %}{% endblock %}
+{% block filters %}{% include "job_specific_bugs_list_filters.html" %}{% endblock %}
+
 {% block main %}
     {% block bugs %}{% include "base_bugs.html" %}{% endblock %}
 {% endblock %}

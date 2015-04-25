@@ -14,9 +14,9 @@ bug_ranking_files = json.loads(cfg.get(MODE, 'bug_ranking_files')
                                .replace("'", "\""))
 root_data_directory = cfg.get(MODE, 'data_dir')
 js_down_th = json.loads(cfg.get(MODE, 'job_specific_down_th')
-                               .replace("'", "\""))
+                                .replace("'", "\""))
 js_unstable_th = json.loads(cfg.get(MODE, 'job_specific_unstable_th')
-                               .replace("'", "\""))
+                                    .replace("'", "\""))
 
 
 def load_from_yaml_file(file_location):
@@ -89,12 +89,21 @@ def get_timestamp(data_location, tframe):
 def get_oil_stats(data_location, tframe):
     """Load up oilstats"""
 
-    oil_stats = \
-        load_from_yaml_file(os.path.join(data_location, 'oil-stats.yaml'))
+    try:
+        oil_stats = \
+            load_from_yaml_file(os.path.join(data_location, 'oil-stats.yaml'))
+    except AbsentYamlError:
+        oil_stats = {'jobs': {'pipeline_deploy': {'success rate': '?'},
+                              'pipeline_prepare': {'success rate': '?'},
+                              'test_tempest_smoke': {'success rate': '?',}},
+                     'overall': {'success rate': '?',
+                                 'tempest builds': '?',
+                                 'total jobs': '?'}}
     if not oil_stats:
         return
-    overall = round(oil_stats['overall']['success rate'], 2)
-    if overall < float(cfg.get(MODE, 'overall_down_th')):
+    SRate = oil_stats['overall']['success rate']
+    overall = round(SRate, 2) if SRate != '?' else '?'
+    if overall == '?' or overall < float(cfg.get(MODE, 'overall_down_th')):
         tframe.overall_colour = cfg.get(MODE, 'down_colour')
     elif overall < float(cfg.get(MODE, 'overall_unstable_th')):
         tframe.overall_colour = cfg.get(MODE, 'unstable_colour')
@@ -104,8 +113,9 @@ def get_oil_stats(data_location, tframe):
     tframe.job_success_rates = {}
     tframe.job_success_rate_col = {}
     for jobname, yaml_file in bug_ranking_files.items():
-        success = round(oil_stats['jobs'][jobname]['success rate'], 2)
-        if success < float(js_down_th[jobname]):
+        OvAll = oil_stats['jobs'][jobname]['success rate']
+        success = round(OvAll, 2) if OvAll != '?' else '?'
+        if success == '?' or success < float(js_down_th[jobname]):
             tframe.job_success_rate_col[jobname] = cfg.get(MODE, 'down_colour')
         elif success < float(js_unstable_th[jobname]):
             tframe.job_success_rate_col[jobname] = \
@@ -154,7 +164,7 @@ def get_common_data(environments, root_data_directory, time_range='daily',
         except AbsentYamlError:
             data.env[environment].oil_state = 'down'
             data.env[environment].oil_state_colour = \
-                cfg.get(MODE, 
+                cfg.get(MODE,
                         '{}_colour'.format(data.env[environment].oil_state))
             data.env[environment].oil_situation = \
                 ["No report_status file found"]
@@ -209,20 +219,47 @@ def conv_to_dict(data):
                 out[key] = value
     return out
 
-
 def main_page(request, time_range='daily'):
-    environments = [env for env in os.listdir(root_data_directory) 
+    environments = [env for env in os.listdir(root_data_directory)
                     if os.path.isdir(os.path.join(root_data_directory, env))]
     # Show (daily?) results and limit the number of bugs to the top ten:
     data = get_common_data(environments, root_data_directory, time_range, 10)
+    data.time_range = time_range
     return render(request, 'main_page.html', conv_to_dict(data))
 
+def weekly_main_page(request, time_range='weekly'):
+    return main_page(request, time_range)
 
-def job_specific_bugs_list(request, job, time_range='daily'):
+def job_specific_bugs_list(request, job, time_range='daily',
+                           specific_env='all'):
     # TODO: environments should be an argument, really, defaulting to all
-    environments = [dir for dir in os.listdir(root_data_directory) 
-                    if os.path.isdir(dir)]
+    if specific_env == 'all':
+        environments = [env for env in os.listdir(root_data_directory) if
+                        os.path.isdir(os.path.join(root_data_directory, env))]
+    else:
+        environments = [specific_env]
     data = get_common_data(environments, root_data_directory, time_range)
     data.job = job
+    data.time_range = time_range
     return render(request, 'job_specific_bugs_list.html', conv_to_dict(data))
 
+'''
+
+def weekly_production_job_specific_bugs_list(request, job, time_range='weekly',
+                                  specific_env='production')
+    return job_specific_bugs_list(request, job, time_range, specific_env)
+
+def weekly_staging_serverstack_job_specific_bugs_list(request, job, 
+                                  time_range='weekly',
+                                  specific_env='production')
+    return job_specific_bugs_list(request, job, time_range, specific_env)
+   
+def daily_production_job_specific_bugs_list(request, job, time_range='weekly',
+                                  specific_env='production')
+    return job_specific_bugs_list(request, job, time_range, specific_env)
+
+def daily_staging_serverstack_job_specific_bugs_list(request, job, 
+                                  time_range='weekly',
+                                  specific_env='production')
+    return job_specific_bugs_list(request, job, time_range, specific_env)
+'''    
