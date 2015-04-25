@@ -9,14 +9,24 @@
                 <tr>
                     <td>Bug ID</td>
                     <td>Number of hits</td>
+                    <td> assignee </td>
+                    <td> age_days </td>
+                    <td> title </td>
+                    <td> importance </td>
+                    <td> status </td>
                 </tr>
-                {% for bug_id, hits in rank %}
+                {% for bug_id, hits, lp_link, assignee, age_days, bug_title, importance, status in rank %}
                 <tr>
-                    <td>{{ bug_id }}</td>
+                    <td><a href="{{ lp_link }}">{{ bug_id }}</a></td>
                     <td>{{ hits }}</td>
+                    <td>{{ assignee }}</td>
+                    <td>{{ age_days }}</td>
+                    <td>{{ bug_title }}</td> 
+                    <td>{{ importance }}</td>
+                    <td>{{ status }}</td>
                 </tr>
-                {% endfor %}                        
-            </table>  
+                {% endfor %}
+            </table> 
             {% endif %}
         {% endfor %}
         <hr/>

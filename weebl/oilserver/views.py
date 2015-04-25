@@ -27,7 +27,7 @@ def load_from_yaml_file(file_location):
 
     with open(file_location, 'r') as oil_file:
         return yaml.load(oil_file)
-
+  
 def get_current_oil_state(data_location, env):
     """Load up report status"""
     env.oil_state = 'up'
@@ -143,9 +143,43 @@ def get_bug_ranking_data(data_location, tframe, limit=None):
         tframe.rankings[jobname] = sorted_bugs
     return tframe
 
+def merge_with_launchpad_data(data_location, tframe):
+    lp_data = get_launchpad_data(data_location)
+    
+    for job, job_ranking in tframe.rankings.items():
+        for idx, (bug, hits) in enumerate(job_ranking):
+            bug_data = lp_data['tasks'].get(bug)
+            if bug_data:
+                bug_data = bug_data[0]
+                lp_link = os.path.join(cfg.get(MODE, 'launchpad_bugs_url'), 
+                                       bug)
+                assignee = bug_data['assignee']
+                age_days = bug_data['bug']['age_days']
+                title = bug_data['bug']['title']
+                importance = bug_data['importance']
+                status = bug_data['status']                
+            else:
+                lp_link = '/'
+                assignee = ''
+                age_days = ''
+                title = ''
+                importance = ''
+                status = ''
+
+            tframe.rankings[job][idx] = (bug, hits, lp_link, assignee, 
+                                         age_days, title, importance, status)    
+    return tframe
+
+def get_launchpad_data(data_location):
+    file_location = os.path.join(data_location, 'OIL.json')
+    if not os.path.exists(file_location):
+        raise AbsentYamlError("{} missing".format(file_location))
+
+    with open(file_location, 'r') as lp_file:
+        return yaml.load(lp_file)
 
 def get_common_data(environments, root_data_directory, time_range='daily',
-                 limit=None):
+                    limit=None):
     """Get all relevant data."""
     data = namedtuple('data','')
     data.env = {}
@@ -159,8 +193,8 @@ def get_common_data(environments, root_data_directory, time_range='daily',
 
         data.title = 'main_page'
         try:
-            data.env[environment] = get_current_oil_state(env_data_location,
-                                                          data.env[environment])
+            data.env[environment] = \
+                get_current_oil_state(env_data_location, data.env[environment])
         except AbsentYamlError:
             data.env[environment].oil_state = 'down'
             data.env[environment].oil_state_colour = \
@@ -168,11 +202,11 @@ def get_common_data(environments, root_data_directory, time_range='daily',
                         '{}_colour'.format(data.env[environment].oil_state))
             data.env[environment].oil_situation = \
                 ["No report_status file found"]
-
         tframe = data.env[environment].tframe
         tframe = get_timestamp(time_range_data_location, tframe)
         tframe = get_oil_stats(time_range_data_location, tframe)
         tframe = get_bug_ranking_data(time_range_data_location, tframe, limit)
+        tframe = merge_with_launchpad_data(root_data_directory, tframe)
     return data
 
 def conv_to_dict(data):
