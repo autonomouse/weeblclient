@@ -13,6 +13,10 @@ MODE = utils.get_mode()
 bug_ranking_files = json.loads(cfg.get(MODE, 'bug_ranking_files')
                                .replace("'", "\""))
 root_data_directory = cfg.get(MODE, 'data_dir')
+js_down_th = json.loads(cfg.get(MODE, 'job_specific_down_th')
+                               .replace("'", "\""))
+js_unstable_th = json.loads(cfg.get(MODE, 'job_specific_unstable_th')
+                               .replace("'", "\""))
 
 
 def load_from_yaml_file(file_location):
@@ -26,89 +30,111 @@ def load_from_yaml_file(file_location):
 
 def get_current_oil_state(data_location, env):
     """Load up report status"""
-    env.oil_state = 'normal'
+    env.oil_state = 'up'
+    env.oil_state_colour = cfg.get(MODE, '{}_colour'.format(env.oil_state))
     env.oil_situation = []
-    
+
     status = load_from_yaml_file(os.path.join(data_location, 'report_status'))
-    
+
     # Work out how long it's been since it last checked in:
-    timestamp = datetime.strptime(status['last_time_jenkins_reported'], 
-                                  '%Y-%m-%d %H:%M:%S')                                                 
+    timestamp = datetime.strptime(status['last_time_jenkins_reported'],
+                                  '%Y-%m-%d %H:%M:%S')
     time_difference = datetime.utcnow() - timestamp
-    warning_th = cfg.get(MODE, 'check_in_warning_threshold')
-    critical_th = cfg.get(MODE, 'check_in_critical_threshold')
-    if time_difference.seconds > float(critical_th):
-        env.oil_state = 'critical'
+    unstable_th = cfg.get(MODE, 'check_in_unstable_threshold')
+    down_th = cfg.get(MODE, 'check_in_down_threshold')
+
+    if time_difference.seconds > float(down_th):
+        env.oil_state = 'down'
+        env.oil_state_colour = cfg.get(MODE, '{}_colour'.format(env.oil_state))
         msg = "It has been over {} seconds since jenkins last checked in."
-        env.oil_situation.append(msg.format(critical_th))
-    elif time_difference.seconds > float(warning_th):
-        env.oil_state = 'warning'
+        env.oil_situation.append(msg.format(down_th))
+    elif time_difference.seconds > float(unstable_th):
+        env.oil_state = 'unstable'
+        env.oil_state_colour = cfg.get(MODE, '{}_colour'.format(env.oil_state))
         msg = "It has been over {} seconds since jenkins last checked in."
-        env.oil_situation.append(msg.format(warning_th))
-    
+        env.oil_situation.append(msg.format(unstable_th))
+
     # Determine if there are any dead nodes:
     body_count = len(status['dead_nodes'])
     if body_count > 0:
-        env.oil_state = 'warning'
+        env.oil_state = 'unstable'
+        env.oil_state_colour = cfg.get(MODE, '{}_colour'.format(env.oil_state))
         msg = "{} nodes are reported as dead.".format(body_count)
         env.oil_situation.append(msg)
-    
+
     # Determine if there are too few builds in the queue:
     builds_in_q = len(status['start_builds_queue'])
     build_q_th = cfg.get(MODE, 'low_build_queue_threshold')
     if builds_in_q < int(build_q_th):
-        env.oil_state = 'warning'
+        env.oil_state = 'unstable'
+        env.oil_state_colour = cfg.get(MODE, '{}_colour'.format(env.oil_state))
         msg = "There are only {} pipeline_start builds currently in the queue."
-        env.oil_situation.append(msg.format(build_q_th))        
-    
+        env.oil_situation.append(msg.format(build_q_th))
+
     # Determine if there are any builds that are hanging:
     # TODO - not yet implemented on jenkins
-    
+
     # Determine if the Queue Daemon has stopped:
-    # TODO - not yet implemented on jenkins    
-    
+    # TODO - not yet implemented on jenkins
+
     return env
-    
+
 def get_timestamp(data_location, tframe):
     """Load up timestamp that oil-stats was run."""
-    
+
     tframe.timestamp = \
-        load_from_yaml_file(os.path.join(data_location, 'timestamp'))    
+        load_from_yaml_file(os.path.join(data_location, 'timestamp'))
     return tframe
-    
+
 def get_oil_stats(data_location, tframe):
     """Load up oilstats"""
-    
+
     oil_stats = \
         load_from_yaml_file(os.path.join(data_location, 'oil-stats.yaml'))
     if not oil_stats:
         return
-    tframe.success_rate = str(round(oil_stats['overall']['success rate'], 2))
+    overall = round(oil_stats['overall']['success rate'], 2)
+    if overall < float(cfg.get(MODE, 'overall_down_th')):
+        tframe.overall_colour = cfg.get(MODE, 'down_colour')
+    elif overall < float(cfg.get(MODE, 'overall_unstable_th')):
+        tframe.overall_colour = cfg.get(MODE, 'unstable_colour')
+    else:
+        tframe.overall_colour = cfg.get(MODE, 'up_colour')
+    tframe.success_rate = str(overall)
     tframe.job_success_rates = {}
+    tframe.job_success_rate_col = {}
     for jobname, yaml_file in bug_ranking_files.items():
-        tframe.job_success_rates[jobname] = \
-            str(round(oil_stats['jobs'][jobname]['success rate'], 2))
+        success = round(oil_stats['jobs'][jobname]['success rate'], 2)
+        if success < float(js_down_th[jobname]):
+            tframe.job_success_rate_col[jobname] = cfg.get(MODE, 'down_colour')
+        elif success < float(js_unstable_th[jobname]):
+            tframe.job_success_rate_col[jobname] = \
+                cfg.get(MODE, 'unstable_colour')
+        else:
+            tframe.job_success_rate_col[jobname] = cfg.get(MODE, 'up_colour')
+        tframe.job_success_rates[jobname] = str(success)
+
     return tframe
-    
+
 def get_bug_ranking_data(data_location, tframe, limit=None):
     """Load up bug_ranking data."""
     tframe.rankings = {}
     for jobname, yaml_file in bug_ranking_files.items():
-        job_ranking = load_from_yaml_file(os.path.join(data_location, 
+        job_ranking = load_from_yaml_file(os.path.join(data_location,
                                                        yaml_file))
         job_ranking = dict(job_ranking) if job_ranking else {}
-        
+
         bugs = [ranking for ranking in job_ranking.items()]
-        
+
         # Sort bugs by number of hits:
         sorted_bugs = sorted(bugs, key=operator.itemgetter(1), reverse=True)
         tframe.rankings[jobname] = job_ranking
         sorted_bugs = sorted_bugs[:limit] if limit != None else sorted_bugs
         tframe.rankings[jobname] = sorted_bugs
     return tframe
-        
 
-def get_common_data(environments, root_data_directory, time_range='daily', 
+
+def get_common_data(environments, root_data_directory, time_range='daily',
                  limit=None):
     """Get all relevant data."""
     data = namedtuple('data','')
@@ -120,50 +146,54 @@ def get_common_data(environments, root_data_directory, time_range='daily',
 
         env_data_location = os.path.join(root_data_directory, environment)
         time_range_data_location = os.path.join(env_data_location, time_range)
-            
+
         data.title = 'main_page'
         try:
-            data.env[environment] = get_current_oil_state(env_data_location, 
+            data.env[environment] = get_current_oil_state(env_data_location,
                                                           data.env[environment])
         except AbsentYamlError:
-            data.env[environment].oil_state = 'critical'
-            data.env[environment].oil_situation = ["No report_status file found"]
+            data.env[environment].oil_state = 'down'
+            data.env[environment].oil_state_colour = \
+                cfg.get(MODE, 
+                        '{}_colour'.format(data.env[environment].oil_state))
+            data.env[environment].oil_situation = \
+                ["No report_status file found"]
 
         tframe = data.env[environment].tframe
         tframe = get_timestamp(time_range_data_location, tframe)
         tframe = get_oil_stats(time_range_data_location, tframe)
         tframe = get_bug_ranking_data(time_range_data_location, tframe, limit)
     return data
-    
+
 def conv_to_dict(data):
-    """Converts from those multi-level namedtuples that seemed such a good idea 
+    """Converts from those multi-level namedtuples that seemed such a good idea
     at the time back into a dictionary.
-    
+
     Example data structure (for daily data on production):
 
-    data['title'] 
+    data['title']
         - The title of the page
 
-    data['env']['name'] 
+    data['env']['name']
         - The name of this environment (in this example: 'production')
 
     data['env']['production']['oil_state']
-        - The current status of the 'production' OIL environment 
-        
+        - The current status of the 'production' OIL environment
+
     data['env']['production']['oil_situation']
-        - An explanation for the current status of the OIL environment 
-        
+        - An explanation for the current status of the OIL environment
+
     data['env']['production']['tframe']['success_rate']
         - The overall success rate of from daily oil-stats run on production
-    
+
     data['env']['production']['tframe']['timestamp']
-        - The time when the daily oil-stats were run on production data    
-    
+        - The time when the daily oil-stats were run on production data
+
     data['env']['production']['tframe']['job_success_rates']
         - A dict of each job and it's individual success rate
-    
+
     data['env']['production']['tframe']['rankings']['pipeline_deploy']
-        - A list of tuples showing the bugs hit and count for the 
+        - A list of tuples showing the bugs hit and count for the
           pipeline_deploy job (in this case)
     """
     out = {}
@@ -178,10 +208,11 @@ def conv_to_dict(data):
             else:
                 out[key] = value
     return out
-    
+
 
 def main_page(request, time_range='daily'):
-    environments = os.listdir(root_data_directory)
+    environments = [env for env in os.listdir(root_data_directory) 
+                    if os.path.isdir(os.path.join(root_data_directory, env))]
     # Show (daily?) results and limit the number of bugs to the top ten:
     data = get_common_data(environments, root_data_directory, time_range, 10)
     return render(request, 'main_page.html', conv_to_dict(data))
@@ -189,7 +220,8 @@ def main_page(request, time_range='daily'):
 
 def job_specific_bugs_list(request, job, time_range='daily'):
     # TODO: environments should be an argument, really, defaulting to all
-    environments = os.listdir(root_data_directory)
+    environments = [dir for dir in os.listdir(root_data_directory) 
+                    if os.path.isdir(dir)]
     data = get_common_data(environments, root_data_directory, time_range)
     data.job = job
     return render(request, 'job_specific_bugs_list.html', conv_to_dict(data))

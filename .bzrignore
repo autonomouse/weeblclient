@@ -2,4 +2,6 @@
 usr/share/doc/weebl/changelog.Debian.gz
 usr/share/doc/weebl/changelog.gz
 usr/share/doc/weebl/weebl.html
-data
+data/*
+*~
+~
