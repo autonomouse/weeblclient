@@ -3,11 +3,11 @@
 {% block page_title %}{{ title }}{% endblock %}
 {% block title %}{{ title }}{% endblock %}
 
-{% block filters %}{% include "main_page_filters.html" %}{% endblock %}
+{% block filters %}{% include "filter_main_page.html" %}{% endblock %}
 
 {% block main %}
     {% block breakdown %}{% include "base_breakdown.html" %}{% endblock %}
-    {% block bugs %}{% include "base_top_ten_bugs.html" %}{% endblock %}
+    {% block bugs %}{% include "base_all_bugs.html" %}{% endblock %}
     {% block charts %}{% include "base_charts.html" %}{% endblock %}
 {% endblock %}
 

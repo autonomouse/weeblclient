@@ -150,24 +150,28 @@ def merge_with_launchpad_data(data_location, tframe):
         for idx, (bug, hits) in enumerate(job_ranking):
             bug_data = lp_data['tasks'].get(bug)
             if bug_data:
-                bug_data = bug_data[0]
-                lp_link = os.path.join(cfg.get(MODE, 'launchpad_bugs_url'), 
-                                       bug)
+                bug_data = bug_data[0]                
+                lp_link = \
+                    os.path.join(cfg.get(MODE, 'launchpad_bugs_url'), bug)
                 assignee = bug_data['assignee']
                 age_days = bug_data['bug']['age_days']
+                date_assigned = bug_data['date_assigned']
                 title = bug_data['bug']['title']
                 importance = bug_data['importance']
-                status = bug_data['status']                
+                status = bug_data['status']        
+                all_tags = bug_data['bug']['tags']               
             else:
-                lp_link = '/'
+                lp_link = None
                 assignee = ''
                 age_days = ''
+                date_assigned = ''
                 title = ''
                 importance = ''
-                status = ''
-
-            tframe.rankings[job][idx] = (bug, hits, lp_link, assignee, 
-                                         age_days, title, importance, status)    
+                status = ''     
+                all_tags = ''  
+            tframe.rankings[job][idx] = (bug, lp_link, hits, lp_link, title,
+                                         assignee, age_days, importance, 
+                                         status, date_assigned, all_tags)
     return tframe
 
 def get_launchpad_data(data_location):
