@@ -26,19 +26,29 @@
             <table>  
                     <tr>
                         <td><small>Environment:</small></td>
+                        <td><div style="width: 50px"></td>
                         <td><small>OIL state:</small></td>
+                        <td><div style="width: 75px"></td>
                         <td><small>Success rate:</small></td>
+                        <td><div style="width: 75px"></td>
                         <td><small>Pipeline_deploy:</small></td>
+                        <td><div style="width: 15px"></td>
                         <td><small>Pipeline_prepare:</small></td>
+                        <td><div style="width: 15px"></td>
                         <td><small>Test_tempest_smoke:</small></td>
                     </tr>                                  
                 {% for key, environment in env.items %}
                     <tr>
                         <td>{{ environment.name }}</td>
+                        <td></td>
                         <td><span style="color:{{ environment.oil_state_colour }}">{{ environment.oil_state }}</span></td>
+                        <td></td>
                         <td><span style="color:{{ environment.tframe.overall_colour }}">{{ environment.tframe.success_rate }}% </span></td>
+                        <td></td>
                         <td><span style="color:{{ environment.tframe.job_success_rate_col.pipeline_deploy }}">{{ environment.tframe.job_success_rates.pipeline_deploy }}% </span></td>
+                        <td></td>
                         <td><span style="color:{{ environment.tframe.job_success_rate_col.pipeline_prepare }}">{{ environment.tframe.job_success_rates.pipeline_prepare }}% </span></td>
+                        <td></td>
                         <td><span style="color:{{ environment.tframe.job_success_rate_col.test_tempest_smoke }}">{{ environment.tframe.job_success_rates.test_tempest_smoke }}% </span></td>
                     </tr>    
                 {% endfor %}

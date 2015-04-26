@@ -143,7 +143,7 @@ def get_bug_ranking_data(data_location, tframe, limit=None):
         tframe.rankings[jobname] = sorted_bugs
     return tframe
 
-def merge_with_launchpad_data(data_location, tframe):
+def merge_with_launchpad_data(data_location, tframe, database):
     lp_data = get_launchpad_data(data_location)
     
     for job, job_ranking in tframe.rankings.items():
@@ -169,8 +169,9 @@ def merge_with_launchpad_data(data_location, tframe):
                 importance = ''
                 status = ''     
                 all_tags = ''  
+            cats = link_tags_with_hi_lvl_categories(database, tframe, job, bug)
             tframe.rankings[job][idx] = (bug, lp_link, hits, lp_link, title,
-                                         assignee, age_days, importance, 
+                                         assignee, age_days, cats, importance, 
                                          status, date_assigned, all_tags)
     return tframe
 
@@ -182,9 +183,22 @@ def get_launchpad_data(data_location):
     with open(file_location, 'r') as lp_file:
         return yaml.load(lp_file)
 
+def link_tags_with_hi_lvl_categories(database, tframe, job, bug_id):    
+    for bug in tframe.rankings[job]:
+        if bug[0] == bug_id:
+            db_bug = database['bugs'].get(bug_id)
+            categories = db_bug.get('category') if db_bug else 'Unknown'
+            if categories in [[], None, 'None']:
+                categories = 'Unknown' 
+            return categories
+
 def get_common_data(environments, root_data_directory, time_range='daily',
                     limit=None):
     """Get all relevant data."""
+    # Load up data from files:
+    with open(os.path.join(root_data_directory, 'database.yaml'), 'r') as db:
+        database = yaml.load(db)
+        
     data = namedtuple('data','')
     data.env = {}
     for environment in environments:
@@ -210,7 +224,8 @@ def get_common_data(environments, root_data_directory, time_range='daily',
         tframe = get_timestamp(time_range_data_location, tframe)
         tframe = get_oil_stats(time_range_data_location, tframe)
         tframe = get_bug_ranking_data(time_range_data_location, tframe, limit)
-        tframe = merge_with_launchpad_data(root_data_directory, tframe)
+        tframe = \
+            merge_with_launchpad_data(root_data_directory, tframe, database)
     return data
 
 def conv_to_dict(data):
@@ -280,24 +295,3 @@ def job_specific_bugs_list(request, job, time_range='daily',
     data.job = job
     data.time_range = time_range
     return render(request, 'job_specific_bugs_list.html', conv_to_dict(data))
-
-'''
-
-def weekly_production_job_specific_bugs_list(request, job, time_range='weekly',
-                                  specific_env='production')
-    return job_specific_bugs_list(request, job, time_range, specific_env)
-
-def weekly_staging_serverstack_job_specific_bugs_list(request, job, 
-                                  time_range='weekly',
-                                  specific_env='production')
-    return job_specific_bugs_list(request, job, time_range, specific_env)
-   
-def daily_production_job_specific_bugs_list(request, job, time_range='weekly',
-                                  specific_env='production')
-    return job_specific_bugs_list(request, job, time_range, specific_env)
-
-def daily_staging_serverstack_job_specific_bugs_list(request, job, 
-                                  time_range='weekly',
-                                  specific_env='production')
-    return job_specific_bugs_list(request, job, time_range, specific_env)
-'''    
