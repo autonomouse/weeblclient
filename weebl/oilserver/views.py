@@ -152,6 +152,7 @@ def get_bug_ranking_data(data_location, tframe, limit=None):
 def merge_with_launchpad_data(data_location, tframe):
     lp_data = get_launchpad_data(data_location)
     cats = {}
+    bug_cats = {}
     
     for job, job_ranking in tframe.rankings.items():
         for idx, (bug, hits) in enumerate(job_ranking):
@@ -176,11 +177,14 @@ def merge_with_launchpad_data(data_location, tframe):
                 importance = ''
                 status = ''     
                 all_tags = ''  
-            cats = link_tags_with_hi_lvl_categories(cats, all_tags, tframe, 
-                                                    job, bug)
+            cats, bug_cats = link_tags_with_hi_lvl_categories(cats, all_tags, 
+                                                              tframe, job, bug,
+                                                              bug_cats)
+            category = bug_cats.get(bug)
             tframe.rankings[job][idx] = (bug, lp_link, hits, lp_link, title,
-                                         assignee, age_days, cats, importance, 
-                                         status, date_assigned, all_tags)
+                                         assignee, age_days, cats, 
+                                         importance, status, date_assigned, 
+                                         all_tags, category)
     breakdown = {}
     for category in cats:
         breakdown[category] = len(cats[category])
@@ -197,18 +201,19 @@ def get_launchpad_data(data_location):
         return yaml.load(lp_file)
 
 def link_tags_with_hi_lvl_categories(categories, all_tags, tframe, job, 
-                                     bug_id):
+                                     bug_id, bug_cats):
     for bug in tframe.rankings[job]:
         if bug[0] == bug_id:
             category = ['Unknown']
             for tag in all_tags: 
                 if 'category-' in tag:
                     category = [tag.replace('category-', '')]
+                    bug_cats[bug_id] = category
             for cat in category:
                 if cat not in categories:
                      categories[cat] = []
                 categories[cat].append(bug_id)
-    return categories
+    return (categories, bug_cats)
 
 def get_common_data(environments, root_data_directory, time_range='daily',
                     limit=None):

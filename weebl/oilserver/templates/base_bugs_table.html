@@ -14,7 +14,7 @@
         <td><div style="width: 170px"><h3>Assignee</h3></div></td>
         <td><div style="width: 150px"><h3>All Tags</h3></div></td>
     </tr>
-    {% for bug, lp_link, hits, lp_link, bug_title, assignee, age_days, category, importance, status, date_assigned, all_tags in rank %}
+    {% for bug, lp_link, hits, lp_link, bug_title, assignee, age_days, cats, importance, status, date_assigned, all_tags, category in rank %}
     <tr>
         <td><img src='{% static "oilserver/button-closed.png" %}'/></td>
         {% if lp_link %}
@@ -22,8 +22,8 @@
         {% else %}
             <td>{{ bug }}</td>
         {% endif %}
-        <td>{{ bug_title }}</td> 
-        <td></td>
+        <td>{{ bug_title }}</td>
+        <td>{% for cat in category %}{{ cat }}{% if cat|length > 1 %},{% endif %} {% endfor  %}</td>
         <td>{{ hits }} hits</td>
         <td>{{ importance }}</td>
         <td>{{ status }}</td>
