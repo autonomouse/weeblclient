@@ -44,32 +44,25 @@ def get_current_oil_state(data_location, env):
     down_th = cfg.get(MODE, 'check_in_down_threshold')
 
     if time_difference.seconds > float(down_th):
-        env.oil_state = 'down'
-        env.oil_state_colour = cfg.get(MODE, '{}_colour'.format(env.oil_state))
         msg = "It has been over {} seconds since jenkins last checked in."
-        env.oil_situation.append(msg.format(down_th))
+        set_oil_state(env, 'down', msg.format(unstable_th))
     elif time_difference.seconds > float(unstable_th):
-        env.oil_state = 'unstable'
-        env.oil_state_colour = cfg.get(MODE, '{}_colour'.format(env.oil_state))
         msg = "It has been over {} seconds since jenkins last checked in."
-        env.oil_situation.append(msg.format(unstable_th))
+        set_oil_state(env, 'unstable', msg.format(unstable_th))
 
     # Determine if there are any dead nodes:
     body_count = len(status['dead_nodes'])
     if body_count > 0:
-        env.oil_state = 'unstable'
-        env.oil_state_colour = cfg.get(MODE, '{}_colour'.format(env.oil_state))
-        msg = "{} nodes are reported as dead.".format(body_count)
-        env.oil_situation.append(msg)
+        msg = "The following {} nodes are reported as dead: "
+        msg += "{}.".format(body_count, status['dead_nodes'])
+        set_oil_state(env, 'unstable', msg)
 
     # Determine if there are too few builds in the queue:
     builds_in_q = len(status['start_builds_queue'])
     build_q_th = cfg.get(MODE, 'low_build_queue_threshold')
     if builds_in_q < int(build_q_th):
-        env.oil_state = 'unstable'
-        env.oil_state_colour = cfg.get(MODE, '{}_colour'.format(env.oil_state))
         msg = "There are only {} pipeline_start builds currently in the queue."
-        env.oil_situation.append(msg.format(build_q_th))
+        set_oil_state(env, 'unstable', msg.format(build_q_th))
 
     # Determine if there are any builds that are hanging:
     # TODO - not yet implemented on jenkins
@@ -78,6 +71,19 @@ def get_current_oil_state(data_location, env):
     # TODO - not yet implemented on jenkins
 
     return env
+
+def set_oil_state(env, new_state, msg):  
+    # Set state:      
+    if env.oil_state != 'down':
+        env.oil_state = new_state
+
+    # Set colour:    
+    env.oil_state_colour = cfg.get(MODE, '{}_colour'.format(env.oil_state))
+
+    # Set message:  
+    if msg != '':
+        env.oil_situation.append(msg)
+    return env.oil_state
 
 def get_timestamp(data_location, tframe):
     """Load up timestamp that oil-stats was run."""
@@ -190,6 +196,8 @@ def link_tags_with_hi_lvl_categories(database, tframe, job, bug_id):
             categories = db_bug.get('category') if db_bug else 'Unknown'
             if categories in [[], None, 'None']:
                 categories = 'Unknown' 
+            # TODO: calculate_breakdown(data)
+            #import pdb; pdb.set_trace()
             return categories
 
 def get_common_data(environments, root_data_directory, time_range='daily',

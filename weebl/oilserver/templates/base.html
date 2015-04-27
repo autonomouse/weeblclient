@@ -36,6 +36,8 @@
                         <td><small>Pipeline_prepare:</small></td>
                         <td><div style="width: 15px"></td>
                         <td><small>Test_tempest_smoke:</small></td>
+                        <td><div style="width: 45px"></td>
+                        <td><div style="width: 500px"</td>
                     </tr>                                  
                 {% for key, environment in env.items %}
                     <tr>
@@ -50,6 +52,11 @@
                         <td><span style="color:{{ environment.tframe.job_success_rate_col.pipeline_prepare }}">{{ environment.tframe.job_success_rates.pipeline_prepare }}% </span></td>
                         <td></td>
                         <td><span style="color:{{ environment.tframe.job_success_rate_col.test_tempest_smoke }}">{{ environment.tframe.job_success_rates.test_tempest_smoke }}% </span></td>
+                        <td></td>
+                        <td>{% for msg in environment.oil_situation %}
+                        {{ msg }},
+                        {% if msg|length > 1 %},{% endif %}
+                        {% endfor %}</td>
                     </tr>    
                 {% endfor %}
                 </table>
