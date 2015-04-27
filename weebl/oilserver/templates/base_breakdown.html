@@ -1,6 +1,29 @@
 
 <div id='main_content' class='main_content'>
     <h2>Breakdown by category:</h2>
-    <p> [Nothing to see here - move along] </p>
+        
+    <table border="1">
+        <tr>
+            <td><h3>Category</h3></td>
+            <td><h3>Number</h3></td>
+        </tr>
+        {% for category, bug_count in breakdown.items %}
+        <tr>
+            <td>{{ category }}</td>
+            <td>{{ bug_count }}</td>
+        </tr>
+        {% endfor %} 
+    </table> 
+
+        
+    
+    
+<p></p>
+<p></p>
+
+
+
+
+
     <hr/>
 </div>

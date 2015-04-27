@@ -1,41 +1,41 @@
 {% load staticfiles %}    
             
-            <table border="1">
-                <tr>
-                    <td><div style="width: 15px"></div></td>
-                    <td><div style="width: 300px"><h3>Bug</h3></div></td>
-                    <td><div style="width: 300px"><h3>Summary</h3></div></td>
-                    <td><div style="width: 125px"><h3>Category</h3></div></td>
-                    <td><div style="width: 100px"><h3>Prevalence</h3></div></td>
-                    <td><div style="width: 100px"><h3>Importance</h3></div></td>
-                    <td><div style="width: 90px"><h3>Status</h3></div></td>
-                    <td><div style="width: 80px"><h3>First Hit (days)</h3></div></td>
-                    <td><div style="width: 80px"><h3>Last Hit (days)</h3></div></td>
-                    <td><div style="width: 170px"><h3>Assignee</h3></div></td>
-                    <td><div style="width: 150px"><h3>All Tags</h3></div></td>
-                </tr>
-                {% for bug, lp_link, hits, lp_link, bug_title, assignee, age_days, category, importance, status, date_assigned, all_tags in rank %}
-                <tr>
-                    <td><img src='{% static "oilserver/button-closed.png" %}'/></td>
-                    {% if lp_link %}
-                        <td><a href="{{ lp_link }}">{{ bug }}</a></td>
-                    {% else %}
-                        <td>{{ bug }}</td>
-                    {% endif %}
-                    <td>{{ bug_title }}</td> 
-                    <td>{% for tag in all_tags %}{{ tag }}{% if category|length > 1 %},{% endif %} {% endfor  %}</td>
-                    <td>{{ hits }} hits</td>
-                    <td>{{ importance }}</td>
-                    <td>{{ status }}</td>
-                    <td>{{ age_days }}</td>
-                    <!-- 
-                    TODO: age_days != "First Hit" - this is just aplaceholder until the DB is implemented 
-                    -->
-                    <td><!-- TODO: last hit --></td>
-                    <td>{{ assignee }}</td>
-                    <td>{% for tag in all_tags %}{{ tag }}{% if all_tags|length > 1 %},{% endif %} {% endfor  %}</td>
-                </tr>
-                {% endfor %}
-            </table> 
-            <p></p>
-            <p></p>
+<table border="1">
+    <tr>
+        <td><div style="width: 15px"></div></td>
+        <td><div style="width: 300px"><h3>Bug</h3></div></td>
+        <td><div style="width: 300px"><h3>Summary</h3></div></td>
+        <td><div style="width: 125px"><h3>Category</h3></div></td>
+        <td><div style="width: 100px"><h3>Prevalence</h3></div></td>
+        <td><div style="width: 100px"><h3>Importance</h3></div></td>
+        <td><div style="width: 90px"><h3>Status</h3></div></td>
+        <td><div style="width: 80px"><h3>First Hit (days)</h3></div></td>
+        <td><div style="width: 80px"><h3>Last Hit (days)</h3></div></td>
+        <td><div style="width: 170px"><h3>Assignee</h3></div></td>
+        <td><div style="width: 150px"><h3>All Tags</h3></div></td>
+    </tr>
+    {% for bug, lp_link, hits, lp_link, bug_title, assignee, age_days, category, importance, status, date_assigned, all_tags in rank %}
+    <tr>
+        <td><img src='{% static "oilserver/button-closed.png" %}'/></td>
+        {% if lp_link %}
+            <td><a href="{{ lp_link }}">{{ bug }}</a></td>
+        {% else %}
+            <td>{{ bug }}</td>
+        {% endif %}
+        <td>{{ bug_title }}</td> 
+        <td>{% for tag in all_tags %}{{ tag }}{% if category|length > 1 %},{% endif %} {% endfor  %}</td>
+        <td>{{ hits }} hits</td>
+        <td>{{ importance }}</td>
+        <td>{{ status }}</td>
+        <td>{{ age_days }}</td>
+        <!-- 
+        TODO: age_days != "First Hit" - this is just aplaceholder until the DB is implemented 
+        -->
+        <td><!-- TODO: last hit --></td>
+        <td>{{ assignee }}</td>
+        <td>{% for tag in all_tags %}{{ tag }}{% if all_tags|length > 1 %},{% endif %} {% endfor  %}</td>
+    </tr>
+    {% endfor %}
+</table> 
+<p></p>
+<p></p>

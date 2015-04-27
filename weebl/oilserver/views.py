@@ -53,8 +53,8 @@ def get_current_oil_state(data_location, env):
     # Determine if there are any dead nodes:
     body_count = len(status['dead_nodes'])
     if body_count > 0:
-        msg = "The following {} nodes are reported as dead: "
-        msg += "{}.".format(body_count, status['dead_nodes'])
+        msg = "The following {} nodes are reported as dead: {}"
+        msg = msg.format(body_count, status['dead_nodes'])
         set_oil_state(env, 'unstable', msg)
 
     # Determine if there are too few builds in the queue:
@@ -151,6 +151,7 @@ def get_bug_ranking_data(data_location, tframe, limit=None):
 
 def merge_with_launchpad_data(data_location, tframe, database):
     lp_data = get_launchpad_data(data_location)
+    cats = {}
     
     for job, job_ranking in tframe.rankings.items():
         for idx, (bug, hits) in enumerate(job_ranking):
@@ -175,11 +176,17 @@ def merge_with_launchpad_data(data_location, tframe, database):
                 importance = ''
                 status = ''     
                 all_tags = ''  
-            cats = link_tags_with_hi_lvl_categories(database, tframe, job, bug)
+            cats = link_tags_with_hi_lvl_categories(cats, database, tframe, 
+                                                    job, bug)
             tframe.rankings[job][idx] = (bug, lp_link, hits, lp_link, title,
                                          assignee, age_days, cats, importance, 
                                          status, date_assigned, all_tags)
-    return tframe
+    breakdown = {}
+    for category in cats:
+        breakdown[category] = len(cats[category])
+    # Sort bugs by number of eachcategory:
+    #breakdown = sorted(breakdown, key=operator.itemgetter(1), reverse=True)
+    return (tframe, cats, breakdown)
 
 def get_launchpad_data(data_location):
     file_location = os.path.join(data_location, 'OIL.json')
@@ -189,16 +196,19 @@ def get_launchpad_data(data_location):
     with open(file_location, 'r') as lp_file:
         return yaml.load(lp_file)
 
-def link_tags_with_hi_lvl_categories(database, tframe, job, bug_id):    
+def link_tags_with_hi_lvl_categories(categories, database, tframe, job, 
+                                     bug_id):
     for bug in tframe.rankings[job]:
         if bug[0] == bug_id:
             db_bug = database['bugs'].get(bug_id)
-            categories = db_bug.get('category') if db_bug else 'Unknown'
-            if categories in [[], None, 'None']:
-                categories = 'Unknown' 
-            # TODO: calculate_breakdown(data)
-            #import pdb; pdb.set_trace()
-            return categories
+            category = db_bug.get('category') if db_bug else ['Unknown']
+            if category in [[], None, 'None']:
+                category = ['Unknown']
+            for cat in category:
+                if cat not in categories:
+                     categories[cat] = []
+                categories[cat].append(bug_id)
+    return categories
 
 def get_common_data(environments, root_data_directory, time_range='daily',
                     limit=None):
@@ -232,7 +242,7 @@ def get_common_data(environments, root_data_directory, time_range='daily',
         tframe = get_timestamp(time_range_data_location, tframe)
         tframe = get_oil_stats(time_range_data_location, tframe)
         tframe = get_bug_ranking_data(time_range_data_location, tframe, limit)
-        tframe = \
+        tframe, data.categories, data.breakdown = \
             merge_with_launchpad_data(root_data_directory, tframe, database)
     return data
 
