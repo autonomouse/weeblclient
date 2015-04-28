@@ -18,8 +18,8 @@ run: syncdb
 	tools/run_weebl
 
 .PHONY: test
-test: export DJANGO_SETTINGS_MODULE=weebl.settings 
-test: syncdb 
+test: export DJANGO_SETTINGS_MODULE=weebl.test_settings
+test: syncdb
 	tools/run_tests lint
 	tools/run_tests unit
 
