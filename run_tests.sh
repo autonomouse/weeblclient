@@ -9,7 +9,7 @@ if echo "$@" | grep -q "lint" ; then
 fi
 
 if echo "$@" | grep -q "unit" ; then
-  echo "Running unit tests..."
+  echo "Running functional and unit tests..."
   for APP in $APPS
     do 
       ${PROJECT}/manage.py test $APP
@@ -17,6 +17,9 @@ if echo "$@" | grep -q "unit" ; then
 fi
 
 if echo "$@" | grep -q "func" ; then
-  echo "Running functional tests..."
-  python3 ${PROJECT}/functional_tests.py
+  echo "Running functional and unit tests..."
+  for APP in $APPS
+    do 
+      ${PROJECT}/manage.py test $APP
+    done
 fi

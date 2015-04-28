@@ -20,7 +20,8 @@ def find_config(conf=None):
         else:
             raise InvalidConfig('Specified config file not found at %s' % conf)
 
-    env_conf = os.getenv('WEEBL_ROOT', None)
+    root = os.path.abspath(os.path.join(os.path.realpath(__file__), '../..'))
+    env_conf = os.getenv('WEEBL_ROOT', root)
     env_conf = (env_conf and
                 os.path.join(env_conf, 'etc', 'weebl', 'weebl.conf'))
     if env_conf and os.path.isfile(env_conf):

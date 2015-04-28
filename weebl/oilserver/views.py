@@ -10,9 +10,9 @@ from collections import namedtuple
 
 cfg = utils.get_config()
 MODE = utils.get_mode()
+root_data_directory = cfg.get(MODE, 'data_dir')
 bug_ranking_files = json.loads(cfg.get(MODE, 'bug_ranking_files')
                                .replace("'", "\""))
-root_data_directory = cfg.get(MODE, 'data_dir')
 js_down_th = json.loads(cfg.get(MODE, 'job_specific_down_th')
                                 .replace("'", "\""))
 js_unstable_th = json.loads(cfg.get(MODE, 'job_specific_unstable_th')

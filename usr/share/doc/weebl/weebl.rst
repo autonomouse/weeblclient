@@ -58,6 +58,8 @@ Dependencies
     - python3-requests
     - python3-psycopg2
     - apache2
+    - python2 (>= 2.7)
+    - python-selenium 
      
 
 Postgres Installation
