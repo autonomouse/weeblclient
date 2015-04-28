@@ -4,6 +4,7 @@ from six.moves import configparser
 
 _config = []
 
+
 def find_config(conf=None):
     """Finds config file, allowing users to specify config via CLI or
     environment variable.  If neither, default config is returned
@@ -51,7 +52,7 @@ def get_config(conf=None):
 
 def get_mode(mode=None):
     if not mode:
-        # TODO: Look in etc for the mode file and assign the contents of that 
+        # TODO: Look in etc for the mode file and assign the contents of that
         # (i.e. 'DEFAULT', or 'TESTING') to mode, otherwise mode = 'DEFAULT'
         mode = 'DEFAULT'
     return mode

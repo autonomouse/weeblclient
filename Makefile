@@ -16,3 +16,10 @@ syncdb: install_deps createuser
 .PHONY: run
 run: syncdb
 	tools/run_weebl
+
+.PHONY: test
+test: export DJANGO_SETTINGS_MODULE=weebl.settings 
+test: syncdb 
+	tools/run_tests lint
+	tools/run_tests unit
+
