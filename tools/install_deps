@@ -1,4 +1,4 @@
 sudo apt-get install python3 python3-django postgresql \
      python3-django-tastypie python3-yaml python3-mimeparse \
      python3-dateutil python3-requests python3-psycopg2 \
-     apache2 python python-selenium
+     apache2 python python-selenium python3-flake8
