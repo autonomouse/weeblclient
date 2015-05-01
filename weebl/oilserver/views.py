@@ -8,6 +8,7 @@ from django.shortcuts import render
 from exceptions import AbsentYamlError
 from collections import namedtuple
 
+#import pdb; pdb.set_trace()
 cfg = utils.get_config()
 MODE = utils.get_mode()
 root_data_directory = cfg.get(MODE, 'data_dir')
@@ -27,7 +28,7 @@ def load_from_yaml_file(file_location):
 
     with open(file_location, 'r') as oil_file:
         return yaml.load(oil_file)
-  
+
 def get_current_oil_state(data_location, env):
     """Load up report status"""
     env.oil_state = 'up'
@@ -43,11 +44,11 @@ def get_current_oil_state(data_location, env):
     unstable_th = cfg.get(MODE, 'check_in_unstable_threshold')
     down_th = cfg.get(MODE, 'check_in_down_threshold')
 
-    if time_difference.seconds > float(down_th):
-        msg = "It has been over {} seconds since jenkins last checked in."
+    if time_difference.total_seconds() > float(down_th):
+        msg = "It has been over {} seconds since jenkins last checked in"
         set_oil_state(env, 'down', msg.format(unstable_th))
-    elif time_difference.seconds > float(unstable_th):
-        msg = "It has been over {} seconds since jenkins last checked in."
+    elif time_difference.total_seconds() > float(unstable_th):
+        msg = "It has been over {} seconds since jenkins last checked in"
         set_oil_state(env, 'unstable', msg.format(unstable_th))
 
     # Determine if there are any dead nodes:
@@ -61,7 +62,7 @@ def get_current_oil_state(data_location, env):
     builds_in_q = len(status['start_builds_queue'])
     build_q_th = cfg.get(MODE, 'low_build_queue_threshold')
     if builds_in_q < int(build_q_th):
-        msg = "There are only {} pipeline_start builds currently in the queue."
+        msg = "There are only {} pipeline_start builds currently in the queue"
         set_oil_state(env, 'unstable', msg.format(build_q_th))
 
     # Determine if there are any builds that are hanging:
@@ -72,15 +73,15 @@ def get_current_oil_state(data_location, env):
 
     return env
 
-def set_oil_state(env, new_state, msg):  
-    # Set state:      
+def set_oil_state(env, new_state, msg):
+    # Set state:
     if env.oil_state != 'down':
         env.oil_state = new_state
 
-    # Set colour:    
+    # Set colour:
     env.oil_state_colour = cfg.get(MODE, '{}_colour'.format(env.oil_state))
 
-    # Set message:  
+    # Set message:
     if msg != '':
         env.oil_situation.append(msg)
     return env.oil_state
@@ -153,12 +154,12 @@ def merge_with_launchpad_data(data_location, tframe):
     lp_data = get_launchpad_data(data_location)
     cats = {}
     bug_cats = {}
-    
+
     for job, job_ranking in tframe.rankings.items():
         for idx, (bug, hits) in enumerate(job_ranking):
             bug_data = lp_data['tasks'].get(bug)
             if bug_data:
-                bug_data = bug_data[0]                
+                bug_data = bug_data[0]
                 lp_link = \
                     os.path.join(cfg.get(MODE, 'launchpad_bugs_url'), bug)
                 assignee = bug_data['assignee']
@@ -166,8 +167,8 @@ def merge_with_launchpad_data(data_location, tframe):
                 date_assigned = bug_data['date_assigned']
                 title = bug_data['bug']['title']
                 importance = bug_data['importance']
-                status = bug_data['status']        
-                all_tags = bug_data['bug']['tags']               
+                status = bug_data['status']
+                all_tags = bug_data['bug']['tags']
             else:
                 lp_link = None
                 assignee = ''
@@ -175,15 +176,15 @@ def merge_with_launchpad_data(data_location, tframe):
                 date_assigned = ''
                 title = ''
                 importance = ''
-                status = ''     
-                all_tags = ''  
-            cats, bug_cats = link_tags_with_hi_lvl_categories(cats, all_tags, 
+                status = ''
+                all_tags = ''
+            cats, bug_cats = link_tags_with_hi_lvl_categories(cats, all_tags,
                                                               tframe, job, bug,
                                                               bug_cats)
             category = bug_cats.get(bug)
             tframe.rankings[job][idx] = (bug, lp_link, hits, lp_link, title,
-                                         assignee, age_days, cats, 
-                                         importance, status, date_assigned, 
+                                         assignee, age_days, cats,
+                                         importance, status, date_assigned,
                                          all_tags, category)
     breakdown = {}
     for category in cats:
@@ -200,12 +201,12 @@ def get_launchpad_data(data_location):
     with open(file_location, 'r') as lp_file:
         return yaml.load(lp_file)
 
-def link_tags_with_hi_lvl_categories(categories, all_tags, tframe, job, 
+def link_tags_with_hi_lvl_categories(categories, all_tags, tframe, job,
                                      bug_id, bug_cats):
     for bug in tframe.rankings[job]:
         if bug[0] == bug_id:
             category = ['Unknown']
-            for tag in all_tags: 
+            for tag in all_tags:
                 if 'category-' in tag:
                     category = [tag.replace('category-', '')]
                     bug_cats[bug_id] = category
@@ -218,7 +219,7 @@ def link_tags_with_hi_lvl_categories(categories, all_tags, tframe, job,
 def get_common_data(environments, root_data_directory, time_range='daily',
                     limit=None):
     """Get all relevant data."""
-        
+
     data = namedtuple('data','')
     data.env = {}
     for environment in environments:
@@ -298,7 +299,7 @@ def main_page(request, time_range='daily'):
     # Show (daily?) results and limit the number of bugs to the top ten:
     data = get_common_data(environments, root_data_directory, time_range, 10)
     data.time_range = time_range
-    return render(request, 'main_page.html', conv_to_dict(data))
+    return render(request, 'page_main.html', conv_to_dict(data))
 
 def weekly_main_page(request, time_range='weekly'):
     return main_page(request, time_range)
@@ -314,4 +315,5 @@ def job_specific_bugs_list(request, job, time_range='daily',
     data = get_common_data(environments, root_data_directory, time_range)
     data.job = job
     data.time_range = time_range
-    return render(request, 'job_specific_bugs_list.html', conv_to_dict(data))
+    return render(request, 'page_job_specific_bugs_list.html',
+                  conv_to_dict(data))

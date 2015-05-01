@@ -1,0 +1,14 @@
+{% for key, environment in env.items %} 
+    {% if environment.oil_situation %} 
+    <div class="inner-wrapper" id="content">
+        <h3>Situation report for {{ environment.name }}:</h3>
+        <div class="logo">                  
+                <ul>
+                    {% for msg in environment.oil_situation %}
+                        <li>{{ msg }}{% if msg|length > 1 %},{% endif %}</li>
+                    {% endfor %}
+                </ul>
+        </div>
+    </div>
+    {% endif %} 
+{% endfor %}

@@ -3,71 +3,46 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
-        <link href='{% static "oilserver/ubuntu.css" %}' rel="stylesheet" type="text/css">
+        <link rel="stylesheet" type="text/css" media="all" href="http://assets.ubuntu.com/sites/guidelines/css/latest/ubuntu-styles.css"/>
         <title>{% block page_title %}{% endblock %}</title>
     </head>
 
     <body>
-
-        <div id='title'>
-            <div class='topbar'>
-                <div style="width:600px;margin-left:25px;margin-top:11px;display:block;float:left;">
-                    <a href='/'>
-                        <img src='{% static "oilserver/ubuntu_openstack_interoperability_lab.png" %}'/>
-                    </a>
-                </div>
-                <div class='user_info'>
-                    <h1>{% block user_info %}{% endblock %}</h1>
-                </div>
+        <!-- Banner -->
+        <header class="banner global" role="banner" id="banner">
+            <div class="logo">
+                <a href='/'>
+                    <img src='{% static "oilserver/ubuntu_openstack_interoperability_lab.png" %}'/>
+                </a>
+                {% block user_info %}{% endblock %}
             </div>
-        </div>
-        
-        <div id='main_content' class='main_content'>
-            <table>  
-                    <tr>
-                        <td><small>Environment:</small></td>
-                        <td><div style="width: 50px"></td>
-                        <td><small>OIL state:</small></td>
-                        <td><div style="width: 75px"></td>
-                        <td><small>Success rate:</small></td>
-                        <td><div style="width: 75px"></td>
-                        <td><small>Pipeline_deploy:</small></td>
-                        <td><div style="width: 15px"></td>
-                        <td><small>Pipeline_prepare:</small></td>
-                        <td><div style="width: 15px"></td>
-                        <td><small>Test_tempest_smoke:</small></td>
-                        <td><div style="width: 45px"></td>
-                        <td><div style="width: 500px"</td>
-                    </tr>                                  
-                {% for key, environment in env.items %}
-                    <tr>
-                        <td>{{ environment.name }}</td>
-                        <td></td>
-                        <td><span style="color:{{ environment.oil_state_colour }}">{{ environment.oil_state }}</span></td>
-                        <td></td>
-                        <td><span style="color:{{ environment.tframe.overall_colour }}">{{ environment.tframe.success_rate }}% </span></td>
-                        <td></td>
-                        <td><span style="color:{{ environment.tframe.job_success_rate_col.pipeline_deploy }}">{{ environment.tframe.job_success_rates.pipeline_deploy }}% </span></td>
-                        <td></td>
-                        <td><span style="color:{{ environment.tframe.job_success_rate_col.pipeline_prepare }}">{{ environment.tframe.job_success_rates.pipeline_prepare }}% </span></td>
-                        <td></td>
-                        <td><span style="color:{{ environment.tframe.job_success_rate_col.test_tempest_smoke }}">{{ environment.tframe.job_success_rates.test_tempest_smoke }}% </span></td>
-                        <td></td>
-                        <td>{% for msg in environment.oil_situation %}
-                        {{ msg }},
-                        {% if msg|length > 1 %},{% endif %}
-                        {% endfor %}</td>
-                    </tr>    
-                {% endfor %}
-                </table>
-                <br />
-        </div>
+        </header>
 
-        {% block filters %}
-        {% endblock %}
-        
-        {% block main %}
-        {% endblock %}
+        <main id="body">
+
+            <div id="main-content" class="row no-border">
+
+                <!-- Stats -->
+                <div class="header banner">
+                    {% include "base_status_bar.html" %} 
+                </div>
+
+                <!-- Filters -->
+                <div class="two-col one-col">
+                    {% block filters %} {% endblock %}
+                </div>
+                
+                <div class="nine-col last-col">
+                    {% block main %}{% endblock %}
+                </div>
+                
+            </div>
+        </main>
+
+
+        <!-- Footer -->
+        <div class="footer-wrapper">
+        </div>
 
     </body>
 </html>
