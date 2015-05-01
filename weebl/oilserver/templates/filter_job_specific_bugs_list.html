@@ -1,9 +1,6 @@
+{% extends "base_filters.html" %}
 
-
-    <div id='main-nav' class='nav'>
-        <h3>Filters:</h3>
-        <ul>
-            <li><a href="/job/{{ job }}/">daily</a></li>
-            <li><a href="/job/{{ job }}/weekly/">weekly</a></li>
-        </ul>
-    </div>
+{% block filter_list %}
+        <li><a href="/">daily</a></li>
+        <li><a href="/weekly/">weekly</a></li>
+{% endblock %}

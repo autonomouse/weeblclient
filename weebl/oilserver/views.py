@@ -43,19 +43,31 @@ def get_current_oil_state(data_location, env):
     time_difference = datetime.utcnow() - timestamp
     unstable_th = cfg.get(MODE, 'check_in_unstable_threshold')
     down_th = cfg.get(MODE, 'check_in_down_threshold')
+    
+    delta = round(time_difference.total_seconds())
+    days = time_difference.days
+    seconds = time_difference.seconds
+    minutes = round(seconds/60)
+    
+    msg = "Jenkins has not checked in for over {} {}"
+    if days > 0:
+        time_msg = msg.format(days, 'days')
+    else:
+        time_msg = msg.format(minutes, 'minutes')
 
-    if time_difference.total_seconds() > float(down_th):
-        msg = "It has been over {} seconds since jenkins last checked in"
-        set_oil_state(env, 'down', msg.format(unstable_th))
-    elif time_difference.total_seconds() > float(unstable_th):
-        msg = "It has been over {} seconds since jenkins last checked in"
-        set_oil_state(env, 'unstable', msg.format(unstable_th))
+    errstate = None
+    if delta > float(down_th):
+        errstate = 'down'
+    elif delta > float(unstable_th):
+        errstate = 'unstable'
+    if errstate:
+        set_oil_state(env, errstate, time_msg)
 
     # Determine if there are any dead nodes:
     body_count = len(status['dead_nodes'])
     if body_count > 0:
         msg = "The following {} nodes are reported as dead: {}"
-        msg = msg.format(body_count, status['dead_nodes'])
+        msg = msg.format(body_count, ", ".join(status['dead_nodes']))
         set_oil_state(env, 'unstable', msg)
 
     # Determine if there are too few builds in the queue:
