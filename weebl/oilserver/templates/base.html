@@ -32,7 +32,7 @@
                     {% block filters %} {% endblock %}
                 </div>
                 
-                <div class="nine-col last-col">
+                <div class="nine-col">
                     {% block main %}{% endblock %}
                 </div>
                 
@@ -42,6 +42,20 @@
 
         <!-- Footer -->
         <div class="footer-wrapper">
+            <footer class="global inner-wrapper clearfix">
+                <div class="legal clearfix">
+                    <div class="legal-inner">
+                        {% block footer-copyright %}
+                        <p class="twelve-col">
+                            <p class="version">OIL Version <a href="/">View documentation</a></p>
+                            <p class="version">Doberman Version <a href="/">View documentation</a></p>
+                            <p class="version">Weebl Version <a href="/">View documentation</a></p>
+                        </p>
+                        <p class="twelve-col copy">&copy; 2015 Canonical Ltd. Ubuntu and Canonical are registered trademarks of Canonical Ltd.</p>
+                        {% endblock %}
+                    </div>
+                </div>
+            </footer>
         </div>
 
     </body>

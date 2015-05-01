@@ -1,6 +1,6 @@
 
 {% for key, environment in env.items %}
-    <div id='main_content' class='main_content'>
+    <div class="inner-wrapper" id="content">
         <p></p>
         <h2>All {{ job }} {{ environment.name }} bugs ({{ time_range }}):</h2>
         <p></p>
@@ -9,6 +9,5 @@
                 {% include "base_bugs_table.html" %}
             {% endif %}
         {% endfor %}
-        <hr/>
     </div>
 {% endfor %}

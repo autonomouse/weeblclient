@@ -1,18 +1,17 @@
 {% load staticfiles %}  
-
-<table border="1">
+<table>
     <tr>
-        <td><div style="width: 15px"></div></td>
-        <td><div style="width: 300px"><h3>Bug</h3></div></td>
-        <td><div style="width: 300px"><h3>Summary</h3></div></td>
-        <td><div style="width: 125px"><h3>Category</h3></div></td>
-        <td><div style="width: 100px"><h3>Prevalence</h3></div></td>
-        <td><div style="width: 100px"><h3>Importance</h3></div></td>
-        <td><div style="width: 90px"><h3>Status</h3></div></td>
-        <td><div style="width: 80px"><h3>First Hit (days)</h3></div></td>
-        <td><div style="width: 80px"><h3>Last Hit (days)</h3></div></td>
-        <td><div style="width: 170px"><h3>Assignee</h3></div></td>
-        <td><div style="width: 150px"><h3>All Tags</h3></div></td>
+        <td></td>
+        <td><h4>Bug</h4></td>
+        <td><h4>Summary</h4></td>
+        <td><h4>Category</h4></td>
+        <td><h4>Prevalence</h4></td>
+        <td><h4>Importance</h4></td>
+        <td><h4>Status</h4></td>
+        <td><h4>First Hit (days)</h4></td>
+        <td><h4>Last Hit (days)</h4></td>
+        <td><h4>Assignee</h4></td>
+        <td><h4>All Tags</h4></td>
     </tr>
     {% for bug, lp_link, hits, lp_link, bug_title, assignee, age_days, cats, importance, status, date_assigned, all_tags, category in rank %}
     <tr>
@@ -37,6 +36,3 @@
     </tr>
     {% endfor %}
 </table> 
-<p></p>
-<p></p>
-

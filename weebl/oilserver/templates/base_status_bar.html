@@ -1,6 +1,6 @@
 {% load staticfiles %}
 <!-- Oil Stats -->
- <div class="tabbed-menu">
+ <div class="tabbed-menu" id="inner-wrapper">
     <ul>
         <li><small>Environment:</small></li>
         <li><small>OIL state:</small></li>
@@ -8,7 +8,7 @@
         <li><small>Pipeline_deploy:</small></li>
         <li><small>Pipeline_prepare:</small></li>
         <li><small>Test_tempest_smoke:</small></li>
-        <li></li>
+        <li><small></small></li>
     </ul>
     {% for key, environment in env.items %}   
     <ul>
