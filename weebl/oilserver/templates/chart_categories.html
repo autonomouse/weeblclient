@@ -17,12 +17,13 @@
         // Create the data table.
         var data = new google.visualization.DataTable();
         
-        
         data.addColumn('string', 'Category');
-        data.addColumn('number', 'Slices');
+        data.addColumn('number', 'Number');
+        <!-- data.addColumn('number', 'Percentage'); -->
+                
         data.addRows([
         {% for category, bug_count in breakdown.items %}
-          ['{{ category }}', {{ bug_count }}],
+            ['{{ category }}', {{ bug_count }}],
         {% endfor %} 
         ]);
 
