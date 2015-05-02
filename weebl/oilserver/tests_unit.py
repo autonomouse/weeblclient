@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
-
-from oilserver.views import (main_page, job_specific_bugs_list)
+import os
+from oilserver import views
 from django.http import HttpRequest
 from common_test_methods import WeeblTestCase
 
@@ -19,13 +19,13 @@ class DevSmokeTests(WeeblTestCase):
 
     def test_main_page(self):
         request = HttpRequest()
-        response = main_page(request)
+        response = views.main_page(request)
         self.assertIn(b'main_page', response.content)
 '''
     def test_job_specific_bugs_list(self):
         request = HttpRequest()
         job = 'pipeline_deploy'
-        response = job_specific_bugs_list(request, job)
+        response = views.job_specific_bugs_list(request, job)
         self.assertIn(b'job_specific_bugs_list', response.content)
         self.assertIn(b'pipeline_deploy', response.content)
 '''
@@ -40,23 +40,36 @@ class DevSmokeTests(WeeblTestCase):
 class UnitTests(WeeblTestCase):
 
     def test_load_from_yaml_file(self):
-
-        import pdb;pdb.set_trace()
-
+        # Create mock data:
         a_dictionary = {'a': 1, 'b': 2, 'c': 3}
-        self.create_temporary_yaml_file(a_dictionary)
-"""
-
-        self.create_mock_data('test_data', 'data')
-
-
-        file_location = 'weebl/oilserver/mock_data'
-        #with open()
-
-        # create a yaml file
-
-        oil_yaml = load_from_yaml_file(file_location)
-"""
+        file_loc = self.create_temporary_yaml_file('yaml.yaml', a_dictionary)
+                
+        # Test method: 
+        oil_yaml = views.load_from_yaml_file(file_loc)
+        
+        # Tidy Up:
+        os.remove(file_loc)
+        
+        # Assertion
+        self.assertEquals(a_dictionary, oil_yaml)
+    
+    def test_get_current_oil_state(self):
+        # Create mock data:
+        env_name = 'mock_production'
+        data_location = self.create_mock_scp_data(env_name)
+        input_env = {}
+                
+        # Test method: 
+        output_env = views.test_get_current_oil_state(data_location, input_env)
+        
+        # Tidy Up:
+        pass
+        
+        # Assertion
+        #self.assertEquals(a_dictionary, oil_yaml)
+        import pdb; pdb.set_trace()
+        
+        
 """
 get_current_oil_state(data_location, env):
 
@@ -105,7 +118,7 @@ def main_page(request, time_range='daily'):
     return render(request, 'main_page.html', conv_to_dict(data))
 
 def weekly_main_page(request, time_range='weekly'):
-    return main_page(request, time_range)
+    return views.main_page(request, time_range)
 
 def job_specific_bugs_list(request, job, time_range='daily',
                            specific_env='all'):
