@@ -13,12 +13,6 @@ class WeeblTestCase(TestCase):
     # Helper methods:
     def mock_batch_oil_stats_data(self):
         pass
-        
-    def time_now(self, frmt=None):
-        if frmt is None:
-            return datetime.now()
-        else:
-            return datetime.now().strftime(frmt)
 
     def makedirs(self, path):
         try:
@@ -30,12 +24,18 @@ class WeeblTestCase(TestCase):
         with open(path_to_file, 'w') as f:
             f.write(text)
 
-    def get_timestamp(self, when):
+    def get_timestamp(self, when='now'):
         if when == 'now':
             timestamp = self.time_now()
         else:
-            timestamp = parse(when)
+            timestamp = parse(when.replace('_', ' '))
         return timestamp.strftime('%F_%T')
+        
+    def time_now(self, frmt=None):
+        if frmt is None:
+            return datetime.now()
+        else:
+            return datetime.now().strftime(frmt)
 
     def create_temporary_file(self, where, name, content):
         try:
@@ -48,17 +48,23 @@ class WeeblTestCase(TestCase):
             temp.flush()
         return temp.name
 
+    def make_somewhere(self, where, name='tmpfile'):
+        jnk, file_loc = tempfile.mkstemp()
+        where = os.path.dirname(file_loc)
+        new_name = os.path.join(where, name)
+        shutil.move(file_loc, new_name)
+        return file_loc
+    
     def create_temporary_yaml_file(self, name, dictionary, where=None):
         if where is None:
-            jnk, file_loc = tempfile.mkstemp()
-            where = os.path.dirname(file_loc)
-            new_name = os.path.join(where, name)
-            shutil.move(file_loc, new_name)
+            where = self.make_somewhere(where, name)
         content = yaml.safe_dump(dictionary)
         return self.create_temporary_file(where, name, content)
 
     def create_timestamp_file(self, where, when):
         name = 'timestamp'
+        if where is None:
+            where = self.make_somewhere(where, name)
         content = self.get_timestamp(when)
         return self.create_temporary_file(where, name, content)
 

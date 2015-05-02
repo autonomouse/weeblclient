@@ -251,7 +251,7 @@ def get_common_data(environments, root_data_directory, time_range='daily',
         env_data_location = os.path.join(root_data_directory, environment)
         time_range_data_location = os.path.join(env_data_location, time_range)
 
-        data.title = 'main_page'
+        data.title = 'weebl'
         try:
             data.env[environment] = \
                 get_current_oil_state(env_data_location, data.env[environment])
@@ -321,6 +321,7 @@ def main_page(request, time_range='daily'):
                     if os.path.isdir(os.path.join(root_data_directory, env))]
     # Show (daily?) results and limit the number of bugs to the top ten:
     data = get_common_data(environments, root_data_directory, time_range, 10)
+    data.title = 'Weebl - Main Page'
     data.time_range = time_range
     return render(request, 'page_main.html', conv_to_dict(data))
 
@@ -338,6 +339,7 @@ def job_specific_bugs_list(request, job, time_range='daily',
     else:
         environments = [specific_env]
     data = get_common_data(environments, root_data_directory, time_range)
+    data.title = 'Weebl - Job Specific Bugs List'
     data.job = job
     data.time_range = time_range
     return render(request, 'page_job_specific_bugs_list.html',
