@@ -5,6 +5,5 @@ read -r -p "Are you sure you want to drop the $DATABASE database? [y/N] " respon
 response=${response,,}    # tolower
 if [[ $response =~ ^(yes|y)$ ]]
 then
-    output=`sudo -u postgres psql postgres -tAc "DROP DATABASE IF EXISTS $DATABASE
-"`
+    output=`sudo -u postgres psql postgres -tAc "DROP DATABASE IF EXISTS $DATABASE"`
 fi

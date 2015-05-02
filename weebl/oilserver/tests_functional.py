@@ -16,9 +16,9 @@ class WebDriverOilTestCase(TestCase):
     HOST = 'http://localhost:8000'
 
     def setUp(self):
-        
+
         # Create mock data:
-        self.create_mock_data('test_data')        
+        self.create_mock_data('test_data')
 
         # Start the server:
         #self.setup_django_runserver()
@@ -42,35 +42,35 @@ class WebDriverOilTestCase(TestCase):
     def tearDown(self):
         self.runserver.terminate()
         self.driver.close()
-        
+
         self.destroy_mock_data('test_data')
-        
+
 '''
 class CommonTests(WebDriverOilTestCase):
-    
+
     def test_deploy_stats(self):
         self.driver.get("{}/".format(self.HOST))
         import pdb; pdb.set_trace()
-    
+
     def test_prepare_stats(self):
         self.driver.get("{}/".format(self.HOST))
         import pdb; pdb.set_trace()
-    
+
     def test_tempest_stats(self):
         self.driver.get("{}/".format(self.HOST))
         import pdb; pdb.set_trace()
-    
+
     def test_state(self):
         self.driver.get("{}/".format(self.HOST))
         import pdb; pdb.set_trace()
-    
+
     def test_success(self):
         self.driver.get("{}/".format(self.HOST))
         import pdb; pdb.set_trace()
 
 
 class MainPageTests(WebDriverOilTestCase):
-    
+
     def test_breakdown(self):
         self.driver.get("{}/".format(self.HOST))
         import pdb; pdb.set_trace()

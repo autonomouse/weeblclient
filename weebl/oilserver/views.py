@@ -8,16 +8,16 @@ from django.shortcuts import render
 from exceptions import AbsentYamlError
 from collections import namedtuple
 
-#import pdb; pdb.set_trace()
+
 cfg = utils.get_config()
 MODE = utils.get_mode()
 root_data_directory = cfg.get(MODE, 'data_dir')
 bug_ranking_files = json.loads(cfg.get(MODE, 'bug_ranking_files')
                                .replace("'", "\""))
 js_down_th = json.loads(cfg.get(MODE, 'job_specific_down_th')
-                                .replace("'", "\""))
+                        .replace("'", "\""))
 js_unstable_th = json.loads(cfg.get(MODE, 'job_specific_unstable_th')
-                                    .replace("'", "\""))
+                            .replace("'", "\""))
 
 
 def load_from_yaml_file(file_location):
@@ -28,6 +28,7 @@ def load_from_yaml_file(file_location):
 
     with open(file_location, 'r') as oil_file:
         return yaml.load(oil_file)
+
 
 def get_current_oil_state(data_location, env):
     """Load up report status"""
@@ -43,12 +44,12 @@ def get_current_oil_state(data_location, env):
     time_difference = datetime.utcnow() - timestamp
     unstable_th = cfg.get(MODE, 'check_in_unstable_threshold')
     down_th = cfg.get(MODE, 'check_in_down_threshold')
-    
+
     delta = round(time_difference.total_seconds())
     days = time_difference.days
     seconds = time_difference.seconds
-    minutes = round(seconds/60)
-    
+    minutes = round(seconds / 60)
+
     msg = "Jenkins has not checked in for over {} {}"
     if days > 0:
         time_msg = msg.format(days, 'days')
@@ -85,6 +86,7 @@ def get_current_oil_state(data_location, env):
 
     return env
 
+
 def set_oil_state(env, new_state, msg):
     # Set state:
     if env.oil_state != 'down':
@@ -98,12 +100,14 @@ def set_oil_state(env, new_state, msg):
         env.oil_situation.append(msg)
     return env.oil_state
 
+
 def get_timestamp(data_location, tframe):
     """Load up timestamp that oil-stats was run."""
 
     tframe.timestamp = \
         load_from_yaml_file(os.path.join(data_location, 'timestamp'))
     return tframe
+
 
 def get_oil_stats(data_location, tframe):
     """Load up oilstats"""
@@ -114,7 +118,7 @@ def get_oil_stats(data_location, tframe):
     except AbsentYamlError:
         oil_stats = {'jobs': {'pipeline_deploy': {'success rate': '?'},
                               'pipeline_prepare': {'success rate': '?'},
-                              'test_tempest_smoke': {'success rate': '?',}},
+                              'test_tempest_smoke': {'success rate': '?'}},
                      'overall': {'success rate': '?',
                                  'tempest builds': '?',
                                  'total jobs': '?'}}
@@ -145,6 +149,7 @@ def get_oil_stats(data_location, tframe):
 
     return tframe
 
+
 def get_bug_ranking_data(data_location, tframe, limit=None):
     """Load up bug_ranking data."""
     tframe.rankings = {}
@@ -158,9 +163,10 @@ def get_bug_ranking_data(data_location, tframe, limit=None):
         # Sort bugs by number of hits:
         sorted_bugs = sorted(bugs, key=operator.itemgetter(1), reverse=True)
         tframe.rankings[jobname] = job_ranking
-        sorted_bugs = sorted_bugs[:limit] if limit != None else sorted_bugs
+        sorted_bugs = sorted_bugs[:limit] if limit is not None else sorted_bugs
         tframe.rankings[jobname] = sorted_bugs
     return tframe
+
 
 def merge_with_launchpad_data(data_location, tframe):
     lp_data = get_launchpad_data(data_location)
@@ -202,8 +208,9 @@ def merge_with_launchpad_data(data_location, tframe):
     for category in cats:
         breakdown[category] = len(cats[category])
     # Sort bugs by number of eachcategory:
-    #breakdown = sorted(breakdown, key=operator.itemgetter(1), reverse=True)
+    # breakdown = sorted(breakdown, key=operator.itemgetter(1), reverse=True)
     return (tframe, cats, breakdown)
+
 
 def get_launchpad_data(data_location):
     file_location = os.path.join(data_location, 'OIL.json')
@@ -212,6 +219,7 @@ def get_launchpad_data(data_location):
 
     with open(file_location, 'r') as lp_file:
         return yaml.load(lp_file)
+
 
 def link_tags_with_hi_lvl_categories(categories, all_tags, tframe, job,
                                      bug_id, bug_cats):
@@ -224,20 +232,21 @@ def link_tags_with_hi_lvl_categories(categories, all_tags, tframe, job,
                     bug_cats[bug_id] = category
             for cat in category:
                 if cat not in categories:
-                     categories[cat] = []
+                    categories[cat] = []
                 categories[cat].append(bug_id)
     return (categories, bug_cats)
+
 
 def get_common_data(environments, root_data_directory, time_range='daily',
                     limit=None):
     """Get all relevant data."""
 
-    data = namedtuple('data','')
+    data = namedtuple('data', '')
     data.env = {}
     for environment in environments:
-        data.env[environment] = namedtuple('env','')
+        data.env[environment] = namedtuple('env', '')
         data.env[environment].name = environment
-        data.env[environment].tframe = namedtuple('tframe','')
+        data.env[environment].tframe = namedtuple('tframe', '')
 
         env_data_location = os.path.join(root_data_directory, environment)
         time_range_data_location = os.path.join(env_data_location, time_range)
@@ -260,6 +269,7 @@ def get_common_data(environments, root_data_directory, time_range='daily',
         tframe, data.categories, data.breakdown = \
             merge_with_launchpad_data(root_data_directory, tframe)
     return data
+
 
 def conv_to_dict(data):
     """Converts from those multi-level namedtuples that seemed such a good idea
@@ -305,6 +315,7 @@ def conv_to_dict(data):
                 out[key] = value
     return out
 
+
 def main_page(request, time_range='daily'):
     environments = [env for env in os.listdir(root_data_directory)
                     if os.path.isdir(os.path.join(root_data_directory, env))]
@@ -313,8 +324,10 @@ def main_page(request, time_range='daily'):
     data.time_range = time_range
     return render(request, 'page_main.html', conv_to_dict(data))
 
+
 def weekly_main_page(request, time_range='weekly'):
     return main_page(request, time_range)
+
 
 def job_specific_bugs_list(request, job, time_range='daily',
                            specific_env='all'):
