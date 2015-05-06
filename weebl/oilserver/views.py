@@ -46,15 +46,25 @@ def get_current_oil_state(data_location, env):
     down_th = cfg.get(MODE, 'check_in_down_threshold')
 
     delta = round(time_difference.total_seconds())
-    days = time_difference.days
     seconds = time_difference.seconds
     minutes = round(seconds / 60)
-
+    hours = round(minutes / 60)
+    days = time_difference.days
+    weeks = round(days / 7)
+    
     msg = "Jenkins has not checked in for over {} {}"
-    if days > 0:
-        time_msg = msg.format(days, 'days')
+    if weeks > 0:
+        timestr = 'weeks' if weeks > 1 else 'week'
+        time_msg = msg.format(weeks, timestr)
+    elif days > 0:
+        timestr = 'days' if days > 1 else 'day'
+        time_msg = msg.format(days, timestr)
+    elif hours > 0:
+        timestr = 'hours' if hours > 1 else 'hour'
+        time_msg = msg.format(hours, timestr)
     else:
-        time_msg = msg.format(minutes, 'minutes')
+        timestr = 'minutes' if minutes > 1 else 'minute'
+        time_msg = msg.format(minutes, timestr)
 
     errstate = None
     if delta > float(down_th):
