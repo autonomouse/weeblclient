@@ -1,0 +1,11 @@
+{% block main %}  
+    {% for key, environment in env.items %}
+        <div class="inner-wrapper" id="content">
+            <p></p>
+            {% block bug_title %}{% endblock %}   
+            <p></p>
+            {% block bugs_table %}{% endblock %}  
+            <hr/>
+        </div>
+    {% endfor %}
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block page_title %}{{ title }}{% endblock %}
+{% block user_info %}{% endblock %}
+
+{% block filters %}{% include "filter_main_page.html" %}{% endblock %}
+
+{% block main %}
+    {% block situation %}{% include "base_situation.html" %}{% endblock %}
+    {% block breakdown %}{% include "base_breakdown.html" %}{% endblock %}
+    {% block bugs %}{% include "base_all_bugs.html" %}{% endblock %}
+    {% block charts %}{% include "base_charts.html" %}{% endblock %}
+{% endblock %}
+

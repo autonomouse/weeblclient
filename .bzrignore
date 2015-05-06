@@ -1,4 +1,7 @@
 .coverage
-oil-auth.json
-test-catalog-auth.json
-crude_analysis_report_directory
+usr/share/doc/weebl/changelog.Debian.gz
+usr/share/doc/weebl/changelog.gz
+usr/share/doc/weebl/weebl.html
+data/*
+*~
+~

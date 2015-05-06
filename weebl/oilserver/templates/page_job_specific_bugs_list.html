@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block page_title %}{{ title }}{% endblock %}
+{% block user_info %}{% endblock %}
+
+{% block filters %}{% include "filter_job_specific_bugs_list.html" %}{% endblock %}
+
+{% block main %}
+    {% block bugs %}{% include "base_job_specific_bugs.html" %}{% endblock %}
+{% endblock %}
