@@ -1,7 +1,7 @@
 Preamble
 ========
 
-- This section document the Weebl project. 
+- This section document the Weebl project.
 - To build html version, run:
     | pandoc usr/share/doc/weebl/weebl.rst -o usr/share/doc/weebl/weebl.html
 - Then this doc can be viewed as a webpage:
@@ -29,88 +29,52 @@ Development Notes
 Installation of Django 1.7 on pre-vivid releases
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-- To avoid using pip and instead use vivid repositories on earlier releases (such as utopic), do the following: 
-    - sudo vi /etc/apt/preferences.d/vivid-manual-only 
-        | Package: * 
-        | Pin: release n=vivid 
-        | Pin-Priority: 99  
-        
+- To avoid using pip and instead use vivid repositories on earlier releases (such as utopic), do the following:
+    - sudo vi /etc/apt/preferences.d/vivid-manual-only
+        | Package: *
+        | Pin: release n=vivid
+        | Pin-Priority: 99
+
     - grep '\sutopic\s' /etc/apt/sources.list | sudo tee /etc/apt/sources.list.d/vivid.list
-    - sudo sed 's/utopic/vivid/g' -i /etc/apt/sources.list.d/vivid.list 
-    - sudo apt-get update 
-    - apt-cache policy python3-django 
-    - sudo apt-get install python-django-common/vivid 
-    - sudo apt-get install python3-sqlparse/vivid 
-    - sudo apt-get install python3-django/vivid 
+    - sudo sed 's/utopic/vivid/g' -i /etc/apt/sources.list.d/vivid.list
+    - sudo apt-get update
+    - apt-cache policy python3-django
+    - sudo apt-get install python-django-common/vivid
+    - sudo apt-get install python3-sqlparse/vivid
+    - sudo apt-get install python3-django/vivid
     - source: http://askubuntu.com/questions/569339/install-vagrant-version-1-5-or-greater-on-14-10
 
 Dependencies
 ~~~~~~~~~~~~
 
-- These modules will eventually be automatically installed as part of the packaging branch (This information will then be found in debian/control). At which time, these instructions will be updated. During development, however, the following will need to be installed:
-    - python3 (>= 3.4.0) 
-    - python3-django (>= 1.7.0) 
-    - postgresql-9.4
-    - python3-django-tastypie
-    - python3-yaml
-    - python3-mimeparse
-    - python3-dateutil
-    - python3-requests
-    - python3-psycopg2
-    - apache2
-    - python (>= 2.7)
-    - python-selenium 
-    - build-essential
-
-Postgres Installation
-~~~~~~~~~~~~~~~~~~~~~
-
-- The tests will not work until you have set up a database on your machine for it to connect to
-- Install Postgres
-    - sudo apt-get install postgresql
-    - sudo apt-get install python3-psycopg2
-- sudo su - postgres
-    | createdb bugs_database
-    | createuser user -P
-    | psql
-    | GRANT ALL PRIVILEGES ON DATABASE bugs_database TO "user";
-    | ALTER USER "user" CREATEDB;
-    | createdb bugs_database
-    | exit (Cntl-D) and exit
-- then
-    | weebl/manage.py syncdb
-
-Running tests
-~~~~~~~~~~~~~
- 
-- Run unit tests using:
-| ./run_tests.sh unit
-- Run linter using:
-| ./run_tests.sh lint
-
-- When Selenium2 for Python3 is supported in the vivid repositories, you will be able to run functional (webdriver) tests using:
-| ./run_tests.sh func
-
+- Run ./install_deps before attempting to use invoke (see 'Deployment')
 
 Deployment
 ~~~~~~~~~~
 
-- Weebl is not yet production ready (these instrutions will be updated with Apache hosting instructions as Weebl is developed), and so it is currently deployed using django's built-in server:
-    | sudo ./weebl/manage.py runserver 0.0.0.0:8000
+- To deploy on a django's built in test server:
+    | sudo invoke go production -s run_server
+    
+- To deploy on Apache:
+    | sudo invoke go production
+    
+- In case of catestrophic failure, you can dump the production database by doing the following (please note that there is no data backup facility yet, so not recommended *at all* once we start populating the database with actual data):
+    | sudo invoke destroy production
+
 
 
 Making Changes and Packaging Weebl
 ==================================
 
 - http://www.laurentluce.com/posts/hello-world/
-- Update changelog 
+- Update changelog
 - Create a duplicate of changelog called changelog.Debian
     | cp changelog changelog.Debian
 - Copy these files over to usr/share/doc/weebl/ and compress them:
     | cp changelog usr/share/doc/weebl/
     | mv changelog.Debian usr/share/doc/weebl/
     | gzip -f --best usr/share/doc/weebl/changelog
-    | gzip -f --best usr/share/doc/weebl/changelog.Debian    
+    | gzip -f --best usr/share/doc/weebl/changelog.Debian
 - Fix permissions of package files:
     | find . -type d | xargs chmod 0755
 - Create the package (this assumes the weebl directory is called trunk and the version number is 0.0.1-0ubuntu1):
@@ -119,5 +83,3 @@ Making Changes and Packaging Weebl
     | mv trunk.deb weebl_0.0.1-0ubuntu1.deb
 - Check package for errors:
     | lintian weebl_0.0.1-0ubuntu1.deb
-
-

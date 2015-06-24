@@ -1,0 +1,19 @@
+- model: sites.site
+  pk: 1
+  fields:
+    domain: weebl
+    name: weebl
+
+- model: oilserver.weeblsetting
+  pk: 1
+  fields:
+    site: 1
+    overall_down_th: 50
+    low_build_queue_threshold: 3
+    check_in_down_threshold: 1800
+    overall_unstable_th: 65
+    up_colour: green
+    weebl_documentation: https://docs.google.com/document/d/1Bcq3nY_GBu6VKhZuNY4hGwQ-UcsIyhbRPak9ORU5emI/edit
+    check_in_unstable_threshold: 300
+    unstable_colour: orange
+    down_colour: red
