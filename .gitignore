@@ -5,3 +5,4 @@ usr/share/doc/weebl/weebl.html
 data/*
 *~
 __pycache__
+node_modules/
