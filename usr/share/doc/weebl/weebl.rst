@@ -83,3 +83,94 @@ Making Changes and Packaging Weebl
     | mv trunk.deb weebl_0.0.1-0ubuntu1.deb
 - Check package for errors:
     | lintian weebl_0.0.1-0ubuntu1.deb
+
+
+API Specification
+=================
+
+Authentication
+--------------
+
+- There is currently no authentication on the API.
+
+Quick Start
+-----------
+
+- For now to upload data (report_status data in this case) do the following:
+    | curl --dump-header - -H "Content-Type: application/json" -X PUT --data '{"last_active": "2015-06-18T15:56:37"}' http://localhost/api/v1/environment/1/update_status/
+    
+- or if using python requests: 
+    | url = http://localhost/api/v1/environment/1/update_status/
+    | headers = {"content-type":"application/json"}
+    | data = {"last_active": "2015-06-18T15:56:37"}
+    | requests.post(url, headers=headers, data=json.dumps(data)).text
+
+- This can then be seen by:
+    | curl --dump-header - -H "Content-Type: application/json" -X GET http://localhost/api/v1/report_status/
+
+- or by going to: 
+    | http://localhost/api/v1/report_status/?format=json
+
+Response Codes
+--------------
+
+Weebl utilises Tasypie's response codes, which should be the `standard html response codes`_.
+
+.. _standard html response codes: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
+
+Error Codes
+-----------
+
+In addition to the response codes, Weebl will also implement `Twitter-style error codes`, although these are yet to be implemented.
+
+.. _Twitter-style error codes: https://dev.twitter.com/overview/api/response-codes
+
+They will eventually be listed here:
+
+====   ===========================   ==============================================================================
+Code   Text                          Description
+====   ===========================   ==============================================================================
+32     Authentication problem        Could not authenticate the credentials provided
+====   ===========================   ==============================================================================
+
+
+Headers
+-------
+
+{"content-type":"application/json"}
+
+General Response Info
+---------------------
+
+- Tastypie has some useful built-in responses for collection URIs (e.g. a GET on /api/<v>/environment/):
+    - "meta":
+        - a dictionary of helpful summary information
+        - e.g. {"limit": 20, "next": null, "offset": 0, "previous": null, "total_count": 2}
+    - "objects": 
+        - a list of dictionaries containing the requested info
+
+Resource Specification
+----------------------
+
+- Below are tables for each end-point, where <v> represents the api version number (for example "v1") and <UUID> represents the uuid of the environment instance
+    - "Environment" Resource Description
+        - environment has a custom operation resulting in an extra end-point which allows an environment instance (specified by UUID) to be updated.
+        - if the instance specified by UUID doesn't exist, it is created
+        - the name of this environment can be changed at any point by adding {'name': '<name>'}
+        - if no previous name has been specified, then it will get it's UUID as it's name
+
+=============   =========================================   =====================================   ================================   =============================
+HTTP Method     End-point                                   Data                                    Success Response                   Failure Response (Error Code)
+=============   =========================================   =====================================   ================================   =============================
+POST, PUT       /api/<v>/environment/<UUID>/update_status/  {'name': 'production'} or {}            <UUID> was updated                 (TBD)                        
+GET             /api/v1/environment/                        (N/A)                                   meta + environment object          (TBD)                         
+=============   =========================================   =====================================   ================================   =============================
+
+
+
+Other things to consider (remove this section when done)
+--------------------------------------------------------
+- parameters resources
+- response format
+- plural versus singular (act on lists or one at a time)
+- consistency
