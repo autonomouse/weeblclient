@@ -15,6 +15,10 @@ urlpatterns = patterns('',
                            views.main_page,
                            name='main_page'),
 
+                       url("Settings/" + end,
+                           views.settings_page,
+                           name='settings_page'),
+
                        url(job_path + time_range + specific_env + end,
                            views.job_specific_bugs_list,
                            name='job_specific_bugs_list'),
