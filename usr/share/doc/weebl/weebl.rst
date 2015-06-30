@@ -106,10 +106,10 @@ Quick Start
     | requests.post(url, headers=headers, data=json.dumps(data)).text
 
 - This can then be seen by:
-    | curl --dump-header - -H "Content-Type: application/json" -X GET http://localhost/api/v1/report_status/
+    | curl --dump-header - -H "Content-Type: application/json" -X GET http://localhost/api/v1/update_status/
 
 - or by going to: 
-    | http://localhost/api/v1/report_status/?format=json
+    | http://localhost/api/v1/update_status/?format=json
 
 Response Codes
 --------------
