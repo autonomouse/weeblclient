@@ -2,7 +2,7 @@ import os
 import utils
 from django.db import models
 from django.contrib.sites.models import Site
-from oilserver.common import StatusChecker
+
 
 class WeeblSetting(models.Model):
     """Settings for Weebl"""
