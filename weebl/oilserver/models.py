@@ -52,7 +52,7 @@ class Environment(models.Model):
     """The environment (e.g. Prodstack, Staging)."""
     uuid = models.CharField(
         max_length=36,
-        default=utils.generate_uuid(),
+        default=utils.generate_uuid,
         unique=True,
         blank=False,
         null=False,
@@ -75,6 +75,7 @@ class ServiceStatus(models.Model):
     """
     name = models.CharField(
         max_length=255,
+        unique=True,
         default="Unknown",
         help_text="Current state of the environment.")
     description = models.TextField(
@@ -100,8 +101,6 @@ class Jenkins(models.Model):
         unique=True,
         help_text="A URL used internally (e.g. behind a firewall) for access \
         to this server.")
-        current_situation = models.TextField(
-        help_text="Statement(s) giving background to the current env status.")
     service_status_updated_at = models.DateTimeField(
         default=utils.time_now(),
         blank=True,
