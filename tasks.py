@@ -247,7 +247,6 @@ def create_db(database, user, pwd):
         print("Database: {} created".format(database))
     syncdb()
     load_fixtures("initial_settings.yaml")
-    install_vanilla()
 
 def prompt(message, default, validate):
     answer = input(message)
@@ -300,9 +299,6 @@ def deploy_with_runserver(ipaddr, port):
 def load_fixtures(fixture):
     print("Adding data from {} into database".format(fixture))
     run('{}/manage.py loaddata "{}"'.format(application, fixture))
-
-def install_vanilla():
-    run("npm install vanilla-framework --save")
 
 def deploy_with_apache(apacheconf, deployloc, application, wsgifile="wsgi.py",
 					   static_dir="oilserver/static", user_group = "www-data"):

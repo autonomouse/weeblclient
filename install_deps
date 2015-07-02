@@ -19,6 +19,5 @@ apt-get -y --no-upgrade install \
     python3-flake8 \
     libapache2-mod-wsgi-py3 \
     pandoc \
-    npm \
     python3-pytest \
     --fix-missing
