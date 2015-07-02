@@ -97,19 +97,19 @@ Quick Start
 -----------
 
 - For now to upload data (report_status data in this case) do the following:
-    | curl --dump-header - -H "Content-Type: application/json" -X PUT --data '{"last_active": "2015-06-18T15:56:37"}' http://localhost/api/v1/environment/1/update_status/
+    | curl --dump-header - -H "Content-Type: application/json" -X PUT --data '{"name": "production"}' http://localhost/api/v1/environment/<UUID>/update_status/
     
 - or if using python requests: 
-    | url = http://localhost/api/v1/environment/1/update_status/
+    | url = 'http://localhost/api/v1/environment/<UUID>/update_status/'
     | headers = {"content-type":"application/json"}
-    | data = {"last_active": "2015-06-18T15:56:37"}
+    | data = {"name": "production"}
     | requests.post(url, headers=headers, data=json.dumps(data)).text
 
 - This can then be seen by:
-    | curl --dump-header - -H "Content-Type: application/json" -X GET http://localhost/api/v1/update_status/
+    | curl --dump-header - -H "Content-Type: application/json" -X GET http://localhost/api/v<UUID>/update_status/
 
 - or by going to: 
-    | http://localhost/api/v1/update_status/?format=json
+    | http://localhost/api/v<UUID>/update_status/?format=json
 
 Response Codes
 --------------
