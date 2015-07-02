@@ -18,4 +18,6 @@ apt-get -y --no-upgrade install \
     python-selenium \
     python3-flake8 \
     libapache2-mod-wsgi-py3 \
+    pandoc \
+    python3-pytest \
     --fix-missing

@@ -46,10 +46,9 @@ def go(database, server="apache"):
 @task
 def run_tests():
     """Run unit, functional, and lint tests for each app."""
-    initialise_database('test')
     for app in apps:
         run_unit_tests(app)
-        run_lint_tests()
+    run_lint_tests()
 
 @task(help={'database': "Type test or production"})
 def createdb(database):
@@ -63,28 +62,6 @@ def createdb(database):
 def syncdb():
     """Synchronise the django database."""
     migrate()
-
-def initialise_database(database):
-    if database == "production":
-        stngs = prdctn_settings
-        user = prdctn_user
-        port = prdctn_port
-    elif database == "test":
-        stngs = test_settings
-        ipaddr = test_user
-        port = test_port
-    else:
-        print("Please provide an option: either 'production' or 'test'")
-        return
-    set_postgres_password(postgres_pwd)
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "{0}.{1}"
-                          .format(application, stngs))
-    createdb(database)
-
-def migrate():
-    """Make migrations and migrate."""
-    run("{}/manage.py makemigrations".format(application))
-    run("{}/manage.py migrate".format(application))
 
 @task
 def force_stop():
@@ -109,6 +86,28 @@ def destroy(database):
         destroy_production_data()
     elif database == "test":
         destroy_test_data()
+
+def initialise_database(database):
+    if database == "production":
+        stngs = prdctn_settings
+        user = prdctn_user
+        port = prdctn_port
+    elif database == "test":
+        stngs = test_settings
+        ipaddr = test_user
+        port = test_port
+    else:
+        print("Please provide an option: either 'production' or 'test'")
+        return
+    set_postgres_password(postgres_pwd)
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "{0}.{1}"
+                          .format(application, stngs))
+    createdb(database)
+
+def migrate():
+    """Make migrations and migrate."""
+    run("{}/manage.py makemigrations".format(application))
+    run("{}/manage.py migrate".format(application))
 
 def create_production_db():
     create_db_and_user(prdctn_db_name, prdctn_user, prdctn_pwd)
@@ -257,10 +256,14 @@ def prompt(message, default, validate):
         print("\n{} is not recognised, try again:\n".format(answer))
         return prompt(message, default, validate)
 
-def run_unit_tests(app):
-    print("Running functional and unit tests for {}...".format(app))
+def run_unit_tests(app=None):
     try:
-        run("{}/manage.py test {}".format(application, app), pty=True)
+        if app is None:
+            print("Running functional and unit tests")
+            run("{}/manage.py test".format(application), pty=True)
+        else:
+            print("Running functional and unit tests for {}...".format(app))
+            run("{}/manage.py test {}".format(application, app), pty=True)
         print('OK')
     except Exception as e:
         print("Some tests failed")

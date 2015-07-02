@@ -5,3 +5,6 @@ usr/share/doc/weebl/weebl.html
 data/*
 *~
 __pycache__
+*.pyc
+node_modules/
+*.orig
