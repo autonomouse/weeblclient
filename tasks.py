@@ -271,8 +271,9 @@ def run_unit_tests(app=None):
 def run_lint_tests():
     print("Running flake8 lint tests...")
     try:
-        run("/usr/bin/python3 -m flake8 --exclude {0}/tests/ {0} --ignore=F403"
-            .format(application), pty=True)
+        cmd = "/usr/bin/python3 -m flake8 --exclude={0}/tests/,"
+        cmd += "{0}/oilserver/migrations/ {0} --ignore=F403"
+        run(cmd.format(application), pty=True)
         print('OK')
     except Exception as e:
         print("Some tests failed")
