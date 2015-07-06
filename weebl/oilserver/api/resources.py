@@ -1,3 +1,4 @@
+import os
 import json
 import utils
 from tastypie import fields
@@ -10,7 +11,15 @@ from django.conf.urls import url
 from oilserver import models
 
 
-class EnvironmentResource(ModelResource):
+class CommonResource(ModelResource):
+
+    def replace_pk_with_alternative(self, bundle, alternative=None):
+        if uuid is not None:
+            uri = os.path.dirname(bundle.data['resource_uri'].rstrip('/'))
+            bundle.data['resource_uri'] = "{}/{}/".format(uri, alternative)
+        return bundle
+
+class EnvironmentResource(CommonResource):
 
     class Meta:
         queryset = models.Environment.objects.all()
@@ -24,7 +33,7 @@ class EnvironmentResource(ModelResource):
             bundle.obj.name = bundle.data['name']
         except:
             pass
-        bundle.obj.save()        
+        bundle.obj.save()
         return bundle
 
     def dispatch(self, request_type, request, **kwargs):
@@ -56,8 +65,13 @@ class EnvironmentResource(ModelResource):
         bundle = self.build_bundle(obj=environment, request=request)
         return self.create_response(request, self.full_dehydrate(bundle))
 
-class ServiceStatusResource(ModelResource):
-    
+    def dehydrate(self, bundle):
+        uuid = bundle.data['uuid']
+        return self.replace_pk_with_alternative(bundle, uuid)
+
+
+class ServiceStatusResource(CommonResource):
+
     class Meta:
         resource_name = 'service_status'
         queryset = models.ServiceStatus.objects.all()
@@ -66,21 +80,25 @@ class ServiceStatusResource(ModelResource):
         authorization = Authorization()
         always_return_data=True
 
+    def dehydrate(self, bundle):
+        uuid = bundle.data['uuid']
+        return self.replace_pk_with_alternative(bundle, uuid)
 
-class JenkinsResource(ModelResource):
+
+class JenkinsResource(CommonResource):
     environment = fields.ForeignKey(EnvironmentResource, 'environment')
     service_status = fields.ForeignKey(ServiceStatusResource, 'service_status')
-    
+
     class Meta:
         queryset = models.Jenkins.objects.all()
         fields = ['environment', 'service_status', 'external_access_url',
                   'internal_access_url', 'service_status_updated_at']
         authorization = Authorization()
         always_return_data=True
-    
+
     def hydrate(self, bundle):
         # Update tiemstamp (also prevents user submitting timestamp data):
-        bundle.data['service_status_updated_at'] = utils.time_now()        
+        bundle.data['service_status_updated_at'] = utils.time_now()
         return bundle
 
     def obj_create(self, bundle, request=None, **kwargs):
@@ -90,9 +108,9 @@ class JenkinsResource(ModelResource):
             models.ServiceStatus.objects.get(name='unknown')
         bundle.obj.external_access_url = bundle.data['external_access_url']
         if 'jenkins_internal_url' in bundle.data:
-            int_url = bundle.data['jenkins_internal_url']     
+            int_url = bundle.data['jenkins_internal_url']
         else:
-            int_url = bundle.data['external_access_url']        
+            int_url = bundle.data['external_access_url']
         bundle.obj.internal_access_url = int_url
         bundle.obj.save()
         return bundle
@@ -101,10 +119,15 @@ class JenkinsResource(ModelResource):
         ''' Overrides and replaces the the uuid in the end-point with pk. '''
         if 'pk' in kwargs:
             uuid = kwargs['pk']  # Because end-point is the UUID not pk really
-            # Match the UUID to an Environment instance and work out the pk of 
+            # Match the UUID to an Environment instance and work out the pk of
             # this Jenkins instance from that:
             env = models.Environment.objects.get(uuid=uuid)
             kwargs['pk'] = env.jenkins.pk
             kwargs['environment'] = env
         return super(JenkinsResource, self).dispatch(request_type, request,
                                                      **kwargs)
+
+    def dehydrate(self, bundle):
+        uuid = bundle.obj.environment.uuid
+        return self.replace_pk_with_alternative(bundle, uuid)
+
