@@ -1,3 +1,14 @@
+from django.utils import timezone
+from uuid import uuid4
+
+def time_now():
+    return timezone.now()
+
+def generate_uuid():
+    return str(uuid4())
+
+# The following will be removed in the isOILup/views+html branch:
+
 import os
 from exceptions import InvalidConfig
 from six.moves import configparser

@@ -13,9 +13,10 @@
             <div class="logo">
                 <a href='/'>
                     <img src='{% static "oilserver/ubuntu_openstack_interoperability_lab.png" %}'/>
-                </a>
+                </a>                
                 {% block user_info %}{% endblock %}
             </div>
+            {% include "base_user.html" %}
         </header>
 
         <main id="body">

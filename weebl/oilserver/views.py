@@ -7,8 +7,13 @@ from datetime import datetime
 from django.shortcuts import render
 from exceptions import AbsentYamlError
 from collections import namedtuple
+from oilserver import models
+from oilserver.common import StatusChecker
+from forms import SettingsForm
 
-
+status_checker = StatusChecker(models.WeeblSetting, models.Environment)
+current_site = status_checker.get_current_site()
+    
 cfg = utils.get_config()
 MODE = utils.get_mode()
 root_data_directory = cfg.get(MODE, 'data_dir')
@@ -354,3 +359,27 @@ def job_specific_bugs_list(request, job, time_range='daily',
     data.time_range = time_range
     return render(request, 'page_job_specific_bugs_list.html',
                   conv_to_dict(data))
+
+def settings_page(request):
+    data = status_checker.get_common_data()
+    data.title = 'Weebl - Settings'
+    data.updated = None
+
+    original = status_checker.get_site_settings()
+    
+    if request.method != 'POST':
+        # Before send the form:
+        form = SettingsForm(initial=original)
+    else:
+        # Upon receipt of the form:
+        req_data = request.POST.copy()
+        req_data[''] = original['site_id']
+        settings = models.WeeblSetting.objects.get(pk=current_site)
+        form = SettingsForm(req_data, instance=settings)
+        if form.is_valid():
+            form.save()
+            data.updated = True
+        else:
+            data.updated = False
+    data.form = form
+    return render(request, 'page_settings.html', conv_to_dict(data))

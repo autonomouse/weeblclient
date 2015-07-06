@@ -1,4 +1,5 @@
 import os
+import utils
 from django.db import models
 from django.contrib.sites.models import Site
 
@@ -45,3 +46,24 @@ class WeeblSetting(models.Model):
 
     def __str__(self):
         return str(self.site)
+
+
+class Environment(models.Model):
+    """The environment (e.g. Prodstack, Staging)."""
+    uuid = models.CharField(
+        max_length=36,
+        default=utils.generate_uuid,
+        unique=True,
+        blank=False,
+        null=False,
+        help_text="UUID of environment")
+    name = models.CharField(
+        max_length=255,
+        unique=True,
+        default=uuid.default,
+        blank=True,
+        null=True,
+        help_text="Name of environment")
+
+    def __str__(self):
+        return "{} ({})".format(self.name, self.uuid)
