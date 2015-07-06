@@ -14,7 +14,7 @@ from oilserver import models
 class CommonResource(ModelResource):
 
     def replace_pk_with_alternative(self, bundle, alternative=None):
-        if uuid is not None:
+        if alternative is not None:
             uri = os.path.dirname(bundle.data['resource_uri'].rstrip('/'))
             bundle.data['resource_uri'] = "{}/{}/".format(uri, alternative)
         return bundle
