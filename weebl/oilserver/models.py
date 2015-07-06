@@ -90,7 +90,7 @@ class ServiceStatus(models.Model):
 
 class Jenkins(models.Model):
     """The Continuous Integration Server."""
-    environment = models.ForeignKey(Environment)
+    environment = models.OneToOneField(Environment)
     service_status = models.ForeignKey(ServiceStatus)
     external_access_url = models.URLField(
         unique=True,
@@ -103,14 +103,8 @@ class Jenkins(models.Model):
         to this server.")
     service_status_updated_at = models.DateTimeField(
         default=utils.time_now,
-        blank=True,
-        null=True,
+        auto_now_add=True,
         help_text="DateTime the service status was last updated.")
-
     def __str__(self):
         return self.external_access_url
-    
-    def check_in(self):
-        print("check in")
-        import pdb; pdb.set_trace()
-        
+

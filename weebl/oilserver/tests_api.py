@@ -171,3 +171,75 @@ class ServiceStatusResourceTest(ResourceTests):
         self.assertIsNone(r_dict)
         self.assertEqual(response.status_code, 404)
 
+
+class JenkinsResourceTest(ResourceTests):
+
+    def setUp(self):
+        super(JenkinsResourceTest, self).setUp()
+        self.unrecognied_environment_uuid_msg =\
+            {'error': ''}  # This really needs to be changed! 
+
+    def test_put_mock_jenkins_check_in_with_new_environment_uuid(self):
+        '''Attempting to call jenkins API with new environment uuid should fail
+        as the create new envrionment call needs to be called first, but it
+        should fail with the correct error message.
+        '''
+        env_uuid = utils.generate_uuid()
+        response = self.api_client.put(
+            '/api/{}/jenkins/{}/'.format(self.version, env_uuid))
+        r_dict = self.deserialize(response)
+
+        # Assertions
+        self.assertEqual(r_dict, self.unrecognied_environment_uuid_msg)
+        self.assertEqual(response.status_code, 400)
+
+
+    def test_put_mock_jenkins_check_in_with_existing_uuid(self):
+        '''Attempting to call jenkins API with new environment uuid should fail
+        as the create new envrionment call needs to be called first, but it
+        should fail with the correct error message.
+        '''
+        
+        env_uuid = utils.generate_uuid()
+        response1 = self.api_client.put(
+            '/api/{}/jenkins/{}/'.format(self.version, env_uuid))
+        r_dict1 = self.deserialize(response1)
+        correct_msg = r_dict1 == self.unrecognied_environment_uuid_msg
+        
+        # Create a new environment:
+        response2 = self.api_client.post(
+            '/api/{}/environment/'.format(self.version, env_uuid))
+        r_dict1 = self.deserialize(response1)
+        correct_msg = r_dict1 == self.unrecognied_environment_uuid_msg
+
+        import pdb; pdb.set_trace()
+        
+        
+        
+        # From find by name (above):
+        #
+        #name = "mock_production"
+        #r_dict0 = self.post_create_environment_model_with_name(name)
+        #response = self.api_client.get('/api/{}/environment/by_name/{}/'
+        #                               .format(self.version, name),
+        #                               format='json')
+        #r_dict1 = self.deserialize(response)      
+        
+        
+        
+        
+        # 
+        post_create_model(self, model, data={}, status_code=False)
+        
+
+        # Assertions
+        self.assertTrue(correct_msg)
+        self.assertEqual(r_dict, self.unrecognied_environment_uuid_msg)
+        self.assertEqual(response.status_code, 400)
+
+
+
+        # Confirm error message (400)
+        response
+        post_create_model(self, model, data={}, status_code=False)
+        # Create new environment first, then resend

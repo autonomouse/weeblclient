@@ -6,17 +6,21 @@ import pytz
 from django.contrib.sites.models import Site
 from __init__ import __version__
 from collections import namedtuple
-
+from oilserver.models import (
+    WeeblSetting,
+    Environment,
+    ServiceStatus,
+    Jenkins
+    )
 
 class StatusChecker():
     """ """
 
-    def __init__(self, weebl_setting, environment):
-        self.current_site = Site.objects.get_current().id
-        if repr(weebl_setting.objects.all()) == '[]':
+    def __init__(self, ):
+        if repr(WeeblSetting.objects.all()) == '[]':
             raise Exception("No current site - fixtures must be loaded first!")
-        self.weebl_setting = weebl_setting.objects.get(pk=self.current_site)
-        self.environment = environment
+        self.current_site = Site.objects.get_current().id
+        self.weebl_setting = WeeblSetting.objects.get(pk=self.current_site)
 
 
     def get_site_settings(self):
@@ -47,11 +51,13 @@ class StatusChecker():
         env.oil_state = 'up'
         key = '{}_colour'.format(env.oil_state)
         env.oil_state_colour = self.get_site_settings()[key]
+        
+        import pdb;pdb.set_trace()
 
         env.oil_situation = []
-        status = environment.current_situation
+        #status = environment.current_situation
 
-        delta, time_msg = self.calc_time_since_last_checkin(environment.last_active)
+        delta, time_msg = self.calc_time_since_last_checkin(jenkins.service_status_updated_at)
 
         self.change_state_if_overdue(delta, env, time_msg)
         #self.change_state_if_dead_nodes(status, env) # <- expects status to be a dict

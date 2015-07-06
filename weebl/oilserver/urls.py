@@ -14,24 +14,4 @@ urlpatterns = patterns('',
                        url(catch_all + end,
                            views.main_page,
                            name='main_page'),
-
-                       url(job_path + time_range + specific_env + end,
-                           views.job_specific_bugs_list,
-                           name='job_specific_bugs_list'),
-
-                       url(job_path + time_range + end,
-                           views.job_specific_bugs_list,
-                           name='job_specific_bugs_list'),
-
-                       url(job_path + end,
-                           views.job_specific_bugs_list,
-                           name='job_specific_bugs_list'),
-
-                       url(job_path + weekly + end,
-                           views.job_specific_bugs_list,
-                           name='job_specific_bugs_list'),
-
-                       url(weekly + end,
-                           views.weekly_main_page,
-                           name='weekly_main_page'),
                        )
