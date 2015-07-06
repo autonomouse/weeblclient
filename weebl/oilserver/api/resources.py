@@ -13,10 +13,13 @@ from oilserver import models
 
 class CommonResource(ModelResource):
 
-    def replace_pk_with_alternative(self, bundle, alternative=None):
-        if alternative is not None:
+    def replace_pk_with_alternative(self, bundle, alternative=None, 
+                                    elements=['resource_uri']):
+        if alternative is None:
+            return bundle
+        for element in elements:
             uri = os.path.dirname(bundle.data['resource_uri'].rstrip('/'))
-            bundle.data['resource_uri'] = "{}/{}/".format(uri, alternative)
+            bundle.data[element] = "{}/{}/".format(uri, alternative)
         return bundle
 
 class EnvironmentResource(CommonResource):
@@ -80,10 +83,6 @@ class ServiceStatusResource(CommonResource):
         authorization = Authorization()
         always_return_data=True
 
-    def dehydrate(self, bundle):
-        uuid = bundle.data['uuid']
-        return self.replace_pk_with_alternative(bundle, uuid)
-
 
 class JenkinsResource(CommonResource):
     environment = fields.ForeignKey(EnvironmentResource, 'environment')
@@ -116,7 +115,7 @@ class JenkinsResource(CommonResource):
         return bundle
 
     def dispatch(self, request_type, request, **kwargs):
-        ''' Overrides and replaces the the uuid in the end-point with pk. '''
+        ''' Overrides and replaces the the uuid in the end-point with pk.'''
         if 'pk' in kwargs:
             uuid = kwargs['pk']  # Because end-point is the UUID not pk really
             # Match the UUID to an Environment instance and work out the pk of
@@ -129,5 +128,5 @@ class JenkinsResource(CommonResource):
 
     def dehydrate(self, bundle):
         uuid = bundle.obj.environment.uuid
-        return self.replace_pk_with_alternative(bundle, uuid)
-
+        uuidify_these = ['resource_uri', 'environment']
+        return self.replace_pk_with_alternative(bundle, uuid, uuidify_these)
