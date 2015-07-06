@@ -103,7 +103,7 @@ class JenkinsResource(CommonResource):
 
     def obj_create(self, bundle, request=None, **kwargs):
         bundle.obj.environment =\
-            models.Environment.objects.get(name=bundle.data['environment'])
+            models.Environment.objects.get(uuid=bundle.data['environment'])
         bundle.obj.service_status =\
             models.ServiceStatus.objects.get(name='unknown')
         bundle.obj.external_access_url = bundle.data['external_access_url']
