@@ -67,3 +67,45 @@ class Environment(models.Model):
 
     def __str__(self):
         return "{} ({})".format(self.name, self.uuid)
+
+
+class ServiceStatus(models.Model):
+    """Potential states that the CI server (Jenkins) may be in (e.g. up,
+    unstable, down, unknown).
+    """
+    name = models.CharField(
+        max_length=255,
+        unique=True,
+        default="Unknown",
+        help_text="Current state of the environment.")
+    description = models.TextField(
+        default=None,
+        blank=True,
+        null=True,
+        help_text="Optional description for status.")
+
+    def __str__(self):
+        return self.name
+
+
+class Jenkins(models.Model):
+    """The Continuous Integration Server."""
+    environment = models.ForeignKey(Environment)
+    service_status = models.ForeignKey(ServiceStatus)
+    external_access_url = models.URLField(
+        unique=True,
+        help_text="A URL for external access to this server.")
+    internal_access_url = models.URLField(
+        default=None,
+        blank=True,
+        unique=True,
+        help_text="A URL used internally (e.g. behind a firewall) for access \
+        to this server.")
+    service_status_updated_at = models.DateTimeField(
+        default=utils.time_now(),
+        blank=True,
+        null=True,
+        help_text="DateTime the service status was last updated.")
+
+    def __str__(self):
+        return self.external_access_url
