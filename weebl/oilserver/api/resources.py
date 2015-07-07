@@ -32,15 +32,14 @@ class EnvironmentResource(CommonResource):
         always_return_data=True
 
     def obj_create(self, bundle, request=None, **kwargs):
-        try:
+        # Update name if one is supplied:
+        if 'name' in bundle.data:
             bundle.obj.name = bundle.data['name']
-        except:
-            pass
         bundle.obj.save()
         return bundle
 
     def dispatch(self, request_type, request, **kwargs):
-        ''' Overrides and replaces the the uuid in the end-point with pk. '''
+        """Overrides and replaces the the uuid in the end-point with pk."""
         if 'pk' in kwargs:
             uuid = kwargs['pk']  # Because end-point is the UUID not pk really
             actual_primary_key = models.Environment.objects.get(uuid=uuid).pk
@@ -65,8 +64,8 @@ class EnvironmentResource(CommonResource):
         name = kwargs['name']
         if models.Environment.objects.filter(name=name).exists():
             environment = models.Environment.objects.get(name=name)
-        bundle = self.build_bundle(obj=environment, request=request)
-        return self.create_response(request, self.full_dehydrate(bundle))
+            bundle = self.build_bundle(obj=environment, request=request)
+            return self.create_response(request, self.full_dehydrate(bundle))
 
     def dehydrate(self, bundle):
         uuid = bundle.data['uuid']
@@ -115,7 +114,7 @@ class JenkinsResource(CommonResource):
         return bundle
 
     def dispatch(self, request_type, request, **kwargs):
-        ''' Overrides and replaces the the uuid in the end-point with pk.'''
+        """Overrides and replaces the the uuid in the end-point with pk."""
         if 'pk' in kwargs:
             uuid = kwargs['pk']  # Because end-point is the UUID not pk really
             # Match the UUID to an Environment instance and work out the pk of

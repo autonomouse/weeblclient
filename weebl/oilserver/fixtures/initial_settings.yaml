@@ -22,22 +22,22 @@
   pk: 1
   fields:
     name: up
-    description: Jenkins is functioning normally
+    description: Jenkins is functioning normally.
 
 - model: oilserver.servicestatus
   pk: 2
   fields:
     name: unstable
-    description: Jenkins is unstable suggesting that there may be a problem
+    description: Jenkins is unstable suggesting that there may be a problem.
 
 - model: oilserver.servicestatus
   pk: 3
   fields:
     name: down
-    description: Jenkins is broken
+    description: Jenkins is broken.
 
 - model: oilserver.servicestatus
   pk: 4
   fields:
     name: unknown
-    description: Current state of Jenkins is unknown
+    description: Current state of Jenkins is unknown.
