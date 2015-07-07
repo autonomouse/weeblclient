@@ -1,15 +1,11 @@
 from django.conf.urls import patterns, include, url
 from tastypie.api import Api
-from oilserver.api.resources import (
-    EnvironmentResource, 
-    ServiceStatusResource,
-    JenkinsResource
-    )
+from oilserver.api import resources
 
 v_api = Api(api_name='v1')
-v_api.register(EnvironmentResource())
-v_api.register(ServiceStatusResource())
-v_api.register(JenkinsResource())
+v_api.register(resources.EnvironmentResource())
+v_api.register(resources.ServiceStatusResource())
+v_api.register(resources.JenkinsResource())
 
 urlpatterns = patterns('',
                        url(r'^', include('oilserver.urls')),

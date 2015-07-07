@@ -18,7 +18,7 @@ class CommonResource(ModelResource):
         if alternative is None:
             return bundle
         for element in elements:
-            uri = os.path.dirname(bundle.data['resource_uri'].rstrip('/'))
+            uri = os.path.dirname(bundle.data[element].rstrip('/'))
             bundle.data[element] = "{}/{}/".format(uri, alternative)
         return bundle
 
@@ -119,9 +119,11 @@ class JenkinsResource(CommonResource):
             uuid = kwargs['pk']  # Because end-point is the UUID not pk really
             # Match the UUID to an Environment instance and work out the pk of
             # this Jenkins instance from that:
-            env = models.Environment.objects.get(uuid=uuid)
-            kwargs['pk'] = env.jenkins.pk
-            kwargs['environment'] = env
+            if models.Environment.objects.filter(uuid=uuid).exists():
+                env = models.Environment.objects.get(uuid=uuid)
+                kwargs['pk'] = env.jenkins.pk
+                kwargs['environment'] = env
+                # TODO: else return and error code
         return super(JenkinsResource, self).dispatch(request_type, request,
                                                      **kwargs)
 
