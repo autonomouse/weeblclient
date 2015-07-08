@@ -127,11 +127,18 @@ In addition to the response codes, Weebl will also implement `Twitter-style erro
 
 They will eventually be listed here:
 
-====   ===========================   ==============================================================================
-Code   Text                          Description
-====   ===========================   ==============================================================================
-32     Authentication problem        Could not authenticate the credentials provided
-====   ===========================   ==============================================================================
+====   =============================    ==============================================================================
+Code   Text                             Description
+====   =============================    ==============================================================================
+0      Authentication problem           Could not authenticate the credentials provided
+100    WeeblSetting does not exist      The instance of WeeblSetting does not exist
+101    Environment does not exist       The instance of Environment does not exist
+102    ServiceStatus does not exist     The instance of ServiceStatus does not exist
+103    Jenkins does not exist           The instance of Jenkins does not exist
+====   =============================    ==============================================================================
+
+
+
 
 
 Headers
@@ -159,12 +166,34 @@ Resource Specification
         - the name of this environment can be changed at any point by adding {'name': '<name>'}
         - if no previous name has been specified, then it will get it's UUID as it's name
 
-=============   =========================================   =====================================   ================================   =============================
-HTTP Method     End-point                                   Data                                    Success Response                   Failure Response (Error Code)
-=============   =========================================   =====================================   ================================   =============================
-POST, PUT       /api/<v>/environment/<UUID>/update_status/  {'name': 'production'} or {}            <UUID> was updated                 (TBD)                        
-GET             /api/v1/environment/                        (N/A)                                   meta + environment object          (TBD)                         
-=============   =========================================   =====================================   ================================   =============================
+================================    =========================================   =============   ========================================    =============================================================================
+Purpose                             End-point                                   HTTP Method     Data                                        Notes
+================================    =========================================   =============   ========================================    =============================================================================
+Create environment                  /api/<v>/environment/                       POST, PUT       {'name': 'production'} or {}                If 'name' not supplied, will use UUID as name.  
+List all environments               /api/<v>/environment/                       GET                                                           
+Show environment with this name     /api/<v>/environment/by_name/production/    GET             
+Show environment with this UUID     /api/<v>/environment/<UUID>/                GET             
+Update enviornment                  /api/<v>/environment/<UUID>/                PUT             {'name': 'production'}                      Changing the UUID by this method is not allowed
+Delete the environment with UUID    /api/<v>/environment/<UUID>/                DELETE          
+
+Create jenkins                      /api/<v>/jenkins/                           POST, PUT       {'environment': <UUID>,                     Required: 'environment', 'external_access_url'
+                                                                                                 'external_access_url': <jenkins_url>}      Optional: 'internal_access_url' (defaults to 'external_access_url')
+                                                                                                or 
+                                                                                                {'environment': <UUID>,
+                                                                                                 'external_access_url': <jenkins_url>,
+                                                                                                 'internal_access_url': <url>}       
+List all jenkins                    /api/<v>/jenkins/                           GET                                              
+Show jenkins with this env UUID     /api/<v>/jenkins/<UUID>/                    GET             
+Update jenkins                      /api/<v>/jenkins/<UUID>/                    PUT             {'external_access_url': <jenkins_url>,      Can supply 'external_access_url', 'internal_access_url', both or none ({}).
+                                                                                                 'internal_access_url': <url>}              'service_status_updated_at' will update automatically
+                                                                                                                                            Changing the environment UUID or 'service_status_updated_at' is not allowed.
+Delete the jenkins                  /api/<v>/jenkins/<UUID>/                    DELETE        
+  
+List service_status                 /api/<v>/service_status/                    GET                 
+Show individual service_status      /api/<v>/service_status/<integer>/          GET                 
+================================    =========================================   =============   ========================================    =============================================================================
+
+
 
 
 
