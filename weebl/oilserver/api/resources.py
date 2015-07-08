@@ -91,6 +91,7 @@ class JenkinsResource(CommonResource):
         queryset = models.Jenkins.objects.all()
         fields = ['environment', 'service_status', 'external_access_url',
                   'internal_access_url', 'service_status_updated_at']
+        list_allowed_methods = ['get', 'post', 'put', 'delete']
         authorization = Authorization()
         always_return_data=True
 
