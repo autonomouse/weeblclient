@@ -97,19 +97,19 @@ Quick Start
 -----------
 
 - For now to upload data (report_status data in this case) do the following:
-    | curl --dump-header - -H "Content-Type: application/json" -X PUT --data '{"name": "production"}' http://localhost/api/v1/environment/<UUID>/update_status/
+    | curl --dump-header - -H "Content-Type: application/json" -X PUT --data '{}' http://localhost/api/<v>/jenkins/<UUID>/
     
 - or if using python requests: 
-    | url = 'http://localhost/api/v1/environment/<UUID>/update_status/'
+    | url = 'http://localhost/api/<v>/jenkins/<UUID>/'
     | headers = {"content-type":"application/json"}
-    | data = {"name": "production"}
+    | data = {}
     | requests.post(url, headers=headers, data=json.dumps(data)).text
 
 - This can then be seen by:
-    | curl --dump-header - -H "Content-Type: application/json" -X GET http://localhost/api/v<UUID>/update_status/
+    | curl --dump-header - -H "Content-Type: application/json" -X GET http://localhost/api/<v>/jenkins/<UUID>/
 
 - or by going to: 
-    | http://localhost/api/v<UUID>/update_status/?format=json
+    | http://localhost/api/<v>/jenkins/<UUID>/
 
 Response Codes
 --------------
