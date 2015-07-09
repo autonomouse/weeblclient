@@ -22,8 +22,8 @@ def generate_random_url(n=10):
 
 def time_since(timestamp):
     if timestamp is None:
-        return    
-    
+        return
+
     if type(timestamp) is not datetime:
         timestamp_dt = parser.parse(timestamp)
     else:

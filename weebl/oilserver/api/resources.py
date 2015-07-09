@@ -13,7 +13,7 @@ from oilserver import models
 
 class CommonResource(ModelResource):
 
-    def replace_pk_with_alternative(self, bundle, alternative=None, 
+    def replace_pk_with_alternative(self, bundle, alternative=None,
                                     elements=['resource_uri']):
         if alternative is None:
             return bundle
@@ -21,6 +21,7 @@ class CommonResource(ModelResource):
             uri = os.path.dirname(bundle.data[element].rstrip('/'))
             bundle.data[element] = "{}/{}/".format(uri, alternative)
         return bundle
+
 
 class EnvironmentResource(CommonResource):
 

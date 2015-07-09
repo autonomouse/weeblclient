@@ -159,12 +159,7 @@ General Response Info
 Resource Specification
 ----------------------
 
-- Below are tables for each end-point, where <v> represents the api version number (for example "v1") and <UUID> represents the uuid of the environment instance
-    - "Environment" Resource Description
-        - environment has a custom operation resulting in an extra end-point which allows an environment instance (specified by UUID) to be updated.
-        - if the instance specified by UUID doesn't exist, it is created
-        - the name of this environment can be changed at any point by adding {'name': '<name>'}
-        - if no previous name has been specified, then it will get it's UUID as it's name
+- Below are tables for each end-point, where <v> represents the api version number (for example "v1") and <UUID> represents the uuid of the environment instance:
 
 ================================    =========================================   =============   ========================================    =============================================================================
 Purpose                             End-point                                   HTTP Method     Data                                        Notes

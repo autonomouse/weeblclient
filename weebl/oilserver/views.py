@@ -51,7 +51,7 @@ def get_current_oil_state(data_location, env):
     hours = round(minutes / 60)
     days = time_difference.days
     weeks = round(days / 7)
-    
+
     msg = "Jenkins has not checked in for over {} {}"
     if weeks > 0:
         timestr = 'weeks' if weeks > 1 else 'week'
