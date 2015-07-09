@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/1.7/ref/settings/
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 
+SITE_ID = 1
+
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 # Quick-start development settings - unsuitable for production
@@ -36,7 +38,9 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
     'oilserver',
+    'tastypie',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -58,8 +62,8 @@ WSGI_APPLICATION = 'weebl.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'bugs_database',
-        'USER': 'weebl',
+        'NAME': 'test_bugs_database',
+        'USER': 'test_weebl',
         'PASSWORD': 'passweebl',
         'HOST': 'localhost',
         'PORT': None
@@ -84,3 +88,5 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.7/howto/static-files/
 
 STATIC_URL = '/static/'
+
+TASTYPIE_DEFAULT_FORMATS = ['json']

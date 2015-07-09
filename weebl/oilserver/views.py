@@ -13,7 +13,7 @@ from oilserver.forms import SettingsForm
 
 status_checker = StatusChecker(models.WeeblSetting, models.Environment)
 current_site = status_checker.get_current_site()
-    
+
 cfg = utils.get_config()
 MODE = utils.get_mode()
 root_data_directory = cfg.get(MODE, 'data_dir')
@@ -56,7 +56,7 @@ def get_current_oil_state(data_location, env):
     hours = round(minutes / 60)
     days = time_difference.days
     weeks = round(days / 7)
-    
+
     msg = "Jenkins has not checked in for over {} {}"
     if weeks > 0:
         timestr = 'weeks' if weeks > 1 else 'week'
@@ -363,7 +363,7 @@ def job_specific_bugs_list(request, job, time_range='daily',
 def settings_page(request):
     data = {'updated': None}
     original = models.WeeblSetting.objects.get(pk=current_site)
-    
+
     if request.method != 'POST':
         # Before send the form:
         form = SettingsForm(instance=original)

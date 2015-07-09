@@ -4,6 +4,7 @@ import yaml
 import utils
 import pytz
 from django.contrib.sites.models import Site
+from django.forms.models import model_to_dict
 from collections import namedtuple
 
 

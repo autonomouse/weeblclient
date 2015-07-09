@@ -90,22 +90,21 @@ class ServiceStatus(models.Model):
 
 class Jenkins(models.Model):
     """The Continuous Integration Server."""
-    environment = models.ForeignKey(Environment)
+    environment = models.OneToOneField(Environment)
     service_status = models.ForeignKey(ServiceStatus)
     external_access_url = models.URLField(
         unique=True,
         help_text="A URL for external access to this server.")
     internal_access_url = models.URLField(
+        unique=True,
         default=None,
         blank=True,
-        unique=True,
         help_text="A URL used internally (e.g. behind a firewall) for access \
         to this server.")
     service_status_updated_at = models.DateTimeField(
-        default=utils.time_now(),
-        blank=True,
-        null=True,
+        default=utils.time_now,
+        auto_now_add=True,
         help_text="DateTime the service status was last updated.")
-
     def __str__(self):
         return self.external_access_url
+
