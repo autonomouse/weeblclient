@@ -4,15 +4,15 @@ import operator
 import json
 import utils
 from datetime import datetime
+from django.contrib.sites.models import Site
 from django.shortcuts import render
 from exceptions import AbsentYamlError
 from collections import namedtuple
 from oilserver import models
-from oilserver.common import StatusChecker
 from oilserver.forms import SettingsForm
 
-status_checker = StatusChecker(models.WeeblSetting, models.Environment)
-current_site = status_checker.get_current_site()
+
+current_site = Site.objects.get_current().id
 
 cfg = utils.get_config()
 MODE = utils.get_mode()
