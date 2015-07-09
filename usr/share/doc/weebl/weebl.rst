@@ -83,3 +83,123 @@ Making Changes and Packaging Weebl
     | mv trunk.deb weebl_0.0.1-0ubuntu1.deb
 - Check package for errors:
     | lintian weebl_0.0.1-0ubuntu1.deb
+
+
+API Specification
+=================
+
+Authentication
+--------------
+
+- There is currently no authentication on the API.
+
+Quick Start
+-----------
+
+- For now to upload data (report_status data in this case) do the following:
+    | curl --dump-header - -H "Content-Type: application/json" -X PUT --data '{}' http://localhost/api/<v>/jenkins/<UUID>/
+    
+- or if using python requests: 
+    | url = 'http://localhost/api/<v>/jenkins/<UUID>/'
+    | headers = {"content-type":"application/json"}
+    | data = {}
+    | requests.post(url, headers=headers, data=json.dumps(data)).text
+
+- This can then be seen by:
+    | curl --dump-header - -H "Content-Type: application/json" -X GET http://localhost/api/<v>/jenkins/<UUID>/
+
+- or by going to: 
+    | http://localhost/api/<v>/jenkins/<UUID>/
+
+Response Codes
+--------------
+
+Weebl utilises Tasypie's response codes, which should be the `standard html response codes`_.
+
+.. _standard html response codes: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
+
+Error Codes
+-----------
+
+In addition to the response codes, Weebl will also implement `Twitter-style error codes`, although these are yet to be implemented.
+
+.. _Twitter-style error codes: https://dev.twitter.com/overview/api/response-codes
+
+They will eventually be listed here:
+
+====   =============================    ==============================================================================
+Code   Text                             Description
+====   =============================    ==============================================================================
+0      Authentication problem           Could not authenticate the credentials provided
+100    WeeblSetting does not exist      The instance of WeeblSetting does not exist
+101    Environment does not exist       The instance of Environment does not exist
+102    ServiceStatus does not exist     The instance of ServiceStatus does not exist
+103    Jenkins does not exist           The instance of Jenkins does not exist
+====   =============================    ==============================================================================
+
+
+
+
+
+Headers
+-------
+
+{"content-type":"application/json"}
+
+General Response Info
+---------------------
+
+- Tastypie has some useful built-in responses for collection URIs (e.g. a GET on /api/<v>/environment/):
+    - "meta":
+        - a dictionary of helpful summary information
+        - e.g. {"limit": 20, "next": null, "offset": 0, "previous": null, "total_count": 2}
+    - "objects": 
+        - a list of dictionaries containing the requested info
+
+Resource Specification
+----------------------
+
+- Below are tables for each end-point, where <v> represents the api version number (for example "v1") and <UUID> represents the uuid of the environment instance
+    - "Environment" Resource Description
+        - environment has a custom operation resulting in an extra end-point which allows an environment instance (specified by UUID) to be updated.
+        - if the instance specified by UUID doesn't exist, it is created
+        - the name of this environment can be changed at any point by adding {'name': '<name>'}
+        - if no previous name has been specified, then it will get it's UUID as it's name
+
+================================    =========================================   =============   ========================================    =============================================================================
+Purpose                             End-point                                   HTTP Method     Data                                        Notes
+================================    =========================================   =============   ========================================    =============================================================================
+Create environment                  /api/<v>/environment/                       POST, PUT       {'name': 'production'} or {}                If 'name' not supplied, will use UUID as name.  
+List all environments               /api/<v>/environment/                       GET                                                           
+Show environment with this name     /api/<v>/environment/by_name/production/    GET             
+Show environment with this UUID     /api/<v>/environment/<UUID>/                GET             
+Update enviornment                  /api/<v>/environment/<UUID>/                PUT             {'name': 'production'}                      Changing the UUID by this method is not allowed
+Delete the environment with UUID    /api/<v>/environment/<UUID>/                DELETE          
+
+Create jenkins                      /api/<v>/jenkins/                           POST, PUT       {'environment': <UUID>,                     Required: 'environment', 'external_access_url'
+                                                                                                 'external_access_url': <jenkins_url>}      Optional: 'internal_access_url' (defaults to 'external_access_url')
+                                                                                                or 
+                                                                                                {'environment': <UUID>,
+                                                                                                 'external_access_url': <jenkins_url>,
+                                                                                                 'internal_access_url': <url>}       
+List all jenkins                    /api/<v>/jenkins/                           GET                                              
+Show jenkins with this env UUID     /api/<v>/jenkins/<UUID>/                    GET             
+Update jenkins                      /api/<v>/jenkins/<UUID>/                    PUT             {'external_access_url': <jenkins_url>,      Can supply 'external_access_url', 'internal_access_url', both or none ({}).
+                                                                                                 'internal_access_url': <url>}              'service_status_updated_at' will update automatically
+                                                                                                                                            Changing the environment UUID or 'service_status_updated_at' is not allowed.
+Delete the jenkins                  /api/<v>/jenkins/<UUID>/                    DELETE        
+  
+List service_status                 /api/<v>/service_status/                    GET                 
+Show individual service_status      /api/<v>/service_status/<integer>/          GET                 
+================================    =========================================   =============   ========================================    =============================================================================
+
+
+
+
+
+Other things to consider (remove this section when done)
+--------------------------------------------------------
+- parameters resources
+- response format
+- plural versus singular (act on lists or one at a time)
+- consistency

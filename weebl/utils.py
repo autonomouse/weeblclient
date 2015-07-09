@@ -40,7 +40,7 @@ def uuid_check(uuid):
     match = regex.match(uuid)
     return bool(match)
 
-# The following will be removed in the isOILup/views branch:
+# The following will be removed in the isOILup/views+html branch:
 
 import os
 from exceptions import InvalidConfig
