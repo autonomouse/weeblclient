@@ -4,7 +4,6 @@ import yaml
 import utils
 import pytz
 from django.contrib.sites.models import Site
-from __init__ import __version__
 from collections import namedtuple
 
 
@@ -40,7 +39,7 @@ class StatusChecker():
         sset['weebl_documentation'] = settings.weebl_documentation
         sset['site_name'] = self.current_site
 
-        sset['weebl_version'] = __version__
+        sset['weebl_version'] = utils.get_weebl_version()
         return sset
 
 

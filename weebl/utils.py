@@ -1,11 +1,15 @@
 from django.utils import timezone
 from uuid import uuid4
+from __init__ import __version__
 
 def time_now():
     return timezone.now()
 
 def generate_uuid():
     return str(uuid4())
+
+def get_weebl_version():
+    return __version__
 
 # The following will be removed in the isOILup/views+html branch:
 
