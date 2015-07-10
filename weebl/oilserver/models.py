@@ -2,6 +2,7 @@ import os
 import utils
 from django.db import models
 from django.contrib.sites.models import Site
+from oilserver.status_checker import StatusChecker
 
 
 class WeeblSetting(models.Model):
@@ -68,6 +69,25 @@ class Environment(models.Model):
     def __str__(self):
         return "{} ({})".format(self.name, self.uuid)
 
+    def get_set_go(self):
+        current_site = Site.objects.get_current().id
+        return WeeblSetting.objects.get(pk=current_site)
+
+    @property
+    def state_description(self):
+        status_checker = StatusChecker(self.get_set_go())
+        return status_checker.get_current_oil_situation(self, ServiceStatus)
+
+    @property
+    def state(self):
+        status_checker = StatusChecker(self.get_set_go())
+        return status_checker.get_current_oil_state(self, ServiceStatus)
+
+    @property
+    def state_colour(self):
+        status_checker = StatusChecker(self.get_set_go())
+        return getattr(self.get_set_go(), '{}_colour'.format(self.state))
+
 
 class ServiceStatus(models.Model):
     """Potential states that the CI server (Jenkins) may be in (e.g. up,
@@ -105,6 +125,6 @@ class Jenkins(models.Model):
         default=utils.time_now,
         auto_now_add=True,
         help_text="DateTime the service status was last updated.")
+
     def __str__(self):
         return self.external_access_url
-
