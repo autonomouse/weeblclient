@@ -102,16 +102,23 @@ class JenkinsResource(CommonResource):
         return bundle
 
     def obj_create(self, bundle, request=None, **kwargs):
-        bundle.obj.environment =\
-            models.Environment.objects.get(uuid=bundle.data['environment'])
+        bundle.obj.environment = models.Environment.objects.get(
+            uuid=bundle.data['environment'])
         bundle.obj.service_status =\
             models.ServiceStatus.objects.get(name='unknown')
-        bundle.obj.external_access_url = bundle.data['external_access_url']
-        if 'jenkins_internal_url' in bundle.data:
-            int_url = bundle.data['jenkins_internal_url']
+        
+        if 'external_access_url' in bundle.data:
+            bundle.obj.external_access_url = bundle.data['external_access_url']
         else:
-            int_url = bundle.data['external_access_url']
-        bundle.obj.internal_access_url = int_url
+            bundle.obj.external_access_url = bundle.data['external_access_url']
+
+        if 'internal_access_url' in bundle.data:
+            bundle.obj.internal_access_url = bundle.data[
+                'jenkins_internal_url']
+        else:
+            bundle.obj.internal_access_url = bundle.data[
+                'external_access_url']
+
         bundle.obj.save()
         return bundle
 
