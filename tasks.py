@@ -46,9 +46,10 @@ def go(database, server="apache"):
 @task
 def run_tests():
     """Run unit, functional, and lint tests for each app."""
+    run_lint_tests()
     for app in apps:
         run_unit_tests(app)
-    run_lint_tests()
+    run_functional_tests()
 
 @task(help={'database': "Type test or production"})
 def createdb(database):
@@ -76,8 +77,8 @@ def force_stop():
                 proc.kill()
                 print(msg.format(proc.name(), proc.pid, file))
             except:
-                print("Failed to kill {} process id {}. Exception: {}"
-                      .format(proc.name(), proc.pid, e))
+                print("Failed to kill {} process id {}."
+                      .format(proc.name(), proc.pid))
 
 @task(help={'database': "Type test or production"})
 def destroy(database):
@@ -250,16 +251,17 @@ def create_db(database, user, pwd):
 
 def prompt(message, default, validate):
     answer = input(message)
+    answer = default if answer == '' else answer
     try:
         return validate(answer)
     except:
         print("\n{} is not recognised, try again:\n".format(answer))
-        return prompt(message, default, validate)
+        return prompt(message, default, validate)            
 
 def run_unit_tests(app=None):
     try:
         if app is None:
-            print("Running functional and unit tests")
+            print("Running unit tests")
             run("{}/manage.py test".format(application), pty=True)
         else:
             print("Running functional and unit tests for {}...".format(app))
@@ -277,6 +279,14 @@ def run_lint_tests():
         print('OK')
     except Exception as e:
         print("Some tests failed")
+
+def run_functional_tests(app=None):
+    """While this could and probably should be done as part of 'manage.py test'
+    selenium with webdriver for some reason is still not available for Python3.
+    As a result, it is being run separately under Python2.
+    """
+    print("Running functional tests")
+    run("python2 {}/tests_functional.py".format(application))
 
 def yes_no(val):
     YES_OR_NO = re.compile("^(y|n|yes|no)$",re.IGNORECASE)

@@ -1,12 +1,9 @@
 import os
-import json
 import utils
 from tastypie import fields
 from tastypie.resources import ModelResource
 from tastypie.authorization import Authorization
 from tastypie.utils import trailing_slash
-from tastypie import http
-from tastypie import exceptions
 from django.conf.urls import url
 from oilserver import models
 
@@ -30,7 +27,7 @@ class EnvironmentResource(CommonResource):
         list_allowed_methods = ['get', 'post', 'put', 'delete']
         fields = ['uuid', 'name']
         authorization = Authorization()
-        always_return_data=True
+        always_return_data = True
 
     def obj_create(self, bundle, request=None, **kwargs):
         # Update name if one is supplied:
@@ -78,10 +75,10 @@ class ServiceStatusResource(CommonResource):
     class Meta:
         resource_name = 'service_status'
         queryset = models.ServiceStatus.objects.all()
-        list_allowed_methods = ['get']
+        list_allowed_methods = []
         fields = ['name', 'description']
         authorization = Authorization()
-        always_return_data=True
+        always_return_data = True
 
 
 class JenkinsResource(CommonResource):
@@ -94,7 +91,7 @@ class JenkinsResource(CommonResource):
                   'internal_access_url', 'service_status_updated_at']
         list_allowed_methods = ['get', 'post', 'put', 'delete']
         authorization = Authorization()
-        always_return_data=True
+        always_return_data = True
 
     def hydrate(self, bundle):
         # Update tiemstamp (also prevents user submitting timestamp data):
@@ -106,7 +103,7 @@ class JenkinsResource(CommonResource):
             uuid=bundle.data['environment'])
         bundle.obj.service_status =\
             models.ServiceStatus.objects.get(name='unknown')
-        
+
         if 'external_access_url' in bundle.data:
             bundle.obj.external_access_url = bundle.data['external_access_url']
         else:

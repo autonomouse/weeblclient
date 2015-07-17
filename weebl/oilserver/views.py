@@ -1,17 +1,7 @@
-import os
-import yaml
-import operator
-import json
-import utils
-from datetime import datetime
 from django.contrib.sites.models import Site
 from django.shortcuts import render
-from exceptions import AbsentYamlError
-from collections import namedtuple
 from oilserver import models
-from oilserver.status_checker import StatusChecker
 from oilserver.forms import SettingsForm
-from oilserver import models
 
 
 current_site = Site.objects.get_current().id
@@ -22,10 +12,12 @@ def generate_generic_data_dict(title, time_range, environments):
     data = {}
     data['title'] = title
     data['time_range'] = time_range
+    data['settings'] = settings
     data['env'] = {}
     for environment in environments:
         data['env'][environment.name] = environment
     return data
+
 
 def main_page(request, time_range='daily'):
     # Show (daily?) results and limit the number of bugs to the top ten:

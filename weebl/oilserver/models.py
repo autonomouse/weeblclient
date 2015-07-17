@@ -1,8 +1,8 @@
-import os
 import utils
 from django.db import models
 from django.contrib.sites.models import Site
 from oilserver.status_checker import StatusChecker
+from weebl.__init__ import __api_version__
 
 
 class WeeblSetting(models.Model):
@@ -48,6 +48,14 @@ class WeeblSetting(models.Model):
     def __str__(self):
         return str(self.site)
 
+    @property
+    def weebl_version(self):
+        return utils.get_weebl_version()
+
+    @property
+    def api_version(self):
+        return __api_version__
+
 
 class Environment(models.Model):
     """The environment (e.g. Prodstack, Staging)."""
@@ -85,7 +93,6 @@ class Environment(models.Model):
 
     @property
     def state_colour(self):
-        status_checker = StatusChecker(self.get_set_go())
         return getattr(self.get_set_go(), '{}_colour'.format(self.state))
 
 
