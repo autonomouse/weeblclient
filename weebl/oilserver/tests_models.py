@@ -21,7 +21,10 @@ class ModelTests(WeeblTestCase):
         self.jenkins.environment = self.environment
         self.service_status = models.ServiceStatus()
         self.jenkins.service_status = self.service_status
-
+        self.build_executor = models.BuildExecutor()
+        self.build_executor.jenkins = self.jenkins
+        self.pipeline = models.Pipeline()
+        self.pipeline.build_executor = self.build_executor
 
 class WeeblSettingTests(ModelTests):
     def test_fields_accessible(self):
@@ -49,6 +52,18 @@ class ServiceStatusTests(ModelTests):
 class JenkinsTests(ModelTests):
     def test_fields_accessible(self):
         fields = ['environment', 'service_status', 'external_access_url',
-                  'internal_access_url', 'service_status_updated_at']
+                  'internal_access_url', 'service_status_updated_at', 'uuid']
         for field in fields:
             self.assertTrue(hasattr(self.jenkins, field))
+
+class BuildExecutorTests(ModelTests):
+    def test_fields_accessible(self):
+        fields = ['uuid', 'name', 'jenkins']
+        for field in fields:
+            self.assertTrue(hasattr(self.build_executor, field))
+
+class PipelineTests(ModelTests):
+    def test_fields_accessible(self):
+        fields = ['pipeline_id', 'build_executor']
+        for field in fields:
+            self.assertTrue(hasattr(self.pipeline, field))

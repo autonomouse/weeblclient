@@ -54,10 +54,10 @@ Deployment
 
 - To deploy on a django's built in test server:
     | sudo invoke go production -s run_server
-    
+
 - To deploy on Apache:
     | sudo invoke go production
-    
+
 - In case of catestrophic failure, you can dump the production database by doing the following (please note that there is no data backup facility yet, so not recommended *at all* once we start populating the database with actual data):
     | sudo invoke destroy production
 
@@ -98,8 +98,8 @@ Quick Start
 
 - For now to upload data (report_status data in this case) do the following:
     | curl --dump-header - -H "Content-Type: application/json" -X PUT --data '{}' http://localhost/api/<v>/jenkins/<UUID>/
-    
-- or if using python requests: 
+
+- or if using python requests:
     | url = 'http://localhost/api/<v>/jenkins/<UUID>/'
     | headers = {"content-type":"application/json"}
     | data = {}
@@ -108,7 +108,7 @@ Quick Start
 - This can then be seen by:
     | curl --dump-header - -H "Content-Type: application/json" -X GET http://localhost/api/<v>/jenkins/<UUID>/
 
-- or by going to: 
+- or by going to:
     | http://localhost/api/<v>/jenkins/<UUID>/
 
 Response Codes
@@ -153,39 +153,51 @@ General Response Info
     - "meta":
         - a dictionary of helpful summary information
         - e.g. {"limit": 20, "next": null, "offset": 0, "previous": null, "total_count": 2}
-    - "objects": 
+    - "objects":
         - a list of dictionaries containing the requested info
 
 Resource Specification
 ----------------------
 
-- Below are tables for each end-point, where <v> represents the api version number (for example "v1") and <UUID> represents the uuid of the environment instance:
+- Below are tables for each end-point, where <v> represents the api version number (for example "v1"), <UUID> represents the uuid of the environment instance and <uuid> represents a uuid for the given model:
 
 ================================    =========================================   =============   ========================================    =============================================================================
 Purpose                             End-point                                   HTTP Method     Data                                        Notes
 ================================    =========================================   =============   ========================================    =============================================================================
-Create environment                  /api/<v>/environment/                       POST, PUT       {'name': 'production'} or {}                If 'name' not supplied, will use UUID as name.  
-List all environments               /api/<v>/environment/                       GET                                                           
-Show environment with this name     /api/<v>/environment/by_name/production/    GET             
-Show environment with this UUID     /api/<v>/environment/<UUID>/                GET             
+Create environment                  /api/<v>/environment/                       POST            {'name': 'production'} or {}                If 'name' not supplied, will use UUID as name.
+List all environments               /api/<v>/environment/                       GET
+Show environment with this name     /api/<v>/environment/by_name/production/    GET
+Show environment with this UUID     /api/<v>/environment/<UUID>/                GET
 Update enviornment                  /api/<v>/environment/<UUID>/                PUT             {'name': 'production'}                      Changing the UUID by this method is not allowed
-Delete the environment with UUID    /api/<v>/environment/<UUID>/                DELETE          
+Delete the environment with UUID    /api/<v>/environment/<UUID>/                DELETE
 
-Create jenkins                      /api/<v>/jenkins/                           POST, PUT       {'environment': <UUID>,                     Required: 'environment', 'external_access_url'
+Create jenkins                      /api/<v>/jenkins/                           POST            {'environment': <UUID>,                     Required: 'environment', 'external_access_url'
                                                                                                  'external_access_url': <jenkins_url>}      Optional: 'internal_access_url' (defaults to 'external_access_url')
-                                                                                                or 
+                                                                                                or
                                                                                                 {'environment': <UUID>,
                                                                                                  'external_access_url': <jenkins_url>,
-                                                                                                 'internal_access_url': <url>}       
-List all jenkins                    /api/<v>/jenkins/                           GET                                              
-Show jenkins with this env UUID     /api/<v>/jenkins/<UUID>/                    GET             
+                                                                                                 'internal_access_url': <url>}
+List all jenkins                    /api/<v>/jenkins/                           GET
+Show jenkins with this env UUID     /api/<v>/jenkins/<UUID>/                    GET
 Update jenkins                      /api/<v>/jenkins/<UUID>/                    PUT             {'external_access_url': <jenkins_url>,      Can supply 'external_access_url', 'internal_access_url', both or none ({}).
                                                                                                  'internal_access_url': <url>}              'service_status_updated_at' will update automatically
                                                                                                                                             Changing the environment UUID or 'service_status_updated_at' is not allowed.
-Delete the jenkins                  /api/<v>/jenkins/<UUID>/                    DELETE        
-  
-List service_status                 /api/<v>/service_status/                    GET                 
-Show individual service_status      /api/<v>/service_status/<integer>/          GET                 
+Delete the jenkins                  /api/<v>/jenkins/<UUID>/                    DELETE
+
+List service_status                 /api/<v>/service_status/                    GET
+Show individual service_status      /api/<v>/service_status/<integer>/          GET
+
+Create build_executor               /api/<v>/build_executor/                    POST            {'jenkins': <UUID>}                         If 'name' not supplied, will use its uuid as name.
+                                                                                                or
+                                                                                                {'name': '<ci-oil-master/slaveXX-X>',
+                                                                                                 'jenkins': <UUID>}
+List all build_executors            /api/<v>/build_executor/                    GET
+Show environment with this uuid     /api/<v>/build_executor/<uuid>/             GET
+Update build_executor               /api/<v>/build_executor/<uuid>/             PUT             {'jenkins': <UUID>}                         Changing the UUID by this method is not allowed
+                                                                                                or
+                                                                                                {'name': '<ci-oil-master/slaveXX-X>',
+                                                                                                 'jenkins': <UUID>}                     
+Delete the build_executor           /api/<v>/build_executor/<uuid>/             DELETE
 ================================    =========================================   =============   ========================================    =============================================================================
 
 

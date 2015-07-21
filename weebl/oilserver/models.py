@@ -65,14 +65,14 @@ class Environment(models.Model):
         unique=True,
         blank=False,
         null=False,
-        help_text="UUID of environment")
+        help_text="UUID of environment.")
     name = models.CharField(
         max_length=255,
         unique=True,
         default=uuid.default,
         blank=True,
         null=True,
-        help_text="Name of environment")
+        help_text="Name of environment.")
 
     def __str__(self):
         return "{} ({})".format(self.name, self.uuid)
@@ -135,3 +135,36 @@ class Jenkins(models.Model):
 
     def __str__(self):
         return self.external_access_url
+
+    @property
+    def uuid(self):
+        return self.environment.uuid
+
+
+class BuildExecutor(models.Model):
+    """The Jenkins build executor (master or slave)."""
+    uuid = models.CharField(
+        max_length=36,
+        default=utils.generate_uuid,
+        unique=True,
+        blank=False,
+        null=False,
+        help_text="UUID of the jenkins build executor.")
+    name = models.CharField(
+        max_length=255,
+        unique=True,
+        default=uuid.default,
+        help_text="Name of the jenkins build executor.")
+    jenkins = models.ForeignKey(Jenkins)
+
+
+class Pipeline(models.Model):
+    """The pipelines currently recorded."""
+    pipeline_id = models.CharField(
+        max_length=36,
+        default=utils.generate_uuid,
+        unique=True,
+        blank=False,
+        null=False,
+        help_text="UUID of environment.")
+    build_executor = models.ForeignKey(BuildExecutor)

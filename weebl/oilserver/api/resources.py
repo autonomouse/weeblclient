@@ -15,8 +15,11 @@ class CommonResource(ModelResource):
         if alternative is None:
             return bundle
         for element in elements:
-            uri = os.path.dirname(bundle.data[element].rstrip('/'))
-            bundle.data[element] = "{}/{}/".format(uri, alternative)
+            if type(bundle.data[element]) is int:
+                replace_me = bundle.data[element]
+            else:
+                replace_me = os.path.dirname(bundle.data[element].rstrip('/'))
+            bundle.data[element] = "{}/{}/".format(replace_me, alternative)
         return bundle
 
 
@@ -94,7 +97,7 @@ class JenkinsResource(CommonResource):
         always_return_data = True
 
     def hydrate(self, bundle):
-        # Update tiemstamp (also prevents user submitting timestamp data):
+        # Update timestamp (also prevents user submitting timestamp data):
         bundle.data['service_status_updated_at'] = utils.time_now()
         return bundle
 
@@ -137,3 +140,49 @@ class JenkinsResource(CommonResource):
         uuid = bundle.obj.environment.uuid
         uuidify_these = ['resource_uri', 'environment']
         return self.replace_pk_with_alternative(bundle, uuid, uuidify_these)
+
+
+class BuildExecutorResource(CommonResource):
+    jenkins = fields.ForeignKey(JenkinsResource, 'jenkins')
+
+    class Meta:
+        resource_name = 'build_executor'
+        queryset = models.BuildExecutor.objects.all()
+        fields = ['name', 'uuid', 'jenkins']
+        list_allowed_methods = ['get', 'post', 'put', 'delete']
+        authorization = Authorization()
+        always_return_data = True
+
+    def obj_create(self, bundle, request=None, **kwargs):
+        bundle.obj.jenkins =\
+            models.Environment.objects.get(uuid=bundle.data['jenkins']).jenkins
+
+        if 'name' in bundle.data:
+            bundle.obj.name = bundle.data['name']
+
+        bundle.obj.save()
+        return bundle
+
+    def dispatch(self, request_type, request, **kwargs):
+        """Overrides and replaces the the uuid in the end-point with pk."""
+        if 'pk' in kwargs:
+            uuid = kwargs['pk']  # Because end-point is the UUID not pk really
+            if models.BuildExecutor.objects.filter(uuid=uuid).exists():
+                build_executor = models.BuildExecutor.objects.get(uuid=uuid)
+                kwargs['pk'] = build_executor.pk
+                # TODO: else return and error code
+        return super(BuildExecutorResource, self).dispatch(request_type,
+                                                           request, **kwargs)
+
+    def dehydrate(self, bundle):
+        uuid = bundle.obj.uuid
+        uuidify_these = ['resource_uri', 'jenkins']
+        return self.replace_pk_with_alternative(bundle, uuid, uuidify_these)
+
+    def hydrate(self, bundle):
+        # The UUID field is read-only, so don't allow user to change it:
+        if 'uuid' in bundle.data:
+            bundle.data.pop('uuid')
+        if 'pk' in bundle.data:
+            bundle.data.pop('pk')
+        return bundle
