@@ -1,9 +1,4 @@
-import os
-import json
-import yaml
 import utils
-import pytz
-from collections import namedtuple
 
 
 class StatusChecker():
@@ -26,7 +21,7 @@ class StatusChecker():
         oil_state = 'up'
         oil_situation = []
 
-        initial_status = environment.jenkins.service_status.name
+        #initial_status = environment.jenkins.service_status.name
         last_active = environment.jenkins.service_status_updated_at
         delta, time_msg = self.calc_time_since_last_checkin(last_active)
 
@@ -37,7 +32,6 @@ class StatusChecker():
 
         environment.service_status = ServStat.objects.get(name=oil_state)
         return (oil_state, oil_situation)
-
 
     def calc_time_since_last_checkin(self, timestamp):
         if timestamp is None:
@@ -52,7 +46,7 @@ class StatusChecker():
         days = time_difference.days
         weeks = round(days / 7)
 
-        msg = "Jenkins has not checked in for over {} {}"
+        msg = "Jenkins has not checked in for {} {}"
         if weeks > 0:
             timestr = 'weeks' if weeks > 1 else 'week'
             time_msg = msg.format(weeks, timestr)
@@ -62,11 +56,12 @@ class StatusChecker():
         elif hours > 0:
             timestr = 'hours' if hours > 1 else 'hour'
             time_msg = msg.format(hours, timestr)
-        else:
+        elif minutes > 0:
             timestr = 'minutes' if minutes > 1 else 'minute'
             time_msg = msg.format(minutes, timestr)
+        else:
+            time_msg = ''
         return (delta, time_msg)
-
 
     def get_overdue_state(self, delta):
         unstable_th = self.settings.check_in_unstable_threshold
@@ -78,7 +73,6 @@ class StatusChecker():
         elif delta > float(unstable_th):
             errstate = 'unstable'
         return errstate
-
 
     def set_oil_state(self, oil_state, oil_situation, new_state, msg):
         # Set state:

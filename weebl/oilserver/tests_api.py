@@ -123,21 +123,20 @@ class EnvironmentResourceTest(ResourceTests):
 class ServiceStatusResourceTest(ResourceTests):
 
     def setUp(self):
+        """Initial service_status objects should have been loaded in via 
+        fixtures.
+        """
         super(ServiceStatusResourceTest, self).setUp()
 
-    def test_get_all_service_status_models(self):
-        """GET all service_status models.
-        Initial service_status objects should have been loaded in via fixtures.
-        """
+    def test_get_method_not_allowed(self):
+        """Validate that user cannot GET service_status model."""
         response =\
             self.api_client.get('/api/{}/service_status/'.format(self.version))
         r_dict = self.deserialize(response)
-        obj_names = [x['name'] for x in r_dict['objects']]
 
         # Assertions
-        expected_state_names = ['up', 'unstable', 'down', 'unknown']
-        self.assertSetEqual(set(expected_state_names), set(obj_names))
-        self.assertEqual(response.status_code, 200)
+        self.assertIsNone(r_dict)
+        self.assertEqual(response.status_code, 405)
 
     def test_post_method_not_allowed(self):
         """Validate that user cannot POST service_status model."""

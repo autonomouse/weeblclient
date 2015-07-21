@@ -4,48 +4,50 @@ import subprocess
 import unittest
 import time
 import shlex
-from selenium import webdriver
-from django.test import TestCase
 import os
+from selenium import webdriver
+from random import randint
 
 
-class WebDriverOilTestCase(TestCase):
+class WebDriverOilTestCase(unittest.TestCase):
+    pass
 
-    SETUP = ['python3 weebl/manage.py syncdb --noinput', ]
-    RUNSERVER = 'python3 weebl/manage.py runserver'
-    HOST = 'http://localhost:8000'
+'''
+    HOST = 'http://localhost'
 
     def setUp(self):
-
-        # Create mock data:
-        self.create_mock_data('test_data')
-
-        # Start the server:
-        #self.setup_django_runserver()
-        self.runserver = self.start_django_runserver()
-
         # Create a browser instance and go to site:
         self.driver = webdriver.Firefox()
 
-    def setup_django_runserver(self):
-        for cmd in self.SETUP:
-            subprocess.check_call(shlex.split(cmd),
-                                  stdout=subprocess.PIPE,
-                                  stderr=subprocess.PIPE)
+    def go_to_url(self, url):
+        self.driver.get(url)
 
-    def start_django_runserver(self):
-        p = subprocess.Popen(shlex.split(self.RUNSERVER),
-                             stderr=subprocess.STDOUT)
-        time.sleep(2)
-        return p
+    def clicky(self, locator):
+        self.driver.find_element_by_css_selector(locator).click()
+
+    def typey(self, locator, keys):
+        self.driver.find_element_by_css_selector(locator).click()
+        self.driver.find_element_by_css_selector(locator).clear()
+        self.driver.find_element_by_css_selector(locator).send_keys(text)
 
     def tearDown(self):
-        self.runserver.terminate()
+        self.stop_django_runserver()
         self.driver.close()
 
-        self.destroy_mock_data('test_data')
 
-'''
+class SettingsTests(WebDriverOilTestCase):
+
+    def tearDown(self):
+        self.typey('#id_check_in_unstable_threshold', randint())
+
+        super(SettingsTests, self).tearDown()
+
+    def test_deploy_stats(self):
+        print('wtf?')
+        self.go_to_url("{}/Settings/".format(self.HOST))
+        #import pdb; pdb.set_trace()
+
+
 class CommonTests(WebDriverOilTestCase):
 
     def test_deploy_stats(self):
@@ -55,7 +57,6 @@ class CommonTests(WebDriverOilTestCase):
     def test_prepare_stats(self):
         self.driver.get("{}/".format(self.HOST))
         import pdb; pdb.set_trace()
-
     def test_tempest_stats(self):
         self.driver.get("{}/".format(self.HOST))
         import pdb; pdb.set_trace()
