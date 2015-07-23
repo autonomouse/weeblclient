@@ -171,6 +171,7 @@ Show environment with this UUID     /api/<v>/environment/<UUID>/                
 Update enviornment                  /api/<v>/environment/<UUID>/                PUT             {'name': 'production'}                      Changing the UUID by this method is not allowed
 Delete the environment with UUID    /api/<v>/environment/<UUID>/                DELETE
 
+
 Create jenkins                      /api/<v>/jenkins/                           POST            {'environment': <UUID>,                     Required: 'environment', 'external_access_url'
                                                                                                  'external_access_url': <jenkins_url>}      Optional: 'internal_access_url' (defaults to 'external_access_url')
                                                                                                 or
@@ -184,8 +185,10 @@ Update jenkins                      /api/<v>/jenkins/<UUID>/                    
                                                                                                                                             Changing the environment UUID or 'service_status_updated_at' is not allowed.
 Delete the jenkins                  /api/<v>/jenkins/<UUID>/                    DELETE
 
+
 List service_status                 /api/<v>/service_status/                    GET
 Show individual service_status      /api/<v>/service_status/<integer>/          GET
+
 
 Create build_executor               /api/<v>/build_executor/                    POST            {'jenkins': <UUID>}                         If 'name' not supplied, will use its uuid as name.
                                                                                                 or
@@ -198,6 +201,12 @@ Update build_executor               /api/<v>/build_executor/<uuid>/             
                                                                                                 {'name': '<ci-oil-master/slaveXX-X>',
                                                                                                  'jenkins': <UUID>}                     
 Delete the build_executor           /api/<v>/build_executor/<uuid>/             DELETE
+
+
+Create pipeline                     /api/<v>/pipeline/                          POST
+List all pipelines                  /api/<v>/pipeline/                          GET
+Show pipeline with this uuid        /api/<v>/pipeline/<uuid>/                   GET
+Delete pipeline                     /api/<v>/pipeline/<uuid>/                   DELETE
 ================================    =========================================   =============   ========================================    =============================================================================
 
 

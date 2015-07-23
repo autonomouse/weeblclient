@@ -10,16 +10,16 @@ from oilserver import models
 
 class CommonResource(ModelResource):
 
-    def replace_pk_with_alternative(self, bundle, alternative=None,
-                                    elements=['resource_uri']):
-        if alternative is None:
+    def replace_pk_with_alternative(self, bundle, replace_with):
+        if replace_with is None:
             return bundle
-        for element in elements:
-            if type(bundle.data[element]) is int:
-                replace_me = bundle.data[element]
+        for replace_this, with_this in replace_with:
+            if type(bundle.data[replace_this]) is int:
+                replace_me = bundle.data[replace_this]
             else:
-                replace_me = os.path.dirname(bundle.data[element].rstrip('/'))
-            bundle.data[element] = "{}/{}/".format(replace_me, alternative)
+                replace_me =\
+                    os.path.dirname(bundle.data[replace_this].rstrip('/'))
+            bundle.data[replace_this] = "{}/{}/".format(replace_me, with_this)
         return bundle
 
 
@@ -27,7 +27,8 @@ class EnvironmentResource(CommonResource):
 
     class Meta:
         queryset = models.Environment.objects.all()
-        list_allowed_methods = ['get', 'post', 'put', 'delete']
+        list_allowed_methods = ['get', 'post', 'put', 'delete']  # all items
+        detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
         fields = ['uuid', 'name']
         authorization = Authorization()
         always_return_data = True
@@ -69,8 +70,8 @@ class EnvironmentResource(CommonResource):
             return self.create_response(request, self.full_dehydrate(bundle))
 
     def dehydrate(self, bundle):
-        uuid = bundle.data['uuid']
-        return self.replace_pk_with_alternative(bundle, uuid)
+        replace_with = [('resource_uri', bundle.obj.uuid), ]
+        return self.replace_pk_with_alternative(bundle, replace_with)
 
 
 class ServiceStatusResource(CommonResource):
@@ -78,7 +79,8 @@ class ServiceStatusResource(CommonResource):
     class Meta:
         resource_name = 'service_status'
         queryset = models.ServiceStatus.objects.all()
-        list_allowed_methods = []
+        list_allowed_methods = []  # all items
+        detail_allowed_methods = []  # individual
         fields = ['name', 'description']
         authorization = Authorization()
         always_return_data = True
@@ -92,7 +94,8 @@ class JenkinsResource(CommonResource):
         queryset = models.Jenkins.objects.all()
         fields = ['environment', 'service_status', 'external_access_url',
                   'internal_access_url', 'service_status_updated_at']
-        list_allowed_methods = ['get', 'post', 'put', 'delete']
+        list_allowed_methods = ['get', 'post', 'put', 'delete']  # all items
+        detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
         authorization = Authorization()
         always_return_data = True
 
@@ -137,9 +140,9 @@ class JenkinsResource(CommonResource):
                                                      **kwargs)
 
     def dehydrate(self, bundle):
-        uuid = bundle.obj.environment.uuid
-        uuidify_these = ['resource_uri', 'environment']
-        return self.replace_pk_with_alternative(bundle, uuid, uuidify_these)
+        replace_with = [('resource_uri', bundle.obj.environment.uuid), 
+                        ('environment', bundle.obj.environment.uuid), ]
+        return self.replace_pk_with_alternative(bundle, replace_with)
 
 
 class BuildExecutorResource(CommonResource):
@@ -149,7 +152,8 @@ class BuildExecutorResource(CommonResource):
         resource_name = 'build_executor'
         queryset = models.BuildExecutor.objects.all()
         fields = ['name', 'uuid', 'jenkins']
-        list_allowed_methods = ['get', 'post', 'put', 'delete']
+        list_allowed_methods = ['get', 'post', 'put', 'delete']  # all items
+        detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
         authorization = Authorization()
         always_return_data = True
 
@@ -175,14 +179,57 @@ class BuildExecutorResource(CommonResource):
                                                            request, **kwargs)
 
     def dehydrate(self, bundle):
-        uuid = bundle.obj.uuid
-        uuidify_these = ['resource_uri', 'jenkins']
-        return self.replace_pk_with_alternative(bundle, uuid, uuidify_these)
+        replace_with = [('resource_uri', bundle.obj.uuid), 
+                        ('jenkins',bundle.obj.jenkins.uuid), ]
+        return self.replace_pk_with_alternative(bundle, replace_with)
 
     def hydrate(self, bundle):
         # The UUID field is read-only, so don't allow user to change it:
         if 'uuid' in bundle.data:
             bundle.data.pop('uuid')
+        if 'pk' in bundle.data:
+            bundle.data.pop('pk')
+        return bundle
+
+
+
+class PipelineResource(CommonResource):
+    build_executor = fields.ForeignKey(BuildExecutorResource, 'build_executor')
+
+    class Meta:
+        queryset = models.Pipeline.objects.all()
+        fields = ['pipeline_id', 'build_executor']
+        list_allowed_methods = ['get', 'post', 'delete']  # all items
+        detail_allowed_methods = ['get', 'post', 'delete']  # individual
+        authorization = Authorization()
+        always_return_data = True
+
+    def obj_create(self, bundle, request=None, **kwargs):
+        bundle.obj.build_executor = models.BuildExecutor.objects.get(
+            uuid=bundle.data['build_executor'])
+        bundle.obj.save()
+        return bundle
+
+    def dispatch(self, request_type, request, **kwargs):
+        """Overrides and replaces the the uuid in the end-point with pk."""
+        if 'pk' in kwargs:
+            uuid = kwargs['pk']  # Because end-point is the UUID not pk really
+            if models.Pipeline.objects.filter(pipeline_id=uuid).exists():
+                pipeline = models.Pipeline.objects.get(pipeline_id=uuid)
+                kwargs['pk'] = pipeline.pk
+                # TODO: else return and error code
+        return super(PipelineResource, self).dispatch(request_type, request,
+                                                      **kwargs)
+
+    def dehydrate(self, bundle):
+        replace_with = [('resource_uri', bundle.obj.pipeline_id), 
+                        ('build_executor', bundle.obj.build_executor.uuid), ]
+        return self.replace_pk_with_alternative(bundle, replace_with)
+
+    def hydrate(self, bundle):
+        # The pipeline_id field is read-only, so don't allow user to change it:
+        if 'pipeline_id' in bundle.data:
+            bundle.data.pop('pipeline_id')
         if 'pk' in bundle.data:
             bundle.data.pop('pk')
         return bundle

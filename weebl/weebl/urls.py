@@ -9,6 +9,7 @@ v_api.register(resources.EnvironmentResource())
 v_api.register(resources.ServiceStatusResource())
 v_api.register(resources.JenkinsResource())
 v_api.register(resources.BuildExecutorResource())
+v_api.register(resources.PipelineResource())
 
 urlpatterns = patterns('',
                        url(r'^', include('oilserver.urls')),

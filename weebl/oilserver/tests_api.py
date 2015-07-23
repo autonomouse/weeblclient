@@ -91,7 +91,7 @@ class EnvironmentResourceTest(ResourceTests):
         r_dict = self.post_create_environment_model_with_name()
         uuid = r_dict['uuid']
         new_name = utils.generate_random_string()
-        data = {'uuid': uuid, 'name': new_name}
+        data = {'name': new_name}
 
         response = self.api_client.put('/api/{}/environment/{}/'
                                        .format(self.version, uuid), data=data)
@@ -99,6 +99,24 @@ class EnvironmentResourceTest(ResourceTests):
 
         # Assertions
         self.assertEquals(r_dict['uuid'], new_r_dict['uuid'])
+        self.assertNotEquals(r_dict['name'], new_r_dict['name'])
+        self.assertEqual(response.status_code, 200)
+
+    def test_put_cannot_update_existing_environment_models_uuid(self):
+        """PUT to update an existing environment model."""
+        r_dict = self.post_create_environment_model_with_name()
+        uuid = r_dict['uuid']
+        new_uuid = utils.generate_uuid()
+        new_name = utils.generate_random_string()
+        data = {'uuid': new_uuid, 'name': new_name}
+
+        response = self.api_client.put('/api/{}/environment/{}/'
+                                       .format(self.version, uuid), data=data)
+        new_r_dict = self.deserialize(response)
+
+        # Assertions
+        self.assertEquals(uuid, new_r_dict['uuid'])
+        self.assertNotEquals(new_uuid, new_r_dict['uuid'])
         self.assertNotEquals(r_dict['name'], new_r_dict['name'])
         self.assertEqual(response.status_code, 200)
 
@@ -166,7 +184,7 @@ class ServiceStatusResourceTest(ResourceTests):
 
         # Assertions
         self.assertIsNone(r_dict)
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 405)
 
 
 class JenkinsResourceTest(ResourceTests):
@@ -188,7 +206,6 @@ class JenkinsResourceTest(ResourceTests):
                                                                data=data2)
         return (uuid, random_name)
 
-
     def test_put_mock_jenkins_check_in_with_new_environment_uuid(self):
         """Attempting to call jenkins API with new environment uuid should fail
         as the create new envrionment call needs to be called first, but it
@@ -202,7 +219,6 @@ class JenkinsResourceTest(ResourceTests):
         # Assertions
         self.assertEqual(r_dict, self.unrecognied_environment_uuid_msg)
         self.assertEqual(response.status_code, 400)
-
 
     def test_put_mock_jenkins_check_in_with_existing_uuid(self):
         """Attempting to call jenkins API with an existing environment uuid
@@ -383,6 +399,122 @@ class BuildExecutorTest(ResourceTests):
                                           .format(self.version, uuid))
 
         non_obj = models.BuildExecutor.objects.filter(uuid=uuid)
+
+        # Assertions
+        self.assertTrue(obj_created)
+        self.assertEqual(non_obj.count(), 0)
+        self.assertEqual(response.status_code, 204)
+
+
+class PipelineTest(ResourceTests):
+
+    def setUp(self):
+        super(PipelineTest, self).setUp()
+
+    def create_new_environment_jenkins_and_build_executor(self):
+        # Create environment:
+        random_env_name = utils.generate_random_string()
+        random_url = utils.generate_random_url()
+        data1 = {'name': random_env_name}
+        response1 = self.post_create_model_without_status_code(
+            'environment', data=data1)
+
+        # Create jenkins:
+        uuid = response1['uuid']
+        data2 = {'environment': uuid, 'external_access_url': random_url}
+        response2 = self.post_create_model_without_status_code(
+            'jenkins', data=data2)
+
+        # Create build executor:
+        random_buildex_name = utils.generate_random_string()
+        data3 = {'name': random_buildex_name, 'jenkins': uuid}
+        response3 = self.post_create_model_without_status_code(
+            'build_executor', data=data3)
+
+        return response3['uuid']
+
+    def test_post_create_build_executor_model(self):
+        buildex = self.create_new_environment_jenkins_and_build_executor()
+
+        data = {'build_executor': buildex}
+        r_dict, status_code = self.post_create_model_with_status_code(
+            'pipeline', data=data)
+
+        # Assertions
+        self.assertIn('pipeline_id', r_dict)
+        self.assertNotIn('pk', r_dict)
+        self.assertEqual(status_code, 201)
+
+    def test_get_all_pipeline_models(self):
+        """GET all pipeline models."""
+        buildex = self.create_new_environment_jenkins_and_build_executor()
+        data = {'build_executor': buildex}
+        r_dict0 = self.post_create_model_without_status_code(
+            'pipeline', data=data)
+        r_dict1 = self.post_create_model_without_status_code(
+            'pipeline', data=data)
+        r_dict2 = self.post_create_model_without_status_code(
+            'pipeline', data=data)
+
+        response = self.api_client.get('/api/{}/pipeline/'
+                                       .format(self.version), format='json')
+        r_dict = self.deserialize(response)
+        objects = r_dict['objects']
+
+        # Assertions
+        self.assertIn(r_dict0['pipeline_id'], objects[0]['pipeline_id'])
+        self.assertIn(r_dict1['pipeline_id'], objects[1]['pipeline_id'])
+        self.assertIn(r_dict2['pipeline_id'], objects[2]['pipeline_id'])
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_specific_pipeline_model(self):
+        """GET a specific pipeline model by it's UUID."""
+        buildex = self.create_new_environment_jenkins_and_build_executor()
+        data = {'build_executor': buildex}
+        r_dict0, status_code = self.post_create_model_with_status_code(
+            'pipeline', data=data)
+        pipeline_id = r_dict0['pipeline_id']
+        response = self.api_client.get('/api/{}/pipeline/{}/'
+                                       .format(self.version, pipeline_id),
+                                       format='json')
+        r_dict1 = self.deserialize(response)
+
+        # Assertions
+        self.assertEquals(pipeline_id, r_dict1['pipeline_id'])
+        self.assertEqual(response.status_code, 200)
+
+    def test_put_method_not_allowed(self):
+        """PUT to update an existing pipeline model."""
+        buildex = self.create_new_environment_jenkins_and_build_executor()
+        data = {'build_executor': buildex}
+        r_dict0, status_code = self.post_create_model_with_status_code(
+            'pipeline', data=data)
+        pipeline_id = r_dict0['pipeline_id']
+        data = {}
+        response = self.api_client.put('/api/{}/pipeline/{}/'
+                                       .format(self.version, pipeline_id),
+                                       data=data, format='json')
+        r_dict1 = self.deserialize(response)
+
+        # Assertions
+        self.assertIsNone(r_dict1)
+        self.assertEqual(response.status_code, 405)
+
+    def test_delete_pipeline_model(self):
+        """DELETE an existing pipeline model."""
+        buildex = self.create_new_environment_jenkins_and_build_executor()
+        data = {'build_executor': buildex}
+        r_dict0, status_code = self.post_create_model_with_status_code(
+            'pipeline', data=data)
+        pipeline_id = r_dict0['pipeline_id']
+
+        obj_created =\
+            models.Pipeline.objects.filter(pipeline_id=pipeline_id).count() > 0
+        response = self.api_client.delete('/api/{}/pipeline/{}/'
+                                       .format(self.version, pipeline_id),
+                                       format='json')
+
+        non_obj = models.Pipeline.objects.filter(pipeline_id=pipeline_id)
 
         # Assertions
         self.assertTrue(obj_created)
