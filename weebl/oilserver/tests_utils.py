@@ -4,7 +4,7 @@ import random
 from common_test_methods import WeeblTestCase
 from datetime import datetime, timedelta
 from django.core.validators import URLValidator, ValidationError
-from time import sleep
+from freezegun import freeze_time
 
 
 class UtilsTests(WeeblTestCase):
@@ -47,32 +47,63 @@ class UtilsTests(WeeblTestCase):
         self.assertEqual(len(second_lvl_dom), num)
 
     def test_time_since(self):
-        timestamp = datetime.strptime("Jan 1 2000 00:00:00",
-                                      "%b %d %Y %H:%M:%S")
+        with freeze_time("Jan 1 2000 00:00:00"):
+            timestamp = utils.time_now()
         delta = utils.time_since(timestamp)
         ts_type = type(delta)
         self.assertTrue(ts_type is timedelta)
 
     def test_time_difference_less_than_x_mins(self):
-        timestamp = datetime.strptime("Jan 1 2000 00:00:00",
-                                      "%b %d %Y %H:%M:%S")
-        no_time = 0
-        sleep(2)
-        wrong_short_0 = utils.time_difference_less_than_x_mins(
-            utils.time_now(), no_time)
-        wrong_long_0 = utils.time_difference_less_than_x_mins(
-            timestamp, no_time)
+        # zero time difference:
+        with freeze_time("Jan 2 2000 00:00:00"):
+            timestamp = utils.time_now()
+            val_true = utils.time_difference_less_than_x_mins(
+                timestamp, 1)
+            self.assertTrue(val_true)
+            val_true = utils.time_difference_less_than_x_mins(
+                timestamp, 0.00000001)
+            self.assertTrue(val_true)
+            val_false = utils.time_difference_less_than_x_mins(
+                timestamp, 0)
+            self.assertFalse(val_false)
 
-        no_time = 10
-        right_short_10 = utils.time_difference_less_than_x_mins(
-            utils.time_now(), no_time)
-        wrong_long_10 = utils.time_difference_less_than_x_mins(
-            timestamp, no_time)
+        # 1 second time difference:
+        with freeze_time("Jan 2 2000 00:00:01"):
+            one_sec_in_mins = (1 / 60)
+            two_sec_in_mins = one_sec_in_mins * 2
+            val_true = utils.time_difference_less_than_x_mins(
+                timestamp, two_sec_in_mins)
+            self.assertTrue(val_true)
+            val_false = utils.time_difference_less_than_x_mins(
+                timestamp, one_sec_in_mins)
+            self.assertFalse(val_false)
 
-        self.assertFalse(wrong_short_0)
-        self.assertFalse(wrong_long_0)
-        self.assertTrue(right_short_10)
-        self.assertFalse(wrong_long_10)
+        # 1 minute time difference:
+        with freeze_time("Jan 2 2000 00:01:00"):
+            val_true = utils.time_difference_less_than_x_mins(
+                timestamp, 2)
+            self.assertTrue(val_true)
+            val_false = utils.time_difference_less_than_x_mins(
+                timestamp, 1)
+            self.assertFalse(val_false)
+
+        # 1 hour time difference:
+        with freeze_time("Jan 2 2000 01:00:00"):
+            val_true = utils.time_difference_less_than_x_mins(
+                timestamp, 61)
+            self.assertTrue(val_true)
+            val_false = utils.time_difference_less_than_x_mins(
+                timestamp, 60)
+            self.assertFalse(val_false)
+
+        # Negative time difference:
+        with freeze_time("Jan 1 2000 00:00:00"):
+            val_true = utils.time_difference_less_than_x_mins(
+                timestamp, 60000000)
+            self.assertTrue(val_true)
+            val_true = utils.time_difference_less_than_x_mins(
+                timestamp, 0)
+            self.assertTrue(val_true)
 
     def test_uuid_check(self):
         good_uuid = "12345678-abcd-ABCD-1234-123abc123abc"

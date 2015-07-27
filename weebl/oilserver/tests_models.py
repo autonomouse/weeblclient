@@ -1,16 +1,11 @@
 #! /usr/bin/env python3
-import os
-import shutil
-from oilserver import views
-from django.http import HttpRequest
 from common_test_methods import WeeblTestCase
-from collections import namedtuple
 from oilserver import models
 from django.contrib.sites.models import Site
 
 
 class ModelTests(WeeblTestCase):
-    fixtures = ['initial_settings.yaml',]
+    fixtures = ['initial_settings.yaml', ]
 
     @classmethod
     def setUp(self):
@@ -26,6 +21,7 @@ class ModelTests(WeeblTestCase):
         self.pipeline = models.Pipeline()
         self.pipeline.build_executor = self.build_executor
 
+
 class WeeblSettingTests(ModelTests):
     def test_fields_accessible(self):
         fields = ['site', 'check_in_unstable_threshold',
@@ -36,6 +32,7 @@ class WeeblSettingTests(ModelTests):
         for field in fields:
             self.assertTrue(hasattr(self.settings, field))
 
+
 class EnvironmentTests(ModelTests):
     def test_fields_accessible(self):
         fields = ['uuid', 'name', 'get_set_go', 'state_description', 'state',
@@ -43,11 +40,13 @@ class EnvironmentTests(ModelTests):
         for field in fields:
             self.assertTrue(hasattr(self.environment, field))
 
+
 class ServiceStatusTests(ModelTests):
     def test_fields_accessible(self):
         fields = ['name', 'description']
         for field in fields:
             self.assertTrue(hasattr(self.service_status, field))
+
 
 class JenkinsTests(ModelTests):
     def test_fields_accessible(self):
@@ -56,11 +55,13 @@ class JenkinsTests(ModelTests):
         for field in fields:
             self.assertTrue(hasattr(self.jenkins, field))
 
+
 class BuildExecutorTests(ModelTests):
     def test_fields_accessible(self):
         fields = ['uuid', 'name', 'jenkins']
         for field in fields:
             self.assertTrue(hasattr(self.build_executor, field))
+
 
 class PipelineTests(ModelTests):
     def test_fields_accessible(self):

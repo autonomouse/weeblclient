@@ -20,4 +20,5 @@ apt-get -y --no-upgrade install \
     libapache2-mod-wsgi-py3 \
     pandoc \
     python3-pytest \
+    python3-freezegun \
     --fix-missing

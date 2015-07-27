@@ -1,10 +1,7 @@
 #! /usr/bin/env python3
-import os
-import shutil
 from oilserver import views
 from django.http import HttpRequest
 from common_test_methods import WeeblTestCase
-from collections import namedtuple
 
 
 class DevSmokeTests(WeeblTestCase):

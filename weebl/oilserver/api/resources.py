@@ -140,7 +140,7 @@ class JenkinsResource(CommonResource):
                                                      **kwargs)
 
     def dehydrate(self, bundle):
-        replace_with = [('resource_uri', bundle.obj.environment.uuid), 
+        replace_with = [('resource_uri', bundle.obj.environment.uuid),
                         ('environment', bundle.obj.environment.uuid), ]
         return self.replace_pk_with_alternative(bundle, replace_with)
 
@@ -179,8 +179,8 @@ class BuildExecutorResource(CommonResource):
                                                            request, **kwargs)
 
     def dehydrate(self, bundle):
-        replace_with = [('resource_uri', bundle.obj.uuid), 
-                        ('jenkins',bundle.obj.jenkins.uuid), ]
+        replace_with = [('resource_uri', bundle.obj.uuid),
+                        ('jenkins', bundle.obj.jenkins.uuid), ]
         return self.replace_pk_with_alternative(bundle, replace_with)
 
     def hydrate(self, bundle):
@@ -190,7 +190,6 @@ class BuildExecutorResource(CommonResource):
         if 'pk' in bundle.data:
             bundle.data.pop('pk')
         return bundle
-
 
 
 class PipelineResource(CommonResource):
@@ -222,7 +221,7 @@ class PipelineResource(CommonResource):
                                                       **kwargs)
 
     def dehydrate(self, bundle):
-        replace_with = [('resource_uri', bundle.obj.pipeline_id), 
+        replace_with = [('resource_uri', bundle.obj.pipeline_id),
                         ('build_executor', bundle.obj.build_executor.uuid), ]
         return self.replace_pk_with_alternative(bundle, replace_with)
 

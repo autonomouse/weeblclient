@@ -2,7 +2,7 @@ import re
 import pytz
 import string
 import random
-from datetime import datetime, timedelta
+from datetime import timedelta
 from dateutil import parser
 from django.utils import timezone
 from uuid import uuid4
@@ -34,7 +34,7 @@ def time_since(timestamp):
     if timestamp is None:
         return
 
-    if type(timestamp) is not datetime:
+    if type(timestamp) is str:
         timestamp_dt = parser.parse(timestamp)
     else:
         timestamp_dt = timestamp.replace(tzinfo=None)

@@ -169,7 +169,7 @@ class ServiceStatusResourceTest(ResourceTests):
     def test_put_method_not_allowed(self):
         """Validate that user cannot PUT service_status model."""
         response = self.api_client.put('/api/{}/service_status/'
-                                        .format(self.version))
+                                       .format(self.version))
         r_dict = self.deserialize(response)
 
         # Assertions
@@ -179,7 +179,7 @@ class ServiceStatusResourceTest(ResourceTests):
     def test_delete_method_not_allowed(self):
         """Validate that user cannot DELETE a specific service_status model."""
         response = self.api_client.delete('/api/{}/service_status/0/'
-                                        .format(self.version))
+                                          .format(self.version))
         r_dict = self.deserialize(response)
 
         # Assertions
@@ -202,8 +202,7 @@ class JenkinsResourceTest(ResourceTests):
                                                                data=data1)
         uuid = response1['uuid']
         data2 = {'environment': uuid, 'external_access_url': random_url}
-        response2 = self.post_create_model_without_status_code('jenkins',
-                                                               data=data2)
+        self.post_create_model_without_status_code('jenkins', data=data2)
         return (uuid, random_name)
 
     def test_put_mock_jenkins_check_in_with_new_environment_uuid(self):
@@ -250,7 +249,6 @@ class JenkinsResourceTest(ResourceTests):
         self.assertTrue(lt_than_1_min)
         self.assertEqual(response2.status_code, 200)
 
-
     def test_put_mock_jenkins_check_in_with_data(self):
         """Attempting to call jenkins API with an existing environment uuid
         should return with the correct .
@@ -279,6 +277,7 @@ class JenkinsResourceTest(ResourceTests):
         lt_than_1_min = utils.time_difference_less_than_x_mins(timestamp, 1)
 
         # Assertions
+        self.assertTrue(uuids_match)
         self.assertTrue(lt_than_1_min)
         self.assertEqual(response2.status_code, 200)
         self.assertTrue(r_dict2['internal_access_url'] == inturl)
@@ -298,8 +297,7 @@ class BuildExecutorTest(ResourceTests):
                                                                data=data1)
         uuid = response1['uuid']
         data2 = {'environment': uuid, 'external_access_url': random_url}
-        response2 = self.post_create_model_without_status_code('jenkins',
-                                                               data=data2)
+        self.post_create_model_without_status_code('jenkins', data=data2)
         return (uuid, random_name)
 
     def post_create_build_executor_model_with_name(self, name=None):
@@ -422,8 +420,7 @@ class PipelineTest(ResourceTests):
         # Create jenkins:
         uuid = response1['uuid']
         data2 = {'environment': uuid, 'external_access_url': random_url}
-        response2 = self.post_create_model_without_status_code(
-            'jenkins', data=data2)
+        self.post_create_model_without_status_code('jenkins', data=data2)
 
         # Create build executor:
         random_buildex_name = utils.generate_random_string()
@@ -511,8 +508,8 @@ class PipelineTest(ResourceTests):
         obj_created =\
             models.Pipeline.objects.filter(pipeline_id=pipeline_id).count() > 0
         response = self.api_client.delete('/api/{}/pipeline/{}/'
-                                       .format(self.version, pipeline_id),
-                                       format='json')
+                                          .format(self.version, pipeline_id),
+                                          format='json')
 
         non_obj = models.Pipeline.objects.filter(pipeline_id=pipeline_id)
 
