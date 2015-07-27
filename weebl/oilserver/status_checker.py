@@ -46,7 +46,7 @@ class StatusChecker():
         days = time_difference.days
         weeks = round(days / 7)
 
-        msg = "Jenkins has not checked in for over {} {}"
+        msg = "Jenkins has not checked in for {} {}"
         if weeks > 0:
             timestr = 'weeks' if weeks > 1 else 'week'
             time_msg = msg.format(weeks, timestr)
@@ -56,9 +56,11 @@ class StatusChecker():
         elif hours > 0:
             timestr = 'hours' if hours > 1 else 'hour'
             time_msg = msg.format(hours, timestr)
-        else:
+        elif minutes > 0:
             timestr = 'minutes' if minutes > 1 else 'minute'
             time_msg = msg.format(minutes, timestr)
+        else:
+            time_msg = ''
         return (delta, time_msg)
 
     def get_overdue_state(self, delta):

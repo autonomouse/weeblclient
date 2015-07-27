@@ -2,7 +2,7 @@ import re
 import pytz
 import string
 import random
-from datetime import datetime, timedelta
+from datetime import timedelta
 from dateutil import parser
 from django.utils import timezone
 from uuid import uuid4
@@ -27,14 +27,14 @@ def generate_random_string(n=10, uppercase=False):
 
 
 def generate_random_url(n=10):
-    return "http://www.{}.com".format(generate_random_string(n=8))
+    return "http://www.{}.com".format(generate_random_string(n))
 
 
 def time_since(timestamp):
     if timestamp is None:
         return
 
-    if type(timestamp) is not datetime:
+    if type(timestamp) is str:
         timestamp_dt = parser.parse(timestamp)
     else:
         timestamp_dt = timestamp.replace(tzinfo=None)
@@ -46,8 +46,9 @@ def time_difference_less_than_x_mins(timestamp, minutes):
 
 
 def uuid_check(uuid):
-    uuid_pattern = "^[a-f0-9]{8}-?[a-f0-9]{4}-?4[a-f0-9]{3}"
-    uuid_pattern += "-?[89ab][a-f0-9]{3}-?[a-f0-9]{12}\Z"
+    opt = "A-Fa-f0-9"
+    uuid_pattern = "^[" + opt + "]{8}-?[" + opt + "]{4}-?[" + opt + "]{4}-?["
+    uuid_pattern += opt + "]{4}-?[" + opt + "]{12}"
     regex = re.compile(uuid_pattern, re.I)
     match = regex.match(uuid)
     return bool(match)

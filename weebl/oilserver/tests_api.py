@@ -123,21 +123,20 @@ class EnvironmentResourceTest(ResourceTests):
 class ServiceStatusResourceTest(ResourceTests):
 
     def setUp(self):
+        """Initial service_status objects should have been loaded in via
+        fixtures.
+        """
         super(ServiceStatusResourceTest, self).setUp()
 
-    def test_get_all_service_status_models(self):
-        """GET all service_status models.
-        Initial service_status objects should have been loaded in via fixtures.
-        """
+    def test_get_method_not_allowed(self):
+        """Validate that user cannot GET service_status model."""
         response =\
             self.api_client.get('/api/{}/service_status/'.format(self.version))
         r_dict = self.deserialize(response)
-        obj_names = [x['name'] for x in r_dict['objects']]
 
         # Assertions
-        expected_state_names = ['up', 'unstable', 'down', 'unknown']
-        self.assertSetEqual(set(expected_state_names), set(obj_names))
-        self.assertEqual(response.status_code, 200)
+        self.assertIsNone(r_dict)
+        self.assertEqual(response.status_code, 405)
 
     def test_post_method_not_allowed(self):
         """Validate that user cannot POST service_status model."""
@@ -152,7 +151,7 @@ class ServiceStatusResourceTest(ResourceTests):
     def test_put_method_not_allowed(self):
         """Validate that user cannot PUT service_status model."""
         response = self.api_client.put('/api/{}/service_status/'
-                                        .format(self.version))
+                                       .format(self.version))
         r_dict = self.deserialize(response)
 
         # Assertions
@@ -162,7 +161,7 @@ class ServiceStatusResourceTest(ResourceTests):
     def test_delete_method_not_allowed(self):
         """Validate that user cannot DELETE a specific service_status model."""
         response = self.api_client.delete('/api/{}/service_status/0/'
-                                        .format(self.version))
+                                          .format(self.version))
         r_dict = self.deserialize(response)
 
         # Assertions
@@ -175,20 +174,18 @@ class JenkinsResourceTest(ResourceTests):
     def setUp(self):
         super(JenkinsResourceTest, self).setUp()
         self.unrecognied_environment_uuid_msg =\
-            {'error': ''}  # This really needs to be changed! 
+            {'error': ''}  # This really needs to be changed!
 
     def create_new_environment_and_jenkins_with_random_name(self):
         random_name = utils.generate_random_string()
         random_url = utils.generate_random_url()
         data1 = {'name': random_name}
-        response1 = self.post_create_model_without_status_code('environment', 
+        response1 = self.post_create_model_without_status_code('environment',
                                                                data=data1)
         uuid = response1['uuid']
         data2 = {'environment': uuid, 'external_access_url': random_url}
-        response2 = self.post_create_model_without_status_code('jenkins', 
-                                                               data=data2)
+        self.post_create_model_without_status_code('jenkins', data=data2)
         return (uuid, random_name)
-
 
     def test_put_mock_jenkins_check_in_with_new_environment_uuid(self):
         """Attempting to call jenkins API with new environment uuid should fail
@@ -204,14 +201,13 @@ class JenkinsResourceTest(ResourceTests):
         self.assertEqual(r_dict, self.unrecognied_environment_uuid_msg)
         self.assertEqual(response.status_code, 400)
 
-
     def test_put_mock_jenkins_check_in_with_existing_uuid(self):
-        """Attempting to call jenkins API with an existing environment uuid 
+        """Attempting to call jenkins API with an existing environment uuid
         should return with the correct .
         """
         uuid, random_name =\
             self.create_new_environment_and_jenkins_with_random_name()
-        
+
         # GET UUID for random_name:
         response1 = self.api_client.get('/api/{}/environment/by_name/{}/'
                                         .format(self.version, random_name),
@@ -219,13 +215,13 @@ class JenkinsResourceTest(ResourceTests):
         r_dict1 = self.deserialize(response1)
         returned_uuid = r_dict1['uuid']
         uuids_match = (uuid == returned_uuid)
-        
+
         # Update status via PUT request (check in):
         response2 = self.api_client.put(
             '/api/{}/jenkins/{}/'.format(self.version, returned_uuid),
-            data={}, 
+            data={},
             format='json')
-        r_dict2 = self.deserialize(response2)        
+        r_dict2 = self.deserialize(response2)
         timestamp = r_dict2['service_status_updated_at']
         lt_than_1_min = utils.time_difference_less_than_x_mins(timestamp, 1)
 
@@ -235,16 +231,15 @@ class JenkinsResourceTest(ResourceTests):
         self.assertTrue(lt_than_1_min)
         self.assertEqual(response2.status_code, 200)
 
-
     def test_put_mock_jenkins_check_in_with_data(self):
-        """Attempting to call jenkins API with an existing environment uuid 
+        """Attempting to call jenkins API with an existing environment uuid
         should return with the correct .
         """
         uuid, random_name =\
             self.create_new_environment_and_jenkins_with_random_name()
         inturl = utils.generate_random_url()
         exturl = utils.generate_random_url()
-        
+
         # GET UUID for random_name:
         response1 = self.api_client.get('/api/{}/environment/by_name/{}/'
                                         .format(self.version, random_name),
@@ -252,18 +247,19 @@ class JenkinsResourceTest(ResourceTests):
         r_dict1 = self.deserialize(response1)
         returned_uuid = r_dict1['uuid']
         uuids_match = (uuid == returned_uuid)
-        
+
         # Update status via PUT request (check in):
         response2 = self.api_client.put(
             '/api/{}/jenkins/{}/'.format(self.version, returned_uuid),
             data={"external_access_url": exturl,
-                  "internal_access_url": inturl}, 
+                  "internal_access_url": inturl},
             format='json')
-        r_dict2 = self.deserialize(response2)        
+        r_dict2 = self.deserialize(response2)
         timestamp = r_dict2['service_status_updated_at']
         lt_than_1_min = utils.time_difference_less_than_x_mins(timestamp, 1)
-        
+
         # Assertions
+        self.assertTrue(uuids_match)
         self.assertTrue(lt_than_1_min)
         self.assertEqual(response2.status_code, 200)
         self.assertTrue(r_dict2['internal_access_url'] == inturl)
