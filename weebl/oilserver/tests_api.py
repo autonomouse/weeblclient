@@ -1,23 +1,7 @@
 #! /usr/bin/env python3
 import utils
-from tastypie.test import ResourceTestCase
-from weebl import urls
+from common_test_methods import ResourceTests
 from oilserver import models
-
-
-class ResourceTests(ResourceTestCase):
-    version = urls.v_api.api_name
-    fixtures = ['initial_settings.yaml']
-
-    def post_create_model_with_status_code(self, model, data):
-        response = self.api_client.post(
-            '/api/{}/{}/'.format(self.version, model), data=data)
-        return (self.deserialize(response), response.status_code)
-
-    def post_create_model_without_status_code(self, model, data={}):
-        response = self.api_client.post(
-            '/api/{}/{}/'.format(self.version, model), data=data)
-        return self.deserialize(response)
 
 
 class EnvironmentResourceTest(ResourceTests):
@@ -25,32 +9,25 @@ class EnvironmentResourceTest(ResourceTests):
     def setUp(self):
         super(EnvironmentResourceTest, self).setUp()
 
-    def post_create_environment_model_with_name(self, name=None):
-        if name is None:
-            name = utils.generate_random_string()
-        data = {'name': name}
-        return self.post_create_model_without_status_code('environment',
-                                                          data=data)
-
-    def test_get_all_environment_models(self):
-        """GET all environment models."""
-        r_dict0 = self.post_create_environment_model_with_name('mock_env0')
-        r_dict1 = self.post_create_environment_model_with_name('mock_env1')
-        r_dict2 = self.post_create_environment_model_with_name('mock_env2')
+    def test_get_all_environments(self):
+        """GET all environment instances."""
+        env_dict = []
+        mock_envs = ['mock_env0', 'mock_env1', 'mock_env2']
+        for mock_env in mock_envs:
+            env_dict.append(self.make_environment(mock_env))
         response = self.api_client.get('/api/{}/environment/'
                                        .format(self.version), format='json')
         r_dict = self.deserialize(response)
         objects = r_dict['objects']
 
         # Assertions
-        self.assertIn(r_dict0['uuid'], objects[0]['uuid'])
-        self.assertIn(r_dict1['uuid'], objects[1]['uuid'])
-        self.assertIn(r_dict2['uuid'], objects[2]['uuid'])
         self.assertEqual(response.status_code, 200)
+        for idx, env in enumerate(env_dict):
+            self.assertIn(env['uuid'], objects[idx]['uuid'])
 
-    def test_get_specific_environment_model(self):
-        """GET a specific environment model by it's UUID."""
-        r_dict0 = self.post_create_environment_model_with_name()
+    def test_get_specific_environment(self):
+        """GET a specific environment instance by its UUID."""
+        r_dict0 = self.make_environment()
         uuid = r_dict0['uuid']
         response = self.api_client.get('/api/{}/environment/{}/'
                                        .format(self.version, uuid),
@@ -58,25 +35,25 @@ class EnvironmentResourceTest(ResourceTests):
         r_dict1 = self.deserialize(response)
 
         # Assertions
-        self.assertEquals(uuid, r_dict1['uuid'])
+        self.assertEqual(uuid, r_dict1['uuid'])
         self.assertEqual(response.status_code, 200)
 
-    def test_get_specific_environment_model_by_name(self):
-        """GET a specific environment model by it's name."""
+    def test_get_specific_environment_by_name(self):
+        """GET a specific environment instance by its name."""
         name = "mock_production"
-        r_dict0 = self.post_create_environment_model_with_name(name)
+        r_dict0 = self.make_environment(name)
         response = self.api_client.get('/api/{}/environment/by_name/{}/'
                                        .format(self.version, name),
                                        format='json')
         r_dict1 = self.deserialize(response)
 
         # Assertions
-        self.assertEquals(r_dict0, r_dict1)
+        self.assertEqual(r_dict0, r_dict1)
         self.assertEqual(response.status_code, 200)
 
-    def test_post_create_environment_model(self):
-        """POST to create a new environment model."""
-        r_dict, status_code = self.post_create_model_with_status_code(
+    def test_post_create_environment(self):
+        """POST to create a new environment instance."""
+        r_dict, status_code = self.post_create_instance(
             'environment',
             data={'name': utils.generate_random_string()})
         new_obj = models.Environment.objects.filter(uuid=r_dict['uuid'])
@@ -86,44 +63,30 @@ class EnvironmentResourceTest(ResourceTests):
         self.assertNotEqual(new_obj.count(), 0)
         self.assertEqual(status_code, 201)
 
-    def test_put_update_existing_environment_model(self):
-        """PUT to update an existing environment model."""
-        r_dict = self.post_create_environment_model_with_name()
+    def test_put_update_existing_environment(self):
+        """PUT to update an existing environment instance."""
+        r_dict = self.make_environment()
         uuid = r_dict['uuid']
         new_name = utils.generate_random_string()
         data = {'name': new_name}
+        before = models.Environment.objects.filter(name=new_name).exists()
 
         response = self.api_client.put('/api/{}/environment/{}/'
                                        .format(self.version, uuid), data=data)
+        after = models.Environment.objects.filter(name=new_name).exists()
         new_r_dict = self.deserialize(response)
 
         # Assertions
-        self.assertEquals(r_dict['uuid'], new_r_dict['uuid'])
+        self.assertEqual(r_dict['uuid'], new_r_dict['uuid'])
         self.assertNotEquals(r_dict['name'], new_r_dict['name'])
         self.assertEqual(response.status_code, 200)
+        self.assertFalse(before)
+        self.assertTrue(after)
 
-    def test_put_cannot_update_existing_environment_models_uuid(self):
-        """PUT to update an existing environment model."""
-        r_dict = self.post_create_environment_model_with_name()
-        uuid = r_dict['uuid']
-        new_uuid = utils.generate_uuid()
-        new_name = utils.generate_random_string()
-        data = {'uuid': new_uuid, 'name': new_name}
+    def test_delete_environment(self):
+        """DELETE an existing environment instance."""
 
-        response = self.api_client.put('/api/{}/environment/{}/'
-                                       .format(self.version, uuid), data=data)
-        new_r_dict = self.deserialize(response)
-
-        # Assertions
-        self.assertEquals(uuid, new_r_dict['uuid'])
-        self.assertNotEquals(new_uuid, new_r_dict['uuid'])
-        self.assertNotEquals(r_dict['name'], new_r_dict['name'])
-        self.assertEqual(response.status_code, 200)
-
-    def test_delete_environment_model(self):
-        """DELETE an existing environment model."""
-
-        r_dict0 = self.post_create_environment_model_with_name()
+        r_dict0 = self.make_environment()
         uuid = r_dict0['uuid']
         obj_created = models.Environment.objects.filter(uuid=uuid).count() > 0
 
@@ -147,7 +110,7 @@ class ServiceStatusResourceTest(ResourceTests):
         super(ServiceStatusResourceTest, self).setUp()
 
     def test_get_method_not_allowed(self):
-        """Validate that user cannot GET service_status model."""
+        """Validate that user cannot GET service_status instance."""
         response =\
             self.api_client.get('/api/{}/service_status/'.format(self.version))
         r_dict = self.deserialize(response)
@@ -157,7 +120,7 @@ class ServiceStatusResourceTest(ResourceTests):
         self.assertEqual(response.status_code, 405)
 
     def test_post_method_not_allowed(self):
-        """Validate that user cannot POST service_status model."""
+        """Validate that user cannot POST service_status instance."""
         response = self.api_client.post('/api/{}/service_status/'
                                         .format(self.version))
         r_dict = self.deserialize(response)
@@ -167,7 +130,7 @@ class ServiceStatusResourceTest(ResourceTests):
         self.assertEqual(response.status_code, 405)
 
     def test_put_method_not_allowed(self):
-        """Validate that user cannot PUT service_status model."""
+        """Validate that user cannot PUT service_status instance."""
         response = self.api_client.put('/api/{}/service_status/'
                                        .format(self.version))
         r_dict = self.deserialize(response)
@@ -177,7 +140,8 @@ class ServiceStatusResourceTest(ResourceTests):
         self.assertEqual(response.status_code, 405)
 
     def test_delete_method_not_allowed(self):
-        """Validate that user cannot DELETE a specific service_status model."""
+        """Validate that user cannot DELETE a specific service_status instance.
+        """
         response = self.api_client.delete('/api/{}/service_status/0/'
                                           .format(self.version))
         r_dict = self.deserialize(response)
@@ -193,17 +157,6 @@ class JenkinsResourceTest(ResourceTests):
         super(JenkinsResourceTest, self).setUp()
         self.unrecognied_environment_uuid_msg =\
             {'error': ''}  # TODO: This really needs to be changed!
-
-    def create_new_environment_and_jenkins_with_random_name(self):
-        random_name = utils.generate_random_string()
-        random_url = utils.generate_random_url()
-        data1 = {'name': random_name}
-        response1 = self.post_create_model_without_status_code('environment',
-                                                               data=data1)
-        uuid = response1['uuid']
-        data2 = {'environment': uuid, 'external_access_url': random_url}
-        self.post_create_model_without_status_code('jenkins', data=data2)
-        return (uuid, random_name)
 
     def test_put_mock_jenkins_check_in_with_new_environment_uuid(self):
         """Attempting to call jenkins API with new environment uuid should fail
@@ -223,8 +176,7 @@ class JenkinsResourceTest(ResourceTests):
         """Attempting to call jenkins API with an existing environment uuid
         should return with the correct .
         """
-        uuid, random_name =\
-            self.create_new_environment_and_jenkins_with_random_name()
+        uuid, random_name = self.make_environment_and_jenkins()
 
         # GET UUID for random_name:
         response1 = self.api_client.get('/api/{}/environment/by_name/{}/'
@@ -253,8 +205,7 @@ class JenkinsResourceTest(ResourceTests):
         """Attempting to call jenkins API with an existing environment uuid
         should return with the correct .
         """
-        uuid, random_name =\
-            self.create_new_environment_and_jenkins_with_random_name()
+        uuid, random_name = self.make_environment_and_jenkins()
         inturl = utils.generate_random_url()
         exturl = utils.generate_random_url()
 
@@ -289,33 +240,12 @@ class BuildExecutorTest(ResourceTests):
     def setUp(self):
         super(BuildExecutorTest, self).setUp()
 
-    def create_new_environment_and_jenkins(self):
-        random_name = utils.generate_random_string()
-        random_url = utils.generate_random_url()
-        data1 = {'name': random_name}
-        response1 = self.post_create_model_without_status_code('environment',
-                                                               data=data1)
+    def test_post_create_build_executor(self):
+        response1 = self.make_environment()
         uuid = response1['uuid']
-        data2 = {'environment': uuid, 'external_access_url': random_url}
-        self.post_create_model_without_status_code('jenkins', data=data2)
-        return (uuid, random_name)
-
-    def post_create_build_executor_model_with_name(self, name=None):
-        if name is None:
-            name = utils.generate_random_string()
-        uuid, env_name = self.create_new_environment_and_jenkins()
-
-        data = {'name': name, 'jenkins': uuid}
-        return self.post_create_model_without_status_code(
-            'build_executor', data=data)
-
-    def test_post_create_build_executor_model(self):
-        uuid, env_name = self.create_new_environment_and_jenkins()
-
-        name = utils.generate_random_string()
-        data = {'name': name, 'jenkins': uuid}
-        r_dict, status_code = self.post_create_model_with_status_code(
-            'build_executor', data=data)
+        name = response1['name']
+        self.make_jenkins(uuid)
+        r_dict, status_code = self.make_build_executor(name)
 
         # Assertions
         self.assertIn('uuid', r_dict)
@@ -324,25 +254,25 @@ class BuildExecutorTest(ResourceTests):
         self.assertNotEqual(r_dict['uuid'], uuid)
         self.assertEqual(status_code, 201)
 
-    def test_get_all_build_executor_models(self):
-        """GET all build_executor models."""
-        r_dict0 = self.post_create_build_executor_model_with_name('mock_bex0')
-        r_dict1 = self.post_create_build_executor_model_with_name('mock_bex1')
-        r_dict2 = self.post_create_build_executor_model_with_name('mock_bex2')
+    def test_get_all_build_executors(self):
+        """GET all build_executor instances."""
+        bex_dict = []
+        build_executors = ['mock_bex0', 'mock_bex1', 'mock_bex2']
+        for build_executor in build_executors:
+            bex_dict.append(self.make_build_executor(build_executor))
         response = self.api_client.get('/api/{}/build_executor/'
                                        .format(self.version), format='json')
         r_dict = self.deserialize(response)
         objects = r_dict['objects']
 
         # Assertions
-        self.assertIn(r_dict0['uuid'], objects[0]['uuid'])
-        self.assertIn(r_dict1['uuid'], objects[1]['uuid'])
-        self.assertIn(r_dict2['uuid'], objects[2]['uuid'])
         self.assertEqual(response.status_code, 200)
+        for idx, env in enumerate(bex_dict):
+            self.assertIn(env[0]['uuid'], objects[idx]['uuid'])
 
-    def test_get_specific_build_executor_model(self):
-        """GET a specific build_executor model by it's UUID."""
-        r_dict0 = self.post_create_build_executor_model_with_name()
+    def test_get_specific_build_executor(self):
+        """GET a specific build_executor instance by its UUID."""
+        r_dict0, status_code = self.make_build_executor()
         uuid = r_dict0['uuid']
         response = self.api_client.get('/api/{}/build_executor/{}/'
                                        .format(self.version, uuid),
@@ -350,46 +280,53 @@ class BuildExecutorTest(ResourceTests):
         r_dict1 = self.deserialize(response)
 
         # Assertions
-        self.assertEquals(uuid, r_dict1['uuid'])
+        self.assertEqual(uuid, r_dict1['uuid'])
         self.assertEqual(response.status_code, 200)
 
-    def test_put_update_existing_build_executor_model(self):
-        """PUT to update an existing build_executor model."""
-        r_dict = self.post_create_build_executor_model_with_name()
+    def test_put_update_existing_build_executor(self):
+        """PUT to update an existing build_executor instance."""
+        r_dict, status_code = self.make_build_executor()
         uuid = r_dict['uuid']
         new_name = utils.generate_random_string()
         data = {'name': new_name}
-
+        before = models.BuildExecutor.objects.filter(name=new_name).exists()
         response = self.api_client.put('/api/{}/build_executor/{}/'
                                        .format(self.version, uuid), data=data)
+        after = models.BuildExecutor.objects.filter(name=new_name).exists()
         new_r_dict = self.deserialize(response)
 
         # Assertions
         self.assertNotEquals(r_dict['name'], new_r_dict['name'])
         self.assertEqual(response.status_code, 200)
+        self.assertFalse(before)
+        self.assertTrue(after)
 
-    def test_put_cannot_update_existing_build_executor_models_uuid(self):
-        """PUT to update an existing build_executor model."""
-        r_dict = self.post_create_build_executor_model_with_name()
+    def test_put_cannot_update_existing_build_executors_uuid(self):
+        """PUT to update an existing build_executor instance."""
+        r_dict, status_code = self.make_build_executor()
         uuid = r_dict['uuid']
         uuid2 = utils.generate_uuid()
         new_name = utils.generate_random_string()
         data = {'uuid': uuid2, 'name': new_name}
+        before = models.BuildExecutor.objects.filter(uuid=uuid2).exists()
 
         response = self.api_client.put('/api/{}/build_executor/{}/'
                                        .format(self.version, uuid), data=data)
+
+        after = models.BuildExecutor.objects.filter(uuid=uuid2).exists()
         new_r_dict = self.deserialize(response)
 
         # Assertions
-        self.assertEquals(uuid, new_r_dict['uuid'])
+        self.assertEqual(uuid, new_r_dict['uuid'])
         self.assertNotEquals(uuid2, new_r_dict['uuid'])
         self.assertNotEquals(r_dict['name'], new_r_dict['name'])
         self.assertEqual(response.status_code, 200)
+        self.assertFalse(before)
+        self.assertFalse(after)
 
-    def test_delete_build_executor_model(self):
-        """DELETE an existing build_executor model."""
-
-        r_dict0 = self.post_create_build_executor_model_with_name()
+    def test_delete_build_executor(self):
+        """DELETE an existing build_executor instance."""
+        r_dict0, status_code = self.make_build_executor()
         uuid = r_dict0['uuid']
         obj_created =\
             models.BuildExecutor.objects.filter(uuid=uuid).count() > 0
@@ -409,67 +346,37 @@ class PipelineTest(ResourceTests):
     def setUp(self):
         super(PipelineTest, self).setUp()
 
-    def create_new_environment_jenkins_and_build_executor(self):
-        # Create environment:
-        random_env_name = utils.generate_random_string()
-        random_url = utils.generate_random_url()
-        data1 = {'name': random_env_name}
-        response1 = self.post_create_model_without_status_code(
-            'environment', data=data1)
-
-        # Create jenkins:
-        uuid = response1['uuid']
-        data2 = {'environment': uuid, 'external_access_url': random_url}
-        self.post_create_model_without_status_code('jenkins', data=data2)
-
-        # Create build executor:
-        random_buildex_name = utils.generate_random_string()
-        data3 = {'name': random_buildex_name, 'jenkins': uuid}
-        response3 = self.post_create_model_without_status_code(
-            'build_executor', data=data3)
-
-        return response3['uuid']
-
-    def test_post_create_build_executor_model(self):
-        buildex = self.create_new_environment_jenkins_and_build_executor()
-
-        data = {'build_executor': buildex}
-        r_dict, status_code = self.post_create_model_with_status_code(
-            'pipeline', data=data)
+    def test_post_create_build_executor(self):
+        buildex = self.make_build_executor()[0]['uuid']
+        before = str(models.Pipeline.objects.all()) != '[]'
+        r_dict, status_code = self.make_pipeline(buildex)
+        after = str(models.Pipeline.objects.all()) != '[]'
 
         # Assertions
         self.assertIn('pipeline_id', r_dict)
         self.assertNotIn('pk', r_dict)
         self.assertEqual(status_code, 201)
+        self.assertFalse(before)
+        self.assertTrue(after)
 
-    def test_get_all_pipeline_models(self):
-        """GET all pipeline models."""
-        buildex = self.create_new_environment_jenkins_and_build_executor()
-        data = {'build_executor': buildex}
-        r_dict0 = self.post_create_model_without_status_code(
-            'pipeline', data=data)
-        r_dict1 = self.post_create_model_without_status_code(
-            'pipeline', data=data)
-        r_dict2 = self.post_create_model_without_status_code(
-            'pipeline', data=data)
-
+    def test_get_all_pipelines(self):
+        """GET all pipeline instances."""
+        pl_dict = []
+        for idx in range(3):
+            pl_dict.append(self.make_pipeline())
         response = self.api_client.get('/api/{}/pipeline/'
                                        .format(self.version), format='json')
         r_dict = self.deserialize(response)
         objects = r_dict['objects']
 
         # Assertions
-        self.assertIn(r_dict0['pipeline_id'], objects[0]['pipeline_id'])
-        self.assertIn(r_dict1['pipeline_id'], objects[1]['pipeline_id'])
-        self.assertIn(r_dict2['pipeline_id'], objects[2]['pipeline_id'])
         self.assertEqual(response.status_code, 200)
+        for idx, pl in enumerate(pl_dict):
+            self.assertIn(pl[0]['pipeline_id'], objects[idx]['pipeline_id'])
 
-    def test_get_specific_pipeline_model(self):
-        """GET a specific pipeline model by it's UUID."""
-        buildex = self.create_new_environment_jenkins_and_build_executor()
-        data = {'build_executor': buildex}
-        r_dict0, status_code = self.post_create_model_with_status_code(
-            'pipeline', data=data)
+    def test_get_specific_pipeline(self):
+        """GET a specific pipeline instance by its UUID."""
+        r_dict0, status_code = self.make_pipeline()
         pipeline_id = r_dict0['pipeline_id']
         response = self.api_client.get('/api/{}/pipeline/{}/'
                                        .format(self.version, pipeline_id),
@@ -477,32 +384,25 @@ class PipelineTest(ResourceTests):
         r_dict1 = self.deserialize(response)
 
         # Assertions
-        self.assertEquals(pipeline_id, r_dict1['pipeline_id'])
+        self.assertEqual(pipeline_id, r_dict1['pipeline_id'])
         self.assertEqual(response.status_code, 200)
 
     def test_put_method_not_allowed(self):
-        """PUT to update an existing pipeline model."""
-        buildex = self.create_new_environment_jenkins_and_build_executor()
-        data = {'build_executor': buildex}
-        r_dict0, status_code = self.post_create_model_with_status_code(
-            'pipeline', data=data)
+        """PUT to update an existing pipeline instance."""
+        r_dict0, status_code = self.make_pipeline()
         pipeline_id = r_dict0['pipeline_id']
-        data = {}
         response = self.api_client.put('/api/{}/pipeline/{}/'
                                        .format(self.version, pipeline_id),
-                                       data=data, format='json')
+                                       data={}, format='json')
         r_dict1 = self.deserialize(response)
 
         # Assertions
         self.assertIsNone(r_dict1)
         self.assertEqual(response.status_code, 405)
 
-    def test_delete_pipeline_model(self):
-        """DELETE an existing pipeline model."""
-        buildex = self.create_new_environment_jenkins_and_build_executor()
-        data = {'build_executor': buildex}
-        r_dict0, status_code = self.post_create_model_with_status_code(
-            'pipeline', data=data)
+    def test_delete_pipeline(self):
+        """DELETE an existing pipeline instance."""
+        r_dict0, status_code = self.make_pipeline()
         pipeline_id = r_dict0['pipeline_id']
 
         obj_created =\
