@@ -19,10 +19,6 @@ test_db_name = "test_bugs_database"
 prdctn_db_name = "bugs_database"
 test_settings = "test_settings"
 prdctn_settings = "settings"
-test_ipaddr = '127.0.0.1'
-prdctn_ipaddr = '127.0.0.1'
-test_port = '8001'
-prdctn_port = '8000'
 sites_available_location = "/etc/apache2/sites-available/weebl.conf"
 file_loc = os.path.dirname(os.path.abspath(__file__))
 deploy_path = "{}/{}".format(file_loc, application)  # change
@@ -37,11 +33,13 @@ def list():
     run('invoke --help')
 
 @task(help={'database': "Type test or production",
-			'server': "Optionally suffix with -s runserver",})
-def go(database, server="apache"):
+			'server': "Optionally suffix with -s runserver",
+                        'ip-addr': "IP to run server on. Defaults to 127.0.0.1.",
+                        'port': "Port to run server on. Defaults to 8000."})
+def go(database, server="apache", ip_addr="127.0.0.1", port=8000):
     """Set up and run weebl using either a test or a production database."""
     initialise_database(database)
-    deploy(prdctn_ipaddr, prdctn_port, server)
+    deploy(ip_addr, port, server)
 
 @task
 def run_tests():
@@ -91,12 +89,8 @@ def destroy(database):
 def initialise_database(database):
     if database == "production":
         stngs = prdctn_settings
-        user = prdctn_user
-        port = prdctn_port
     elif database == "test":
         stngs = test_settings
-        ipaddr = test_user
-        port = test_port
     else:
         print("Please provide an option: either 'production' or 'test'")
         return
