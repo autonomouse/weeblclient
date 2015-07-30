@@ -20,7 +20,6 @@ class EnvironmentResourceTest(ResourceTests):
         r_dict = self.deserialize(response)
         objects = r_dict['objects']
 
-        # Assertions
         self.assertEqual(response.status_code, 200)
         for idx, env in enumerate(env_dict):
             self.assertIn(env['uuid'], objects[idx]['uuid'])
@@ -34,7 +33,6 @@ class EnvironmentResourceTest(ResourceTests):
                                        format='json')
         r_dict1 = self.deserialize(response)
 
-        # Assertions
         self.assertEqual(uuid, r_dict1['uuid'])
         self.assertEqual(response.status_code, 200)
 
@@ -47,7 +45,6 @@ class EnvironmentResourceTest(ResourceTests):
                                        format='json')
         r_dict1 = self.deserialize(response)
 
-        # Assertions
         self.assertEqual(r_dict0, r_dict1)
         self.assertEqual(response.status_code, 200)
 
@@ -58,7 +55,6 @@ class EnvironmentResourceTest(ResourceTests):
             data={'name': utils.generate_random_string()})
         new_obj = models.Environment.objects.filter(uuid=r_dict['uuid'])
 
-        # Assertions
         self.assertIn('uuid', r_dict)
         self.assertNotEqual(new_obj.count(), 0)
         self.assertEqual(status_code, 201)
@@ -70,18 +66,16 @@ class EnvironmentResourceTest(ResourceTests):
         new_name = utils.generate_random_string()
         data = {'name': new_name}
         before = models.Environment.objects.filter(name=new_name).exists()
+        self.assertFalse(before)
 
         response = self.api_client.put('/api/{}/environment/{}/'
                                        .format(self.version, uuid), data=data)
         after = models.Environment.objects.filter(name=new_name).exists()
+        self.assertTrue(after)
         new_r_dict = self.deserialize(response)
-
-        # Assertions
         self.assertEqual(r_dict['uuid'], new_r_dict['uuid'])
         self.assertNotEquals(r_dict['name'], new_r_dict['name'])
         self.assertEqual(response.status_code, 200)
-        self.assertFalse(before)
-        self.assertTrue(after)
 
     def test_delete_environment(self):
         """DELETE an existing environment instance."""
@@ -89,14 +83,12 @@ class EnvironmentResourceTest(ResourceTests):
         r_dict0 = self.make_environment()
         uuid = r_dict0['uuid']
         obj_created = models.Environment.objects.filter(uuid=uuid).count() > 0
+        self.assertTrue(obj_created)
 
         response = self.api_client.delete('/api/{}/environment/{}/'
                                           .format(self.version, uuid))
-
         non_obj = models.Environment.objects.filter(uuid=uuid)
 
-        # Assertions
-        self.assertTrue(obj_created)
         self.assertEqual(non_obj.count(), 0)
         self.assertEqual(response.status_code, 204)
 
@@ -113,30 +105,24 @@ class ServiceStatusResourceTest(ResourceTests):
         """Validate that user cannot GET service_status instance."""
         response =\
             self.api_client.get('/api/{}/service_status/'.format(self.version))
-        r_dict = self.deserialize(response)
 
-        # Assertions
-        self.assertIsNone(r_dict)
+        self.assertIsNone(self.deserialize(response))
         self.assertEqual(response.status_code, 405)
 
     def test_post_method_not_allowed(self):
         """Validate that user cannot POST service_status instance."""
         response = self.api_client.post('/api/{}/service_status/'
                                         .format(self.version))
-        r_dict = self.deserialize(response)
 
-        # Assertions
-        self.assertIsNone(r_dict)
+        self.assertIsNone(self.deserialize(response))
         self.assertEqual(response.status_code, 405)
 
     def test_put_method_not_allowed(self):
         """Validate that user cannot PUT service_status instance."""
         response = self.api_client.put('/api/{}/service_status/'
                                        .format(self.version))
-        r_dict = self.deserialize(response)
 
-        # Assertions
-        self.assertIsNone(r_dict)
+        self.assertIsNone(self.deserialize(response))
         self.assertEqual(response.status_code, 405)
 
     def test_delete_method_not_allowed(self):
@@ -144,10 +130,8 @@ class ServiceStatusResourceTest(ResourceTests):
         """
         response = self.api_client.delete('/api/{}/service_status/0/'
                                           .format(self.version))
-        r_dict = self.deserialize(response)
 
-        # Assertions
-        self.assertIsNone(r_dict)
+        self.assertIsNone(self.deserialize(response))
         self.assertEqual(response.status_code, 405)
 
 
@@ -168,7 +152,6 @@ class JenkinsResourceTest(ResourceTests):
             '/api/{}/jenkins/{}/'.format(self.version, env_uuid))
         r_dict = self.deserialize(response)
 
-        # Assertions
         self.assertEqual(r_dict, self.unrecognied_environment_uuid_msg)
         self.assertEqual(response.status_code, 400)
 
@@ -184,7 +167,7 @@ class JenkinsResourceTest(ResourceTests):
                                         format='json')
         r_dict1 = self.deserialize(response1)
         returned_uuid = r_dict1['uuid']
-        uuids_match = (uuid == returned_uuid)
+        self.assertTrue(uuid == returned_uuid)
 
         # Update status via PUT request (check in):
         response2 = self.api_client.put(
@@ -193,13 +176,11 @@ class JenkinsResourceTest(ResourceTests):
             format='json')
         r_dict2 = self.deserialize(response2)
         timestamp = r_dict2['service_status_updated_at']
-        lt_than_1_min = utils.time_difference_less_than_x_mins(timestamp, 1)
-
-        # Assertions
-        self.assertTrue(uuids_match)
+        
         self.assertTrue(utils.uuid_check(returned_uuid))
-        self.assertTrue(lt_than_1_min)
         self.assertEqual(response2.status_code, 200)
+        lt_than_1_min = utils.time_difference_less_than_x_mins(timestamp, 1)
+        self.assertTrue(lt_than_1_min)
 
     def test_put_mock_jenkins_check_in_with_data(self):
         """Attempting to call jenkins API with an existing environment uuid
@@ -215,7 +196,7 @@ class JenkinsResourceTest(ResourceTests):
                                         format='json')
         r_dict1 = self.deserialize(response1)
         returned_uuid = r_dict1['uuid']
-        uuids_match = (uuid == returned_uuid)
+        self.assertTrue(uuid == returned_uuid)
 
         # Update status via PUT request (check in):
         response2 = self.api_client.put(
@@ -226,9 +207,6 @@ class JenkinsResourceTest(ResourceTests):
         r_dict2 = self.deserialize(response2)
         timestamp = r_dict2['service_status_updated_at']
         lt_than_1_min = utils.time_difference_less_than_x_mins(timestamp, 1)
-
-        # Assertions
-        self.assertTrue(uuids_match)
         self.assertTrue(lt_than_1_min)
         self.assertEqual(response2.status_code, 200)
         self.assertTrue(r_dict2['internal_access_url'] == inturl)
@@ -247,7 +225,6 @@ class BuildExecutorTest(ResourceTests):
         self.make_jenkins(uuid)
         r_dict, status_code = self.make_build_executor(name)
 
-        # Assertions
         self.assertIn('uuid', r_dict)
         self.assertNotIn('pk', r_dict)
         self.assertEqual(r_dict['name'], name)
@@ -257,18 +234,16 @@ class BuildExecutorTest(ResourceTests):
     def test_get_all_build_executors(self):
         """GET all build_executor instances."""
         bex_dict = []
-        build_executors = ['mock_bex0', 'mock_bex1', 'mock_bex2']
-        for build_executor in build_executors:
+        for build_executor in range(3):
             bex_dict.append(self.make_build_executor(build_executor))
         response = self.api_client.get('/api/{}/build_executor/'
                                        .format(self.version), format='json')
         r_dict = self.deserialize(response)
-        objects = r_dict['objects']
 
-        # Assertions
         self.assertEqual(response.status_code, 200)
-        for idx, env in enumerate(bex_dict):
-            self.assertIn(env[0]['uuid'], objects[idx]['uuid'])
+        expected_uuids = [bdict[0]['uuid'] for bdict in bex_dict]
+        actual_uuids = [obj['uuid'] for obj in r_dict['objects']]
+        self.assertCountEqual(actual_uuids, expected_uuids)
 
     def test_get_specific_build_executor(self):
         """GET a specific build_executor instance by its UUID."""
@@ -279,7 +254,6 @@ class BuildExecutorTest(ResourceTests):
                                        format='json')
         r_dict1 = self.deserialize(response)
 
-        # Assertions
         self.assertEqual(uuid, r_dict1['uuid'])
         self.assertEqual(response.status_code, 200)
 
@@ -290,16 +264,14 @@ class BuildExecutorTest(ResourceTests):
         new_name = utils.generate_random_string()
         data = {'name': new_name}
         before = models.BuildExecutor.objects.filter(name=new_name).exists()
+        self.assertFalse(before)
         response = self.api_client.put('/api/{}/build_executor/{}/'
                                        .format(self.version, uuid), data=data)
-        after = models.BuildExecutor.objects.filter(name=new_name).exists()
-        new_r_dict = self.deserialize(response)
-
-        # Assertions
-        self.assertNotEquals(r_dict['name'], new_r_dict['name'])
         self.assertEqual(response.status_code, 200)
-        self.assertFalse(before)
+        after = models.BuildExecutor.objects.filter(name=new_name).exists()
         self.assertTrue(after)
+        new_r_dict = self.deserialize(response)
+        self.assertNotEquals(r_dict['name'], new_r_dict['name'])
 
     def test_put_cannot_update_existing_build_executors_uuid(self):
         """PUT to update an existing build_executor instance."""
@@ -309,34 +281,30 @@ class BuildExecutorTest(ResourceTests):
         new_name = utils.generate_random_string()
         data = {'uuid': uuid2, 'name': new_name}
         before = models.BuildExecutor.objects.filter(uuid=uuid2).exists()
+        self.assertFalse(before)
 
         response = self.api_client.put('/api/{}/build_executor/{}/'
                                        .format(self.version, uuid), data=data)
 
         after = models.BuildExecutor.objects.filter(uuid=uuid2).exists()
+        self.assertFalse(after)
         new_r_dict = self.deserialize(response)
 
-        # Assertions
         self.assertEqual(uuid, new_r_dict['uuid'])
         self.assertNotEquals(uuid2, new_r_dict['uuid'])
         self.assertNotEquals(r_dict['name'], new_r_dict['name'])
         self.assertEqual(response.status_code, 200)
-        self.assertFalse(before)
-        self.assertFalse(after)
 
     def test_delete_build_executor(self):
         """DELETE an existing build_executor instance."""
         r_dict0, status_code = self.make_build_executor()
         uuid = r_dict0['uuid']
-        obj_created =\
-            models.BuildExecutor.objects.filter(uuid=uuid).count() > 0
+        self.assertTrue(models.BuildExecutor.objects.filter(uuid=uuid)
+                        .count() > 0)
         response = self.api_client.delete('/api/{}/build_executor/{}/'
                                           .format(self.version, uuid))
 
         non_obj = models.BuildExecutor.objects.filter(uuid=uuid)
-
-        # Assertions
-        self.assertTrue(obj_created)
         self.assertEqual(non_obj.count(), 0)
         self.assertEqual(response.status_code, 204)
 
@@ -349,15 +317,14 @@ class PipelineTest(ResourceTests):
     def test_post_create_build_executor(self):
         buildex = self.make_build_executor()[0]['uuid']
         before = str(models.Pipeline.objects.all()) != '[]'
+        self.assertFalse(before)
         r_dict, status_code = self.make_pipeline(buildex)
         after = str(models.Pipeline.objects.all()) != '[]'
+        self.assertTrue(after)
 
-        # Assertions
         self.assertIn('pipeline_id', r_dict)
         self.assertNotIn('pk', r_dict)
         self.assertEqual(status_code, 201)
-        self.assertFalse(before)
-        self.assertTrue(after)
 
     def test_get_all_pipelines(self):
         """GET all pipeline instances."""
@@ -369,7 +336,6 @@ class PipelineTest(ResourceTests):
         r_dict = self.deserialize(response)
         objects = r_dict['objects']
 
-        # Assertions
         self.assertEqual(response.status_code, 200)
         for idx, pl in enumerate(pl_dict):
             self.assertIn(pl[0]['pipeline_id'], objects[idx]['pipeline_id'])
@@ -383,7 +349,6 @@ class PipelineTest(ResourceTests):
                                        format='json')
         r_dict1 = self.deserialize(response)
 
-        # Assertions
         self.assertEqual(pipeline_id, r_dict1['pipeline_id'])
         self.assertEqual(response.status_code, 200)
 
@@ -394,10 +359,7 @@ class PipelineTest(ResourceTests):
         response = self.api_client.put('/api/{}/pipeline/{}/'
                                        .format(self.version, pipeline_id),
                                        data={}, format='json')
-        r_dict1 = self.deserialize(response)
-
-        # Assertions
-        self.assertIsNone(r_dict1)
+        self.assertIsNone(self.deserialize(response))
         self.assertEqual(response.status_code, 405)
 
     def test_delete_pipeline(self):
@@ -405,15 +367,12 @@ class PipelineTest(ResourceTests):
         r_dict0, status_code = self.make_pipeline()
         pipeline_id = r_dict0['pipeline_id']
 
-        obj_created =\
-            models.Pipeline.objects.filter(pipeline_id=pipeline_id).count() > 0
+        self.assertTrue(models.Pipeline.objects.filter(pipeline_id=pipeline_id)
+                        .count() > 0)
         response = self.api_client.delete('/api/{}/pipeline/{}/'
                                           .format(self.version, pipeline_id),
                                           format='json')
 
         non_obj = models.Pipeline.objects.filter(pipeline_id=pipeline_id)
-
-        # Assertions
-        self.assertTrue(obj_created)
         self.assertEqual(non_obj.count(), 0)
         self.assertEqual(response.status_code, 204)
