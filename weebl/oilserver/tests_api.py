@@ -195,7 +195,7 @@ class JenkinsResourceTest(ResourceTests):
             format='json')
         r_dict2 = self.deserialize(response2)
         timestamp = r_dict2['service_status_updated_at']
-        
+
         self.assertTrue(utils.uuid_check(returned_uuid))
         self.assertEqual(response2.status_code, 200)
         lt_than_1_min = utils.time_difference_less_than_x_mins(timestamp, 1)
@@ -238,11 +238,9 @@ class BuildExecutorTest(ResourceTests):
         super(BuildExecutorTest, self).setUp()
 
     def test_post_create_build_executor(self):
-        response1 = self.make_environment()
-        uuid = response1['uuid']
-        name = response1['name']
-        self.make_jenkins(uuid)
-        r_dict, status_code = self.make_build_executor(name)
+        uuid, name = self.make_environment_and_jenkins()
+        r_dict, status_code = self.make_build_executor(
+            name=name, env_uuid=uuid)
 
         self.assertIn('uuid', r_dict)
         self.assertNotIn('pk', r_dict)
@@ -252,9 +250,7 @@ class BuildExecutorTest(ResourceTests):
 
     def test_get_all_build_executors(self):
         """GET all build_executor instances."""
-        bex_dict = []
-        for build_executor in range(3):
-            bex_dict.append(self.make_build_executor(build_executor))
+        bex_dict = [self.make_build_executor() for _ in range(3)]
         response = self.api_client.get('/api/{}/build_executor/'
                                        .format(self.version), format='json')
         r_dict = self.deserialize(response)
@@ -268,11 +264,11 @@ class BuildExecutorTest(ResourceTests):
         """GET a specific build_executor instance by its UUID."""
         r_dict0, status_code = self.make_build_executor()
         uuid = r_dict0['uuid']
+
         response = self.api_client.get('/api/{}/build_executor/{}/'
                                        .format(self.version, uuid),
                                        format='json')
         r_dict1 = self.deserialize(response)
-
         self.assertEqual(uuid, r_dict1['uuid'])
         self.assertEqual(response.status_code, 200)
 
@@ -297,8 +293,7 @@ class BuildExecutorTest(ResourceTests):
         r_dict, status_code = self.make_build_executor()
         uuid = r_dict['uuid']
         uuid2 = utils.generate_uuid()
-        new_name = utils.generate_random_string()
-        data = {'uuid': uuid2, 'name': new_name}
+        data = {'uuid': uuid2}
         before = models.BuildExecutor.objects.filter(uuid=uuid2).exists()
         self.assertFalse(before)
 
@@ -306,12 +301,11 @@ class BuildExecutorTest(ResourceTests):
                                        .format(self.version, uuid), data=data)
 
         after = models.BuildExecutor.objects.filter(uuid=uuid2).exists()
-        self.assertFalse(after)
+        self.assertFalse(after, msg="build_executor UUID has been altered!")
         new_r_dict = self.deserialize(response)
 
         self.assertEqual(uuid, new_r_dict['uuid'])
         self.assertNotEquals(uuid2, new_r_dict['uuid'])
-        self.assertNotEquals(r_dict['name'], new_r_dict['name'])
         self.assertEqual(response.status_code, 200)
 
     def test_delete_build_executor(self):
@@ -319,7 +313,7 @@ class BuildExecutorTest(ResourceTests):
         r_dict0, status_code = self.make_build_executor()
         uuid = r_dict0['uuid']
         self.assertTrue(models.BuildExecutor.objects.filter(uuid=uuid)
-                        .count() > 0)
+                        .count() > 0, msg="build_executor has not been made")
         response = self.api_client.delete('/api/{}/build_executor/{}/'
                                           .format(self.version, uuid))
 

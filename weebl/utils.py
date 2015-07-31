@@ -52,3 +52,13 @@ def uuid_check(uuid):
     regex = re.compile(uuid_pattern, re.I)
     match = regex.match(uuid)
     return bool(match)
+
+
+def pop(dictionary, fields):
+    fields = list(fields) if fields is not list else fields
+    for field in fields:
+        try:
+            dictionary.pop(field)
+        except KeyError:
+            pass
+    return dictionary

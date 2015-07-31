@@ -184,11 +184,10 @@ class BuildExecutorResource(CommonResource):
         return self.replace_pk_with_alternative(bundle, replace_with)
 
     def hydrate(self, bundle):
-        # The UUID field is read-only, so don't allow user to change it:
-        if 'uuid' in bundle.data:
-            bundle.data.pop('uuid')
-        if 'pk' in bundle.data:
-            bundle.data.pop('pk')
+        fields_to_remove = ['uuid', 'pk']
+        # Hide database structure details by obscuring the primary key.
+        # Also, the UUID field is read-only, so don't allow user to change it.
+        bundle.data = utils.pop(bundle.data, fields_to_remove)
         return bundle
 
 
@@ -226,9 +225,8 @@ class PipelineResource(CommonResource):
         return self.replace_pk_with_alternative(bundle, replace_with)
 
     def hydrate(self, bundle):
-        # The uuid field is read-only, so don't allow user to change it:
-        if 'uuid' in bundle.data:
-            bundle.data.pop('uuid')
-        if 'pk' in bundle.data:
-            bundle.data.pop('pk')
+        fields_to_remove = ['uuid', 'pk']
+        # Hide database structure details by obscuring the primary key.
+        # Also, the UUID field is read-only, so don't allow user to change it.
+        bundle.data = utils.pop(bundle.data, fields_to_remove)
         return bundle
