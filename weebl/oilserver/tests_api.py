@@ -9,12 +9,12 @@ class ResourceTests(ResourceTestCase):
     version = urls.v_api.api_name
     fixtures = ['initial_settings.yaml']
 
-    def post_create_model_with_status_code(self, model, data):
+    def post_create_instance_with_status_code(self, model, data):
         response = self.api_client.post(
             '/api/{}/{}/'.format(self.version, model), data=data)
         return (self.deserialize(response), response.status_code)
 
-    def post_create_model_without_status_code(self, model, data={}):
+    def post_create_instance_without_status_code(self, model, data={}):
         response = self.api_client.post(
             '/api/{}/{}/'.format(self.version, model), data=data)
         return self.deserialize(response)
@@ -25,18 +25,18 @@ class EnvironmentResourceTest(ResourceTests):
     def setUp(self):
         super(EnvironmentResourceTest, self).setUp()
 
-    def post_create_environment_model_with_name(self, name=None):
+    def post_create_environment(self, name=None):
         if name is None:
             name = utils.generate_random_string()
         data = {'name': name}
-        return self.post_create_model_without_status_code('environment',
+        return self.post_create_instance_without_status_code('environment',
                                                           data=data)
 
-    def test_get_all_environment_models(self):
+    def test_get_all_environments(self):
         """GET all environment models."""
-        r_dict0 = self.post_create_environment_model_with_name('mock_env0')
-        r_dict1 = self.post_create_environment_model_with_name('mock_env1')
-        r_dict2 = self.post_create_environment_model_with_name('mock_env2')
+        r_dict0 = self.post_create_environment('mock_env0')
+        r_dict1 = self.post_create_environment('mock_env1')
+        r_dict2 = self.post_create_environment('mock_env2')
         response = self.api_client.get('/api/{}/environment/'
                                        .format(self.version), format='json')
         r_dict = self.deserialize(response)
@@ -48,9 +48,9 @@ class EnvironmentResourceTest(ResourceTests):
         self.assertIn(r_dict2['uuid'], objects[2]['uuid'])
         self.assertEqual(response.status_code, 200)
 
-    def test_get_specific_environment_model(self):
+    def test_get_specific_environment(self):
         """GET a specific environment model by it's UUID."""
-        r_dict0 = self.post_create_environment_model_with_name()
+        r_dict0 = self.post_create_environment()
         uuid = r_dict0['uuid']
         response = self.api_client.get('/api/{}/environment/{}/'
                                        .format(self.version, uuid),
@@ -61,10 +61,10 @@ class EnvironmentResourceTest(ResourceTests):
         self.assertEquals(uuid, r_dict1['uuid'])
         self.assertEqual(response.status_code, 200)
 
-    def test_get_specific_environment_model_by_name(self):
+    def test_get_specific_environment_by_name(self):
         """GET a specific environment model by it's name."""
         name = "mock_production"
-        r_dict0 = self.post_create_environment_model_with_name(name)
+        r_dict0 = self.post_create_environment(name)
         response = self.api_client.get('/api/{}/environment/by_name/{}/'
                                        .format(self.version, name),
                                        format='json')
@@ -74,9 +74,9 @@ class EnvironmentResourceTest(ResourceTests):
         self.assertEquals(r_dict0, r_dict1)
         self.assertEqual(response.status_code, 200)
 
-    def test_post_create_environment_model(self):
+    def test_post_create_environment(self):
         """POST to create a new environment model."""
-        r_dict, status_code = self.post_create_model_with_status_code(
+        r_dict, status_code = self.post_create_instance_with_status_code(
             'environment',
             data={'name': utils.generate_random_string()})
         new_obj = models.Environment.objects.filter(uuid=r_dict['uuid'])
@@ -86,12 +86,12 @@ class EnvironmentResourceTest(ResourceTests):
         self.assertNotEqual(new_obj.count(), 0)
         self.assertEqual(status_code, 201)
 
-    def test_put_update_existing_environment_model(self):
+    def test_put_update_existing_environment(self):
         """PUT to update an existing environment model."""
-        r_dict = self.post_create_environment_model_with_name()
+        r_dict = self.post_create_environment()
         uuid = r_dict['uuid']
         new_name = utils.generate_random_string()
-        data = {'uuid': uuid, 'name': new_name}
+        data = {'name': new_name}
 
         response = self.api_client.put('/api/{}/environment/{}/'
                                        .format(self.version, uuid), data=data)
@@ -102,10 +102,30 @@ class EnvironmentResourceTest(ResourceTests):
         self.assertNotEquals(r_dict['name'], new_r_dict['name'])
         self.assertEqual(response.status_code, 200)
 
-    def test_delete_environment_model(self):
+    def test_put_cannot_update_existing_environments_uuid(self):
+        """PUT to update an existing environment model."""
+        r_dict = self.post_create_environment()
+        uuid = r_dict['uuid']
+        new_uuid = utils.generate_uuid()
+        data = {'uuid': new_uuid}
+        before = models.Environment.objects.filter(uuid=new_uuid).exists()
+
+        response = self.api_client.put('/api/{}/environment/{}/'
+                                       .format(self.version, uuid), data=data)
+        after = models.Environment.objects.filter(uuid=new_uuid).exists()
+        new_r_dict = self.deserialize(response)
+
+        # Assertions
+        self.assertEquals(uuid, new_r_dict['uuid'])
+        self.assertNotEquals(new_uuid, new_r_dict['uuid'])
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(before)
+        self.assertFalse(after)
+
+    def test_delete_environment(self):
         """DELETE an existing environment model."""
 
-        r_dict0 = self.post_create_environment_model_with_name()
+        r_dict0 = self.post_create_environment()
         uuid = r_dict0['uuid']
         obj_created = models.Environment.objects.filter(uuid=uuid).count() > 0
 
@@ -180,11 +200,11 @@ class JenkinsResourceTest(ResourceTests):
         random_name = utils.generate_random_string()
         random_url = utils.generate_random_url()
         data1 = {'name': random_name}
-        response1 = self.post_create_model_without_status_code('environment',
-                                                               data=data1)
+        response1 = self.post_create_instance_without_status_code(
+            'environment', data=data1)
         uuid = response1['uuid']
         data2 = {'environment': uuid, 'external_access_url': random_url}
-        self.post_create_model_without_status_code('jenkins', data=data2)
+        self.post_create_instance_without_status_code('jenkins', data=data2)
         return (uuid, random_name)
 
     def test_put_mock_jenkins_check_in_with_new_environment_uuid(self):
