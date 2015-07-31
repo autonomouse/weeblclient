@@ -77,9 +77,28 @@ class EnvironmentResourceTest(ResourceTests):
         self.assertNotEquals(r_dict['name'], new_r_dict['name'])
         self.assertEqual(response.status_code, 200)
 
+    def test_put_cannot_update_existing_environments_uuid(self):
+        """PUT to update an existing environment model."""
+        r_dict = self.post_create_environment()
+        uuid = r_dict['uuid']
+        new_uuid = utils.generate_uuid()
+        data = {'uuid': new_uuid}
+        before = models.Environment.objects.filter(uuid=new_uuid).exists()
+
+        response = self.api_client.put('/api/{}/environment/{}/'
+                                       .format(self.version, uuid), data=data)
+        after = models.Environment.objects.filter(uuid=new_uuid).exists()
+        new_r_dict = self.deserialize(response)
+
+        # Assertions
+        self.assertEquals(uuid, new_r_dict['uuid'])
+        self.assertNotEquals(new_uuid, new_r_dict['uuid'])
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(before)
+        self.assertFalse(after)
+
     def test_delete_environment(self):
         """DELETE an existing environment instance."""
-
         r_dict0 = self.make_environment()
         uuid = r_dict0['uuid']
         obj_created = models.Environment.objects.filter(uuid=uuid).count() > 0
