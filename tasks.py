@@ -33,9 +33,9 @@ def list():
     run('invoke --help')
 
 @task(help={'database': "Type test or production",
-			'server': "Optionally suffix with -s runserver",
-                        'ip-addr': "IP to run server on. Defaults to 127.0.0.1.",
-                        'port': "Port to run server on. Defaults to 8000."})
+			'server': "Defaults to Apache. Can alternatively user 'runserver'",
+            'ip-addr': "IP to run server on. Defaults to 127.0.0.1.",
+            'port': "Port to run server on. Defaults to 8000."})
 def go(database, server="apache", ip_addr="127.0.0.1", port=8000):
     """Set up and run weebl using either a test or a production database."""
     initialise_database(database)
