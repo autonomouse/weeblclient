@@ -197,7 +197,7 @@ class PipelineResource(CommonResource):
 
     class Meta:
         queryset = models.Pipeline.objects.all()
-        fields = ['pipeline_id', 'build_executor']
+        fields = ['uuid', 'build_executor']
         list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'delete']  # individual
         authorization = Authorization()
@@ -213,22 +213,22 @@ class PipelineResource(CommonResource):
         """Overrides and replaces the the uuid in the end-point with pk."""
         if 'pk' in kwargs:
             uuid = kwargs['pk']  # Because end-point is the UUID not pk really
-            if models.Pipeline.objects.filter(pipeline_id=uuid).exists():
-                pipeline = models.Pipeline.objects.get(pipeline_id=uuid)
+            if models.Pipeline.objects.filter(uuid=uuid).exists():
+                pipeline = models.Pipeline.objects.get(uuid=uuid)
                 kwargs['pk'] = pipeline.pk
                 # TODO: else return and error code
         return super(PipelineResource, self).dispatch(request_type, request,
                                                       **kwargs)
 
     def dehydrate(self, bundle):
-        replace_with = [('resource_uri', bundle.obj.pipeline_id),
+        replace_with = [('resource_uri', bundle.obj.uuid),
                         ('build_executor', bundle.obj.build_executor.uuid), ]
         return self.replace_pk_with_alternative(bundle, replace_with)
 
     def hydrate(self, bundle):
-        # The pipeline_id field is read-only, so don't allow user to change it:
-        if 'pipeline_id' in bundle.data:
-            bundle.data.pop('pipeline_id')
+        # The uuid field is read-only, so don't allow user to change it:
+        if 'uuid' in bundle.data:
+            bundle.data.pop('uuid')
         if 'pk' in bundle.data:
             bundle.data.pop('pk')
         return bundle

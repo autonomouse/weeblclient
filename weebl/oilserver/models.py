@@ -160,11 +160,11 @@ class BuildExecutor(models.Model):
 
 class Pipeline(models.Model):
     """The pipelines currently recorded."""
-    pipeline_id = models.CharField(
+    uuid = models.CharField(
         max_length=36,
         default=utils.generate_uuid,
         unique=True,
         blank=False,
         null=False,
-        help_text="UUID of environment.")
+        help_text="The pipeline ID (a UUID).")
     build_executor = models.ForeignKey(BuildExecutor)

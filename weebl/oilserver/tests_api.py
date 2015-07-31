@@ -79,7 +79,7 @@ class EnvironmentResourceTest(ResourceTests):
 
     def test_put_cannot_update_existing_environments_uuid(self):
         """PUT to update an existing environment model."""
-        r_dict = self.post_create_environment()
+        r_dict = self.make_environment()
         uuid = r_dict['uuid']
         new_uuid = utils.generate_uuid()
         data = {'uuid': new_uuid}
@@ -341,7 +341,7 @@ class PipelineTest(ResourceTests):
         after = str(models.Pipeline.objects.all()) != '[]'
         self.assertTrue(after)
 
-        self.assertIn('pipeline_id', r_dict)
+        self.assertIn('uuid', r_dict)
         self.assertNotIn('pk', r_dict)
         self.assertEqual(status_code, 201)
 
@@ -357,24 +357,24 @@ class PipelineTest(ResourceTests):
 
         self.assertEqual(response.status_code, 200)
         for idx, pl in enumerate(pl_dict):
-            self.assertIn(pl[0]['pipeline_id'], objects[idx]['pipeline_id'])
+            self.assertIn(pl[0]['uuid'], objects[idx]['uuid'])
 
     def test_get_specific_pipeline(self):
         """GET a specific pipeline instance by its UUID."""
         r_dict0, status_code = self.make_pipeline()
-        pipeline_id = r_dict0['pipeline_id']
+        pipeline_id = r_dict0['uuid']
         response = self.api_client.get('/api/{}/pipeline/{}/'
                                        .format(self.version, pipeline_id),
                                        format='json')
         r_dict1 = self.deserialize(response)
 
-        self.assertEqual(pipeline_id, r_dict1['pipeline_id'])
+        self.assertEqual(pipeline_id, r_dict1['uuid'])
         self.assertEqual(response.status_code, 200)
 
     def test_put_method_not_allowed(self):
         """PUT to update an existing pipeline instance."""
         r_dict0, status_code = self.make_pipeline()
-        pipeline_id = r_dict0['pipeline_id']
+        pipeline_id = r_dict0['uuid']
         response = self.api_client.put('/api/{}/pipeline/{}/'
                                        .format(self.version, pipeline_id),
                                        data={}, format='json')
@@ -384,14 +384,14 @@ class PipelineTest(ResourceTests):
     def test_delete_pipeline(self):
         """DELETE an existing pipeline instance."""
         r_dict0, status_code = self.make_pipeline()
-        pipeline_id = r_dict0['pipeline_id']
+        pipeline_id = r_dict0['uuid']
 
-        self.assertTrue(models.Pipeline.objects.filter(pipeline_id=pipeline_id)
+        self.assertTrue(models.Pipeline.objects.filter(uuid=pipeline_id)
                         .count() > 0)
         response = self.api_client.delete('/api/{}/pipeline/{}/'
                                           .format(self.version, pipeline_id),
                                           format='json')
 
-        non_obj = models.Pipeline.objects.filter(pipeline_id=pipeline_id)
+        non_obj = models.Pipeline.objects.filter(uuid=pipeline_id)
         self.assertEqual(non_obj.count(), 0)
         self.assertEqual(response.status_code, 204)
