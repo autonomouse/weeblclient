@@ -199,7 +199,7 @@ Show environment with this uuid     /api/<v>/build_executor/<uuid>/             
 Update build_executor               /api/<v>/build_executor/<uuid>/             PUT             {'jenkins': <UUID>}                         Changing the UUID by this method is not allowed
                                                                                                 or
                                                                                                 {'name': '<ci-oil-master/slaveXX-X>',
-                                                                                                 'jenkins': <UUID>}                     
+                                                                                                 'jenkins': <UUID>}
 Delete the build_executor           /api/<v>/build_executor/<uuid>/             DELETE
 
 
