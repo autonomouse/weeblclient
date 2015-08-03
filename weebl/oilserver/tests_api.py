@@ -328,10 +328,10 @@ class PipelineTest(ResourceTests):
         super(PipelineTest, self).setUp()
 
     def test_post_create_build_executor(self):
-        buildex = self.make_build_executor()[0]['uuid']
+        build_executor = self.make_build_executor()[0]['uuid']
         before = str(models.Pipeline.objects.all()) != '[]'
         self.assertFalse(before)
-        r_dict, status_code = self.make_pipeline(buildex)
+        r_dict, status_code = self.make_pipeline(build_executor)
         after = str(models.Pipeline.objects.all()) != '[]'
         self.assertTrue(after)
 

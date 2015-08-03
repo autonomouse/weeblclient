@@ -51,9 +51,9 @@ class ResourceTests(ResourceTestCase):
                 'jenkins': env_uuid}
         return self.post_create_instance('build_executor', data=data)
 
-    def make_pipeline(self, buildex=None):
-        if buildex is None:
+    def make_pipeline(self, build_executor=None):
+        if build_executor is None:
             response = self.make_build_executor()
-            buildex = response[0]['uuid']
-        data = {'build_executor': buildex}
+            build_executor = response[0]['uuid']
+        data = {'build_executor': build_executor}
         return self.post_create_instance('pipeline', data=data)
