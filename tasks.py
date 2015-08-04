@@ -44,6 +44,8 @@ def go(database, server="apache", ip_addr="127.0.0.1", port=8000):
 @task
 def run_tests():
     """Run unit, functional, and lint tests for each app."""
+    initialise_database("test")
+    load_fixtures()
     run_lint_tests()
     for app in apps:
         run_unit_tests(app)
@@ -301,7 +303,7 @@ def deploy_with_runserver(ipaddr, port):
     result = run('{} {}/manage.py runserver {}:{}'.format(preamble,
                  application, ipaddr, port), pty=True)
 
-def load_fixtures(fixture):
+def load_fixtures(fixture="initial_settings.yaml"):
     print("Adding data from {} into database".format(fixture))
     run('{}/manage.py loaddata "{}"'.format(application, fixture))
 

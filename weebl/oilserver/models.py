@@ -103,7 +103,7 @@ class ServiceStatus(models.Model):
     name = models.CharField(
         max_length=255,
         unique=True,
-        default="Unknown",
+        default="unknown",
         help_text="Current state of the environment.")
     description = models.TextField(
         default=None,
@@ -168,3 +168,41 @@ class Pipeline(models.Model):
         null=False,
         help_text="The pipeline ID (a UUID).")
     build_executor = models.ForeignKey(BuildExecutor)
+
+
+class BuildStatus(models.Model):
+    """Potential states that the build may be in following being run on the CI
+    server (Jenkins; e.g. success, failure, aborted, unknown).
+    """
+    name = models.CharField(
+        max_length=255,
+        unique=True,
+        default="unknown",
+        help_text="The resulting state of the build.")
+    description = models.TextField(
+        default=None,
+        blank=True,
+        null=True,
+        help_text="Optional description for state.")
+
+    def __str__(self):
+        return self.name
+
+
+class JobType(models.Model):
+    """The type of job run (e.g. pipeline_deploy, pipeline_prepare,
+    test_tempest_smoke).
+    """
+    name = models.CharField(
+        max_length=255,
+        unique=True,
+        default="pipeline_deploy",
+        help_text="The type of job.")
+    description = models.TextField(
+        default=None,
+        blank=True,
+        null=True,
+        help_text="Optional description of job type.")
+
+    def __str__(self):
+        return self.name

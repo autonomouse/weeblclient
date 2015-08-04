@@ -21,23 +21,65 @@
 - model: oilserver.servicestatus
   pk: 1
   fields:
+    name: unknown
+    description: Current state of Jenkins is unknown.
+
+- model: oilserver.servicestatus
+  pk: 2
+  fields:
     name: up
     description: Jenkins is functioning normally.
 
 - model: oilserver.servicestatus
-  pk: 2
+  pk: 3
   fields:
     name: unstable
     description: Jenkins is unstable suggesting that there may be a problem.
 
 - model: oilserver.servicestatus
-  pk: 3
+  pk: 4
   fields:
     name: down
     description: Jenkins is broken.
 
-- model: oilserver.servicestatus
-  pk: 4
+- model: oilserver.buildstatus
+  pk: 1
   fields:
     name: unknown
-    description: Current state of Jenkins is unknown.
+    description: Current state of the build is unknown.
+
+- model: oilserver.buildstatus
+  pk: 2
+  fields:
+    name: success
+    description: The build completed successfully.
+
+- model: oilserver.buildstatus
+  pk: 3
+  fields:
+    name: failure
+    description: The build completed but was not successful.
+
+- model: oilserver.buildstatus
+  pk: 4
+  fields:
+    name: aborted
+    description: The build was aborted.
+
+- model: oilserver.jobtype
+  pk: 1
+  fields:
+    name: pipeline_deploy
+    description: The deployment job.
+
+- model: oilserver.jobtype
+  pk: 2
+  fields:
+    name: pipeline_prepare
+    description: The prepare job.
+
+- model: oilserver.jobtype
+  pk: 3
+  fields:
+    name: test_tempest_smoke
+    description: Tempest tests.

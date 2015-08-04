@@ -79,11 +79,15 @@ class ServiceStatusResource(CommonResource):
     class Meta:
         resource_name = 'service_status'
         queryset = models.ServiceStatus.objects.all()
-        list_allowed_methods = []  # all items
-        detail_allowed_methods = []  # individual
+        list_allowed_methods = ['get']  # all items
+        detail_allowed_methods = ['get']  # individual
         fields = ['name', 'description']
         authorization = Authorization()
         always_return_data = True
+
+    def dehydrate(self, bundle):
+        replace_with = [('resource_uri', bundle.obj.name), ]
+        return self.replace_pk_with_alternative(bundle, replace_with)
 
 
 class JenkinsResource(CommonResource):
@@ -230,3 +234,35 @@ class PipelineResource(CommonResource):
         # Also, the UUID field is read-only, so don't allow user to change it.
         bundle.data = utils.pop(bundle.data, fields_to_remove)
         return bundle
+
+
+class BuildStatusResource(CommonResource):
+
+    class Meta:
+        resource_name = 'build_status'
+        queryset = models.BuildStatus.objects.all()
+        list_allowed_methods = ['get']  # all items
+        detail_allowed_methods = ['get']  # individual
+        fields = ['name', 'description']
+        authorization = Authorization()
+        always_return_data = True
+
+    def dehydrate(self, bundle):
+        replace_with = [('resource_uri', bundle.obj.name), ]
+        return self.replace_pk_with_alternative(bundle, replace_with)
+
+
+class JobTypeResource(CommonResource):
+
+    class Meta:
+        resource_name = 'job_type'
+        queryset = models.JobType.objects.all()
+        list_allowed_methods = ['get']  # all items
+        detail_allowed_methods = ['get']  # individual
+        fields = ['name', 'description']
+        authorization = Authorization()
+        always_return_data = True
+
+    def dehydrate(self, bundle):
+        replace_with = [('resource_uri', bundle.obj.name), ]
+        return self.replace_pk_with_alternative(bundle, replace_with)

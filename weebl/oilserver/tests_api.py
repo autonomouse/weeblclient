@@ -6,9 +6,6 @@ from oilserver import models
 
 class EnvironmentResourceTest(ResourceTests):
 
-    def setUp(self):
-        super(EnvironmentResourceTest, self).setUp()
-
     def test_get_all_environments(self):
         """GET all environment instances."""
         env_dict = []
@@ -114,19 +111,17 @@ class EnvironmentResourceTest(ResourceTests):
 
 class ServiceStatusResourceTest(ResourceTests):
 
-    def setUp(self):
-        """Initial service_status objects should have been loaded in via
-        fixtures.
-        """
-        super(ServiceStatusResourceTest, self).setUp()
-
-    def test_get_method_not_allowed(self):
-        """Validate that user cannot GET service_status instance."""
+    def test_get_method_is_allowed(self):
+        """Validate that user can GET service_status model."""
         response =\
             self.api_client.get('/api/{}/service_status/'.format(self.version))
+        r_dict = self.deserialize(response)
 
-        self.assertIsNone(self.deserialize(response))
-        self.assertEqual(response.status_code, 405)
+        self.assertEqual(response.status_code, 200)
+
+        for idx, bstat in enumerate(r_dict['objects']):
+            self.assertNotIn('pk', bstat)
+            self.assertIn('name', bstat)
 
     def test_post_method_not_allowed(self):
         """Validate that user cannot POST service_status instance."""
@@ -234,9 +229,6 @@ class JenkinsResourceTest(ResourceTests):
 
 class BuildExecutorTest(ResourceTests):
 
-    def setUp(self):
-        super(BuildExecutorTest, self).setUp()
-
     def test_post_create_build_executor(self):
         uuid, name = self.make_environment_and_jenkins()
         r_dict, status_code = self.make_build_executor(
@@ -324,9 +316,6 @@ class BuildExecutorTest(ResourceTests):
 
 class PipelineTest(ResourceTests):
 
-    def setUp(self):
-        super(PipelineTest, self).setUp()
-
     def test_post_create_build_executor(self):
         build_executor = self.make_build_executor()[0]['uuid']
         before = str(models.Pipeline.objects.all()) != '[]'
@@ -389,3 +378,93 @@ class PipelineTest(ResourceTests):
         non_obj = models.Pipeline.objects.filter(uuid=pipeline_id)
         self.assertEqual(non_obj.count(), 0)
         self.assertEqual(response.status_code, 204)
+
+
+class BuildStatusResourceTest(ResourceTests):
+
+    def test_get_method_is_allowed(self):
+        """Validate that user can GET build_status model."""
+        response =\
+            self.api_client.get('/api/{}/build_status/'.format(self.version))
+        r_dict = self.deserialize(response)
+
+        self.assertEqual(response.status_code, 200)
+
+        for idx, bstat in enumerate(r_dict['objects']):
+            self.assertNotIn('pk', bstat)
+            self.assertIn('name', bstat)
+
+    def test_post_method_not_allowed(self):
+        """Validate that user cannot POST build_status model."""
+        response = self.api_client.post('/api/{}/build_status/'
+                                        .format(self.version))
+        r_dict = self.deserialize(response)
+
+        # Assertions
+        self.assertIsNone(r_dict)
+        self.assertEqual(response.status_code, 405)
+
+    def test_put_method_not_allowed(self):
+        """Validate that user cannot PUT build_status model."""
+        response = self.api_client.put('/api/{}/build_status/'
+                                       .format(self.version))
+        r_dict = self.deserialize(response)
+
+        # Assertions
+        self.assertIsNone(r_dict)
+        self.assertEqual(response.status_code, 405)
+
+    def test_delete_method_not_allowed(self):
+        """Validate that user cannot DELETE a specific build_status model."""
+        response = self.api_client.delete('/api/{}/build_status/0/'
+                                          .format(self.version))
+        r_dict = self.deserialize(response)
+
+        # Assertions
+        self.assertIsNone(r_dict)
+        self.assertEqual(response.status_code, 405)
+
+
+class JobTypeResourceTest(ResourceTests):
+
+    def test_get_method_is_allowed(self):
+        """Validate that user can GET job_type model."""
+        response =\
+            self.api_client.get('/api/{}/job_type/'.format(self.version))
+        r_dict = self.deserialize(response)
+
+        self.assertEqual(response.status_code, 200)
+
+        for idx, bstat in enumerate(r_dict['objects']):
+            self.assertNotIn('pk', bstat)
+            self.assertIn('name', bstat)
+
+    def test_post_method_not_allowed(self):
+        """Validate that user cannot POST job_type model."""
+        response = self.api_client.post('/api/{}/job_type/'
+                                        .format(self.version))
+        r_dict = self.deserialize(response)
+
+        # Assertions
+        self.assertIsNone(r_dict)
+        self.assertEqual(response.status_code, 405)
+
+    def test_put_method_not_allowed(self):
+        """Validate that user cannot PUT job_type model."""
+        response = self.api_client.put('/api/{}/job_type/'
+                                       .format(self.version))
+        r_dict = self.deserialize(response)
+
+        # Assertions
+        self.assertIsNone(r_dict)
+        self.assertEqual(response.status_code, 405)
+
+    def test_delete_method_not_allowed(self):
+        """Validate that user cannot DELETE a specific job_type model."""
+        response = self.api_client.delete('/api/{}/job_type/0/'
+                                          .format(self.version))
+        r_dict = self.deserialize(response)
+
+        # Assertions
+        self.assertIsNone(r_dict)
+        self.assertEqual(response.status_code, 405)
