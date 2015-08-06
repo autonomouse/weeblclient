@@ -16,4 +16,9 @@ v_api.register(resources.JobTypeResource())
 urlpatterns = patterns('',
                        url(r'^', include('oilserver.urls')),
                        url(r'^api/', include(v_api.urls)),
-                       )
+                       url(r'api/',
+                           include('tastypie_swagger.urls', 
+                                   namespace='api_docs'),                                   
+                           kwargs={"tastypie_api_module": "weebl.urls.v_api",
+                                   "namespace": "api_docs",
+                                   "version": __api_version__}),)

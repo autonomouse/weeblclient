@@ -49,7 +49,7 @@
                         {% block footer-copyright %}
                         <p class="twelve-col">
                             <p class="version">Weebl Version: {{ settings.weebl_version }} <a href="{{ settings.weebl_documentation }}">View documentation</a></p>
-                            <p class="version">REST API Version: {{ settings.api_version }}
+                            <p class="version">REST API Version: {{ settings.api_version }} <a href="{% static '/api/'%}">View API documentation</a></p>
                         </p>
                         <p class="twelve-col copy">&copy; 2015 Canonical Ltd. Ubuntu and Canonical are registered trademarks of Canonical Ltd.</p>
                         {% endblock %}

@@ -162,7 +162,7 @@ Resource Specification
 - Below are tables for each end-point, where <v> represents the api version number (for example "v1"), <UUID> represents the uuid of the environment instance and <uuid> represents a uuid for the given model:
 
 ================================    =========================================   =============   ========================================    =============================================================================
-Purpose                             End-point                                   HTTP Method     Data                                        Notes
+Purpose                             End-point                                   HTTP Method	Data                                        Notes
 ================================    =========================================   =============   ========================================    =============================================================================
 Create environment                  /api/<v>/environment/                       POST            {'name': 'production'} or {}                If 'name' not supplied, will use UUID as name.
 List all environments               /api/<v>/environment/                       GET
