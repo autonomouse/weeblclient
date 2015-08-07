@@ -1,7 +1,10 @@
 #! /usr/bin/env python3
 import utils
+import arrow
+import random
 from common_test_methods import ResourceTests
 from oilserver import models
+from freezegun import freeze_time
 
 
 class EnvironmentResourceTest(ResourceTests):
@@ -17,7 +20,8 @@ class EnvironmentResourceTest(ResourceTests):
         r_dict = self.deserialize(response)
         objects = r_dict['objects']
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200,
+                         msg="Incorrect status code")
         for idx, env in enumerate(env_dict):
             self.assertIn(env['uuid'], objects[idx]['uuid'])
 
@@ -31,7 +35,8 @@ class EnvironmentResourceTest(ResourceTests):
         r_dict1 = self.deserialize(response)
 
         self.assertEqual(uuid, r_dict1['uuid'])
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200,
+                         msg="Incorrect status code")
 
     def test_get_specific_environment_by_name(self):
         """GET a specific environment instance by its name."""
@@ -43,7 +48,8 @@ class EnvironmentResourceTest(ResourceTests):
         r_dict1 = self.deserialize(response)
 
         self.assertEqual(r_dict0, r_dict1)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200,
+                         msg="Incorrect status code")
 
     def test_post_create_environment(self):
         """POST to create a new environment instance."""
@@ -71,8 +77,10 @@ class EnvironmentResourceTest(ResourceTests):
         self.assertTrue(after)
         new_r_dict = self.deserialize(response)
         self.assertEqual(r_dict['uuid'], new_r_dict['uuid'])
-        self.assertNotEquals(r_dict['name'], new_r_dict['name'])
-        self.assertEqual(response.status_code, 200)
+        self.assertNotEqual(r_dict['name'], new_r_dict['name'],
+                            msg="Name is not different in updated environment")
+        self.assertEqual(response.status_code, 200,
+                         msg="Incorrect status code")
 
     def test_put_cannot_update_existing_environments_uuid(self):
         """PUT to update an existing environment model."""
@@ -87,10 +95,12 @@ class EnvironmentResourceTest(ResourceTests):
         after = models.Environment.objects.filter(uuid=new_uuid).exists()
         new_r_dict = self.deserialize(response)
 
-        # Assertions
-        self.assertEquals(uuid, new_r_dict['uuid'])
-        self.assertNotEquals(new_uuid, new_r_dict['uuid'])
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(uuid, new_r_dict['uuid'],
+                         msg="UUID should not have been updated!")
+        self.assertNotEqual(new_uuid, new_r_dict['uuid'],
+                            msg="UUID should not have been updated!")
+        self.assertEqual(response.status_code, 200,
+                         msg="Incorrect status code")
         self.assertFalse(before)
         self.assertFalse(after)
 
@@ -117,7 +127,8 @@ class ServiceStatusResourceTest(ResourceTests):
             self.api_client.get('/api/{}/service_status/'.format(self.version))
         r_dict = self.deserialize(response)
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200,
+                         msg="Incorrect status code")
 
         for idx, bstat in enumerate(r_dict['objects']):
             self.assertNotIn('pk', bstat)
@@ -238,7 +249,7 @@ class BuildExecutorTest(ResourceTests):
         self.assertNotIn('pk', r_dict)
         self.assertEqual(r_dict['name'], name)
         self.assertNotEqual(r_dict['uuid'], uuid)
-        self.assertEqual(status_code, 201)
+        self.assertEqual(status_code, 201, msg="Incorrect status code")
 
     def test_get_all_build_executors(self):
         """GET all build_executor instances."""
@@ -247,7 +258,8 @@ class BuildExecutorTest(ResourceTests):
                                        .format(self.version), format='json')
         r_dict = self.deserialize(response)
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200,
+                         msg="Incorrect status code")
         expected_uuids = [bdict[0]['uuid'] for bdict in bex_dict]
         actual_uuids = [obj['uuid'] for obj in r_dict['objects']]
         self.assertCountEqual(actual_uuids, expected_uuids)
@@ -262,7 +274,8 @@ class BuildExecutorTest(ResourceTests):
                                        format='json')
         r_dict1 = self.deserialize(response)
         self.assertEqual(uuid, r_dict1['uuid'])
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200,
+                         msg="Incorrect status code")
 
     def test_get_build_executor_uuid_from_name(self):
         r_dict0, status_code = self.make_build_executor()
@@ -286,11 +299,13 @@ class BuildExecutorTest(ResourceTests):
         self.assertFalse(before)
         response = self.api_client.put('/api/{}/build_executor/{}/'
                                        .format(self.version, uuid), data=data)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200,
+                         msg="Incorrect status code")
         after = models.BuildExecutor.objects.filter(name=new_name).exists()
         self.assertTrue(after)
         new_r_dict = self.deserialize(response)
-        self.assertNotEquals(r_dict['name'], new_r_dict['name'])
+        self.assertNotEqual(r_dict['name'], new_r_dict['name'],
+                            msg="Name is not different in updated environment")
 
     def test_put_cannot_update_existing_build_executors_uuid(self):
         """PUT to update an existing build_executor instance."""
@@ -308,9 +323,11 @@ class BuildExecutorTest(ResourceTests):
         self.assertFalse(after, msg="build_executor UUID has been altered!")
         new_r_dict = self.deserialize(response)
 
-        self.assertEqual(uuid, new_r_dict['uuid'])
-        self.assertNotEquals(uuid2, new_r_dict['uuid'])
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(uuid, new_r_dict['uuid'],
+                         msg="UUID should not have been updated!")
+        self.assertNotEqual(uuid2, new_r_dict['uuid'])
+        self.assertEqual(response.status_code, 200,
+                         msg="Incorrect status code")
 
     def test_delete_build_executor(self):
         """DELETE an existing build_executor instance."""
@@ -338,19 +355,20 @@ class PipelineTest(ResourceTests):
 
         self.assertIn('uuid', r_dict)
         self.assertNotIn('pk', r_dict)
-        self.assertEqual(status_code, 201)
+        self.assertEqual(status_code, 201, msg="Incorrect status code")
 
     def test_get_all_pipelines(self):
         """GET all pipeline instances."""
         pl_dict = []
-        for idx in range(3):
+        for _ in range(3):
             pl_dict.append(self.make_pipeline())
         response = self.api_client.get('/api/{}/pipeline/'
                                        .format(self.version), format='json')
         r_dict = self.deserialize(response)
         objects = r_dict['objects']
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200,
+                         msg="Incorrect status code")
         for idx, pl in enumerate(pl_dict):
             self.assertIn(pl[0]['uuid'], objects[idx]['uuid'])
 
@@ -364,7 +382,8 @@ class PipelineTest(ResourceTests):
         r_dict1 = self.deserialize(response)
 
         self.assertEqual(pipeline_id, r_dict1['uuid'])
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200,
+                         msg="Incorrect status code")
 
     def test_put_method_not_allowed(self):
         """PUT to update an existing pipeline instance."""
@@ -400,7 +419,8 @@ class BuildStatusResourceTest(ResourceTests):
             self.api_client.get('/api/{}/build_status/'.format(self.version))
         r_dict = self.deserialize(response)
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200,
+                         msg="Incorrect status code")
 
         for idx, bstat in enumerate(r_dict['objects']):
             self.assertNotIn('pk', bstat)
@@ -412,7 +432,6 @@ class BuildStatusResourceTest(ResourceTests):
                                         .format(self.version))
         r_dict = self.deserialize(response)
 
-        # Assertions
         self.assertIsNone(r_dict)
         self.assertEqual(response.status_code, 405)
 
@@ -422,7 +441,6 @@ class BuildStatusResourceTest(ResourceTests):
                                        .format(self.version))
         r_dict = self.deserialize(response)
 
-        # Assertions
         self.assertIsNone(r_dict)
         self.assertEqual(response.status_code, 405)
 
@@ -432,7 +450,6 @@ class BuildStatusResourceTest(ResourceTests):
                                           .format(self.version))
         r_dict = self.deserialize(response)
 
-        # Assertions
         self.assertIsNone(r_dict)
         self.assertEqual(response.status_code, 405)
 
@@ -445,7 +462,8 @@ class JobTypeResourceTest(ResourceTests):
             self.api_client.get('/api/{}/job_type/'.format(self.version))
         r_dict = self.deserialize(response)
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200,
+                         msg="Incorrect status code")
 
         for idx, bstat in enumerate(r_dict['objects']):
             self.assertNotIn('pk', bstat)
@@ -457,7 +475,6 @@ class JobTypeResourceTest(ResourceTests):
                                         .format(self.version))
         r_dict = self.deserialize(response)
 
-        # Assertions
         self.assertIsNone(r_dict)
         self.assertEqual(response.status_code, 405)
 
@@ -467,7 +484,6 @@ class JobTypeResourceTest(ResourceTests):
                                        .format(self.version))
         r_dict = self.deserialize(response)
 
-        # Assertions
         self.assertIsNone(r_dict)
         self.assertEqual(response.status_code, 405)
 
@@ -477,6 +493,213 @@ class JobTypeResourceTest(ResourceTests):
                                           .format(self.version))
         r_dict = self.deserialize(response)
 
-        # Assertions
         self.assertIsNone(r_dict)
         self.assertEqual(response.status_code, 405)
+
+
+class BuildTest(ResourceTests):
+
+    def setUp(self):
+        super(BuildTest, self).setUp()
+        self.pipeline_id = self.make_pipeline()[0]['uuid']
+
+    def test_post_create_build_model_without_timestamps(self):
+        build_id = str(random.randint(10000, 99999))
+        build_status = "success"
+        job_type = "pipeline_deploy"
+
+        data = {'build_id': str(build_id),
+                'pipeline': self.pipeline_id,
+                'build_status': build_status,
+                'job_type': job_type}
+
+        r_dict, status_code = self.post_create_instance(
+            'build', data=data)
+        recently_analysed = utils.time_difference_less_than_x_mins(
+            r_dict['build_analysed_at'], 1)
+        self.assertTrue(recently_analysed,
+                        msg="Build_analysed_at was over 1 minute ago")
+        self.assertIn('uuid', r_dict, msg="UUID not in response")
+        self.assertEqual(build_id, r_dict['build_id'],
+                         msg="Incorrect build id")
+        self.assertIn(build_status, r_dict['build_status'],
+                      msg="Incorrect build status")
+        self.assertIn(job_type, r_dict['job_type'], msg="Incorrect job type")
+        self.assertNotIn('pk', r_dict,
+                         msg="Primary key is showing up in response")
+        self.assertEqual(status_code, 201, msg="Incorrect status code")
+        self.assertIn(job_type, r_dict['artifact_location'].split('/'))
+        self.assertIn(str(build_id), r_dict['artifact_location'].split('/'))
+        self.assertIn('artifact', r_dict['artifact_location'].split('/'))
+
+    def test_post_create_build_model_with_timestamps(self):
+        build_id = str(random.randint(10000, 99999))
+        build_status = "success"
+        job_type = "pipeline_deploy"
+        with freeze_time("Jan 1 2000 00:00:00"):
+            timestamp0 = utils.time_now()
+        with freeze_time("Jan 1 2000 00:00:05"):
+            timestamp1 = utils.time_now()
+
+        data = {'build_id': str(build_id),
+                'build_started_at': timestamp0,
+                'build_finished_at': timestamp1,
+                'pipeline': self.pipeline_id,
+                'build_status': build_status,
+                'job_type': job_type}
+
+        r_dict, status_code = self.post_create_instance(
+            'build', data=data)
+        recently_analysed = utils.time_difference_less_than_x_mins(
+            r_dict['build_analysed_at'], 1)
+        self.assertTrue(recently_analysed,
+                        msg="Build_analysed_at was over 1 minute ago")
+
+        self.assertEqual(arrow.get(r_dict['build_started_at']),
+                         arrow.get(timestamp0))
+        self.assertEqual(arrow.get(r_dict['build_finished_at']),
+                         arrow.get(timestamp1))
+
+        self.assertIn('uuid', r_dict, msg="UUID not in response")
+        self.assertEqual(build_id, r_dict['build_id'],
+                         msg="Incorrect build id")
+        self.assertIn(build_status, r_dict['build_status'],
+                      msg="Incorrect build status")
+        self.assertIn(job_type, r_dict['job_type'], msg="Incorrect job type")
+        self.assertNotIn('pk', r_dict,
+                         msg="Primary key is showing up in response")
+        self.assertEqual(status_code, 201, msg="Incorrect status code")
+
+    def test_post_cannot_make_two_build_executors_with_same_name(self):
+        shared_uuid, env_name1 = self.make_environment_and_jenkins()
+        shared_name = utils.generate_random_string()
+        try:
+            r_dict1, status_code = self.make_build_executor(
+                name=shared_name, env_uuid=shared_uuid)
+            r_dict2, status_code = self.make_build_executor(
+                name=shared_name, env_uuid=shared_uuid)
+            created_two_build_executors = True
+        except:
+            created_two_build_executors = False
+        msg = "Multiple build executors with same name created on same jenkins"
+        self.assertFalse(created_two_build_executors, msg=msg)
+
+    def test_build_executors_with_same_name_ok_if_different_jenkins(self):
+        uuid1, env_name1 = self.make_environment_and_jenkins()
+        uuid2, env_name2 = self.make_environment_and_jenkins()
+        shared_name = utils.generate_random_string()
+        try:
+            r_dict1, status_code = self.make_build_executor(
+                name=shared_name, env_uuid=uuid1)
+            r_dict2, status_code = self.make_build_executor(
+                name=shared_name, env_uuid=uuid2)
+            created_two_build_executors = True
+        except:
+            created_two_build_executors = False
+        msg = "Failed to create multiple build executors with the same name "
+        msg += "on different jenkins"
+        self.assertTrue(created_two_build_executors, msg=msg)
+
+    def test_put_update_existing_builds(self):
+        """PUT to update an existing environment instance."""
+        r_dict, status_code = self.make_build()
+        original_build_id = r_dict['build_id']
+        before = models.Build.objects.filter(
+            build_id=original_build_id).exists()
+        self.assertTrue(before)
+        updated_build_id = '12345'
+        data = {'build_id': updated_build_id}
+        response = self.api_client.put(
+            '/api/{}/build/{}/'.format(self.version, r_dict['uuid']),
+            data=data)
+        after_orig = models.Build.objects.filter(
+            build_id=original_build_id).exists()
+        self.assertFalse(after_orig)
+        after = models.Build.objects.filter(
+            build_id=updated_build_id).exists()
+        self.assertTrue(after)
+
+        new_r_dict = self.deserialize(response)
+        self.assertNotEqual(original_build_id, new_r_dict['build_id'],
+                            msg="Build id in response different to original")
+        self.assertEqual(updated_build_id, new_r_dict['build_id'],
+                         msg="Build id has not been updated")
+        self.assertEqual(response.status_code, 200,
+                         msg="Incorrect status code")
+
+    def test_put_cannot_update_existing_builds_uuid(self):
+        """PUT to update an existing build instance."""
+        r_dict, status_code = self.make_build()
+        uuid = r_dict['uuid']
+        uuid2 = utils.generate_uuid()
+        data = {'uuid': uuid2}
+        before = models.Build.objects.filter(uuid=uuid2).exists()
+        self.assertFalse(before)
+
+        response = self.api_client.put('/api/{}/build/{}/'
+                                       .format(self.version, uuid), data=data)
+
+        after = models.Build.objects.filter(uuid=uuid2).exists()
+        self.assertFalse(after, msg="build_executor UUID has been altered!")
+        new_r_dict = self.deserialize(response)
+
+        self.assertEqual(uuid, new_r_dict['uuid'],
+                         msg="UUID should not have been updated!")
+        self.assertNotEqual(uuid2, new_r_dict['uuid'])
+        self.assertEqual(response.status_code, 200,
+                         msg="Incorrect status code")
+
+    def test_get_all_builds(self):
+        """GET all build instances."""
+        build_dict = []
+        for _ in range(3):
+            build_dict.append(self.make_build())
+        response = self.api_client.get('/api/{}/build/'
+                                       .format(self.version), format='json')
+        r_dict = self.deserialize(response)
+        objects = r_dict['objects']
+
+        self.assertEqual(response.status_code, 200,
+                         msg="Incorrect status code")
+        for idx, pl in enumerate(build_dict):
+            self.assertIn(pl[0]['uuid'], objects[idx]['uuid'])
+
+    def test_get_specific_build(self):
+        """GET a specific build instance by its UUID."""
+        r_dict0, status_code = self.make_build()
+        uuid = r_dict0['uuid']
+        response = self.api_client.get('/api/{}/build/{}/'
+                                       .format(self.version, uuid),
+                                       format='json')
+        r_dict1 = self.deserialize(response)
+
+        self.assertEqual(uuid, r_dict1['uuid'])
+        self.assertEqual(response.status_code, 200,
+                         msg="Incorrect status code")
+
+    def test_delete_build(self):
+        """DELETE an existing build instance."""
+        r_dict0, status_code = self.make_build()
+        uuid = r_dict0['uuid']
+
+        self.assertTrue(models.Build.objects.filter(uuid=uuid)
+                        .count() > 0)
+        response = self.api_client.delete('/api/{}/build/{}/'
+                                          .format(self.version, uuid),
+                                          format='json')
+
+        non_obj = models.Build.objects.filter(uuid=uuid)
+        self.assertEqual(non_obj.count(), 0, msg="Build not deleted")
+        self.assertEqual(response.status_code, 204,
+                         msg="Incorrect status code")
+
+    def test_make_sure_build_statuses_are_obscured_upon_build_get(self):
+        """A get on build should not reveal the pk for build_status."""
+        r_dict0, status_code = self.make_build()
+        response = self.api_client.get(
+            '/api/{}/build/'.format(self.version), format='json')
+        r_dict1 = self.deserialize(response)
+
+        first_object = r_dict1['objects'][0]
+        value = first_object.get('build_status').rstrip('/').split('/')[-1]
+        self.assertTrue(value in ['unknown', 'success', 'failure', 'aborted'])

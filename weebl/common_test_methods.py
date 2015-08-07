@@ -1,5 +1,7 @@
 import utils
+import random
 from weebl import urls
+from oilserver import models
 from django.test import TestCase
 from tastypie.test import ResourceTestCase
 
@@ -57,3 +59,16 @@ class ResourceTests(ResourceTestCase):
             build_executor = response[0]['uuid']
         data = {'build_executor': build_executor}
         return self.post_create_instance('pipeline', data=data)
+
+    def make_build(self, pipeline=None):
+        if pipeline is None:
+            response = self.make_pipeline()
+            pipeline = response[0]['uuid']
+        build_id = str(random.randint(10000, 99999))
+        build_status = models.BuildStatus.objects.all()[1].name
+        job_type = models.JobType.objects.all()[0].name
+        data = {'build_id': str(build_id),
+                'pipeline': pipeline,
+                'build_status': build_status,
+                'job_type': job_type}
+        return self.post_create_instance('build', data=data)

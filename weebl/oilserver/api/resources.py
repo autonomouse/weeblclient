@@ -11,7 +11,7 @@ from tastypie.exceptions import BadRequest
 
 class CommonResource(ModelResource):
 
-    def replace_pk_with_alternative(self, bundle, replace_with):
+    def replace_bundle_item_with_alternative(self, bundle, replace_with):
         if replace_with is None:
             return bundle
         for replace_this, with_this in replace_with:
@@ -72,7 +72,7 @@ class EnvironmentResource(CommonResource):
 
     def dehydrate(self, bundle):
         replace_with = [('resource_uri', bundle.obj.uuid), ]
-        return self.replace_pk_with_alternative(bundle, replace_with)
+        return self.replace_bundle_item_with_alternative(bundle, replace_with)
 
 
 class ServiceStatusResource(CommonResource):
@@ -88,7 +88,7 @@ class ServiceStatusResource(CommonResource):
 
     def dehydrate(self, bundle):
         replace_with = [('resource_uri', bundle.obj.name), ]
-        return self.replace_pk_with_alternative(bundle, replace_with)
+        return self.replace_bundle_item_with_alternative(bundle, replace_with)
 
 
 class JenkinsResource(CommonResource):
@@ -147,7 +147,7 @@ class JenkinsResource(CommonResource):
     def dehydrate(self, bundle):
         replace_with = [('resource_uri', bundle.obj.environment.uuid),
                         ('environment', bundle.obj.environment.uuid), ]
-        return self.replace_pk_with_alternative(bundle, replace_with)
+        return self.replace_bundle_item_with_alternative(bundle, replace_with)
 
 
 class BuildExecutorResource(CommonResource):
@@ -170,14 +170,13 @@ class BuildExecutorResource(CommonResource):
 
         if 'name' in bundle.data:
             bundle.obj.name = bundle.data['name']
-
         bundle.obj.save()
         return bundle
 
     def obj_get_list(self, bundle, **kwargs):
         """This overrides the default obj_get_list method with an extra block
-        of code to replace the jenkins uuid given with the respective pk, so 
-        the user can simply pass in a uuid rather than having to know the 
+        of code to replace the jenkins uuid given with the respective pk, so
+        the user can simply pass in a uuid rather than having to know the
         primary keys for this table in the database (which is also potentially
         insecure).
         """
@@ -214,13 +213,13 @@ class BuildExecutorResource(CommonResource):
                 build_executor = models.BuildExecutor.objects.get(uuid=uuid)
                 kwargs['pk'] = build_executor.pk
                 # TODO: else return and error code
-        return super(BuildExecutorResource, self).dispatch(request_type,
-                                                           request, **kwargs)
+        return super(BuildExecutorResource, self).dispatch(
+            request_type, request, **kwargs)
 
     def dehydrate(self, bundle):
         replace_with = [('resource_uri', bundle.obj.uuid),
                         ('jenkins', bundle.obj.jenkins.uuid), ]
-        return self.replace_pk_with_alternative(bundle, replace_with)
+        return self.replace_bundle_item_with_alternative(bundle, replace_with)
 
     def hydrate(self, bundle):
         fields_to_remove = ['uuid', 'pk']
@@ -261,7 +260,7 @@ class PipelineResource(CommonResource):
     def dehydrate(self, bundle):
         replace_with = [('resource_uri', bundle.obj.uuid),
                         ('build_executor', bundle.obj.build_executor.uuid), ]
-        return self.replace_pk_with_alternative(bundle, replace_with)
+        return self.replace_bundle_item_with_alternative(bundle, replace_with)
 
     def hydrate(self, bundle):
         fields_to_remove = ['uuid', 'pk']
@@ -284,7 +283,7 @@ class BuildStatusResource(CommonResource):
 
     def dehydrate(self, bundle):
         replace_with = [('resource_uri', bundle.obj.name), ]
-        return self.replace_pk_with_alternative(bundle, replace_with)
+        return self.replace_bundle_item_with_alternative(bundle, replace_with)
 
 
 class JobTypeResource(CommonResource):
@@ -300,4 +299,65 @@ class JobTypeResource(CommonResource):
 
     def dehydrate(self, bundle):
         replace_with = [('resource_uri', bundle.obj.name), ]
-        return self.replace_pk_with_alternative(bundle, replace_with)
+        return self.replace_bundle_item_with_alternative(bundle, replace_with)
+
+
+class BuildResource(CommonResource):
+    pipeline = fields.ForeignKey(PipelineResource, 'pipeline')
+    build_status = fields.ForeignKey(BuildStatusResource, 'build_status')
+    job_type = fields.ForeignKey(JobTypeResource, 'job_type')
+
+    class Meta:
+        queryset = models.Build.objects.all()
+        list_allowed_methods = ['get', 'post', 'put', 'delete']  # all items
+        detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
+        fields = ['uuid', 'build_id', 'artifact_location', 'build_started_at',
+                  'build_finished_at', 'build_analysed_at', 'pipeline',
+                  'build_status', 'job_type']
+        authorization = Authorization()
+        always_return_data = True
+
+    def obj_create(self, bundle, request=None, **kwargs):
+        bundle.obj.build_id = bundle.data['build_id']
+        bundle.obj.pipeline = models.Pipeline.objects.get(
+            uuid=bundle.data['pipeline'])
+        bundle.obj.build_status = models.BuildStatus.objects.get(
+            name=bundle.data['build_status'])
+        bundle.obj.job_type = models.JobType.objects.get(
+            name=bundle.data['job_type'])
+        if 'build_started_at' in bundle.data:
+            bundle.obj.build_started_at = bundle.data['build_started_at']
+        if 'build_finished_at' in bundle.data:
+            bundle.obj.build_finished_at = bundle.data['build_finished_at']
+
+        # Link to Jenkins, but in the future, consider changing this to S3:
+        jenkins_ext_url =\
+            bundle.obj.pipeline.build_executor.jenkins.external_access_url
+        url = "{}/job/{}/{}/artifact/artifacts/"
+        bundle.obj.artifact_location = url.format(
+            jenkins_ext_url, bundle.data['job_type'], bundle.data['build_id'])
+        bundle.obj.save()
+        return bundle
+
+    def dispatch(self, request_type, request, **kwargs):
+        """Overrides and replaces the the uuid in the end-point with pk."""
+        if 'pk' in kwargs:
+            uuid = kwargs['pk']  # Because end-point is the UUID not pk really
+            if models.Build.objects.filter(uuid=uuid).exists():
+                build = models.Build.objects.get(uuid=uuid)
+                kwargs['pk'] = build.pk
+                # TODO: else return and error code
+        return super(BuildResource, self).dispatch(request_type, request,
+                                                   **kwargs)
+
+    def dehydrate(self, bundle):
+        replace_with = [('resource_uri', bundle.obj.uuid),
+                        ('build_status', bundle.obj.build_status),
+                        ('job_type', bundle.obj.job_type),
+                        ('pipeline', bundle.obj.pipeline.uuid), ]
+        return self.replace_bundle_item_with_alternative(bundle, replace_with)
+
+    def hydrate(self, bundle):
+        fields_to_remove = ['uuid', 'pk', 'build_analysed_at']
+        bundle.data = utils.pop(bundle.data, fields_to_remove)
+        return bundle

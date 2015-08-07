@@ -151,11 +151,21 @@ class BuildExecutor(models.Model):
         null=False,
         help_text="UUID of the jenkins build executor.")
     name = models.CharField(
+        unique=False,
         max_length=255,
-        unique=True,
         default=uuid.default,
         help_text="Name of the jenkins build executor.")
     jenkins = models.ForeignKey(Jenkins)
+
+    class Meta:
+        # Jenkins will default to naming the build_executers the same thing
+        # (e.g. 'master, 'ci-oil-slave-10-0', etc) so while they must be unique
+        # within the same environment/jenkins, they will only be unique when
+        # combined with the environment/jenkins uuid, externally:
+        unique_together = (('name', 'jenkins'),)
+
+    def __str__(self):
+        return self.uuid
 
 
 class Pipeline(models.Model):
@@ -168,6 +178,9 @@ class Pipeline(models.Model):
         null=False,
         help_text="The pipeline ID (a UUID).")
     build_executor = models.ForeignKey(BuildExecutor)
+
+    def __str__(self):
+        return self.uuid
 
 
 class BuildStatus(models.Model):
@@ -206,3 +219,43 @@ class JobType(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Build(models.Model):
+    """The build numbers for each job."""
+    uuid = models.CharField(
+        max_length=36,
+        default=utils.generate_uuid,
+        unique=True,
+        blank=False,
+        null=False,
+        help_text="UUID of this build.")
+    build_id = models.CharField(
+        max_length=255,
+        help_text="The build number or other identifier used by jenkins.")
+    artifact_location = models.URLField(
+        unique=True,
+        help_text="URL where build artifacts can be obtainedIf archived, then \
+        jenkins has been wiped and the build numbers reset, so this data is \
+        no longer accessble via jenkins link")
+    build_started_at = models.DateTimeField(
+        default=None,
+        blank=True,
+        null=True,
+        help_text="DateTime the build was started.")
+    build_finished_at = models.DateTimeField(
+        default=None,
+        blank=True,
+        null=True,
+        help_text="DateTime the build finished.")
+    build_analysed_at = models.DateTimeField(
+        default=utils.time_now,
+        auto_now_add=True,
+        blank=True,
+        help_text="DateTime the build was analysed by weebl.")
+    pipeline = models.ForeignKey(Pipeline)
+    build_status = models.ForeignKey(BuildStatus)
+    job_type = models.ForeignKey(JobType)
+
+    def __str__(self):
+        return self.uuid
