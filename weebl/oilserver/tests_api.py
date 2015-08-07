@@ -264,6 +264,18 @@ class BuildExecutorTest(ResourceTests):
         self.assertEqual(uuid, r_dict1['uuid'])
         self.assertEqual(response.status_code, 200)
 
+    def test_get_build_executor_uuid_from_name(self):
+        r_dict0, status_code = self.make_build_executor()
+        uuid_to_match = r_dict0.get('uuid')
+        jenkins = r_dict0.get('jenkins')
+        build_executor_name = r_dict0.get('name')
+        response = self.api_client.get(
+            '/api/{}/build_executor/?jenkins={}&name={}'
+            .format(self.version, jenkins, build_executor_name))
+        r_dict = self.deserialize(response)
+        objects = r_dict['objects']
+        self.assertTrue(uuid_to_match, objects[0].get('uuid'))
+
     def test_put_update_existing_build_executor(self):
         """PUT to update an existing build_executor instance."""
         r_dict, status_code = self.make_build_executor()

@@ -1,11 +1,12 @@
 import os
 import utils
 from tastypie import fields
-from tastypie.resources import ModelResource
+from tastypie.resources import ModelResource, ALL_WITH_RELATIONS
 from tastypie.authorization import Authorization
 from tastypie.utils import trailing_slash
 from django.conf.urls import url
 from oilserver import models
+from tastypie.exceptions import BadRequest
 
 
 class CommonResource(ModelResource):
@@ -160,6 +161,8 @@ class BuildExecutorResource(CommonResource):
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
         authorization = Authorization()
         always_return_data = True
+        filtering = {'jenkins': ALL_WITH_RELATIONS,
+                     'name': ALL_WITH_RELATIONS, }
 
     def obj_create(self, bundle, request=None, **kwargs):
         bundle.obj.jenkins =\
@@ -170,6 +173,38 @@ class BuildExecutorResource(CommonResource):
 
         bundle.obj.save()
         return bundle
+
+    def obj_get_list(self, bundle, **kwargs):
+        """This overrides the default obj_get_list method with an extra block
+        of code to replace the jenkins uuid given with the respective pk, so 
+        the user can simply pass in a uuid rather than having to know the 
+        primary keys for this table in the database (which is also potentially
+        insecure).
+        """
+        filters = {}
+
+        if hasattr(bundle.request, 'GET'):
+            # Grab a mutable copy.
+            filters = bundle.request.GET.copy()
+
+        # Update with the provided kwargs.
+        filters.update(kwargs)
+
+        # Replace uuid with pk so can filter by env/jenkins uuid instead of pk:
+        if 'jenkins' in filters:
+            jenkins_uuid = filters['jenkins'].rstrip('/').split('/')[-1]
+            env_pk = models.Environment.objects.get(uuid=jenkins_uuid).pk
+            jenkins_pk = models.Jenkins.objects.get(environment_id=env_pk).pk
+            filters['jenkins'] = str(jenkins_pk)
+
+        applicable_filters = self.build_filters(filters=filters)
+
+        try:
+            objects = self.apply_filters(bundle.request, applicable_filters)
+            return self.authorized_read_list(objects, bundle)
+        except ValueError:
+            msg = "Invalid resource lookup data provided (mismatched type)."
+            raise BadRequest(msg)
 
     def dispatch(self, request_type, request, **kwargs):
         """Overrides and replaces the the uuid in the end-point with pk."""
