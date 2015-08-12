@@ -38,6 +38,8 @@ class EnvironmentResource(CommonResource):
         # Update name if one is supplied:
         if 'name' in bundle.data:
             bundle.obj.name = bundle.data['name']
+        if 'uuid' in bundle.data:
+            bundle.obj.uuid = bundle.data['uuid']
         bundle.obj.save()
         return bundle
 

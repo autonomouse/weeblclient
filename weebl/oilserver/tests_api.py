@@ -53,6 +53,21 @@ class EnvironmentResourceTest(ResourceTests):
 
     def test_post_create_environment(self):
         """POST to create a new environment instance."""
+        uuid = utils.generate_uuid()
+        data = {'name': utils.generate_random_string(),
+                'uuid': uuid}
+        r_dict, status_code = self.post_create_instance(
+            'environment',
+            data=data)
+        new_obj = models.Environment.objects.filter(uuid=r_dict['uuid'])
+
+        self.assertIn('uuid', r_dict)
+        self.assertNotEqual(new_obj.count(), 0)
+        self.assertEqual(status_code, 201)
+        self.assertEqual(uuid, r_dict['uuid'])
+
+    def test_post_create_environment_with_uuid(self):
+        """POST to create a new environment instance."""
         r_dict, status_code = self.post_create_instance(
             'environment',
             data={'name': utils.generate_random_string()})
