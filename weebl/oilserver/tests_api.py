@@ -252,6 +252,17 @@ class JenkinsResourceTest(ResourceTests):
         self.assertTrue(r_dict2['internal_access_url'] == inturl)
         self.assertTrue(r_dict2['external_access_url'] == exturl)
 
+    def test_make_sure_service_statuses_are_obscured_upon_jenkins_get(self):
+        """A get on jenkins should not reveal the pk for service status."""
+        uuid, random_name = self.make_environment_and_jenkins()
+        response1 = self.api_client.get(
+            '/api/{}/jenkins/'.format(self.version), format='json')
+        r_dict1 = self.deserialize(response1)
+
+        first_object = r_dict1['objects'][0]
+        value = first_object.get('service_status').rstrip('/').split('/')[-1]
+        self.assertTrue(value in ['unknown', 'up', 'unstable', 'down'])
+
 
 class BuildExecutorTest(ResourceTests):
 
