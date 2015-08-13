@@ -45,12 +45,13 @@ class ResourceTests(ResourceTestCase):
         return env_uuid, env_name
 
     def make_build_executor(self, name=None, env_uuid=None):
-        if name is None:
-            name = utils.generate_random_string()
         if env_uuid is None:
             env_uuid, env_name = self.make_environment_and_jenkins()
-        data = {'name': name,
-                'jenkins': env_uuid}
+        if name is None:
+            data = {'jenkins': env_uuid}
+        else:
+            data = {'name': name,
+                    'jenkins': env_uuid}
         return self.post_create_instance('build_executor', data=data)
 
     def make_pipeline(self, build_executor=None):

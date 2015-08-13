@@ -172,6 +172,8 @@ class BuildExecutorResource(CommonResource):
 
         if 'name' in bundle.data:
             bundle.obj.name = bundle.data['name']
+        else:
+            bundle.obj.name = bundle.obj.uuid
         bundle.obj.save()
         return bundle
 

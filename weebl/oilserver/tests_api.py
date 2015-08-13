@@ -266,6 +266,12 @@ class BuildExecutorTest(ResourceTests):
         self.assertNotEqual(r_dict['uuid'], uuid)
         self.assertEqual(status_code, 201, msg="Incorrect status code")
 
+    def test_post_create_unnamed_build_executor(self):
+        uuid, name = self.make_environment_and_jenkins()
+        r_dict, status_code = self.make_build_executor(
+            env_uuid=uuid)
+        self.assertEqual(r_dict['name'], r_dict['uuid'])
+
     def test_get_all_build_executors(self):
         """GET all build_executor instances."""
         bex_dict = [self.make_build_executor() for _ in range(3)]
