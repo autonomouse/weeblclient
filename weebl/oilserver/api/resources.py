@@ -150,6 +150,7 @@ class JenkinsResource(CommonResource):
         replace_with = [('resource_uri', bundle.obj.environment.uuid),
                         ('environment', bundle.obj.environment.uuid),
                         ('service_status', bundle.obj.service_status.name), ]
+        bundle.data['uuid'] = bundle.obj.uuid
         return self.replace_bundle_item_with_alternative(bundle, replace_with)
 
 
