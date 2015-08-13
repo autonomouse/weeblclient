@@ -361,6 +361,36 @@ class BuildExecutorTest(ResourceTests):
         self.assertEqual(response.status_code, 200,
                          msg="Incorrect status code")
 
+    def test_post_cannot_make_two_build_executors_with_same_name(self):
+        shared_uuid, env_name1 = self.make_environment_and_jenkins()
+        shared_name = utils.generate_random_string()
+        try:
+            r_dict1, status_code = self.make_build_executor(
+                name=shared_name, env_uuid=shared_uuid)
+            r_dict2, status_code = self.make_build_executor(
+                name=shared_name, env_uuid=shared_uuid)
+            created_two_build_executors = True
+        except:
+            created_two_build_executors = False
+        msg = "Multiple build executors with same name created on same jenkins"
+        self.assertFalse(created_two_build_executors, msg=msg)
+
+    def test_build_executors_with_same_name_ok_if_different_jenkins(self):
+        uuid1, env_name1 = self.make_environment_and_jenkins()
+        uuid2, env_name2 = self.make_environment_and_jenkins()
+        shared_name = utils.generate_random_string()
+        try:
+            r_dict1, status_code = self.make_build_executor(
+                name=shared_name, env_uuid=uuid1)
+            r_dict2, status_code = self.make_build_executor(
+                name=shared_name, env_uuid=uuid2)
+            created_two_build_executors = True
+        except:
+            created_two_build_executors = False
+        msg = "Failed to create multiple build executors with the same name "
+        msg += "on different jenkins"
+        self.assertTrue(created_two_build_executors, msg=msg)
+
     def test_delete_build_executor(self):
         """DELETE an existing build_executor instance."""
         r_dict0, status_code = self.make_build_executor()
@@ -601,36 +631,6 @@ class BuildTest(ResourceTests):
         self.assertNotIn('pk', r_dict,
                          msg="Primary key is showing up in response")
         self.assertEqual(status_code, 201, msg="Incorrect status code")
-
-    def test_post_cannot_make_two_build_executors_with_same_name(self):
-        shared_uuid, env_name1 = self.make_environment_and_jenkins()
-        shared_name = utils.generate_random_string()
-        try:
-            r_dict1, status_code = self.make_build_executor(
-                name=shared_name, env_uuid=shared_uuid)
-            r_dict2, status_code = self.make_build_executor(
-                name=shared_name, env_uuid=shared_uuid)
-            created_two_build_executors = True
-        except:
-            created_two_build_executors = False
-        msg = "Multiple build executors with same name created on same jenkins"
-        self.assertFalse(created_two_build_executors, msg=msg)
-
-    def test_build_executors_with_same_name_ok_if_different_jenkins(self):
-        uuid1, env_name1 = self.make_environment_and_jenkins()
-        uuid2, env_name2 = self.make_environment_and_jenkins()
-        shared_name = utils.generate_random_string()
-        try:
-            r_dict1, status_code = self.make_build_executor(
-                name=shared_name, env_uuid=uuid1)
-            r_dict2, status_code = self.make_build_executor(
-                name=shared_name, env_uuid=uuid2)
-            created_two_build_executors = True
-        except:
-            created_two_build_executors = False
-        msg = "Failed to create multiple build executors with the same name "
-        msg += "on different jenkins"
-        self.assertTrue(created_two_build_executors, msg=msg)
 
     def test_put_update_existing_builds(self):
         """PUT to update an existing environment instance."""
