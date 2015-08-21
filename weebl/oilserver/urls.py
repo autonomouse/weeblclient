@@ -1,7 +1,6 @@
 from django.conf.urls import patterns, url
 from oilserver import views
 
-
 end = '$'
 catch_all = r'^'
 job_path = r'job/(?P<job>\S+)/'

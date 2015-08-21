@@ -151,7 +151,6 @@ class BuildExecutor(models.Model):
         null=False,
         help_text="UUID of the jenkins build executor.")
     name = models.CharField(
-        unique=False,
         max_length=255,
         default=uuid.default,
         help_text="Name of the jenkins build executor.")
@@ -163,6 +162,9 @@ class BuildExecutor(models.Model):
         # within the same environment/jenkins, they will only be unique when
         # combined with the environment/jenkins uuid, externally:
         unique_together = (('name', 'jenkins'),)
+        
+        # Order the build executors so they are printed in alphabetical order:
+        ordering = ['name']
 
     def __str__(self):
         return self.uuid
@@ -249,10 +251,10 @@ class Build(models.Model):
         null=True,
         help_text="DateTime the build finished.")
     build_analysed_at = models.DateTimeField(
-        default=utils.time_now,
-        auto_now_add=True,
+        default=None,
         blank=True,
-        help_text="DateTime the build was analysed by weebl.")
+        null=True,
+        help_text="DateTime build analysed by weebl, or None if unanalysed.")
     pipeline = models.ForeignKey(Pipeline)
     build_status = models.ForeignKey(BuildStatus)
     job_type = models.ForeignKey(JobType)

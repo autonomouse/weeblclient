@@ -55,9 +55,9 @@ class EnvironmentResource(CommonResource):
 
     def prepend_urls(self):
         # Create "by_name" as a new end-point:
-        end_point = "by_name"
-        name_regex = "(?P<name>\w[\w/-]*)"
         resource_regex = "P<resource_name>{})".format(self._meta.resource_name)
+        name_regex = "(?P<name>\w[\w/-]*)"
+        end_point = "by_name"
         new_url = r"^(?{}/{}/{}{}$".format(resource_regex, end_point,
                                            name_regex, trailing_slash())
         return [url(new_url,
@@ -249,6 +249,8 @@ class PipelineResource(CommonResource):
     def obj_create(self, bundle, request=None, **kwargs):
         bundle.obj.build_executor = models.BuildExecutor.objects.get(
             uuid=bundle.data['build_executor'])
+        if 'pipeline' in bundle.data:
+            bundle.obj.uuid = bundle.data['pipeline']
         bundle.obj.save()
         return bundle
 
@@ -335,7 +337,7 @@ class BuildResource(CommonResource):
             bundle.obj.build_started_at = bundle.data['build_started_at']
         if 'build_finished_at' in bundle.data:
             bundle.obj.build_finished_at = bundle.data['build_finished_at']
-
+        bundle.obj.build_analysed_at = utils.time_now()
         # Link to Jenkins, but in the future, consider changing this to S3:
         jenkins_ext_url =\
             bundle.obj.pipeline.build_executor.jenkins.external_access_url

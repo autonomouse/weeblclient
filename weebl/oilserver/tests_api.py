@@ -5,6 +5,7 @@ import random
 from common_test_methods import ResourceTests
 from oilserver import models
 from freezegun import freeze_time
+from django.db.utils import IntegrityError
 
 
 class EnvironmentResourceTest(ResourceTests):
@@ -364,17 +365,12 @@ class BuildExecutorTest(ResourceTests):
     def test_post_cannot_make_two_build_executors_with_same_name(self):
         shared_uuid, env_name1 = self.make_environment_and_jenkins()
         shared_name = utils.generate_random_string()
-        try:
-            r_dict1, status_code = self.make_build_executor(
-                name=shared_name, env_uuid=shared_uuid)
+        r_dict1, status_code = self.make_build_executor(
+            name=shared_name, env_uuid=shared_uuid)
+        with self.assertRaises(IntegrityError):
             r_dict2, status_code = self.make_build_executor(
                 name=shared_name, env_uuid=shared_uuid)
-            created_two_build_executors = True
-        except:
-            created_two_build_executors = False
-        msg = "Multiple build executors with same name created on same jenkins"
-        self.assertFalse(created_two_build_executors, msg=msg)
-
+        
     def test_build_executors_with_same_name_ok_if_different_jenkins(self):
         uuid1, env_name1 = self.make_environment_and_jenkins()
         uuid2, env_name2 = self.make_environment_and_jenkins()
@@ -390,6 +386,8 @@ class BuildExecutorTest(ResourceTests):
         msg = "Failed to create multiple build executors with the same name "
         msg += "on different jenkins"
         self.assertTrue(created_two_build_executors, msg=msg)
+        self.assertEqual(r_dict1.get('name'), r_dict2.get('name'))
+        self.assertNotEqual(r_dict1.get('jenkins'), r_dict2.get('jenkins'))
 
     def test_delete_build_executor(self):
         """DELETE an existing build_executor instance."""
@@ -407,7 +405,7 @@ class BuildExecutorTest(ResourceTests):
 
 class PipelineTest(ResourceTests):
 
-    def test_post_create_build_executor(self):
+    def test_post_create_pipeline(self):
         build_executor = self.make_build_executor()[0]['uuid']
         before = str(models.Pipeline.objects.all()) != '[]'
         self.assertFalse(before)
@@ -444,6 +442,23 @@ class PipelineTest(ResourceTests):
         r_dict1 = self.deserialize(response)
 
         self.assertEqual(pipeline_id, r_dict1['uuid'])
+        self.assertEqual(response.status_code, 200,
+                         msg="Incorrect status code")
+
+    def test_get_specific_pipeline_matches_uuid(self):
+        """GET a specific pipeline instance by its UUID."""
+        pl = utils.generate_uuid()
+        r_dict0, status_code = self.make_pipeline(pipeline=pl)
+        pipeline_id = r_dict0['uuid']
+        response = self.api_client.get('/api/{}/pipeline/{}/'
+                                       .format(self.version, pipeline_id),
+                                       format='json')
+        r_dict1 = self.deserialize(response)
+
+        self.assertEqual(pipeline_id, pl,
+                         msg="Returned pipeline does not match given pipeline")
+        self.assertEqual(pipeline_id, r_dict1['uuid'],
+                         msg="Returned pipeline does not match url pipeline")
         self.assertEqual(response.status_code, 200,
                          msg="Incorrect status code")
 
@@ -577,6 +592,7 @@ class BuildTest(ResourceTests):
 
         r_dict, status_code = self.post_create_instance(
             'build', data=data)
+
         recently_analysed = utils.time_difference_less_than_x_mins(
             r_dict['build_analysed_at'], 1)
         self.assertTrue(recently_analysed,

@@ -45,11 +45,15 @@ def time_difference_less_than_x_mins(timestamp, minutes):
     return time_since(timestamp) < timedelta(minutes=minutes)
 
 
-def uuid_check(uuid):
+def uuid_re_pattern():
     opt = "A-Fa-f0-9"
-    uuid_pattern = "^[" + opt + "]{8}-?[" + opt + "]{4}-?[" + opt + "]{4}-?["
+    uuid_pattern = "[" + opt + "]{8}-?[" + opt + "]{4}-?[" + opt + "]{4}-?["
     uuid_pattern += opt + "]{4}-?[" + opt + "]{12}"
-    regex = re.compile(uuid_pattern, re.I)
+    return uuid_pattern
+
+
+def uuid_check(uuid):
+    regex = re.compile("^" + uuid_re_pattern(), re.I)
     match = regex.match(uuid)
     return bool(match)
 

@@ -92,3 +92,5 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'oilserver', 'static')
 
 TASTYPIE_DEFAULT_FORMATS = ['json']
+
+API_LIMIT_PER_PAGE = 0
