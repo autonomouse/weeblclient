@@ -210,7 +210,7 @@ class JenkinsResourceTest(ResourceTests):
         returned_uuid = r_dict1['uuid']
         self.assertTrue(uuid == returned_uuid)
 
-        # Update status via PUT request (check in):
+        # Update status via PUT request (check-in):
         response2 = self.api_client.put(
             '/api/{}/jenkins/{}/'.format(self.version, returned_uuid),
             data={},
@@ -218,7 +218,10 @@ class JenkinsResourceTest(ResourceTests):
         r_dict2 = self.deserialize(response2)
         timestamp = r_dict2['service_status_updated_at']
 
-        self.assertTrue(utils.uuid_check(returned_uuid))
+        self.assertTrue(utils.uuid_check(returned_uuid),
+                        "Did not return a UUID")
+        self.assertNotIn("pk", r_dict2,
+                         "A primary key was returned along with the check-in")
         self.assertEqual(response2.status_code, 200)
         lt_than_1_min = utils.time_difference_less_than_x_mins(timestamp, 1)
         self.assertTrue(lt_than_1_min)
@@ -370,7 +373,7 @@ class BuildExecutorTest(ResourceTests):
         with self.assertRaises(IntegrityError):
             r_dict2, status_code = self.make_build_executor(
                 name=shared_name, env_uuid=shared_uuid)
-        
+
     def test_build_executors_with_same_name_ok_if_different_jenkins(self):
         uuid1, env_name1 = self.make_environment_and_jenkins()
         uuid2, env_name2 = self.make_environment_and_jenkins()

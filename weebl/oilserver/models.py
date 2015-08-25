@@ -162,7 +162,7 @@ class BuildExecutor(models.Model):
         # within the same environment/jenkins, they will only be unique when
         # combined with the environment/jenkins uuid, externally:
         unique_together = (('name', 'jenkins'),)
-        
+
         # Order the build executors so they are printed in alphabetical order:
         ordering = ['name']
 

@@ -107,6 +107,10 @@ class JenkinsResource(CommonResource):
         always_return_data = True
 
     def hydrate(self, bundle):
+        fields_to_remove = ['uuid', 'pk']
+        # Hide database structure details by obscuring the primary key.
+        # Also, the UUID field is read-only, so don't allow user to change it.
+        bundle.data = utils.pop(bundle.data, fields_to_remove)
         # Update timestamp (also prevents user submitting timestamp data):
         bundle.data['service_status_updated_at'] = utils.time_now()
         return bundle
