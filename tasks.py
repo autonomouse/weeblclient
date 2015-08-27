@@ -93,11 +93,11 @@ def destroy(database):
 def backup_database(database):
     """Backs up database to file."""
     timestamp = datetime.now().strftime("%Y_%m_%d__%H_%M_%S")
-    backup_to = "DB_backup_{}.json".format(timestamp)
+    backup_to = "Database_backup__{}__{}.json".format(database, timestamp)
     try:
         run("{}/manage.py dumpdata > {}".format(application, backup_to))
     except:
-        print("Could not back up database - aborting")
+        print("Could not back up {} database - aborting".format(application))
         return
     return backup_to
 
