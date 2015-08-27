@@ -12,8 +12,11 @@
     </ul>
     {% for key, environment in env.items %}   
     <ul>
-        <li>{{ environment.name }}</li>
-        <li><span style="color:{{ environment.state_colour }}">{{ environment.state }}</span></li>
+        <li><a href="{% static '/environment/' %}{{ environment.uuid }}/" title="{{ environment.uuid }}">{{ environment.name }}</a></li>
+        <li><span style="color:{{ environment.state_colour }}" 
+                  title="{% for msg in environment.state_description %}{{ msg }}{% if environment.state_description|length != forloop.counter %},{% endif %}{% endfor %}">
+            {{ environment.state }}
+        </span></li>
         <li><span style="color:{{ environment.tframe.overall_colour }}">{{ environment.tframe.success_rate }}% </span></li>
         <li><span style="color:{{ environment.tframe.job_success_rate_col.pipeline_deploy }}">{{ environment.tframe.job_success_rates.pipeline_deploy }}% </span></li>
         <li><span style="color:{{ environment.tframe.job_success_rate_col.pipeline_prepare }}">{{ environment.tframe.job_success_rates.pipeline_prepare }}% </span></li>

@@ -1,0 +1,6 @@
+doberman (0.2.0) precise; urgency=low
+
+  * Added Environment and BuildExecutor Models, API and tests
+  * Added a changelog
+
+ -- Darren Hoyland <darren.hoyland@canonical.com>  Thu, 27 Aug 2015 09:35:31 +0100

@@ -8,12 +8,15 @@ current_site = Site.objects.get_current().id
 settings = models.WeeblSetting.objects.get(pk=current_site)
 
 
-def generate_generic_data_dict(title, time_range, environments):
+def generate_generic_data_dict(title, environments, time_range=None):
     data = {}
     data['title'] = title
-    data['time_range'] = time_range
+    if time_range:
+        data['time_range'] = time_range
     data['settings'] = settings
     data['env'] = {}
+    data['build_executors'] = {}
+    data['jenkins'] = {}
     for environment in environments:
         data['env'][environment.name] = environment
     return data
@@ -21,8 +24,9 @@ def generate_generic_data_dict(title, time_range, environments):
 
 def main_page(request, time_range='daily'):
     # Show (daily?) results and limit the number of bugs to the top ten:
-    data = generate_generic_data_dict('Weebl - Main Page', time_range,
-                                      models.Environment.objects.all())
+    data = generate_generic_data_dict('Weebl - Main Page',
+                                      models.Environment.objects.all(),
+                                      time_range)
     return render(request, 'page_main.html', data)
 
 
@@ -36,8 +40,8 @@ def job_specific_bugs_list(request, job, time_range='daily',
         environments = models.Environment.objects.all()
     else:
         environments = [models.Environment.objects.get(name=specific_env)]
-    data = generate_generic_data_dict('Job Specific Bugs List', time_range,
-                                      environments)
+    data = generate_generic_data_dict('Job Specific Bugs List',
+                                      environments, time_range)
     data['job'] = job
     return render(request, 'page_job_specific_bugs_list.html', data)
 
@@ -61,3 +65,13 @@ def settings_page(request):
             data['updated'] = False
     data['form'] = form
     return render(request, 'page_settings.html', data)
+
+
+def environment_page(request, uuid):
+    env = models.Environment.objects.get(uuid=uuid)
+    data = generate_generic_data_dict('Weebl - Environment', [env])
+    data['title'] = 'Weebl - Environment: {}'.format(env.name)
+    if hasattr(env, 'jenkins'):
+        data['build_executors'] = env.jenkins.buildexecutor_set.values()
+        data['jenkins'] = env.jenkins
+    return render(request, 'page_environment.html', data)
