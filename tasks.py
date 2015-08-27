@@ -5,6 +5,7 @@ import sys
 import psycopg2
 import psutil
 from invoke import task, run
+from datetime import datetime
 
 application = 'weebl'
 preamble = "WEEBL_ROOT=`pwd` PYTHONPATH=$PYTHONPATH:`pwd`"
@@ -190,14 +191,28 @@ def check_if_database_exists(database, pwd):
             exists = True
     return exists
 
-def destroy_db(database, pwd):
+def destroy_db(database, pwd, backup=True):
+    # Backup database:
+    timestamp = datetime.now().strftime("%Y_%m_%d__%H_%M_%S")
+    backup_to = "DB_backup_{}.json".format(timestamp)
+    if backup:
+        try: 
+            run("{}/manage.py dumpdata > {}".format(application, backup_to))
+        except:
+            print("Could not back up database - aborting")
+            return        
+
+    # Drop the database:
     sql = "DROP DATABASE IF EXISTS {}".format(database)
     db_cxn(sql, pwd)
     succeeded = not check_if_database_exists(database, pwd)
     if succeeded is False:
         print("Problem destroying database: {}".format(database))
     elif succeeded is True:
-        print("Database: {} destroyed".format(database))
+        msg = "Database: {} destroyed.".format(database)
+        if backup:
+            msg += "Data backed up to {}".format(backup_to)
+        print(msg)
 
 def destroy_user(user, pwd):
     sql = "DROP USER IF EXISTS {}".format(user)
