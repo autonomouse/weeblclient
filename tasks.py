@@ -89,6 +89,18 @@ def destroy(database):
     elif database == "test":
         destroy_test_data()
 
+@task(help={'database': "Type test or production"})
+def backup_database(database):
+    """Backs up database to file."""
+    timestamp = datetime.now().strftime("%Y_%m_%d__%H_%M_%S")
+    backup_to = "DB_backup_{}.json".format(timestamp)
+    try:
+        run("{}/manage.py dumpdata > {}".format(application, backup_to))
+    except:
+        print("Could not back up database - aborting")
+        return
+    return backup_to
+
 def initialise_database(database):
     if database == "production":
         stngs = prdctn_settings
@@ -125,8 +137,6 @@ def destroy_test_data():
         destroy_user(test_user, test_pwd)
 
 def destroy_production_data():
-
-    # TODO: Offer to back up the database first!!!
 
     rusure1 = "You want to drop the PRODUCTION database (y/N)"
     rusure1 += " - are you absolutely sure about that?! (y/N)"
@@ -192,15 +202,8 @@ def check_if_database_exists(database, pwd):
     return exists
 
 def destroy_db(database, pwd, backup=True):
-    # Backup database:
-    timestamp = datetime.now().strftime("%Y_%m_%d__%H_%M_%S")
-    backup_to = "DB_backup_{}.json".format(timestamp)
     if backup:
-        try: 
-            run("{}/manage.py dumpdata > {}".format(application, backup_to))
-        except:
-            print("Could not back up database - aborting")
-            return        
+        backup_to = backup_database(database)
 
     # Drop the database:
     sql = "DROP DATABASE IF EXISTS {}".format(database)
@@ -210,7 +213,7 @@ def destroy_db(database, pwd, backup=True):
         print("Problem destroying database: {}".format(database))
     elif succeeded is True:
         msg = "Database: {} destroyed.".format(database)
-        if backup:
+        if backup and backup_to:
             msg += "Data backed up to {}".format(backup_to)
         print(msg)
 
