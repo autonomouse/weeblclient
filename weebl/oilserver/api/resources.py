@@ -7,6 +7,7 @@ from tastypie.utils import trailing_slash
 from django.conf.urls import url
 from oilserver import models
 from tastypie.exceptions import BadRequest
+from exceptions import NonUserEditableError
 
 
 class CommonResource(ModelResource):
@@ -22,6 +23,15 @@ class CommonResource(ModelResource):
                     os.path.dirname(bundle.data[replace_this].rstrip('/'))
             bundle.data[replace_this] = "{}/{}/".format(replace_me, with_this)
         return bundle
+
+    def raise_error_if_in_bundle(self, bundle, error_if_fields):
+        bad_fields = []
+        for field in error_if_fields:
+            if field in bundle.data:
+                bad_fields.append(field)
+        if bad_fields:
+            msg = "Cannot edit field(s): {}".format(", ".join(bad_fields))
+            raise NonUserEditableError(msg)
 
 
 class EnvironmentResource(CommonResource):
@@ -371,5 +381,45 @@ class BuildResource(CommonResource):
 
     def hydrate(self, bundle):
         fields_to_remove = ['uuid', 'pk', 'build_analysed_at']
+        bundle.data = utils.pop(bundle.data, fields_to_remove)
+        return bundle
+
+
+class TargetFileGlobResource(CommonResource):
+
+    class Meta:
+        resource_name = 'target_file_glob'
+        queryset = models.TargetFileGlob.objects.all()
+        list_allowed_methods = ['get', 'post', 'put', 'delete']  # all items
+        detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
+        fields = ['glob_pattern']
+        authorization = Authorization()
+        always_return_data = True
+
+    def obj_create(self, bundle, request=None, **kwargs):
+        bundle.obj.glob_pattern = bundle.data['glob_pattern']
+        bundle.obj.save()
+        return bundle
+
+    def dispatch(self, request_type, request, **kwargs):
+        """Overrides and replaces the the uuid in the end-point with pk."""
+        if 'pk' in kwargs:
+            glob_pattern = kwargs['pk']  # As end-point is glob_pattern not pk
+            if models.TargetFileGlob.objects.filter(glob_pattern=glob_pattern
+                                                    ).exists():
+                target_file_glob = models.TargetFileGlob.objects.get(
+                    glob_pattern=glob_pattern)
+                kwargs['pk'] = target_file_glob.pk
+                # TODO: else return and error code
+        return super(TargetFileGlobResource, self).dispatch(request_type,
+                                                            request, **kwargs)
+
+    def dehydrate(self, bundle):
+        replace_with = [('resource_uri', bundle.obj.glob_pattern), ]
+        return self.replace_bundle_item_with_alternative(bundle, replace_with)
+
+    def hydrate(self, bundle):
+        fields_to_remove = ['pk']
+        # Hide database structure details by obscuring the primary key.
         bundle.data = utils.pop(bundle.data, fields_to_remove)
         return bundle

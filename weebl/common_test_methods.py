@@ -75,3 +75,8 @@ class ResourceTests(ResourceTestCase):
                 'build_status': build_status,
                 'job_type': job_type}
         return self.post_create_instance('build', data=data)
+
+    def make_target_file_glob(self):
+        name = utils.generate_random_string()
+        data = {'glob_pattern': name}
+        return self.post_create_instance('target_file_glob', data=data)

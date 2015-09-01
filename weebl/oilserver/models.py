@@ -261,3 +261,13 @@ class Build(models.Model):
 
     def __str__(self):
         return self.uuid
+
+
+class TargetFileGlob(models.Model):
+    """The target file."""
+    glob_pattern = models.TextField(
+        unique=True,
+        help_text="Glob pattern used to match one or more target files.")
+
+    def __str__(self):
+        return self.glob_pattern

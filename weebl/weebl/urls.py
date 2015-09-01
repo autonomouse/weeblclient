@@ -13,6 +13,7 @@ v_api.register(resources.PipelineResource())
 v_api.register(resources.BuildStatusResource())
 v_api.register(resources.JobTypeResource())
 v_api.register(resources.BuildResource())
+v_api.register(resources.TargetFileGlobResource())
 
 urlpatterns = patterns('',
                        url(r'^', include('oilserver.urls')),

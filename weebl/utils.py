@@ -2,7 +2,7 @@ import re
 import pytz
 import string
 import random
-from datetime import timedelta
+from datetime import datetime, timedelta
 from dateutil import parser
 from django.utils import timezone
 from uuid import uuid4
@@ -30,14 +30,37 @@ def generate_random_url(n=10):
     return "http://www.{}.com".format(generate_random_string(n))
 
 
-def time_since(timestamp):
+def generate_random_date(limit_seconds=5000000000, when="any"):
+    delta = timedelta(seconds=random.randint(0, limit_seconds))
+    if when.lower() == "any":
+        if random.randint(0, 9) % 2:
+            when = "future"
+        else:
+            when = "past"
+    if when.lower() == "future":
+        timestamp = datetime.now() + delta
+    else:
+        timestamp = datetime.now() - delta
+    return timestamp
+
+
+def timestamp_as_string(timestamp, ts_format='%a %d %b %y %H:%M:%S'):
+    timestamp_dt = normalise_timestamp(timestamp)
+    return timestamp_dt.strftime(ts_format)
+
+
+def normalise_timestamp(timestamp):
     if timestamp is None:
         return
 
     if type(timestamp) is str:
-        timestamp_dt = parser.parse(timestamp)
+        return parser.parse(timestamp)
     else:
-        timestamp_dt = timestamp.replace(tzinfo=None)
+        return timestamp.replace(tzinfo=None)
+
+
+def time_since(timestamp):
+    timestamp_dt = normalise_timestamp(timestamp)
     return timezone.now() - pytz.utc.localize(timestamp_dt)
 
 

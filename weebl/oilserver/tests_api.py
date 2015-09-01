@@ -652,7 +652,7 @@ class BuildTest(ResourceTests):
         self.assertEqual(status_code, 201, msg="Incorrect status code")
 
     def test_put_update_existing_builds(self):
-        """PUT to update an existing environment instance."""
+        """PUT to update an existing build instance."""
         r_dict, status_code = self.make_build()
         original_build_id = r_dict['build_id']
         before = models.Build.objects.filter(
@@ -754,3 +754,100 @@ class BuildTest(ResourceTests):
         first_object = r_dict1['objects'][0]
         value = first_object.get('build_status').rstrip('/').split('/')[-1]
         self.assertTrue(value in ['unknown', 'success', 'failure', 'aborted'])
+
+
+class TargetFileGlobResourceTest(ResourceTests):
+
+    def test_get_method_is_allowed(self):
+        """Validate that user can GET target_file_glob model."""
+        response = self.api_client.get(
+            '/api/{}/target_file_glob/'.format(self.version))
+        r_dict = self.deserialize(response)
+
+        self.assertEqual(response.status_code, 200,
+                         msg="Incorrect status code")
+
+        for idx, tfiles in enumerate(r_dict['objects']):
+            self.assertNotIn('pk', tfiles)
+            self.assertIn('name', tfiles)
+
+    def test_post_create_target_file_glob(self):
+        before = str(models.TargetFileGlob.objects.all()) != '[]'
+        self.assertFalse(before)
+        r_dict, status_code = self.make_target_file_glob()
+        after = str(models.TargetFileGlob.objects.all()) != '[]'
+        self.assertTrue(after)
+
+        self.assertIn('glob_pattern', r_dict)
+        self.assertNotIn('pk', r_dict)
+        self.assertEqual(status_code, 201, msg="Incorrect status code")
+
+    def test_get_all_target_file_globs(self):
+        """GET all target_file_glob instances."""
+        pl_dict = []
+        for _ in range(3):
+            pl_dict.append(self.make_target_file_glob())
+        response = self.api_client.get('/api/{}/target_file_glob/'
+                                       .format(self.version), format='json')
+        r_dict = self.deserialize(response)
+        objects = r_dict['objects']
+
+        self.assertEqual(response.status_code, 200,
+                         msg="Incorrect status code")
+        for idx, pl in enumerate(pl_dict):
+            self.assertIn(pl[0]['glob_pattern'], objects[idx]['glob_pattern'])
+
+    def test_get_specific_target_file_glob(self):
+        """GET a specific target_file_glob instance by its UUID."""
+        r_dict0, status_code = self.make_target_file_glob()
+        target_file_glob_name = r_dict0['glob_pattern']
+        response = self.api_client.get(
+            '/api/{}/target_file_glob/{}/'.format(
+                self.version, target_file_glob_name), format='json')
+        r_dict1 = self.deserialize(response)
+
+        self.assertEqual(target_file_glob_name, r_dict1['glob_pattern'])
+        self.assertEqual(response.status_code, 200,
+                         msg="Incorrect status code")
+
+    def test_put_update_existing_target_file_globs(self):
+        """PUT to update an existing target_file_glob instance."""
+        r_dict, status_code = self.make_target_file_glob()
+        original_glob_pattern = r_dict['glob_pattern']
+        before = models.TargetFileGlob.objects.filter(
+            glob_pattern=original_glob_pattern).exists()
+        self.assertTrue(before, msg="Glob pattern already exists")
+        updated_glob_pattern = 'NewNameWithADot.txt'
+        data = {'glob_pattern': updated_glob_pattern}
+        response = self.api_client.put('/api/{}/target_file_glob/{}/'.format(
+            self.version, r_dict['glob_pattern']), data=data)
+        after_orig = models.TargetFileGlob.objects.filter(
+            glob_pattern=original_glob_pattern).exists()
+        self.assertFalse(after_orig)
+        after = models.TargetFileGlob.objects.filter(
+            glob_pattern=updated_glob_pattern).exists()
+        self.assertTrue(after, msg="Glob pattern has not been updated")
+
+        new_r_dict = self.deserialize(response)
+        self.assertNotEqual(original_glob_pattern, new_r_dict['glob_pattern'],
+                            msg="Response glob pattern different to original")
+        self.assertEqual(updated_glob_pattern, new_r_dict['glob_pattern'],
+                         msg="Glob pattern has not been updated")
+        self.assertEqual(response.status_code, 200,
+                         msg="Incorrect status code")
+
+    def test_delete_target_file_glob(self):
+        """DELETE an existing target_file_glob instance."""
+        r_dict0, status_code = self.make_target_file_glob()
+        target_file_glob_name = r_dict0['glob_pattern']
+
+        self.assertTrue(models.TargetFileGlob.objects.filter(
+            glob_pattern=target_file_glob_name).count() > 0)
+        response = self.api_client.delete(
+            '/api/{}/target_file_glob/{}/'.format(
+                self.version, target_file_glob_name), format='json')
+
+        non_obj = models.TargetFileGlob.objects.filter(
+            glob_pattern=target_file_glob_name)
+        self.assertEqual(non_obj.count(), 0)
+        self.assertEqual(response.status_code, 204)
