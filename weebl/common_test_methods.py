@@ -80,3 +80,12 @@ class ResourceTests(ResourceTestCase):
         name = utils.generate_random_string()
         data = {'glob_pattern': name}
         return self.post_create_instance('target_file_glob', data=data)
+
+    def make_known_bug_regex(self, target_file_globs=None):
+        if target_file_globs is None:
+            x = random.randint(2, 9)
+            target_file_globs = [utils.generate_random_string() for _ in
+                                 range(x)]
+        data = {"target_file_globs": target_file_globs,
+                "regex": utils.generate_random_string()}
+        return self.post_create_instance('known_bug_regex', data=data)

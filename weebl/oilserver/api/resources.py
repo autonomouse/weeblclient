@@ -423,3 +423,69 @@ class TargetFileGlobResource(CommonResource):
         # Hide database structure details by obscuring the primary key.
         bundle.data = utils.pop(bundle.data, fields_to_remove)
         return bundle
+
+
+class KnownBugRegexResource(CommonResource):
+
+    class Meta:
+        resource_name = 'known_bug_regex'
+        queryset = models.KnownBugRegex.objects.all()
+        list_allowed_methods = ['get', 'post', 'put', 'delete']  # all items
+        detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
+        fields = ['uuid', 'regex', 'target_file_globs',
+                  'model_creation_datetime', 'model_last_edited_at']
+        authorization = Authorization()
+        always_return_data = True
+
+    def obj_create(self, bundle, request=None, **kwargs):
+        bundle.obj.regex = bundle.data['regex']
+        timenow = utils.time_now()
+        bundle.obj.model_creation_datetime = timenow
+        bundle.obj.model_last_edited_at = timenow
+        bundle.obj.save()
+
+        # Specify target globs:
+        globs = bundle.data.get('target_file_globs', [])
+        target_file_globs = [globs] if type(globs) != list else globs
+        glob_patterns = []
+        for globule in target_file_globs:
+            if models.TargetFileGlob.objects.filter(glob_pattern=globule
+                                                    ).exists():
+                target_file = models.TargetFileGlob.objects.get(
+                    glob_pattern=globule)
+            else:
+                # Create target file if doesn't exist:
+                target_file = models.TargetFileGlob()
+                target_file.glob_pattern = globule
+                target_file.save()
+            glob_patterns.append(target_file)
+        bundle.obj.target_file_globs = glob_patterns
+        bundle.obj.save()
+        return bundle
+
+    def dispatch(self, request_type, request, **kwargs):
+        """Overrides and replaces the the uuid in the end-point with pk."""
+        if 'pk' in kwargs:
+            uuid = kwargs['pk']  # Because end-point is the UUID not pk really
+            if models.KnownBugRegex.objects.filter(uuid=uuid).exists():
+                known_bug_regex = models.KnownBugRegex.objects.get(uuid=uuid)
+                kwargs['pk'] = known_bug_regex.pk
+                # TODO: else return and error code
+        return super(KnownBugRegexResource, self).dispatch(
+            request_type, request, **kwargs)
+
+    def dehydrate(self, bundle):
+        if bundle.request.method in ['POST', 'PUT']:
+            obj = models.KnownBugRegex.objects.get(uuid=bundle.obj.uuid)
+            obj.model_last_edited_at = utils.time_now()
+            obj.save()
+        replace_with = [('resource_uri', bundle.obj.uuid), ]
+        return self.replace_bundle_item_with_alternative(bundle, replace_with)
+
+    def hydrate(self, bundle):
+        error_if_fields = ['model_creation_datetime',
+                           'model_last_edited_at']
+        self.raise_error_if_in_bundle(bundle, error_if_fields)
+        fields_to_remove = ['uuid', 'pk']
+        bundle.data = utils.pop(bundle.data, fields_to_remove)
+        return bundle

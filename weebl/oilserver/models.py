@@ -5,8 +5,25 @@ from oilserver.status_checker import StatusChecker
 from weebl.__init__ import __api_version__
 
 
+class BaseModel(models.Model):
+    """Base model with timestamp information that is common to many models.
+    Please note that not all models will inherit from this base model. In
+    particular, any that are part of the initial fixtures file do not
+    (weeblsetting, servicestatus, buildstatus, and jobtype).
+    """
+    model_creation_datetime = models.DateTimeField(
+        default=None,
+        blank=True,
+        null=True,
+        help_text="DateTime this model instance was created.")
+    model_last_edited_at = models.DateTimeField(
+        default=utils.time_now,
+        auto_now_add=True,
+        help_text="DateTime this model instance was last updated.")
+
+
 class WeeblSetting(models.Model):
-    """Settings for Weebl"""
+    """Settings for Weebl."""
     site = models.OneToOneField(
         Site,
         unique=True,
@@ -271,3 +288,22 @@ class TargetFileGlob(models.Model):
 
     def __str__(self):
         return self.glob_pattern
+
+
+class KnownBugRegex(BaseModel, models.Model):
+    """The regex used to identify an error."""
+    uuid = models.CharField(
+        max_length=36,
+        default=utils.generate_uuid,
+        unique=True,
+        blank=False,
+        null=False,
+        help_text="UUID of this pattern.")
+    # regex must be unique, but it can be set to multiple target files:
+    regex = models.TextField(
+        unique=True,
+        help_text="The regular expression used to identify a bug occurrence.")
+    target_file_globs = models.ManyToManyField(TargetFileGlob)
+
+    def __str__(self):
+        return self.uuid

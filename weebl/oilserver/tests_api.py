@@ -6,6 +6,7 @@ from common_test_methods import ResourceTests
 from oilserver import models
 from freezegun import freeze_time
 from django.db.utils import IntegrityError
+from exceptions import NonUserEditableError
 
 
 class EnvironmentResourceTest(ResourceTests):
@@ -767,9 +768,9 @@ class TargetFileGlobResourceTest(ResourceTests):
         self.assertEqual(response.status_code, 200,
                          msg="Incorrect status code")
 
-        for idx, tfiles in enumerate(r_dict['objects']):
-            self.assertNotIn('pk', tfiles)
-            self.assertIn('name', tfiles)
+        for idx, globs in enumerate(r_dict['objects']):
+            self.assertNotIn('pk', globs)
+            self.assertIn('name', globs)
 
     def test_post_create_target_file_glob(self):
         before = str(models.TargetFileGlob.objects.all()) != '[]'
@@ -851,3 +852,218 @@ class TargetFileGlobResourceTest(ResourceTests):
             glob_pattern=target_file_glob_name)
         self.assertEqual(non_obj.count(), 0)
         self.assertEqual(response.status_code, 204)
+
+
+class KnownBugRegexResourceTest(ResourceTests):
+
+    def setUp(self):
+        super(KnownBugRegexResourceTest, self).setUp()
+
+    def test_post_create_pattern_makes_new_target_file_globs(self):
+        new_files = [utils.generate_random_string() for _ in range(3)]
+
+        # Target files should not exist before create pattern call is made:
+        target_file_globs_before = [xxx.file_name for xxx in
+                                    models.TargetFileGlob.objects.all()]
+        for new_file in new_files:
+            self.assertNotIn(new_file, target_file_globs_before)
+
+        # Create KnownBugRegex
+        data = {"target_file_globs": new_files,
+                "regex": utils.generate_random_string()}
+        r_dict, status_code = self.post_create_instance(
+            'known_bug_regex', data=data)
+
+        # Target files should exist after create pattern call is made:
+        target_file_globs_after = [tfglob.glob_pattern for tfglob in
+                                   models.TargetFileGlob.objects.all()]
+        for new_file in new_files:
+            self.assertIn(new_file, target_file_globs_after)
+
+    def test_post_create_pattern_logs_time_correctly(self):
+        data = {"target_file_globs": "console.txt",
+                "regex": "abcd"}
+
+        with freeze_time("Jan 1 2000 00:00:00"):
+            timestamp = utils.time_now()
+            r_dict, status_code = self.post_create_instance(
+                'known_bug_regex', data=data)
+
+        ts1 = utils.timestamp_as_string(timestamp)
+        ts2 = utils.timestamp_as_string(r_dict['model_creation_datetime'])
+        ts3 = utils.timestamp_as_string(r_dict['model_last_edited_at'])
+
+        self.assertEqual(ts1, ts2, msg="Incorrect creation datetime")
+        self.assertEqual(ts1, ts3, msg="Incorrect last_edited datetime")
+        self.assertEqual(status_code, 201, msg="Incorrect status code")
+
+    def test_post_create_pattern_model_with_no_target_file_globs(self):
+        data1 = {"regex": utils.generate_random_string()}
+        r_dict1, statuscode1 = self.post_create_instance(
+            'known_bug_regex', data=data1)
+        data2 = {"target_file_globs": [],
+                 "regex": utils.generate_random_string()}
+        r_dict2, statuscode2 = self.post_create_instance(
+            'known_bug_regex', data=data2)
+        self.assertEqual(statuscode1, 201, msg="Incorrect status code")
+        self.assertEqual(statuscode2, 201, msg="Incorrect status code")
+        self.assertEqual(r_dict1.get('target_file_globs'), None)
+        self.assertEqual(r_dict2.get('target_file_globs'), [])
+
+    def test_post_create_pattern_model_with_one_target_file(self):
+        single_file = "{}.txt".format(utils.generate_random_string())
+        data = {"target_file_globs": single_file,
+                "regex": utils.generate_random_string()}
+        r_dict, status_code = self.post_create_instance(
+            'known_bug_regex', data=data)
+        self.assertEqual(status_code, 201, msg="Incorrect status code")
+        self.assertEqual(r_dict['target_file_globs'], single_file,
+                         msg="Incorrect target file returned")
+
+    def test_post_create_pattern_model_with_two_target_file_globs(self):
+        new_files = [utils.generate_random_string() for _ in range(2)]
+        data = {"target_file_globs": new_files,
+                "regex": utils.generate_random_string()}
+        r_dict, status_code = self.post_create_instance(
+            'known_bug_regex', data=data)
+        self.assertEqual(status_code, 201, msg="Incorrect status code")
+        self.assertEqual(r_dict['target_file_globs'], new_files,
+                         msg="Incorrect target files returned")
+
+    def test_post_cannot_upload_non_unique_regex(self):
+        regex = utils.generate_random_string()
+        data1 = {"regex": regex}
+        data2 = {"target_file_globs": utils.generate_random_string(),
+                 "regex": regex}
+        self.post_create_instance('known_bug_regex', data=data1)
+        with self.assertRaises(IntegrityError):
+            self.post_create_instance('known_bug_regex', data=data2)
+
+    def test_put_update_existing_patterns(self):
+        """PUT to update an existing pattern instance."""
+        r_dict0, status_code = self.make_known_bug_regex()
+        uuid = r_dict0['uuid']
+        original_regex = r_dict0['regex']
+        before = models.KnownBugRegex.objects.filter(
+            regex=original_regex).exists()
+        self.assertTrue(before)
+        time_before = models.KnownBugRegex.objects.get(
+            uuid=uuid).model_last_edited_at
+        updated_regex = utils.generate_random_string()
+        data = {'regex': updated_regex}
+        response = self.api_client.put(
+            '/api/{}/known_bug_regex/{}/'.format(self.version,
+                                                 r_dict0['uuid']), data=data)
+        r_dict1 = self.deserialize(response)
+        self.assertFalse(
+            models.KnownBugRegex.objects.filter(regex=original_regex).exists(),
+            msg="regex not updated")
+        after = models.KnownBugRegex.objects.filter(
+            regex=updated_regex).exists()
+        time_after = models.KnownBugRegex.objects.get(
+            uuid=uuid).model_last_edited_at
+        self.assertTrue(after, msg="regex incorrectly updated")
+        self.assertNotIn('pk', r_dict1, msg="Primary key in response!")
+        self.assertNotEqual(
+            time_before, time_after,
+            msg="Pattern_last_edited_at should have been updated!")
+
+    def test_put_cannot_update_model_last_edited_at_manually(self):
+        """PUT to update an existing pattern instance."""
+        r_dict, status_code = self.make_known_bug_regex()
+        uuid = r_dict['uuid']
+        time_before =\
+            models.KnownBugRegex.objects.get(uuid=uuid).model_last_edited_at
+        model_last_edited_at = utils.generate_random_date()
+        data = {'model_last_edited_at': model_last_edited_at}
+
+        with self.assertRaises(NonUserEditableError):
+            self.api_client.put('/api/{}/known_bug_regex/{}/'
+                                .format(self.version, uuid), data=data)
+        time_after =\
+            models.KnownBugRegex.objects.get(uuid=uuid).model_last_edited_at
+        self.assertEqual(
+            time_before, time_after,
+            msg="Pattern_last_edited_at should not have been updated!")
+
+    def test_put_cannot_update_model_creation_datetime(self):
+        r_dict, status_code = self.make_known_bug_regex()
+        uuid = r_dict['uuid']
+        time_before = models.KnownBugRegex.objects.get(
+            uuid=uuid).model_creation_datetime
+        model_creation_datetime = utils.generate_random_date()
+        data = {'model_creation_datetime': model_creation_datetime}
+        with self.assertRaises(NonUserEditableError):
+            self.api_client.put('/api/{}/known_bug_regex/{}/'.format(
+                self.version, uuid), data=data)
+        time_after = models.KnownBugRegex.objects.get(
+            uuid=uuid).model_creation_datetime
+        self.assertEqual(
+            time_before, time_after,
+            msg="Pattern_creation_datetime should not have been updated!")
+
+    def test_put_cannot_update_existing_patterns_uuid(self):
+        """PUT to update an existing pattern instance."""
+        r_dict, status_code = self.make_known_bug_regex()
+        uuid = r_dict['uuid']
+        uuid2 = utils.generate_uuid()
+        data = {'uuid': uuid2}
+        before = models.KnownBugRegex.objects.filter(uuid=uuid2).exists()
+        self.assertFalse(before)
+
+        response = self.api_client.put('/api/{}/known_bug_regex/{}/'
+                                       .format(self.version, uuid), data=data)
+
+        after = models.KnownBugRegex.objects.filter(uuid=uuid2).exists()
+        self.assertFalse(after, msg="pattern UUID has been altered!")
+        new_r_dict = self.deserialize(response)
+
+        self.assertEqual(uuid, new_r_dict['uuid'],
+                         msg="UUID should not have been updated!")
+        self.assertNotEqual(uuid2, new_r_dict['uuid'])
+        self.assertEqual(response.status_code, 200,
+                         msg="Incorrect status code")
+
+    def test_get_all_patterns(self):
+        """GET all pattern instances."""
+        pattern_dict = []
+        for _ in range(3):
+            pattern_dict.append(self.make_known_bug_regex())
+        response = self.api_client.get('/api/{}/known_bug_regex/'
+                                       .format(self.version), format='json')
+        r_dict = self.deserialize(response)
+        objects = r_dict['objects']
+        self.assertEqual(response.status_code, 200,
+                         msg="Incorrect status code")
+        uuids = [obj['uuid'] for obj in objects]
+        for idx, ptrn in enumerate(pattern_dict):
+            self.assertIn(ptrn[0]['uuid'], uuids)
+
+    def test_get_specific_pattern(self):
+        """GET a specific pattern instance by its UUID."""
+        r_dict0, status_code = self.make_known_bug_regex()
+        uuid = r_dict0['uuid']
+        response = self.api_client.get('/api/{}/known_bug_regex/{}/'
+                                       .format(self.version, uuid),
+                                       format='json')
+        r_dict1 = self.deserialize(response)
+
+        self.assertEqual(uuid, r_dict1['uuid'])
+        self.assertEqual(response.status_code, 200,
+                         msg="Incorrect status code")
+
+    def test_delete_pattern(self):
+        """DELETE an existing pattern instance."""
+        r_dict0, status_code = self.make_known_bug_regex()
+        uuid = r_dict0['uuid']
+
+        self.assertTrue(models.KnownBugRegex.objects.filter(uuid=uuid)
+                        .count() > 0)
+        response = self.api_client.delete('/api/{}/known_bug_regex/{}/'
+                                          .format(self.version, uuid),
+                                          format='json')
+
+        non_obj = models.KnownBugRegex.objects.filter(uuid=uuid)
+        self.assertEqual(non_obj.count(), 0, msg="Pattern not deleted")
+        self.assertEqual(response.status_code, 204,
+                         msg="Incorrect status code")
