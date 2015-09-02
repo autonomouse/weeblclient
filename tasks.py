@@ -101,6 +101,11 @@ def backup_database(database):
         return
     return backup_to
 
+@task(help={'fixture': "Fixture to load into database"})
+def load_fixtures(fixture="initial_settings.yaml"):
+    print("Adding data from {} into database".format(fixture))
+    run('{}/manage.py loaddata "{}"'.format(application, fixture))
+
 def initialise_database(database):
     if database == "production":
         stngs = prdctn_settings
@@ -116,8 +121,8 @@ def initialise_database(database):
 
 def migrate():
     """Make migrations and migrate."""
-    run("{}/manage.py makemigrations".format(application))
-    run("{}/manage.py migrate".format(application))
+    run("{}/manage.py makemigrations".format(application), pty=True)
+    run("{}/manage.py migrate".format(application), pty=True)
 
 def create_production_db():
     create_db_and_user(prdctn_db_name, prdctn_user, prdctn_pwd)
@@ -126,7 +131,6 @@ def create_test_db():
     create_db_and_user(test_db_name, test_user, test_pwd)
 
 def migrate_individual_app(application, app):
-    print("Migrating '{}'".format(app))
     run('{}/manage.py makemigrations {}'.format(application, app))
     run('{}/manage.py migrate {}'.format(application, app))
 
@@ -159,7 +163,7 @@ def destroy_production_data():
 
 def create_db_and_user(db_name, user, pwd):
     create_user(user, pwd)
-    create_db(db_name, user, pwd)
+    create_database(db_name, user, pwd)
 
 def db_cxn(sql, pwd, dbname='postgres', user='postgres', host='localhost',
            isolation_lvl=0):
@@ -243,14 +247,14 @@ def create_user(user, pwd):
         db_cxn(sql2, pwd)
         print("User: {} created".format(user))
 
-def create_db(database, user, pwd):
+def create_database(database, user, pwd):
     sql_createdb = sql_create_db = "CREATE DATABASE {};".format(database, user)
     sql_user_create_db_privilege = "ALTER USER \"{}\" CREATEDB;"
     sql_grant_user_all_db_priv = "GRANT ALL PRIVILEGES ON DATABASE {} TO {};"
     exists = check_if_database_exists(database, pwd)
     if exists:
         print("Database: {} already exists!".format(database))
-        syncdb()
+        migrate()
         return
     db_cxn(sql_user_create_db_privilege, pwd)
     db_cxn(sql_createdb, pwd)
@@ -260,7 +264,7 @@ def create_db(database, user, pwd):
         print("Problem creating database: {}".format(database))
     else:
         print("Database: {} created".format(database))
-    syncdb()
+    migrate()
     load_fixtures("initial_settings.yaml")
 
 def prompt(message, default, validate):
@@ -325,10 +329,6 @@ def deploy(ipaddr=None, port=None, server="apache"):
 def deploy_with_runserver(ipaddr, port):
     result = run('{} {}/manage.py runserver {}:{}'.format(preamble,
                  application, ipaddr, port), pty=True)
-
-def load_fixtures(fixture="initial_settings.yaml"):
-    print("Adding data from {} into database".format(fixture))
-    run('{}/manage.py loaddata "{}"'.format(application, fixture))
 
 def deploy_with_apache(apacheconf, deployloc, application, wsgifile="wsgi.py",
 					   static_dir="oilserver/static", user_group = "www-data"):
