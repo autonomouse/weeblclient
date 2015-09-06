@@ -81,24 +81,29 @@ def force_stop():
                 print("Failed to kill {} process id {}."
                       .format(proc.name(), proc.pid))
 
-@task(help={'database': "Type test or production"})
-def destroy(database):
+@task(help={'database': "Type test or production",
+            'force': "Destroy even if cannot back up data (not recommended!)"})
+def destroy(database, force=False):
     """Destroy either the test or production database and user."""
     if database == "production":
-        destroy_production_data()
+        destroy_production_data(force)
     elif database == "test":
         destroy_test_data()
 
 @task(help={'database': "Type test or production"})
-def backup_database(database):
+def backup_database(database, force=False):
     """Backs up database to file."""
     timestamp = datetime.now().strftime("%Y_%m_%d__%H_%M_%S")
     backup_to = "Database_backup__{}__{}.json".format(database, timestamp)
     try:
         run("{}/manage.py dumpdata > {}".format(application, backup_to))
     except:
-        print("Could not back up {} database - aborting".format(application))
-        return
+        msg = "Could not back up {0} database{1}."
+        if force is True:
+            print(msg.format(application, " - continuing anyway (force)"))
+        else:
+            print(msg.format(application, " - aborting"))
+            return
     return backup_to
 
 @task(help={'fixture': "Fixture to load into database"})
@@ -134,13 +139,13 @@ def migrate_individual_app(application, app):
     run('{}/manage.py makemigrations {}'.format(application, app))
     run('{}/manage.py migrate {}'.format(application, app))
 
-def destroy_test_data():
+def destroy_test_data(force):
     rusure = "Are you sure you want to drop the test database and user?! (y/N)"
     if prompt(rusure, default='N', validate=yes_no):
-        destroy_db(test_db_name, test_pwd)
+        destroy_db(test_db_name, test_pwd, force=force)
         destroy_user(test_user, test_pwd)
 
-def destroy_production_data():
+def destroy_production_data(force):
 
     rusure1 = "You want to drop the PRODUCTION database (y/N)"
     rusure1 += " - are you absolutely sure about that?! (y/N)"
@@ -152,7 +157,7 @@ def destroy_production_data():
     if prompt(rusure1, default='N', validate=yes_no):
         if prompt(rusure2, default='N', validate=yes_no):
             if prompt(rusure3, default='N', validate=i_am_sure):
-                destroy_db(prdctn_db_name, prdctn_pwd)
+                destroy_db(prdctn_db_name, prdctn_pwd, force=force)
                 user = prdctn_user
                 if prompt(rusure4.format(user), default='N', validate=yes_no):
                     destroy_user(prdctn_user, prdctn_pwd)
@@ -205,9 +210,9 @@ def check_if_database_exists(database, pwd):
             exists = True
     return exists
 
-def destroy_db(database, pwd, backup=True):
+def destroy_db(database, pwd, force=False, backup=True):
     if backup:
-        backup_to = backup_database(database)
+        backup_to = backup_database(database, force)
 
     # Drop the database:
     sql = "DROP DATABASE IF EXISTS {}".format(database)
