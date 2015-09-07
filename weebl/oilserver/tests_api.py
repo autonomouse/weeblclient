@@ -9,6 +9,23 @@ from django.db.utils import IntegrityError
 from exceptions import NonUserEditableError
 
 
+class TimeStampedBaseModelTest(ResourceTests):
+
+    def test_save_generates_timestamps(self):
+        with freeze_time("Jan 1 2000 00:00:00"):
+            timestamp1 = utils.time_now()
+            base = models.TimeStampedBaseModel()
+            base.save()
+        self.assertEqual(base.created_at, timestamp1)
+        self.assertEqual(base.updated_at, timestamp1)
+        
+        with freeze_time("Jan 2 2000 00:00:00"):
+            timestamp2 = utils.time_now()
+            base.save()
+        self.assertEqual(base.created_at, timestamp1)
+        self.assertEqual(base.updated_at, timestamp2)
+
+
 class EnvironmentResourceTest(ResourceTests):
 
     def test_get_all_environments(self):
@@ -890,8 +907,8 @@ class KnownBugRegexResourceTest(ResourceTests):
                 'known_bug_regex', data=data)
 
         ts1 = utils.timestamp_as_string(timestamp)
-        ts2 = utils.timestamp_as_string(r_dict['model_creation_datetime'])
-        ts3 = utils.timestamp_as_string(r_dict['model_last_edited_at'])
+        ts2 = utils.timestamp_as_string(r_dict['created_at'])
+        ts3 = utils.timestamp_as_string(r_dict['updated_at'])
 
         self.assertEqual(ts1, ts2, msg="Incorrect creation datetime")
         self.assertEqual(ts1, ts3, msg="Incorrect last_edited datetime")
@@ -948,7 +965,7 @@ class KnownBugRegexResourceTest(ResourceTests):
             regex=original_regex).exists()
         self.assertTrue(before)
         time_before = models.KnownBugRegex.objects.get(
-            uuid=uuid).model_last_edited_at
+            uuid=uuid).updated_at
         updated_regex = utils.generate_random_string()
         data = {'regex': updated_regex}
         response = self.api_client.put(
@@ -961,43 +978,43 @@ class KnownBugRegexResourceTest(ResourceTests):
         after = models.KnownBugRegex.objects.filter(
             regex=updated_regex).exists()
         time_after = models.KnownBugRegex.objects.get(
-            uuid=uuid).model_last_edited_at
+            uuid=uuid).updated_at
         self.assertTrue(after, msg="regex incorrectly updated")
         self.assertNotIn('pk', r_dict1, msg="Primary key in response!")
         self.assertNotEqual(
             time_before, time_after,
             msg="Pattern_last_edited_at should have been updated!")
 
-    def test_put_cannot_update_model_last_edited_at_manually(self):
+    def test_put_cannot_update_updated_at_manually(self):
         """PUT to update an existing pattern instance."""
         r_dict, status_code = self.make_known_bug_regex()
         uuid = r_dict['uuid']
         time_before =\
-            models.KnownBugRegex.objects.get(uuid=uuid).model_last_edited_at
-        model_last_edited_at = utils.generate_random_date()
-        data = {'model_last_edited_at': model_last_edited_at}
+            models.KnownBugRegex.objects.get(uuid=uuid).updated_at
+        updated_at = utils.generate_random_date()
+        data = {'updated_at': updated_at}
 
         with self.assertRaises(NonUserEditableError):
             self.api_client.put('/api/{}/known_bug_regex/{}/'
                                 .format(self.version, uuid), data=data)
         time_after =\
-            models.KnownBugRegex.objects.get(uuid=uuid).model_last_edited_at
+            models.KnownBugRegex.objects.get(uuid=uuid).updated_at
         self.assertEqual(
             time_before, time_after,
             msg="Pattern_last_edited_at should not have been updated!")
 
-    def test_put_cannot_update_model_creation_datetime(self):
+    def test_put_cannot_update_created_at(self):
         r_dict, status_code = self.make_known_bug_regex()
         uuid = r_dict['uuid']
         time_before = models.KnownBugRegex.objects.get(
-            uuid=uuid).model_creation_datetime
-        model_creation_datetime = utils.generate_random_date()
-        data = {'model_creation_datetime': model_creation_datetime}
+            uuid=uuid).created_at
+        created_at = utils.generate_random_date()
+        data = {'created_at': created_at}
         with self.assertRaises(NonUserEditableError):
             self.api_client.put('/api/{}/known_bug_regex/{}/'.format(
                 self.version, uuid), data=data)
         time_after = models.KnownBugRegex.objects.get(
-            uuid=uuid).model_creation_datetime
+            uuid=uuid).created_at
         self.assertEqual(
             time_before, time_after,
             msg="Pattern_creation_datetime should not have been updated!")

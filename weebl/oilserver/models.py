@@ -5,21 +5,28 @@ from oilserver.status_checker import StatusChecker
 from weebl.__init__ import __api_version__
 
 
-class BaseModel(models.Model):
+class TimeStampedBaseModel(models.Model):
     """Base model with timestamp information that is common to many models.
     Please note that not all models will inherit from this base model. In
     particular, any that are part of the initial fixtures file do not
     (weeblsetting, servicestatus, buildstatus, and jobtype).
     """
-    model_creation_datetime = models.DateTimeField(
+    created_at = models.DateTimeField(
         default=None,
         blank=True,
         null=True,
         help_text="DateTime this model instance was created.")
-    model_last_edited_at = models.DateTimeField(
+    updated_at = models.DateTimeField(
         default=utils.time_now,
         auto_now_add=True,
         help_text="DateTime this model instance was last updated.")
+
+    def save(self, *args, **kwargs):
+        current_time = utils.time_now()
+        if self.id is None:
+            self.created_at = current_time
+        self.updated_at = current_time
+        return super(TimeStampedBaseModel, self).save(*args, **kwargs)
 
 
 class WeeblSetting(models.Model):
@@ -290,7 +297,7 @@ class TargetFileGlob(models.Model):
         return self.glob_pattern
 
 
-class KnownBugRegex(BaseModel, models.Model):
+class KnownBugRegex(TimeStampedBaseModel, models.Model):
     """The regex used to identify an error."""
     uuid = models.CharField(
         max_length=36,

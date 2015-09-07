@@ -433,15 +433,12 @@ class KnownBugRegexResource(CommonResource):
         list_allowed_methods = ['get', 'post', 'put', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
         fields = ['uuid', 'regex', 'target_file_globs',
-                  'model_creation_datetime', 'model_last_edited_at']
+                  'created_at', 'updated_at']
         authorization = Authorization()
         always_return_data = True
 
     def obj_create(self, bundle, request=None, **kwargs):
         bundle.obj.regex = bundle.data['regex']
-        timenow = utils.time_now()
-        bundle.obj.model_creation_datetime = timenow
-        bundle.obj.model_last_edited_at = timenow
         bundle.obj.save()
 
         # Specify target globs:
@@ -477,14 +474,13 @@ class KnownBugRegexResource(CommonResource):
     def dehydrate(self, bundle):
         if bundle.request.method in ['POST', 'PUT']:
             obj = models.KnownBugRegex.objects.get(uuid=bundle.obj.uuid)
-            obj.model_last_edited_at = utils.time_now()
             obj.save()
         replace_with = [('resource_uri', bundle.obj.uuid), ]
         return self.replace_bundle_item_with_alternative(bundle, replace_with)
 
     def hydrate(self, bundle):
-        error_if_fields = ['model_creation_datetime',
-                           'model_last_edited_at']
+        error_if_fields = ['created_at',
+                           'updated_at']
         self.raise_error_if_in_bundle(bundle, error_if_fields)
         fields_to_remove = ['uuid', 'pk']
         bundle.data = utils.pop(bundle.data, fields_to_remove)
