@@ -1,17 +1,23 @@
-weebl (0.4.0) precise; urgency=medium
+weebl (0.5.0) vivid; urgency=medium
+
+  * Added Bug model, API and tests
+
+ -- Darren Hoyland <darren.hoyland@canonical.com>  Mon, 07 Sep 2015 22:05:23 +0100
+
+weebl (0.4.0) vivid; urgency=medium
 
   * Added KnownBugRegex model, API and tests
   * Also added a BaseModel with timestamp data, but this is only linked into the KnownBugRegex model for now
 
  -- Darren Hoyland <darren.hoyland@canonical.com>  Wed, 02 Sep 2015 14:35:39 +0100
 
-weebl (0.3.0) precise; urgency=medium
+weebl (0.3.0) vivid; urgency=medium
 
-  * Added TargetFileGlob model, API and tests 
+  * Added TargetFileGlob model, API and tests
 
  -- Darren Hoyland <darren.hoyland@canonical.com>  Tue, 01 Sep 2015 10:29:24 +0100
 
-weebl (0.2.0) precise; urgency=low
+weebl (0.2.0) vivid; urgency=low
 
   * Added Environment and BuildExecutor models, API and tests
   * Added a changelog

@@ -18,7 +18,6 @@ class TimeStampedBaseModelTest(ResourceTests):
             base.save()
         self.assertEqual(base.created_at, timestamp1)
         self.assertEqual(base.updated_at, timestamp1)
-        
         with freeze_time("Jan 2 2000 00:00:00"):
             timestamp2 = utils.time_now()
             base.save()
@@ -153,7 +152,7 @@ class EnvironmentResourceTest(ResourceTests):
         self.assertEqual(response.status_code, 204)
 
 
-class ServiceStatusResourceTest(ResourceTests):
+class ServiceStatusResourceTests(ResourceTests):
 
     def test_get_method_is_allowed(self):
         """Validate that user can GET service_status model."""
@@ -194,10 +193,10 @@ class ServiceStatusResourceTest(ResourceTests):
         self.assertEqual(response.status_code, 405)
 
 
-class JenkinsResourceTest(ResourceTests):
+class JenkinsResourceTests(ResourceTests):
 
     def setUp(self):
-        super(JenkinsResourceTest, self).setUp()
+        super(JenkinsResourceTests, self).setUp()
         self.unrecognied_environment_uuid_msg =\
             {'error': ''}  # TODO: This really needs to be changed!
 
@@ -286,7 +285,7 @@ class JenkinsResourceTest(ResourceTests):
         self.assertTrue(value in ['unknown', 'up', 'unstable', 'down'])
 
 
-class BuildExecutorTest(ResourceTests):
+class BuildExecutorTests(ResourceTests):
 
     def test_post_create_build_executor(self):
         uuid, name = self.make_environment_and_jenkins()
@@ -424,7 +423,7 @@ class BuildExecutorTest(ResourceTests):
         self.assertEqual(response.status_code, 204)
 
 
-class PipelineTest(ResourceTests):
+class PipelineTests(ResourceTests):
 
     def test_post_create_pipeline(self):
         build_executor = self.make_build_executor()[0]['uuid']
@@ -509,7 +508,7 @@ class PipelineTest(ResourceTests):
         self.assertEqual(response.status_code, 204)
 
 
-class BuildStatusResourceTest(ResourceTests):
+class BuildStatusResourceTests(ResourceTests):
 
     def test_get_method_is_allowed(self):
         """Validate that user can GET build_status model."""
@@ -552,7 +551,7 @@ class BuildStatusResourceTest(ResourceTests):
         self.assertEqual(response.status_code, 405)
 
 
-class JobTypeResourceTest(ResourceTests):
+class JobTypeResourceTests(ResourceTests):
 
     def test_get_method_is_allowed(self):
         """Validate that user can GET job_type model."""
@@ -595,10 +594,10 @@ class JobTypeResourceTest(ResourceTests):
         self.assertEqual(response.status_code, 405)
 
 
-class BuildTest(ResourceTests):
+class BuildTests(ResourceTests):
 
     def setUp(self):
-        super(BuildTest, self).setUp()
+        super(BuildTests, self).setUp()
         self.pipeline_id = self.make_pipeline()[0]['uuid']
 
     def test_post_create_build_model_without_timestamps(self):
@@ -774,7 +773,7 @@ class BuildTest(ResourceTests):
         self.assertTrue(value in ['unknown', 'success', 'failure', 'aborted'])
 
 
-class TargetFileGlobResourceTest(ResourceTests):
+class TargetFileGlobResourceTests(ResourceTests):
 
     def test_get_method_is_allowed(self):
         """Validate that user can GET target_file_glob model."""
@@ -790,6 +789,19 @@ class TargetFileGlobResourceTest(ResourceTests):
             self.assertIn('name', globs)
 
     def test_post_create_target_file_glob(self):
+        before = str(models.TargetFileGlob.objects.all()) != '[]'
+        self.assertFalse(before)
+        job_type = 'pipeline_deploy'
+        r_dict, status_code = self.make_target_file_glob(job_type=job_type)
+        after = str(models.TargetFileGlob.objects.all()) != '[]'
+        self.assertTrue(after)
+
+        self.assertIn(job_type, r_dict['job_type'])
+        self.assertIn('glob_pattern', r_dict)
+        self.assertNotIn('pk', r_dict)
+        self.assertEqual(status_code, 201, msg="Incorrect status code")
+
+    def test_post_create_target_file_glob_without_job_type(self):
         before = str(models.TargetFileGlob.objects.all()) != '[]'
         self.assertFalse(before)
         r_dict, status_code = self.make_target_file_glob()
@@ -871,16 +883,13 @@ class TargetFileGlobResourceTest(ResourceTests):
         self.assertEqual(response.status_code, 204)
 
 
-class KnownBugRegexResourceTest(ResourceTests):
+class KnownBugRegexResourceTests(ResourceTests):
 
-    def setUp(self):
-        super(KnownBugRegexResourceTest, self).setUp()
-
-    def test_post_create_pattern_makes_new_target_file_globs(self):
+    def test_post_create_known_bug_regex_makes_new_target_file_globs(self):
         new_files = [utils.generate_random_string() for _ in range(3)]
 
-        # Target files should not exist before create pattern call is made:
-        target_file_globs_before = [xxx.file_name for xxx in
+        # Target files shouldn't exist before create_known_bug_regex call made:
+        target_file_globs_before = [obj.file_name for obj in
                                     models.TargetFileGlob.objects.all()]
         for new_file in new_files:
             self.assertNotIn(new_file, target_file_globs_before)
@@ -891,13 +900,31 @@ class KnownBugRegexResourceTest(ResourceTests):
         r_dict, status_code = self.post_create_instance(
             'known_bug_regex', data=data)
 
-        # Target files should exist after create pattern call is made:
+        # Target files should exist after create known_bug_regex call is made:
         target_file_globs_after = [tfglob.glob_pattern for tfglob in
                                    models.TargetFileGlob.objects.all()]
         for new_file in new_files:
             self.assertIn(new_file, target_file_globs_after)
 
-    def test_post_create_pattern_logs_time_correctly(self):
+    def test_post_create_known_bug_regex_makes_new_bug(self):
+        new_bug = utils.generate_random_string()
+
+        # Bug shouldn't exist before create_known_bug_regex call made:
+        bugs_before = [obj.uuid for obj in models.Bug.objects.all()]
+        self.assertNotIn(new_bug, bugs_before)
+
+        # Create KnownBugRegex
+        data = {"bug": new_bug,
+                "target_file_globs": utils.generate_random_string(),
+                "regex": utils.generate_random_string()}
+        r_dict, status_code = self.post_create_instance(
+            'known_bug_regex', data=data)
+
+        # Bug should exist after create known_bug_regex call is made:
+        bugs_after = [obj.uuid for obj in models.Bug.objects.all()]
+        self.assertIn(new_bug, bugs_after)
+
+    def test_post_create_known_bug_regex_logs_time_correctly(self):
         data = {"target_file_globs": "console.txt",
                 "regex": "abcd"}
 
@@ -914,7 +941,7 @@ class KnownBugRegexResourceTest(ResourceTests):
         self.assertEqual(ts1, ts3, msg="Incorrect last_edited datetime")
         self.assertEqual(status_code, 201, msg="Incorrect status code")
 
-    def test_post_create_pattern_model_with_no_target_file_globs(self):
+    def test_post_create_known_bug_regex_model_with_no_target_file_globs(self):
         data1 = {"regex": utils.generate_random_string()}
         r_dict1, statuscode1 = self.post_create_instance(
             'known_bug_regex', data=data1)
@@ -924,20 +951,20 @@ class KnownBugRegexResourceTest(ResourceTests):
             'known_bug_regex', data=data2)
         self.assertEqual(statuscode1, 201, msg="Incorrect status code")
         self.assertEqual(statuscode2, 201, msg="Incorrect status code")
-        self.assertEqual(r_dict1.get('target_file_globs'), None)
+        self.assertEqual(r_dict1.get('target_file_globs'), [])
         self.assertEqual(r_dict2.get('target_file_globs'), [])
 
-    def test_post_create_pattern_model_with_one_target_file(self):
+    def test_post_create_known_bug_regex_model_with_one_target_file(self):
         single_file = "{}.txt".format(utils.generate_random_string())
         data = {"target_file_globs": single_file,
                 "regex": utils.generate_random_string()}
         r_dict, status_code = self.post_create_instance(
             'known_bug_regex', data=data)
         self.assertEqual(status_code, 201, msg="Incorrect status code")
-        self.assertEqual(r_dict['target_file_globs'], single_file,
+        self.assertEqual(r_dict['target_file_globs'], [single_file],
                          msg="Incorrect target file returned")
 
-    def test_post_create_pattern_model_with_two_target_file_globs(self):
+    def test_post_create_known_bug_regex_model_with_two_target_file_glob(self):
         new_files = [utils.generate_random_string() for _ in range(2)]
         data = {"target_file_globs": new_files,
                 "regex": utils.generate_random_string()}
@@ -956,8 +983,8 @@ class KnownBugRegexResourceTest(ResourceTests):
         with self.assertRaises(IntegrityError):
             self.post_create_instance('known_bug_regex', data=data2)
 
-    def test_put_update_existing_patterns(self):
-        """PUT to update an existing pattern instance."""
+    def test_put_update_existing_known_bug_regexes(self):
+        """PUT to update an existing known_bug_regex instance."""
         r_dict0, status_code = self.make_known_bug_regex()
         uuid = r_dict0['uuid']
         original_regex = r_dict0['regex']
@@ -983,7 +1010,28 @@ class KnownBugRegexResourceTest(ResourceTests):
         self.assertNotIn('pk', r_dict1, msg="Primary key in response!")
         self.assertNotEqual(
             time_before, time_after,
-            msg="Pattern_last_edited_at should have been updated!")
+            msg="Updated_at should have been updated!")
+
+    def test_put_update_bug_in_known_bug_regexes(self):
+        """PUT to update the bug in an existing known_bug_regex instance."""
+        bug_uuid = utils.generate_random_string()
+        r_dict0, status_code = self.make_known_bug_regex(bug=bug_uuid)
+        before = False
+        for obj in models.KnownBugRegex.objects.all():
+            if bug_uuid == obj.bug.uuid:
+                before = True
+                break
+        self.assertTrue(before)
+        updated_bug_uuid = utils.generate_random_string()
+        data = {'bug': updated_bug_uuid}
+        self.api_client.put('/api/{}/known_bug_regex/{}/'.format(
+            self.version, r_dict0['uuid']), data=data)
+        after = False
+        for obj in models.KnownBugRegex.objects.all():
+            if bug_uuid == obj.bug.uuid:
+                after = True
+                break
+        self.assertTrue(after, msg="Bug not updated")
 
     def test_put_cannot_update_updated_at_manually(self):
         """PUT to update an existing pattern instance."""
@@ -1001,7 +1049,7 @@ class KnownBugRegexResourceTest(ResourceTests):
             models.KnownBugRegex.objects.get(uuid=uuid).updated_at
         self.assertEqual(
             time_before, time_after,
-            msg="Pattern_last_edited_at should not have been updated!")
+            msg="updated_at should not have been updated!")
 
     def test_put_cannot_update_created_at(self):
         r_dict, status_code = self.make_known_bug_regex()
@@ -1017,10 +1065,10 @@ class KnownBugRegexResourceTest(ResourceTests):
             uuid=uuid).created_at
         self.assertEqual(
             time_before, time_after,
-            msg="Pattern_creation_datetime should not have been updated!")
+            msg="created_at should not have been updated!")
 
-    def test_put_cannot_update_existing_patterns_uuid(self):
-        """PUT to update an existing pattern instance."""
+    def test_put_cannot_update_existing_known_bug_regexes_uuid(self):
+        """PUT to update an existing known_bug_regex instance."""
         r_dict, status_code = self.make_known_bug_regex()
         uuid = r_dict['uuid']
         uuid2 = utils.generate_uuid()
@@ -1032,7 +1080,7 @@ class KnownBugRegexResourceTest(ResourceTests):
                                        .format(self.version, uuid), data=data)
 
         after = models.KnownBugRegex.objects.filter(uuid=uuid2).exists()
-        self.assertFalse(after, msg="pattern UUID has been altered!")
+        self.assertFalse(after, msg="KnownBugRegex UUID has been altered!")
         new_r_dict = self.deserialize(response)
 
         self.assertEqual(uuid, new_r_dict['uuid'],
@@ -1041,11 +1089,11 @@ class KnownBugRegexResourceTest(ResourceTests):
         self.assertEqual(response.status_code, 200,
                          msg="Incorrect status code")
 
-    def test_get_all_patterns(self):
-        """GET all pattern instances."""
-        pattern_dict = []
+    def test_get_all_known_bug_regexes(self):
+        """GET all known_bug_regex instances."""
+        known_bug_regex_dict = []
         for _ in range(3):
-            pattern_dict.append(self.make_known_bug_regex())
+            known_bug_regex_dict.append(self.make_known_bug_regex())
         response = self.api_client.get('/api/{}/known_bug_regex/'
                                        .format(self.version), format='json')
         r_dict = self.deserialize(response)
@@ -1053,11 +1101,11 @@ class KnownBugRegexResourceTest(ResourceTests):
         self.assertEqual(response.status_code, 200,
                          msg="Incorrect status code")
         uuids = [obj['uuid'] for obj in objects]
-        for idx, ptrn in enumerate(pattern_dict):
+        for idx, ptrn in enumerate(known_bug_regex_dict):
             self.assertIn(ptrn[0]['uuid'], uuids)
 
-    def test_get_specific_pattern(self):
-        """GET a specific pattern instance by its UUID."""
+    def test_get_specific_known_bug_regex(self):
+        """GET a specific known_bug_regex instance by its UUID."""
         r_dict0, status_code = self.make_known_bug_regex()
         uuid = r_dict0['uuid']
         response = self.api_client.get('/api/{}/known_bug_regex/{}/'
@@ -1069,8 +1117,8 @@ class KnownBugRegexResourceTest(ResourceTests):
         self.assertEqual(response.status_code, 200,
                          msg="Incorrect status code")
 
-    def test_delete_pattern(self):
-        """DELETE an existing pattern instance."""
+    def test_delete_known_bug_regex(self):
+        """DELETE an existing known_bug_regex instance."""
         r_dict0, status_code = self.make_known_bug_regex()
         uuid = r_dict0['uuid']
 
@@ -1081,6 +1129,183 @@ class KnownBugRegexResourceTest(ResourceTests):
                                           format='json')
 
         non_obj = models.KnownBugRegex.objects.filter(uuid=uuid)
-        self.assertEqual(non_obj.count(), 0, msg="Pattern not deleted")
+        self.assertEqual(non_obj.count(), 0, msg="KnownBugRegex not deleted")
+        self.assertEqual(response.status_code, 204,
+                         msg="Incorrect status code")
+
+
+class BugTests(ResourceTests):
+
+    def setUp(self):
+        super(BugTests, self).setUp()
+
+    def test_post_create_bug_logs_time_correctly(self):
+        with freeze_time("Jan 1 2000 00:00:00"):
+            r_dict, status_code = self.make_bug()
+            timestamp = utils.time_now()
+
+        ts1 = utils.timestamp_as_string(timestamp)
+        ts2 = utils.timestamp_as_string(r_dict['created_at'])
+        ts3 = utils.timestamp_as_string(r_dict['updated_at'])
+
+        self.assertEqual(ts1, ts2, msg="Incorrect creation datetime")
+        self.assertEqual(ts1, ts3, msg="Incorrect last_edited datetime")
+        self.assertEqual(status_code, 201, msg="Incorrect status code")
+
+    def test_post_create_bug_model_with_only_summary_in_data(self):
+        data = {'summary': utils.generate_random_string()}
+        r_dict, statuscode = self.post_create_instance(
+            'bug', data=data)
+        self.assertEqual(statuscode, 201, msg="Incorrect status code")
+        self.assertEqual(r_dict.get('description'), None)
+        self.assertNotEqual(r_dict.get('uuid'), None)
+
+    def test_put_cannot_update_existing_bug_uuid(self):
+        """PUT to update an existing bug instance."""
+        r_dict, status_code = self.make_bug()
+        uuid = r_dict['uuid']
+        uuid2 = utils.generate_uuid()
+        data = {'uuid': uuid2}
+        before = models.Bug.objects.filter(uuid=uuid2).exists()
+        self.assertFalse(before)
+
+        response = self.api_client.put('/api/{}/bug/{}/'.format(
+            self.version, uuid), data=data)
+
+        after = models.BuildExecutor.objects.filter(uuid=uuid2).exists()
+        self.assertFalse(after, msg="Bug UUID has been altered!")
+        new_r_dict = self.deserialize(response)
+
+        self.assertEqual(uuid, new_r_dict['uuid'],
+                         msg="UUID should not have been updated!")
+        self.assertNotEqual(uuid2, new_r_dict['uuid'])
+        self.assertEqual(response.status_code, 200,
+                         msg="Incorrect status code")
+
+    def test_put_update_existing_bugs(self):
+        """PUT to update an existing bug instance."""
+        r_dict0, status_code = self.make_bug()
+        original_summary = r_dict0['summary']
+        before = models.Bug.objects.filter(
+            summary=original_summary).exists()
+        self.assertTrue(before)
+        time_before = models.Bug.objects.get(
+            summary=original_summary).updated_at
+        updated_summary = utils.generate_random_string()
+        data = {'summary': updated_summary}
+        response = self.api_client.put(
+            '/api/{}/bug/{}/'.format(self.version, r_dict0['summary']),
+            data=data)
+        r_dict1 = self.deserialize(response)
+        self.assertTrue(models.Bug.objects.filter(
+            summary=original_summary).exists(), msg="UUID incorrectly updated")
+        instance = models.Bug.objects.filter(summary=updated_summary)
+        after = instance.exists()
+        self.assertTrue(after, msg="UUID incorrectly updated")
+        time_after = instance[0].updated_at
+        self.assertNotIn('pk', r_dict1, msg="Primary key in response!")
+        self.assertNotEqual(
+            time_before, time_after,
+            msg="Updated_at should have been updated!")
+
+    def test_put_cannot_update_updated_at_manually(self):
+        """PUT to update an existing pattern instance."""
+        r_dict, status_code = self.make_bug()
+        uuid = r_dict['uuid']
+        time_before =\
+            models.Bug.objects.get(uuid=uuid).updated_at
+        updated_at = utils.generate_random_date()
+        data = {'updated_at': updated_at}
+
+        with self.assertRaises(NonUserEditableError):
+            self.api_client.put('/api/{}/bug/{}/'
+                                .format(self.version, uuid), data=data)
+        time_after =\
+            models.Bug.objects.get(uuid=uuid).updated_at
+        self.assertEqual(
+            time_before, time_after,
+            msg="updated_at should not have been updated!")
+
+    def test_put_cannot_update_created_at(self):
+        r_dict, status_code = self.make_bug()
+        uuid = r_dict['uuid']
+        time_before = models.Bug.objects.get(
+            uuid=uuid).created_at
+        created_at = utils.generate_random_date()
+        data = {'created_at': created_at}
+        with self.assertRaises(NonUserEditableError):
+            self.api_client.put('/api/{}/bug/{}/'.format(
+                self.version, uuid), data=data)
+        time_after = models.Bug.objects.get(
+            uuid=uuid).created_at
+        self.assertEqual(
+            time_before, time_after,
+            msg="created_at should not have been updated!")
+
+    def test_put_cannot_update_existing_bugs_uuid(self):
+        """PUT to update an existing bug instance."""
+        r_dict, status_code = self.make_bug()
+        uuid = r_dict['uuid']
+        uuid2 = utils.generate_uuid()
+        data = {'uuid': uuid2}
+        before = models.Bug.objects.filter(uuid=uuid2).exists()
+        self.assertFalse(before)
+
+        response = self.api_client.put('/api/{}/bug/{}/'.format(
+            self.version, uuid), data=data)
+
+        after = models.Bug.objects.filter(uuid=uuid2).exists()
+        self.assertFalse(after, msg="Bug UUID has been altered!")
+
+        new_r_dict = self.deserialize(response)
+
+        self.assertEqual(uuid, new_r_dict['uuid'],
+                         msg="Designation should not have been updated!")
+        self.assertNotEqual(uuid2, new_r_dict['uuid'],
+                            msg="Designation should not have been updated!")
+        self.assertEqual(response.status_code, 200,
+                         msg="Incorrect status code")
+
+    def test_get_all_bugs(self):
+        """GET all bug instances."""
+        bug_dict = []
+        for _ in range(3):
+            bug_dict.append(self.make_bug())
+        response = self.api_client.get('/api/{}/bug/'
+                                       .format(self.version), format='json')
+        r_dict = self.deserialize(response)
+        objects = r_dict['objects']
+        self.assertEqual(response.status_code, 200,
+                         msg="Incorrect status code")
+        uuids = [obj['uuid'] for obj in objects]
+        for idx, ptrn in enumerate(bug_dict):
+            self.assertIn(ptrn[0]['uuid'], uuids)
+
+    def test_get_specific_bug(self):
+        """GET a specific bug instance by its UUID."""
+        r_dict0, status_code = self.make_bug()
+        uuid = r_dict0['uuid']
+        response = self.api_client.get('/api/{}/bug/{}/'
+                                       .format(self.version, uuid),
+                                       format='json')
+        r_dict1 = self.deserialize(response)
+
+        self.assertEqual(uuid, r_dict1['uuid'])
+        self.assertEqual(response.status_code, 200,
+                         msg="Incorrect status code")
+
+    def test_delete_bug(self):
+        """DELETE an existing bug instance."""
+        r_dict0, status_code = self.make_bug()
+        uuid = r_dict0['uuid']
+
+        self.assertTrue(models.Bug.objects.filter(uuid=uuid)
+                        .count() > 0)
+        response = self.api_client.delete('/api/{}/bug/{}/'
+                                          .format(self.version, uuid),
+                                          format='json')
+
+        non_obj = models.Bug.objects.filter(uuid=uuid)
+        self.assertEqual(non_obj.count(), 0, msg="Bug not deleted")
         self.assertEqual(response.status_code, 204,
                          msg="Incorrect status code")

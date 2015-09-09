@@ -33,12 +33,26 @@ class CommonResource(ModelResource):
             msg = "Cannot edit field(s): {}".format(", ".join(bad_fields))
             raise NonUserEditableError(msg)
 
+    def specify_many_to_many_fields(self, resource_name, model, field, bundle):
+        resources = bundle.data.get(resource_name, [])
+        resource_list = [resources] if type(resources) != list else resources
+        output = []
+        for upstream_bug in resource_list:
+            field_filter = {field: upstream_bug}
+            if not model.objects.filter(**field_filter).exists():
+                # Create target file if doesn't exist:
+                instance = model()
+                setattr(instance, field, upstream_bug)
+                instance.save()
+            output.append(model.objects.get(**field_filter))
+        return output
+
 
 class EnvironmentResource(CommonResource):
 
     class Meta:
         queryset = models.Environment.objects.all()
-        list_allowed_methods = ['get', 'post', 'put', 'delete']  # all items
+        list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
         fields = ['uuid', 'name']
         authorization = Authorization()
@@ -111,7 +125,7 @@ class JenkinsResource(CommonResource):
         queryset = models.Jenkins.objects.all()
         fields = ['environment', 'service_status', 'external_access_url',
                   'internal_access_url', 'service_status_updated_at']
-        list_allowed_methods = ['get', 'post', 'put', 'delete']  # all items
+        list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
         authorization = Authorization()
         always_return_data = True
@@ -175,7 +189,7 @@ class BuildExecutorResource(CommonResource):
         resource_name = 'build_executor'
         queryset = models.BuildExecutor.objects.all()
         fields = ['name', 'uuid', 'jenkins']
-        list_allowed_methods = ['get', 'post', 'put', 'delete']  # all items
+        list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
         authorization = Authorization()
         always_return_data = True
@@ -331,7 +345,7 @@ class BuildResource(CommonResource):
 
     class Meta:
         queryset = models.Build.objects.all()
-        list_allowed_methods = ['get', 'post', 'put', 'delete']  # all items
+        list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
         fields = ['uuid', 'build_id', 'artifact_location', 'build_started_at',
                   'build_finished_at', 'build_analysed_at', 'pipeline',
@@ -390,14 +404,17 @@ class TargetFileGlobResource(CommonResource):
     class Meta:
         resource_name = 'target_file_glob'
         queryset = models.TargetFileGlob.objects.all()
-        list_allowed_methods = ['get', 'post', 'put', 'delete']  # all items
+        list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
-        fields = ['glob_pattern']
+        fields = ['glob_pattern', 'job_type']
         authorization = Authorization()
         always_return_data = True
 
     def obj_create(self, bundle, request=None, **kwargs):
         bundle.obj.glob_pattern = bundle.data['glob_pattern']
+        bundle.obj.save()
+        bundle.obj.job_type = self.specify_many_to_many_fields(
+            "job_type", models.JobType, 'name', bundle)
         bundle.obj.save()
         return bundle
 
@@ -415,10 +432,16 @@ class TargetFileGlobResource(CommonResource):
                                                             request, **kwargs)
 
     def dehydrate(self, bundle):
+        if hasattr(bundle.obj, 'job_type'):
+            bundle.data['job_type'] = [
+                job.name for job in bundle.obj.job_type.all()]
         replace_with = [('resource_uri', bundle.obj.glob_pattern), ]
         return self.replace_bundle_item_with_alternative(bundle, replace_with)
 
     def hydrate(self, bundle):
+        if 'job_type' in bundle.data:
+            bundle.obj.job_type = self.specify_many_to_many_fields(
+                "job_type", models.JobType, 'name', bundle)
         fields_to_remove = ['pk']
         # Hide database structure details by obscuring the primary key.
         bundle.data = utils.pop(bundle.data, fields_to_remove)
@@ -430,9 +453,9 @@ class KnownBugRegexResource(CommonResource):
     class Meta:
         resource_name = 'known_bug_regex'
         queryset = models.KnownBugRegex.objects.all()
-        list_allowed_methods = ['get', 'post', 'put', 'delete']  # all items
+        list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
-        fields = ['uuid', 'regex', 'target_file_globs',
+        fields = ['bug', 'uuid', 'regex', 'target_file_globs',
                   'created_at', 'updated_at']
         authorization = Authorization()
         always_return_data = True
@@ -441,22 +464,20 @@ class KnownBugRegexResource(CommonResource):
         bundle.obj.regex = bundle.data['regex']
         bundle.obj.save()
 
-        # Specify target globs:
-        globs = bundle.data.get('target_file_globs', [])
-        target_file_globs = [globs] if type(globs) != list else globs
-        glob_patterns = []
-        for globule in target_file_globs:
-            if models.TargetFileGlob.objects.filter(glob_pattern=globule
-                                                    ).exists():
-                target_file = models.TargetFileGlob.objects.get(
-                    glob_pattern=globule)
-            else:
-                # Create target file if doesn't exist:
-                target_file = models.TargetFileGlob()
-                target_file.glob_pattern = globule
-                target_file.save()
-            glob_patterns.append(target_file)
-        bundle.obj.target_file_globs = glob_patterns
+        # Specify bug uuid:
+        uuid = bundle.data.get('bug', None)
+
+        if models.Bug.objects.filter(uuid=uuid).exists():
+            bug = models.Bug.objects.get(uuid=uuid)
+        else:
+            # Create bug if doesn't exist:
+            bug = models.Bug()
+            if uuid is not None:
+                bug.uuid = uuid
+            bug.save()
+        bundle.obj.bug = bug
+        bundle.obj.target_file_globs = self.specify_many_to_many_fields(
+            "target_file_globs", models.TargetFileGlob, 'glob_pattern', bundle)
         bundle.obj.save()
         return bundle
 
@@ -475,12 +496,78 @@ class KnownBugRegexResource(CommonResource):
         if bundle.request.method in ['POST', 'PUT']:
             obj = models.KnownBugRegex.objects.get(uuid=bundle.obj.uuid)
             obj.save()
+        bundle.data['bug'] = bundle.obj.bug
+        bundle.obj.save()
+
+        if hasattr(bundle.obj, 'target_file_globs'):
+            bundle.data['target_file_globs'] = [
+                tfglob.glob_pattern for tfglob in
+                bundle.obj.target_file_globs.all()]
         replace_with = [('resource_uri', bundle.obj.uuid), ]
         return self.replace_bundle_item_with_alternative(bundle, replace_with)
 
     def hydrate(self, bundle):
-        error_if_fields = ['created_at',
-                           'updated_at']
+        if 'target_file_globs' in bundle.data:
+            bundle.obj.target_file_globs = self.specify_many_to_many_fields(
+                "target_file_globs", models.TargetFileGlob, 'glob_pattern',
+                bundle)
+        error_if_fields = ['created_at', 'updated_at']
+        self.raise_error_if_in_bundle(bundle, error_if_fields)
+        fields_to_remove = ['uuid', 'pk']
+        bundle.data = utils.pop(bundle.data, fields_to_remove)
+        return bundle
+
+
+class BugResource(CommonResource):
+
+    class Meta:
+        queryset = models.Bug.objects.all()
+        list_allowed_methods = ['get', 'post', 'delete']  # all items
+        detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
+        fields = ['uuid', 'summary', 'description', 'upstream_bugs',
+                  'created_at', 'updated_at']
+        authorization = Authorization()
+        always_return_data = True
+
+    def obj_create(self, bundle, request=None, **kwargs):
+        # Update details if supplied:
+        bundle.obj.summary = bundle.data['summary']
+        bundle.obj.description = bundle.data.get('description')
+        bundle.obj.save()
+        if 'upstream_bugs' in bundle.data:
+            bundle.obj.upstream_bugs = self.specify_many_to_many_fields(
+                "upstream_bugs", models.UpstreamBug, 'bug_id', bundle)
+            bundle.obj.save()
+        return bundle
+
+    def dispatch(self, request_type, request, **kwargs):
+        """Overrides and replaces the the uuid in the end-point with pk.
+        """
+        if 'pk' in kwargs:
+            uuid = kwargs['pk']  # As end-point is uuid not pk
+            if models.Bug.objects.filter(uuid=uuid).exists():
+                bug = models.Bug.objects.get(uuid=uuid)
+                kwargs['pk'] = bug.pk
+                # TODO: else return and error code
+        return super(BugResource, self).dispatch(
+            request_type, request, **kwargs)
+
+    def dehydrate(self, bundle):
+        if hasattr(bundle.obj, 'upstream_bugs'):
+            bundle.data['upstream_bugs'] = [
+                usbugs.bug_id for usbugs in bundle.obj.upstream_bugs.all()]
+
+        if bundle.request.method in ['POST', 'PUT']:
+            obj = models.Bug.objects.get(uuid=bundle.obj.uuid)
+            obj.save()
+        replace_with = [('resource_uri', bundle.obj.uuid), ]
+        return self.replace_bundle_item_with_alternative(bundle, replace_with)
+
+    def hydrate(self, bundle):
+        if 'upstream_bugs' in bundle.data:
+            bundle.obj.upstream_bugs = self.specify_many_to_many_fields(
+                "upstream_bugs", models.UpstreamBug, 'bug_id', bundle)
+        error_if_fields = ['created_at', 'updated_at']
         self.raise_error_if_in_bundle(bundle, error_if_fields)
         fields_to_remove = ['uuid', 'pk']
         bundle.data = utils.pop(bundle.data, fields_to_remove)

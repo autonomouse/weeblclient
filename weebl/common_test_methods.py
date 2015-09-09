@@ -76,16 +76,29 @@ class ResourceTests(ResourceTestCase):
                 'job_type': job_type}
         return self.post_create_instance('build', data=data)
 
-    def make_target_file_glob(self):
+    def make_target_file_glob(self, job_type=None):
         name = utils.generate_random_string()
         data = {'glob_pattern': name}
+        if job_type is not None:
+            data['job_type'] = job_type
         return self.post_create_instance('target_file_glob', data=data)
 
-    def make_known_bug_regex(self, target_file_globs=None):
+    def make_known_bug_regex(self, target_file_globs=None, bug=None):
         if target_file_globs is None:
             x = random.randint(2, 9)
             target_file_globs = [utils.generate_random_string() for _ in
                                  range(x)]
         data = {"target_file_globs": target_file_globs,
                 "regex": utils.generate_random_string()}
+        if bug is not None:
+            data['bug'] = bug
         return self.post_create_instance('known_bug_regex', data=data)
+
+    def make_bug(self, uuid=None, summary=None, description=None):
+        data = {'summary': summary if summary is not None else
+                utils.generate_random_string()}
+        if uuid is not None:
+            data['uuid'] = uuid
+        if description is not None:
+            data['description'] = description
+        return self.post_create_instance('bug', data=data)

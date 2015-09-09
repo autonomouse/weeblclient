@@ -15,6 +15,7 @@ v_api.register(resources.JobTypeResource())
 v_api.register(resources.BuildResource())
 v_api.register(resources.TargetFileGlobResource())
 v_api.register(resources.KnownBugRegexResource())
+v_api.register(resources.BugResource())
 
 urlpatterns = patterns('',
                        url(r'^', include('oilserver.urls')),

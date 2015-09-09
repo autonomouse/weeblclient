@@ -292,13 +292,41 @@ class TargetFileGlob(models.Model):
     glob_pattern = models.TextField(
         unique=True,
         help_text="Glob pattern used to match one or more target files.")
+    job_type = models.ManyToManyField(
+        JobType, null=True, blank=True, default=None)
 
     def __str__(self):
         return self.glob_pattern
 
 
+class Bug(TimeStampedBaseModel, models.Model):
+    """An error in OIL that has resulted in an incorrect or unexpected
+    behaviour or result.
+    """
+    uuid = models.CharField(
+        max_length=36,
+        default=utils.generate_uuid,
+        unique=True,
+        blank=False,
+        null=False,
+        help_text="UUID of this bug.")
+    summary = models.TextField(
+        unique=True,
+        default=uuid.default,
+        help_text="Brief overview of bug.")
+    description = models.TextField(
+        default=None,
+        blank=True,
+        null=True,
+        help_text="Full description of bug.")
+
+    def __str__(self):
+        return self.uuid
+
+
 class KnownBugRegex(TimeStampedBaseModel, models.Model):
-    """The regex used to identify an error."""
+    """The regex used to identify a bug."""
+    bug = models.ForeignKey(Bug, null=True, blank=True, default=None)
     uuid = models.CharField(
         max_length=36,
         default=utils.generate_uuid,
@@ -306,7 +334,7 @@ class KnownBugRegex(TimeStampedBaseModel, models.Model):
         blank=False,
         null=False,
         help_text="UUID of this pattern.")
-    # regex must be unique, but it can be set to multiple target files:
+    # While regex must be unique, it can be set to multiple target files:
     regex = models.TextField(
         unique=True,
         help_text="The regular expression used to identify a bug occurrence.")
