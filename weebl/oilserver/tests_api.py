@@ -1,7 +1,6 @@
 #! /usr/bin/env python3
 import utils
 import arrow
-import random
 from common_test_methods import ResourceTests
 from oilserver import models
 from freezegun import freeze_time
@@ -601,7 +600,7 @@ class BuildTests(ResourceTests):
         self.pipeline_id = self.make_pipeline()[0]['uuid']
 
     def test_post_create_build_model_without_timestamps(self):
-        build_id = str(random.randint(10000, 99999))
+        build_id = utils.generate_random_number_as_string()
         build_status = "success"
         job_type = "pipeline_deploy"
 
@@ -631,7 +630,7 @@ class BuildTests(ResourceTests):
         self.assertIn('artifact', r_dict['artifact_location'].split('/'))
 
     def test_post_create_build_model_with_timestamps(self):
-        build_id = str(random.randint(10000, 99999))
+        build_id = utils.generate_random_number_as_string()
         build_status = "success"
         job_type = "pipeline_deploy"
         with freeze_time("Jan 1 2000 00:00:00"):
@@ -791,12 +790,12 @@ class TargetFileGlobResourceTests(ResourceTests):
     def test_post_create_target_file_glob(self):
         before = str(models.TargetFileGlob.objects.all()) != '[]'
         self.assertFalse(before)
-        job_type = 'pipeline_deploy'
-        r_dict, status_code = self.make_target_file_glob(job_type=job_type)
+        job_types = 'pipeline_deploy'
+        r_dict, status_code = self.make_target_file_glob(job_types=job_types)
         after = str(models.TargetFileGlob.objects.all()) != '[]'
         self.assertTrue(after)
 
-        self.assertIn(job_type, r_dict['job_type'])
+        self.assertIn(job_types, r_dict['job_types'])
         self.assertIn('glob_pattern', r_dict)
         self.assertNotIn('pk', r_dict)
         self.assertEqual(status_code, 201, msg="Incorrect status code")
@@ -1260,9 +1259,9 @@ class BugTests(ResourceTests):
         new_r_dict = self.deserialize(response)
 
         self.assertEqual(uuid, new_r_dict['uuid'],
-                         msg="Designation should not have been updated!")
+                         msg="UUID should not have been updated!")
         self.assertNotEqual(uuid2, new_r_dict['uuid'],
-                            msg="Designation should not have been updated!")
+                            msg="UUID should not have been updated!")
         self.assertEqual(response.status_code, 200,
                          msg="Incorrect status code")
 
@@ -1306,6 +1305,157 @@ class BugTests(ResourceTests):
                                           format='json')
 
         non_obj = models.Bug.objects.filter(uuid=uuid)
+        self.assertEqual(non_obj.count(), 0, msg="Bug not deleted")
+        self.assertEqual(response.status_code, 204,
+                         msg="Incorrect status code")
+
+
+class BugTrackerBugTests(ResourceTests):
+
+    def setUp(self):
+        super(BugTrackerBugTests, self).setUp()
+
+    def test_post_create_bug_tracker_bug_logs_time_correctly(self):
+        with freeze_time("Jan 1 2000 00:00:00"):
+            r_dict, status_code = self.make_bug_tracker_bug()
+            timestamp = utils.time_now()
+
+        ts1 = utils.timestamp_as_string(timestamp)
+        ts2 = utils.timestamp_as_string(r_dict['created_at'])
+        ts3 = utils.timestamp_as_string(r_dict['updated_at'])
+
+        self.assertEqual(ts1, ts2, msg="Incorrect creation datetime")
+        self.assertEqual(ts1, ts3, msg="Incorrect last_edited datetime")
+        self.assertEqual(status_code, 201, msg="Incorrect status code")
+
+    def test_post_create_bug_tracker_bug_model(self):
+        bug_id = utils.generate_random_number_as_string()
+        data = {"bug_id": bug_id}
+        r_dict, statuscode = self.post_create_instance(
+            'bug_tracker_bug', data=data)
+        self.assertEqual(statuscode, 201, msg="Incorrect status code")
+        self.assertEqual(r_dict['bug_id'], bug_id)
+
+    def test_post_cannot_upload_non_unique_bug_id(self):
+        bug_id = utils.generate_random_number_as_string()
+        data1 = {"bug_id": bug_id}
+        data2 = {"bug_id": bug_id,
+                 "summary": utils.generate_random_string()}
+        self.post_create_instance('bug_tracker_bug', data=data1)
+        with self.assertRaises(IntegrityError):
+            self.post_create_instance('bug_tracker_bug', data=data2)
+
+    def test_put_update_existing_bug_tracker_bugs(self):
+        """PUT to update an existing bug_tracker_bug instance."""
+        r_dict0, status_code = self.make_bug_tracker_bug()
+        original_bug_id = r_dict0['bug_id']
+        before = models.BugTrackerBug.objects.filter(
+            bug_id=original_bug_id).exists()
+        self.assertTrue(before)
+        time_before = models.BugTrackerBug.objects.get(
+            bug_id=original_bug_id).updated_at
+        updated_bug_id = utils.generate_random_string()
+        data = {'bug_id': updated_bug_id}
+        response = self.api_client.put('/api/{}/bug_tracker_bug/{}/'
+                                       .format(self.version,
+                                               r_dict0['uuid']), data=data)
+        r_dict1 = self.deserialize(response)
+        self.assertFalse(models.BugTrackerBug.objects.filter(
+            bug_id=original_bug_id).exists(),
+            msg="bug_id not updated")
+        instance = models.BugTrackerBug.objects.filter(bug_id=updated_bug_id)
+        after = instance.exists()
+        self.assertTrue(after, msg="bug_id incorrectly updated")
+        time_after = instance[0].updated_at
+        self.assertNotIn('pk', r_dict1, msg="Primary key in response!")
+        self.assertNotEqual(
+            time_before, time_after,
+            msg="Updated_at should have been updated!")
+
+    def test_put_cannot_update_existing_bug_tracker_bugs_uuid(self):
+        """PUT to update an existing bug instance."""
+        r_dict, status_code = self.make_bug_tracker_bug()
+        uuid = r_dict['uuid']
+        uuid2 = utils.generate_uuid()
+        data = {'uuid': uuid2}
+        before = models.BugTrackerBug.objects.filter(uuid=uuid2).exists()
+        self.assertFalse(before)
+        response = self.api_client.put('/api/{}/bug_tracker_bug/{}/'.format(
+            self.version, uuid), data=data)
+
+        after = models.BugTrackerBug.objects.filter(uuid=uuid2).exists()
+        self.assertFalse(after, msg="Bug UUID has been altered!")
+
+        new_r_dict = self.deserialize(response)
+
+        self.assertEqual(uuid, new_r_dict['uuid'],
+                         msg="UUID should not have been updated!")
+        self.assertNotEqual(uuid2, new_r_dict['uuid'],
+                            msg="UUID should not have been updated!")
+        self.assertEqual(response.status_code, 200,
+                         msg="Incorrect status code")
+
+    def test_put_can_update_existing_bug_tracker_bugs_bug_id(self):
+        """PUT to update an existing bug_tracker_bug instance."""
+        r_dict, status_code = self.make_bug_tracker_bug()
+        uuid = r_dict['uuid']
+        bug_id = r_dict['bug_id']
+        bug_id2 = utils.generate_random_number_as_string(not_this=bug_id)
+        data = {'bug_id': bug_id2}
+        before = models.BugTrackerBug.objects.filter(bug_id=bug_id2).exists()
+        self.assertFalse(before)
+
+        response = self.api_client.put('/api/{}/bug_tracker_bug/{}/'.format(
+            self.version, uuid), data=data)
+
+        after = models.BugTrackerBug.objects.filter(bug_id=bug_id2).exists()
+        self.assertTrue(after, msg="Bug id has not been altered!")
+        new_r_dict = self.deserialize(response)
+
+        self.assertNotEqual(bug_id, new_r_dict['bug_id'],
+                            msg="Bug id should have been updated!")
+        self.assertEqual(bug_id2, new_r_dict['bug_id'])
+        self.assertEqual(response.status_code, 200,
+                         msg="Incorrect status code")
+
+    def test_get_all_bug_tracker_bugs(self):
+        """GET all bug_tracker_bug instances."""
+        bug_tracker_bug_dict = []
+        for _ in range(3):
+            bug_tracker_bug_dict.append(self.make_bug_tracker_bug())
+        response = self.api_client.get('/api/{}/bug_tracker_bug/'
+                                       .format(self.version), format='json')
+        r_dict = self.deserialize(response)
+        objects = r_dict['objects']
+        self.assertEqual(response.status_code, 200,
+                         msg="Incorrect status code")
+        bug_ids = [obj['bug_id'] for obj in objects]
+        for idx, ptrn in enumerate(bug_tracker_bug_dict):
+            self.assertIn(ptrn[0]['bug_id'], bug_ids)
+
+    def test_get_specific_bug_tracker_bug(self):
+        """GET a specific bug_tracker_bug instance by its UUID."""
+        r_dict0, status_code = self.make_bug_tracker_bug()
+        uuid = r_dict0['uuid']
+        response = self.api_client.get('/api/{}/bug_tracker_bug/{}/'
+                                       .format(self.version, uuid),
+                                       format='json')
+        r_dict1 = self.deserialize(response)
+        self.assertEqual(uuid, r_dict1['uuid'])
+        self.assertEqual(response.status_code, 200,
+                         msg="Incorrect status code")
+
+    def test_delete_bug_tracker_bug(self):
+        """DELETE an existing bug_tracker_bug instance."""
+        r_dict0, status_code = self.make_bug_tracker_bug()
+        uuid = r_dict0['uuid']
+        self.assertTrue(models.BugTrackerBug.objects.filter(uuid=uuid)
+                        .count() > 0)
+        response = self.api_client.delete('/api/{}/bug_tracker_bug/{}/'
+                                          .format(self.version, uuid),
+                                          format='json')
+
+        non_obj = models.BugTrackerBug.objects.filter(uuid=uuid)
         self.assertEqual(non_obj.count(), 0, msg="Bug not deleted")
         self.assertEqual(response.status_code, 204,
                          msg="Incorrect status code")

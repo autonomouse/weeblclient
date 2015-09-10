@@ -1,3 +1,9 @@
+weebl (0.6.0) vivid; urgency=medium
+
+  * Added BugTrackerBug model, API and tests 
+
+ -- Darren Hoyland <darren.hoyland@canonical.com>  Tue, 08 Sep 2015 11:26:18 +0100
+
 weebl (0.5.0) vivid; urgency=medium
 
   * Added Bug model, API and tests
@@ -23,3 +29,4 @@ weebl (0.2.0) vivid; urgency=low
   * Added a changelog
 
  -- Darren Hoyland <darren.hoyland@canonical.com>  Thu, 27 Aug 2015 09:35:31 +0100
+

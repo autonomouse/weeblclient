@@ -67,7 +67,7 @@ class ResourceTests(ResourceTestCase):
         if pipeline is None:
             response = self.make_pipeline()
             pipeline = response[0]['uuid']
-        build_id = str(random.randint(10000, 99999))
+        build_id = utils.generate_random_number_as_string()
         build_status = models.BuildStatus.objects.all()[1].name
         job_type = models.JobType.objects.all()[0].name
         data = {'build_id': str(build_id),
@@ -76,11 +76,11 @@ class ResourceTests(ResourceTestCase):
                 'job_type': job_type}
         return self.post_create_instance('build', data=data)
 
-    def make_target_file_glob(self, job_type=None):
+    def make_target_file_glob(self, job_types=None):
         name = utils.generate_random_string()
         data = {'glob_pattern': name}
-        if job_type is not None:
-            data['job_type'] = job_type
+        if job_types is not None:
+            data['job_types'] = job_types
         return self.post_create_instance('target_file_glob', data=data)
 
     def make_known_bug_regex(self, target_file_globs=None, bug=None):
@@ -102,3 +102,9 @@ class ResourceTests(ResourceTestCase):
         if description is not None:
             data['description'] = description
         return self.post_create_instance('bug', data=data)
+
+    def make_bug_tracker_bug(self, bug_id=None):
+        if bug_id is None:
+            bug_id = utils.generate_random_number_as_string()
+        data = {'bug_id': bug_id}
+        return self.post_create_instance('bug_tracker_bug', data=data)

@@ -37,15 +37,26 @@ class CommonResource(ModelResource):
         resources = bundle.data.get(resource_name, [])
         resource_list = [resources] if type(resources) != list else resources
         output = []
-        for upstream_bug in resource_list:
-            field_filter = {field: upstream_bug}
+        for resource in resource_list:
+            field_filter = {field: resource}
             if not model.objects.filter(**field_filter).exists():
                 # Create target file if doesn't exist:
                 instance = model()
-                setattr(instance, field, upstream_bug)
+                setattr(instance, field, resource)
                 instance.save()
             output.append(model.objects.get(**field_filter))
         return output
+
+    def hydrate(self, bundle):
+        # Timestamp data should be generated interanlly and not editable:
+        error_if_fields = ['created_at', 'updated_at']
+        self.raise_error_if_in_bundle(bundle, error_if_fields)
+
+        # Hide database structure details by obscuring the primary key, also,
+        # the UUID field is read-only, so don't allow user to change it:
+        fields_to_remove = ['uuid', 'pk']
+        bundle.data = utils.pop(bundle.data, fields_to_remove)
+        return bundle
 
 
 class EnvironmentResource(CommonResource):
@@ -100,6 +111,10 @@ class EnvironmentResource(CommonResource):
         replace_with = [('resource_uri', bundle.obj.uuid), ]
         return self.replace_bundle_item_with_alternative(bundle, replace_with)
 
+    def hydrate(self, bundle):
+        # Don't use CommonResource's hydrate method for Environment.
+        return bundle
+
 
 class ServiceStatusResource(CommonResource):
 
@@ -131,13 +146,9 @@ class JenkinsResource(CommonResource):
         always_return_data = True
 
     def hydrate(self, bundle):
-        fields_to_remove = ['uuid', 'pk']
-        # Hide database structure details by obscuring the primary key.
-        # Also, the UUID field is read-only, so don't allow user to change it.
-        bundle.data = utils.pop(bundle.data, fields_to_remove)
         # Update timestamp (also prevents user submitting timestamp data):
         bundle.data['service_status_updated_at'] = utils.time_now()
-        return bundle
+        return super(JenkinsResource, self).hydrate(bundle)
 
     def obj_create(self, bundle, request=None, **kwargs):
         bundle.obj.environment = models.Environment.objects.get(
@@ -255,13 +266,6 @@ class BuildExecutorResource(CommonResource):
                         ('jenkins', bundle.obj.jenkins.uuid), ]
         return self.replace_bundle_item_with_alternative(bundle, replace_with)
 
-    def hydrate(self, bundle):
-        fields_to_remove = ['uuid', 'pk']
-        # Hide database structure details by obscuring the primary key.
-        # Also, the UUID field is read-only, so don't allow user to change it.
-        bundle.data = utils.pop(bundle.data, fields_to_remove)
-        return bundle
-
 
 class PipelineResource(CommonResource):
     build_executor = fields.ForeignKey(BuildExecutorResource, 'build_executor')
@@ -297,13 +301,6 @@ class PipelineResource(CommonResource):
         replace_with = [('resource_uri', bundle.obj.uuid),
                         ('build_executor', bundle.obj.build_executor.uuid), ]
         return self.replace_bundle_item_with_alternative(bundle, replace_with)
-
-    def hydrate(self, bundle):
-        fields_to_remove = ['uuid', 'pk']
-        # Hide database structure details by obscuring the primary key.
-        # Also, the UUID field is read-only, so don't allow user to change it.
-        bundle.data = utils.pop(bundle.data, fields_to_remove)
-        return bundle
 
 
 class BuildStatusResource(CommonResource):
@@ -394,9 +391,9 @@ class BuildResource(CommonResource):
         return self.replace_bundle_item_with_alternative(bundle, replace_with)
 
     def hydrate(self, bundle):
-        fields_to_remove = ['uuid', 'pk', 'build_analysed_at']
+        fields_to_remove = ['build_analysed_at']
         bundle.data = utils.pop(bundle.data, fields_to_remove)
-        return bundle
+        return super(BuildResource, self).hydrate(bundle)
 
 
 class TargetFileGlobResource(CommonResource):
@@ -413,8 +410,8 @@ class TargetFileGlobResource(CommonResource):
     def obj_create(self, bundle, request=None, **kwargs):
         bundle.obj.glob_pattern = bundle.data['glob_pattern']
         bundle.obj.save()
-        bundle.obj.job_type = self.specify_many_to_many_fields(
-            "job_type", models.JobType, 'name', bundle)
+        bundle.obj.job_types = self.specify_many_to_many_fields(
+            "job_types", models.JobType, 'name', bundle)
         bundle.obj.save()
         return bundle
 
@@ -432,20 +429,17 @@ class TargetFileGlobResource(CommonResource):
                                                             request, **kwargs)
 
     def dehydrate(self, bundle):
-        if hasattr(bundle.obj, 'job_type'):
-            bundle.data['job_type'] = [
-                job.name for job in bundle.obj.job_type.all()]
+        if hasattr(bundle.obj, 'job_types'):
+            bundle.data['job_types'] = [
+                job.name for job in bundle.obj.job_types.all()]
         replace_with = [('resource_uri', bundle.obj.glob_pattern), ]
         return self.replace_bundle_item_with_alternative(bundle, replace_with)
 
     def hydrate(self, bundle):
-        if 'job_type' in bundle.data:
-            bundle.obj.job_type = self.specify_many_to_many_fields(
-                "job_type", models.JobType, 'name', bundle)
-        fields_to_remove = ['pk']
-        # Hide database structure details by obscuring the primary key.
-        bundle.data = utils.pop(bundle.data, fields_to_remove)
-        return bundle
+        if 'job_types' in bundle.data:
+            bundle.obj.job_types = self.specify_many_to_many_fields(
+                "job_types", models.JobType, 'name', bundle)
+        return super(TargetFileGlobResource, self).hydrate(bundle)
 
 
 class KnownBugRegexResource(CommonResource):
@@ -493,9 +487,6 @@ class KnownBugRegexResource(CommonResource):
             request_type, request, **kwargs)
 
     def dehydrate(self, bundle):
-        if bundle.request.method in ['POST', 'PUT']:
-            obj = models.KnownBugRegex.objects.get(uuid=bundle.obj.uuid)
-            obj.save()
         bundle.data['bug'] = bundle.obj.bug
         bundle.obj.save()
 
@@ -511,11 +502,7 @@ class KnownBugRegexResource(CommonResource):
             bundle.obj.target_file_globs = self.specify_many_to_many_fields(
                 "target_file_globs", models.TargetFileGlob, 'glob_pattern',
                 bundle)
-        error_if_fields = ['created_at', 'updated_at']
-        self.raise_error_if_in_bundle(bundle, error_if_fields)
-        fields_to_remove = ['uuid', 'pk']
-        bundle.data = utils.pop(bundle.data, fields_to_remove)
-        return bundle
+        return super(KnownBugRegexResource, self).hydrate(bundle)
 
 
 class BugResource(CommonResource):
@@ -524,7 +511,7 @@ class BugResource(CommonResource):
         queryset = models.Bug.objects.all()
         list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
-        fields = ['uuid', 'summary', 'description', 'upstream_bugs',
+        fields = ['uuid', 'summary', 'description', 'bug_tracker_bugs',
                   'created_at', 'updated_at']
         authorization = Authorization()
         always_return_data = True
@@ -534,9 +521,9 @@ class BugResource(CommonResource):
         bundle.obj.summary = bundle.data['summary']
         bundle.obj.description = bundle.data.get('description')
         bundle.obj.save()
-        if 'upstream_bugs' in bundle.data:
-            bundle.obj.upstream_bugs = self.specify_many_to_many_fields(
-                "upstream_bugs", models.UpstreamBug, 'bug_id', bundle)
+        if 'bug_tracker_bugs' in bundle.data:
+            bundle.obj.bug_tracker_bugs = self.specify_many_to_many_fields(
+                "bug_tracker_bugs", models.BugTrackerBug, 'bug_id', bundle)
             bundle.obj.save()
         return bundle
 
@@ -553,22 +540,48 @@ class BugResource(CommonResource):
             request_type, request, **kwargs)
 
     def dehydrate(self, bundle):
-        if hasattr(bundle.obj, 'upstream_bugs'):
-            bundle.data['upstream_bugs'] = [
-                usbugs.bug_id for usbugs in bundle.obj.upstream_bugs.all()]
-
-        if bundle.request.method in ['POST', 'PUT']:
-            obj = models.Bug.objects.get(uuid=bundle.obj.uuid)
-            obj.save()
+        if hasattr(bundle.obj, 'bug_tracker_bugs'):
+            bundle.data['bug_tracker_bugs'] = [
+                usbugs.bug_id for usbugs in bundle.obj.bug_tracker_bugs.all()]
         replace_with = [('resource_uri', bundle.obj.uuid), ]
         return self.replace_bundle_item_with_alternative(bundle, replace_with)
 
     def hydrate(self, bundle):
-        if 'upstream_bugs' in bundle.data:
-            bundle.obj.upstream_bugs = self.specify_many_to_many_fields(
-                "upstream_bugs", models.UpstreamBug, 'bug_id', bundle)
-        error_if_fields = ['created_at', 'updated_at']
-        self.raise_error_if_in_bundle(bundle, error_if_fields)
-        fields_to_remove = ['uuid', 'pk']
-        bundle.data = utils.pop(bundle.data, fields_to_remove)
+        if 'bug_tracker_bugs' in bundle.data:
+            bundle.obj.bug_tracker_bugs = self.specify_many_to_many_fields(
+                "bug_tracker_bugs", models.BugTrackerBug, 'bug_id', bundle)
+        return super(BugResource, self).hydrate(bundle)
+
+
+class BugTrackerBugResource(CommonResource):
+
+    class Meta:
+        resource_name = 'bug_tracker_bug'
+        queryset = models.BugTrackerBug.objects.all()
+        list_allowed_methods = ['get', 'post', 'delete']  # all items
+        detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
+        fields = ['uuid', 'bug_id', 'created_at', 'updated_at']
+        authorization = Authorization()
+        always_return_data = True
+
+    def obj_create(self, bundle, request=None, **kwargs):
+        # Update details if supplied:
+        bundle.obj.bug_id = bundle.data['bug_id']
+        bundle.obj.save()
         return bundle
+
+    def dispatch(self, request_type, request, **kwargs):
+        """Overrides and replaces the the uuid in the end-point with pk.
+        """
+        if 'pk' in kwargs:
+            uuid = kwargs['pk']  # As end-point is uuid not pk
+            if models.BugTrackerBug.objects.filter(uuid=uuid).exists():
+                bug_tracker_bug = models.BugTrackerBug.objects.get(uuid=uuid)
+                kwargs['pk'] = bug_tracker_bug.pk
+                # TODO: else return and error code
+        return super(BugTrackerBugResource, self).dispatch(
+            request_type, request, **kwargs)
+
+    def dehydrate(self, bundle):
+        replace_with = [('resource_uri', bundle.obj.bug_id), ]
+        return self.replace_bundle_item_with_alternative(bundle, replace_with)

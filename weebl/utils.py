@@ -44,6 +44,14 @@ def generate_random_date(limit_seconds=5000000000, when="any"):
     return timestamp
 
 
+def generate_random_number_as_string(length=5, not_this=None):
+    minimum = int("1" + ("0" * (length - 1)))
+    maximum = int("9" * length)
+    n = str(random.randint(minimum, maximum))
+    return n if n != str(not_this) else generate_random_number_as_string(
+        length=length, not_this=not_this)
+
+
 def timestamp_as_string(timestamp, ts_format='%a %d %b %y %H:%M:%S'):
     timestamp_dt = normalise_timestamp(timestamp)
     return timestamp_dt.strftime(ts_format)
