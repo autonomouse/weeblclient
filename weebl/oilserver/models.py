@@ -322,7 +322,7 @@ class BugTrackerBug(TimeStampedBaseModel, models.Model):
     # GitHub), this will need to be unique_together with bug_tracker.
 
     def __str__(self):
-        return self.bug_id
+        return self.uuid
 
 
 class Bug(TimeStampedBaseModel, models.Model):
@@ -349,11 +349,15 @@ class Bug(TimeStampedBaseModel, models.Model):
     bug_tracker_bugs = models.ManyToManyField(
         BugTrackerBug, null=True, blank=True, default=None)
 
+    @property
+    def upstream_bugs(self):
+        return ",".join([str(b) for b in self.bug_tracker_bugs.all()])
+
     def __str__(self):
         return self.uuid
 
 
-class KnownBugRegex(TimeStampedBaseModel, models.Model):
+class RegularExpression(TimeStampedBaseModel, models.Model):
     """The regex used to identify a bug."""
     bug = models.ForeignKey(Bug, null=True, blank=True, default=None)
     uuid = models.CharField(

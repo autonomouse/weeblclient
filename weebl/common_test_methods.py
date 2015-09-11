@@ -83,7 +83,7 @@ class ResourceTests(ResourceTestCase):
             data['job_types'] = job_types
         return self.post_create_instance('target_file_glob', data=data)
 
-    def make_known_bug_regex(self, target_file_globs=None, bug=None):
+    def make_regular_expression(self, target_file_globs=None, bug=None):
         if target_file_globs is None:
             x = random.randint(2, 9)
             target_file_globs = [utils.generate_random_string() for _ in
@@ -92,7 +92,7 @@ class ResourceTests(ResourceTestCase):
                 "regex": utils.generate_random_string()}
         if bug is not None:
             data['bug'] = bug
-        return self.post_create_instance('known_bug_regex', data=data)
+        return self.post_create_instance('regular_expression', data=data)
 
     def make_bug(self, uuid=None, summary=None, description=None):
         data = {'summary': summary if summary is not None else
