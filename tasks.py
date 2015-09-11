@@ -88,7 +88,7 @@ def destroy(database, force=False):
     if database == "production":
         destroy_production_data(force)
     elif database == "test":
-        destroy_test_data(force)
+        destroy_test_data()
 
 @task(help={'database': "Type test or production"})
 def backup_database(database, force=False):

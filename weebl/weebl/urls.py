@@ -14,7 +14,7 @@ v_api.register(resources.BuildStatusResource())
 v_api.register(resources.JobTypeResource())
 v_api.register(resources.BuildResource())
 v_api.register(resources.TargetFileGlobResource())
-v_api.register(resources.RegularExpressionResource())
+v_api.register(resources.KnownBugRegexResource())
 v_api.register(resources.BugResource())
 v_api.register(resources.BugTrackerBugResource())
 

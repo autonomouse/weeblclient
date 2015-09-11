@@ -442,11 +442,11 @@ class TargetFileGlobResource(CommonResource):
         return super(TargetFileGlobResource, self).hydrate(bundle)
 
 
-class RegularExpressionResource(CommonResource):
+class KnownBugRegexResource(CommonResource):
 
     class Meta:
-        resource_name = 'regular_expression'
-        queryset = models.RegularExpression.objects.all()
+        resource_name = 'known_bug_regex'
+        queryset = models.KnownBugRegex.objects.all()
         list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
         fields = ['bug', 'uuid', 'regex', 'target_file_globs',
@@ -479,11 +479,11 @@ class RegularExpressionResource(CommonResource):
         """Overrides and replaces the the uuid in the end-point with pk."""
         if 'pk' in kwargs:
             uuid = kwargs['pk']  # Because end-point is the UUID not pk really
-            if models.RegularExpression.objects.filter(uuid=uuid).exists():
-                regex = models.RegularExpression.objects.get(uuid=uuid)
-                kwargs['pk'] = regex.pk
+            if models.KnownBugRegex.objects.filter(uuid=uuid).exists():
+                known_bug_regex = models.KnownBugRegex.objects.get(uuid=uuid)
+                kwargs['pk'] = known_bug_regex.pk
                 # TODO: else return and error code
-        return super(RegularExpressionResource, self).dispatch(
+        return super(KnownBugRegexResource, self).dispatch(
             request_type, request, **kwargs)
 
     def dehydrate(self, bundle):
@@ -502,7 +502,7 @@ class RegularExpressionResource(CommonResource):
             bundle.obj.target_file_globs = self.specify_many_to_many_fields(
                 "target_file_globs", models.TargetFileGlob, 'glob_pattern',
                 bundle)
-        return super(RegularExpressionResource, self).hydrate(bundle)
+        return super(KnownBugRegexResource, self).hydrate(bundle)
 
 
 class BugResource(CommonResource):
