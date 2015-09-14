@@ -322,7 +322,7 @@ class BugTrackerBug(TimeStampedBaseModel, models.Model):
     # GitHub), this will need to be unique_together with bug_tracker.
 
     def __str__(self):
-        return self.bug_id
+        return self.uuid
 
 
 class Bug(TimeStampedBaseModel, models.Model):
