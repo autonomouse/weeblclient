@@ -371,3 +371,23 @@ class KnownBugRegex(TimeStampedBaseModel, models.Model):
 
     def __str__(self):
         return self.uuid
+
+
+class BugOccurrence(TimeStampedBaseModel, models.Model):
+    """The occurrence of a bug."""
+    uuid = models.CharField(
+        max_length=36,
+        default=utils.generate_uuid,
+        unique=True,
+        blank=False,
+        null=False,
+        help_text="UUID of this bug occurrence.")
+    build = models.ForeignKey(Build)
+    regex = models.ForeignKey(KnownBugRegex)
+
+    class Meta:
+        # Only create one BugOccurrence instance per build/regex combo:
+        unique_together = (('build', 'regex'),)
+
+    def __str__(self):
+        return self.uuid

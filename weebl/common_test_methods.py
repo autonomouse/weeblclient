@@ -108,3 +108,11 @@ class ResourceTests(ResourceTestCase):
             bug_id = utils.generate_random_number_as_string()
         data = {'bug_id': bug_id}
         return self.post_create_instance('bug_tracker_bug', data=data)
+
+    def make_bug_occurrence(self, regex=None, build=None):
+        if regex is None:
+            regex = self.make_known_bug_regex()[0].get('uuid')
+        if build is None:
+            build = self.make_build()[0].get('uuid')
+        data = {'regex': regex, 'build': build}
+        return self.post_create_instance('bug_occurrence', data=data)

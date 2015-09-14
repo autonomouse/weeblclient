@@ -480,8 +480,8 @@ class KnownBugRegexResource(CommonResource):
         if 'pk' in kwargs:
             uuid = kwargs['pk']  # Because end-point is the UUID not pk really
             if models.KnownBugRegex.objects.filter(uuid=uuid).exists():
-                known_bug_regex = models.KnownBugRegex.objects.get(uuid=uuid)
-                kwargs['pk'] = known_bug_regex.pk
+                regex = models.KnownBugRegex.objects.get(uuid=uuid)
+                kwargs['pk'] = regex.pk
                 # TODO: else return and error code
         return super(KnownBugRegexResource, self).dispatch(
             request_type, request, **kwargs)
@@ -584,4 +584,47 @@ class BugTrackerBugResource(CommonResource):
 
     def dehydrate(self, bundle):
         replace_with = [('resource_uri', bundle.obj.bug_id), ]
+        return self.replace_bundle_item_with_alternative(bundle, replace_with)
+
+
+class BugOccurrenceResource(CommonResource):
+    build = fields.ForeignKey(BuildResource, 'build')
+    regex = fields.ForeignKey(KnownBugRegexResource, 'regex')
+
+    class Meta:
+        resource_name = 'bug_occurrence'
+        queryset = models.BugOccurrence.objects.all()
+        list_allowed_methods = ['get', 'post', 'delete']  # all items
+        detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
+        fields = ['uuid', 'build', 'regex', 'created_at', 'updated_at']
+        authorization = Authorization()
+        always_return_data = True
+
+    def obj_create(self, bundle, request=None, **kwargs):
+        if 'build' in bundle.data:
+            bundle.obj.build = models.Build.objects.get(
+                uuid=bundle.data['build'])
+        if 'regex' in bundle.data:
+            bundle.obj.regex = models.KnownBugRegex.objects.get(
+                uuid=bundle.data['regex'])
+        bundle.obj.save()
+        return bundle
+
+    def dispatch(self, request_type, request, **kwargs):
+        """Overrides and replaces the the uuid in the end-point with pk."""
+        if 'pk' in kwargs:
+            uuid = kwargs['pk']  # Because end-point is the UUID not pk really
+            if models.BugOccurrence.objects.filter(uuid=uuid).exists():
+                bug_occurrence = models.BugOccurrence.objects.get(uuid=uuid)
+                kwargs['pk'] = bug_occurrence.pk
+                # TODO: else return and error code
+        return super(BugOccurrenceResource, self).dispatch(request_type,
+                                                           request, **kwargs)
+
+    def dehydrate(self, bundle):
+        replace_with = [('resource_uri', bundle.obj.uuid), ]
+        if bundle.obj.regex is not None:
+            replace_with.append(('regex', bundle.obj.regex.uuid))
+        if bundle.obj.build is not None:
+            replace_with.append(('build', bundle.obj.build.uuid))
         return self.replace_bundle_item_with_alternative(bundle, replace_with)
