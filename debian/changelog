@@ -1,3 +1,9 @@
+weebl (0.7.1) precise; urgency=medium
+
+  * Add client-side python API
+
+ -- Greg Lutostanski <gregory.lutostanski@canonical.com>  Tue, 15 Sep 2015 12:30:18 +0400
+
 weebl (0.7.0) vivid; urgency=medium
 
   * Added BugOccurrence model, API and tests 

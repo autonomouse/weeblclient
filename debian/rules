@@ -1,0 +1,17 @@
+#!/usr/bin/make -f
+
+export DH_VERBOSE=1
+VERS=$(shell dpkg-parsechangelog | sed -rne 's,^Version: ([^-]+).*,\1,p')
+
+%:
+	dh $@ --with python2
+
+override_dh_auto_test:
+	./run_tests.sh unit
+
+override_dh_install:
+	echo
+
+get-orig-source:
+	git archive --format tar.gz HEAD -o ../weebl_${VERS}.orig.tar.gz
+	dh_auto_clean
