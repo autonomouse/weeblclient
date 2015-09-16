@@ -14,7 +14,7 @@ weekly = r'weekly/'
 urlpatterns = patterns('',
                        url(catch_all + end,
                            views.main_page,
-                           name='main_page'),
+                           name='index'),
 
                        url("Settings/" + end,
                            views.settings_page,

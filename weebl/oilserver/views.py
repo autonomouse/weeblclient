@@ -22,12 +22,8 @@ def generate_generic_data_dict(title, environments, time_range=None):
     return data
 
 
-def main_page(request, time_range='daily'):
-    # Show (daily?) results and limit the number of bugs to the top ten:
-    data = generate_generic_data_dict('Weebl - Main Page',
-                                      models.Environment.objects.all(),
-                                      time_range)
-    return render(request, 'page_main.html', data)
+def main_page(request):
+    return render(request, 'index.html')
 
 
 def weekly_main_page(request, time_range='weekly'):

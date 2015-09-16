@@ -95,3 +95,9 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'oilserver', 'static')
 TASTYPIE_DEFAULT_FORMATS = ['json']
 
 API_LIMIT_PER_PAGE = 0
+
+STATICFILES_DIRS = (
+    "/usr/share/javascript/jquery/",
+    "/usr/share/javascript/angular.js/",
+    "/usr/share/javascript/yui3/"
+)
