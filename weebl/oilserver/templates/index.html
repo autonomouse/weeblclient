@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html class="no-js" lang="en" data-ng-app="WEEBL">
+<html class="no-js" lang="en" data-ng-app="weebl">
 <head>
     <base href="{% url 'index' %}">
-    <title data-ng-bind="title + ' | ' + site + ' WEEBL'"></title>
+    <title data-ng-bind="title + ' | ' + site + ' weebl'"></title>
 
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1" />
@@ -18,7 +18,6 @@
     <link rel="shortcut icon" href="{{ STATIC_URL }}img/favicon.ico" type="image/x-icon" />
 
     {% include "css-conf.html" %}
-
     {% include "js-conf.html" %}
 </head>
 <body data-ng-init="site = 'OIL'">
@@ -65,9 +64,14 @@
         </header>
         <main id="body">
             <div id="main-content" data-maas-error-overlay>
-                <div id="content" data-ng-view> </div>
+            <div id="content" class="six-col" data-ng-view>
+                {% verbatim %}
+                <div data-ng-controller="weeblController as builds">
+                    I have {{ builds.count }} builds.
+                </div>
+                {% endverbatim %}
             </div>
-            <div class="push"></div>
+            </div>
         </main>
     </div>
     <div class="footer-wrapper" data-maas-error-toggle>
