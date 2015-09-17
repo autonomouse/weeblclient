@@ -14,8 +14,6 @@ class Weebl(object):
                  weebl_api_ver="v1",
                  weebl_auth=('weebl', 'passweebl')):
         self.LOG = utils.get_logger("weeblSDK_python2")
-        self.LOG.info("Connecting to Weebl hosted at: {}".format(weebl_url))
-        self.LOG.info("Using client version: {}".format(weebl_api_ver))
         self.env_name = env_name
         self.uuid = uuid
         self.weebl_url = weebl_url
