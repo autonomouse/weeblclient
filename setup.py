@@ -3,27 +3,7 @@ from setuptools import setup, find_packages
 import six
 
 
-if six.PY2:
-    import weeblclient
-    from weeblclient import weebl_python2
-    setup(
-        name="weeblclient",
-        version=weebl_python2.__version__,
-        description="Web App for OIL client",
-        author="Darren Hoyland",
-        author_email="<darren.hoyland@canonical.com>",
-        url="http://launchpad.net/weebl",
-        packages=find_packages(exclude=['weebl', 'weebl.*']),
-        include_package_data=True,
-        classifiers=[
-            "Development Status :: 2 - Pre-Alpha",
-            "Programming Language :: Python",
-            "Topic :: Internet",
-            "Topic :: Software Development :: Libraries :: Python Modules",
-            "Intended Audience :: Developers"
-        ],
-    )
-elif six.PY3:
+if six.PY3:
     import weebl
     import tasks
     setup(
@@ -48,4 +28,24 @@ elif six.PY3:
         },
     )
 else:
-    raise Exception('Cannot build package for unknown python version')
+    # should really check six.PY2 and raise exception if not -- but version
+    # in precise non-updates is ancient and does not have that attribute
+    import weeblclient
+    from weeblclient import weebl_python2
+    setup(
+        name="weeblclient",
+        version=weebl_python2.__version__,
+        description="Web App for OIL client",
+        author="Darren Hoyland",
+        author_email="<darren.hoyland@canonical.com>",
+        url="http://launchpad.net/weebl",
+        packages=find_packages(exclude=['weebl', 'weebl.*']),
+        include_package_data=True,
+        classifiers=[
+            "Development Status :: 2 - Pre-Alpha",
+            "Programming Language :: Python",
+            "Topic :: Internet",
+            "Topic :: Software Development :: Libraries :: Python Modules",
+            "Intended Audience :: Developers"
+        ],
+    )
