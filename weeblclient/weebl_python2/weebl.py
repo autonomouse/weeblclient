@@ -72,10 +72,9 @@ class Weebl(object):
         response = self.make_request('get', url=url)
         return json.loads(response.text).get('objects')
 
-    def weeblify_environment(self, jenkins_host, ci_server_api=None,
-                             report=True):
-        self.set_up_new_environment(report=report)
-        self.set_up_new_jenkins(jenkins_host, report=report)
+    def weeblify_environment(self, jenkins_host, ci_server_api=None):
+        self.set_up_new_environment()
+        self.set_up_new_jenkins(jenkins_host)
         if ci_server_api is not None and hasattr(ci_server_api, 'jenkins_api'):
             self.set_up_new_build_executors(ci_server_api.jenkins_api)
 
@@ -163,11 +162,9 @@ class Weebl(object):
             self.LOG.info(msg.format(self.env_name,
                           newly_created_build_executors))
 
-    def set_up_new_environment(self, report=True):
+    def set_up_new_environment(self):
         if self.environment_exists(self.uuid):
-            if report:
-                self.LOG.info("Environment exists with UUID: {}"
-                              .format(self.uuid))
+            self.LOG.info("Environment exists with UUID: {}".format(self.uuid))
             env_name = self.get_env_name_from_uuid(self.uuid)
             if env_name != self.env_name:
                 msg = "Environment name provided ({0}) does not match the "
@@ -187,11 +184,9 @@ class Weebl(object):
         self.LOG.info("Set up new {} environment: {}".format(
             self.env_name, self.uuid))
 
-    def set_up_new_jenkins(self, jenkins_host, report=True):
+    def set_up_new_jenkins(self, jenkins_host):
         if self.jenkins_exists(self.uuid):
-            if report:
-                self.LOG.info("Jenkins exists with UUID: {}"
-                              .format(self.uuid))
+            self.LOG.info("Jenkins exists with UUID: {}".format(self.uuid))
             return
 
         # Create new jenkins:
@@ -208,11 +203,9 @@ class Weebl(object):
         response = self.make_request('put', url=url)
         return json.loads(response.text).get('uuid')
 
-    def create_pipeline(self, pipeline_id, build_executor_name, report = True):
+    def create_pipeline(self, pipeline_id, build_executor_name):
         if self.pipeline_exists(pipeline_id):
-            if report:
-                self.LOG.info("Pipeline exists with UUID: {}"
-                              .format(pipeline_id))
+            self.LOG.info("Pipeline exists with UUID: {}".format(pipeline_id))
             return pipeline_id
 
         # Get Build Executor:
