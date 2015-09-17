@@ -9,17 +9,17 @@ class Weebl(object):
     """Weebl API wrapper class."""
 
     def __init__(self, uuid, env_name,
-                 weebl_ip="http://10.245.0.14",
+                 weebl_url="http://10.245.0.14",
                  weebl_api_ver="v1",
                  weebl_auth=('weebl', 'passweebl')):
         self.LOG = utils.get_logger("weeblSDK_python2")
         self.env_name = env_name
         self.uuid = uuid
-        self.weebl_ip = weebl_ip
+        self.weebl_url = weebl_url
         self.weebl_auth = weebl_auth
         self.headers = {"content-type": "application/json",
                         "limit": None}
-        self.base_url = "{}/api/{}".format(weebl_ip, weebl_api_ver)
+        self.base_url = "{}/api/{}".format(weebl_url, weebl_api_ver)
 
     def make_request(self, method, raise_exception=True, **params):
         params['headers'] = self.headers
@@ -313,7 +313,7 @@ class Weebl(object):
 
     def get_bug_info(self, force_refresh=True):
         self.LOG.info("Downloading bug regexs from Weebl: {}"
-                      .format(self.weebl_ip))
+                      .format(self.weebl_url))
         regular_expression_instances = self.get_instances("regular_expression")
         bug_instances = self.get_instances("bug")
         bug_tracker_bug_instances = self.get_instances("bug_tracker_bug")
