@@ -1,6 +1,7 @@
 import json
 import requests
 import subprocess
+from datetime import datetime
 from weeblclient.weebl_python2 import utils
 from weeblclient.weebl_python2.exception import UnexpectedStatusCode
 
@@ -9,17 +10,28 @@ class Weebl(object):
     """Weebl API wrapper class."""
 
     def __init__(self, uuid, env_name,
-                 weebl_ip="http://10.245.0.14",
+                 weebl_url="http://10.245.0.14",
                  weebl_api_ver="v1",
                  weebl_auth=('weebl', 'passweebl')):
         self.LOG = utils.get_logger("weeblSDK_python2")
+        self.LOG.info("Connecting to Weebl hosted at: {}".format(weebl_url))
+        self.LOG.info("Using client version: {}".format(weebl_api_ver))
         self.env_name = env_name
         self.uuid = uuid
-        self.weebl_ip = weebl_ip
+        self.weebl_url = weebl_url
         self.weebl_auth = weebl_auth
         self.headers = {"content-type": "application/json",
                         "limit": None}
-        self.base_url = "{}/api/{}".format(weebl_ip, weebl_api_ver)
+        self.base_url = "{}/api/{}".format(weebl_url, weebl_api_ver)
+
+    def convert_timestamp_to_dt_obj(self, timestamp):
+        timestamp_in_ms = timestamp / 1000
+        return datetime.fromtimestamp(timestamp_in_ms)
+
+    def convert_timestamp_to_string(self, timestamp,
+                                    ts_format='%a %d %b %Y %H:%M:%S'):
+        dt_obj = self.convert_timestamp_to_dt_obj(timestamp)
+        return dt_obj.strftime(ts_format)
 
     def make_request(self, method, raise_exception=True, **params):
         params['headers'] = self.headers
@@ -45,6 +57,21 @@ class Weebl(object):
         response = self.make_request('get', url=url)
         return json.loads(response.text).get('objects')
 
+    def get_single_instance(self, obj, instance_id):
+        url = "{}/{}/{}/".format(self.base_url, obj, instance_id)
+        response = self.make_request('get', url=url)
+        return json.loads(response.text)
+
+    def filter_instances(self, obj, filters):
+        filter_by = '?'
+        for num, fltr in enumerate(filters):
+            filter_by += "{}={}".format(fltr[0], fltr[1])
+            if num != (len(filters) - 1):
+                filter_by += "&"
+        url = "{}/{}/{}".format(self.base_url, obj, filter_by, filter_by)
+        response = self.make_request('get', url=url)
+        return json.loads(response.text).get('objects')
+
     def weeblify_environment(self, jenkins_host, ci_server_api=None,
                              report=True):
         self.set_up_new_environment(report=report)
@@ -53,47 +80,64 @@ class Weebl(object):
             self.set_up_new_build_executors(ci_server_api.jenkins_api)
 
     def environment_exists(self, uuid):
-        environment_instances = self.get_instances("environment")
+        environment_instances = self.filter_instances(
+            "environment", [('uuid', uuid)])
         if uuid in [env.get('uuid') for env in environment_instances]:
             return True
         return False
 
-    def build_executor_exists(self, name, env_uuid):
-        build_executor_instances = self.get_instances("build_executor")
-        b_ex_in_env = [bex.get('name') for bex in build_executor_instances
-                       if env_uuid in bex['jenkins']]
-        return True if name in b_ex_in_env else False
-
-    def jenkins_exists(self):
-        jkns_instances = self.get_instances("jenkins")
+    def jenkins_exists(self, uuid):
+        jkns_instances = self.filter_instances("jenkins", [('uuid', uuid)])
         if jkns_instances is not None:
             if self.uuid in [jkns.get('uuid') for jkns in jkns_instances]:
                 return True
         return False
 
+    def build_executor_exists(self, name, env_uuid):
+        build_executor_instances = self.filter_instances(
+            "build_executor", [('name', name)])
+        b_ex_in_env = [bex.get('name') for bex in build_executor_instances
+                       if env_uuid in bex['jenkins']]
+        return True if name in b_ex_in_env else False
+
     def pipeline_exists(self, pipeline_id):
-        pipeline_instances = self.get_instances("pipeline")
+        pipeline_instances = self.filter_instances(
+            "pipeline", [('uuid', pipeline_id)])
         if pipeline_instances is not None:
             if pipeline_id in [pl.get('uuid') for pl in pipeline_instances]:
                 return True
         return False
 
-    def build_exists(self, build_id, job_type, pipeline):
-        build_instances = self.get_instances("build")
-        builds = [bld.get('build_id') for bld in build_instances if pipeline
-                  in bld['pipeline'] and job_type in bld['job_type']]
-        return True if build_id in builds else False
+    def build_exists(self, build_id, pipeline):
+        build_instances = self.filter_instances(
+            "build", [('build_id', build_id)])
+        builds = [bld.get('uuid') for bld in build_instances if pipeline
+                  in bld['pipeline']]
+        if builds != []:
+            return builds[0]
+        return
 
-    def regular_expression_exists(self, regex):
-        regular_expression_instances = self.get_instances("regular_expression")
-        if regular_expression_instances is not None:
+    def known_bug_regex_exists(self, regex):
+        known_bug_regex_instances = self.filter_instances(
+            "known_bug_regex", [('regex', regex)])
+        if known_bug_regex_instances is not None:
             if regex in [kbr.get('regex') for kbr in
-                         regular_expression_instances]:
+                         known_bug_regex_instances]:
                 return True
         return False
 
+    def bug_occurrence_exists(self, build_uuid, regex_uuid):
+        bug_occurrence_instances = self.filter_instances(
+            "bug_occurrence", [('build__uuid', build_uuid),
+                               ('regex__uuid', regex_uuid)])
+        build_uuids = [bugocc.get('uuid') for bugocc in
+              bug_occurrence_instances if build_uuid in bugocc['build']
+              and regex_uuid in bugocc['regex']]
+        return True if build_uuids != [] else False
+
     def target_file_glob_exists(self, glob_pattern):
-        target_file_glob_instances = self.get_instances("target_file_glob")
+        target_file_glob_instances = self.filter_instances(
+            "target_file_glob", [('glob_pattern', glob_pattern)])
         if target_file_glob_instances is not None:
             if glob_pattern in [tfglobs.get('glob_pattern') for tfglobs in
                                 target_file_glob_instances]:
@@ -144,7 +188,7 @@ class Weebl(object):
             self.env_name, self.uuid))
 
     def set_up_new_jenkins(self, jenkins_host, report=True):
-        if self.jenkins_exists():
+        if self.jenkins_exists(self.uuid):
             if report:
                 self.LOG.info("Jenkins exists with UUID: {}"
                               .format(self.uuid))
@@ -190,18 +234,18 @@ class Weebl(object):
 
         return returned_pipeline
 
-    def create_regular_expression(self, glob_pattern, regex, bug=None):
-        if self.regular_expression_exists(regex):
+    def create_known_bug_regex(self, glob_pattern, regex, bug=None):
+        if self.known_bug_regex_exists(regex):
             return
 
-        # Create regular_expression:
-        url = "{}/regular_expression/".format(self.base_url)
+        # Create known_bug_regex:
+        url = "{}/known_bug_regex/".format(self.base_url)
         data = {"target_file_globs": glob_pattern,
                 "regex": regex}
         if bug is not None:
             data['bug'] = bug
         response = self.make_request('post', url=url, data=json.dumps(data))
-        returned_regex = json.loads(response.text).get('regular_expression')
+        returned_regex = json.loads(response.text).get('known_bug_regex')
         if response.status_code == 201:
             self.LOG.info(
                 "Regex \"{}\" successfully created in Weebl".format(regex))
@@ -267,8 +311,9 @@ class Weebl(object):
     def create_build(self, build_id, pipeline, job_type, build_status,
                      build_started_at=None, build_finished_at=None,
                      ts_format="%Y-%m-%d %H:%M:%SZ"):
-        if self.build_exists(build_id, job_type, pipeline):
-            return build_id
+        build_uuid = self.build_exists(build_id, pipeline)
+        if build_uuid is not None:
+            return build_uuid
 
         # Create build:
         url = "{}/build/".format(self.base_url)
@@ -296,94 +341,87 @@ class Weebl(object):
             self.LOG.error(msg)
             raise Exception(msg)
 
-        return returned_build_id
+        return build_uuid
 
-    def populate_re_dict(self, regular_expression):
-        re_dict = {}
-        regex = {'regexp': [regular_expression['regex']]}
-        for target_file_glob in regular_expression['target_file_globs']:
-            jobs = [tfile['job_types'] for tfile in
-                    self.get_instances("target_file_glob") if
-                    tfile['glob_pattern'] == target_file_glob][0]
-            if jobs == []:
-                re_dict['*'] = regex
-            for job in jobs:
-                re_dict[job] = regex
-        return re_dict
+    def create_bug_occurrence(self, build_uuid, regex_uuid):
+        if self.bug_occurrence_exists(build_uuid, regex_uuid):
+            return
+
+        # Create Bug Occurrence:
+        url = "{}/bug_occurrence/".format(self.base_url)
+        data = {'build': build_uuid,
+                'regex': regex_uuid}
+        response = self.make_request('post', url=url, data=json.dumps(data))
+        bug_occurrence_uuid = json.loads(response.text).get('uuid')
+        self.LOG.info("Bug Occurrence created (bug occurrence uuid: {})"
+                      .format(bug_occurrence_uuid))
 
     def get_bug_info(self, force_refresh=True):
         self.LOG.info("Downloading bug regexs from Weebl: {}"
-                      .format(self.weebl_ip))
-        regular_expression_instances = self.get_instances("regular_expression")
+                      .format(self.weebl_url))
+        known_bug_regex_instances = self.get_instances("known_bug_regex")
         bug_instances = self.get_instances("bug")
         bug_tracker_bug_instances = self.get_instances("bug_tracker_bug")
-        return self.munge_bug_info_data(
-            regular_expression_instances, bug_instances,
-            bug_tracker_bug_instances)
+        target_file_glob = self.get_instances("target_file_glob")
 
-    def munge_bug_info_data(self, regular_expression_instances, bug_instances,
-                            bug_tracker_bug_instances):
+        return self.munge_bug_info_data(
+            known_bug_regex_instances, bug_instances,
+            bug_tracker_bug_instances, target_file_glob)
+
+
+    def munge_bug_info_data(self, known_bug_regex_instances, bug_instances,
+                            bug_tracker_bug_instances, target_file_globs):
         """Get the data and put it into the format doberman is expecting (the
         same as test-catalog's get_bug_info method).
         """
         bug_info = {'bugs': {}}
-        for regular_expression in regular_expression_instances:
-            bug_id = regular_expression.get("bug")
-            if bug_id is not None:
-                bug_list = [bug for bug in bug_instances if
-                            bug['uuid'] == bug_id]
-                if bug_list is []:
-                    bug = None
-                    bug_info['bugs'][bug_id] =\
-                        self.populate_re_dict(regular_expression)
-                    bug_info['bugs'][bug_id]['description'] = ""
-                    bug_tracker_bug_ids = []
-                else:
-                    bug = bug_list[0]
-                    bug_tracker_bug_ids = bug.get("bug_tracker_bugs")
+        for target_file_glob in target_file_globs:
+            tfile = target_file_glob['glob_pattern']
+            jobs = target_file_glob.get('job_types')
+            if jobs == []:
+                continue
+            for known_bug_regex in known_bug_regex_instances:
+                regex = known_bug_regex['regex']
+                regex_uuid = known_bug_regex['uuid']
+                files_bug_affects = known_bug_regex.get('target_file_globs')
+                weebl_bug = known_bug_regex.get('bug')
+
+                for bug in bug_instances:
                     # Description here is misnamed - actually means summary:
-                    if bug_tracker_bug_ids in [None, []]:
-                        bug_info['bugs'][bug_id] =\
-                            self.populate_re_dict(regular_expression)
-                        bug_info['bugs'][bug_id]['description'] =\
-                            bug.get('summary')
-                    else:
-                        for bug_tracker_bug in bug_tracker_bug_ids:
-                            bug_tracker_bug_instance = [
-                                usbug for usbug in
-                                bug_tracker_bug_instances if
-                                usbug['bug_id'] == bug_tracker_bug][0]
-                            bug_info['bugs'][bug_tracker_bug] = {}
-                            bug_info['bugs'][bug_tracker_bug]['category'] =\
-                                bug_tracker_bug_instance.get('category')
-                            bug_info['bugs'][bug_tracker_bug]['affects'] =\
-                                bug_tracker_bug_instance.get('affects')
-                            bug_info['bugs'][bug_tracker_bug]['description'] =\
-                                bug_tracker_bug_instance.get('description')
-            else:
-                bug_tracker_bug_ids = []
-                bug_id = "Unknown"
-                bug_info['bugs'][bug_id] =\
-                    self.populate_re_dict(regular_expression)
-                bug_info['bugs'][bug_id]['description'] = ""
-            bug_info['bugs'][bug_id]['category'] = []
-            bug_info['bugs'][bug_id]['affects'] = []
+                    description = bug.get('summary')
+                    if bug['uuid'] == weebl_bug:
+                        if bug['bug_tracker_bugs'] == []:
+                            continue
+                        lp_bugs = bug['bug_tracker_bugs']
+
+                        if tfile in files_bug_affects:
+                            for job in jobs:
+                                tfile_re = {}
+                                for lp_bug in lp_bugs:
+                                    if lp_bug not in bug_info['bugs']:
+                                        lpbug_dict = {}
+
+                                    if 'affects' not in lpbug_dict:
+                                        # TODO: Get from bug_tracker_bug after
+                                        # LP integration:
+                                        lpbug_dict['affects'] = []
+                                    if 'category' not in lpbug_dict:
+                                        # TODO: Get from bug_tracker_bug after
+                                        # LP integration:
+                                        lpbug_dict['category'] = []
+                                    if 'description' not in lpbug_dict:
+                                        lpbug_dict['description'] = description
+                                    if 'regex_uuid' not in lpbug_dict:
+                                        lpbug_dict['regex_uuid'] = regex_uuid
+                                    if job not in lpbug_dict:
+                                        lpbug_dict[job] = []
+
+                                    bug_info['bugs'][lp_bug] = lpbug_dict
+
+                                    if tfile not in tfile_re:
+                                        tfile_re[tfile] = {'regexp': []}
+
+                                    if regex not in tfile_re[tfile]['regexp']:
+                                        tfile_re[tfile]['regexp'].append(regex)
+                                bug_info['bugs'][lp_bug][job].append(tfile_re)
         return bug_info
-
-    def delete_bug_info(self, bugno):
-        """This method does nothing, as deletion is not required for updating
-        the data in weebl."""
-        pass
-
-    def add_bug_info(self, bugno, names, file_, reg, boolean):
-        """
-        warning:
-        'Failed to parse config:\s+lxc.include\s+=\s+.usr.share.lxc.config.ubuntu-cloud.common.conf'
-        has become:
-        'Failed to parse config:\\s+lxc.include\\s+=\\s+.usr.share.lxc.config.ubuntu-cloud.common.conf'
-
-        check in doberman once it is downloaded again
-        """
-        self.create_target_file_glob(glob_pattern=file_, job_types=names)
-        self.create_regular_expression(
-            glob_pattern=file_, regex=reg, bug=bugno)
