@@ -1,7 +1,6 @@
 angular.module('weebl', ['oil_builds'])
 .controller('weeblController', ['buildsRetriever', function(buildsRetriever) {
    buildsRetriever.refresh(this);
-//   this.count = buildsRetriever.total_count;
 }]);
 
 angular.module('oil_builds', [])
@@ -13,8 +12,6 @@ angular.module('oil_builds', [])
        scope.count = data.meta.total_count;
     });
   };
-
-  // refresh();
 
   return {
     total_count: build_count,
