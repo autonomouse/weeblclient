@@ -150,6 +150,15 @@ class EnvironmentResourceTest(ResourceTests):
         self.assertEqual(non_obj.count(), 0)
         self.assertEqual(response.status_code, 204)
 
+    def test_get_filter_by_uuid(self):
+        r_dict0 = self.make_environment()
+        uuid = r_dict0['uuid']
+        response = self.api_client.get('/api/{}/environment/?uuid={}'
+                                       .format(self.version, uuid))
+        r_dict = self.deserialize(response)['objects'][0]
+        returned_uuid = r_dict['uuid']
+        self.assertEqual(uuid, returned_uuid)
+
 
 class ServiceStatusResourceTests(ResourceTests):
 

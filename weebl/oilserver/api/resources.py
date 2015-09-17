@@ -68,6 +68,7 @@ class EnvironmentResource(CommonResource):
         fields = ['uuid', 'name']
         authorization = Authorization()
         always_return_data = True
+        filtering = {'uuid': ALL, }
 
     def obj_create(self, bundle, request=None, **kwargs):
         # Update name if one is supplied:
