@@ -164,8 +164,11 @@ class Weebl(object):
         response = self.make_request('put', url=url)
         return json.loads(response.text).get('uuid')
 
-    def create_pipeline(self, pipeline_id, build_executor_name):
+    def create_pipeline(self, pipeline_id, build_executor_name, report = True):
         if self.pipeline_exists(pipeline_id):
+            if report:
+                self.LOG.info("Pipeline exists with UUID: {}"
+                              .format(pipeline_id))
             return pipeline_id
 
         # Get Build Executor:
