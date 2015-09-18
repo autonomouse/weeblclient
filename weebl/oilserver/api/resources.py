@@ -1,7 +1,7 @@
 import os
 import utils
 from tastypie import fields
-from tastypie.resources import ModelResource, ALL_WITH_RELATIONS
+from tastypie.resources import ModelResource, ALL, ALL_WITH_RELATIONS
 from tastypie.authorization import Authorization
 from tastypie.utils import trailing_slash
 from django.conf.urls import url
@@ -68,6 +68,7 @@ class EnvironmentResource(CommonResource):
         fields = ['uuid', 'name']
         authorization = Authorization()
         always_return_data = True
+        filtering = {'uuid': ALL, }
 
     def obj_create(self, bundle, request=None, **kwargs):
         # Update name if one is supplied:
@@ -144,6 +145,7 @@ class JenkinsResource(CommonResource):
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
         authorization = Authorization()
         always_return_data = True
+        filtering = {'uuid': ALL, }
 
     def hydrate(self, bundle):
         # Update timestamp (also prevents user submitting timestamp data):
@@ -205,7 +207,8 @@ class BuildExecutorResource(CommonResource):
         authorization = Authorization()
         always_return_data = True
         filtering = {'jenkins': ALL_WITH_RELATIONS,
-                     'name': ALL_WITH_RELATIONS, }
+                     'name': ALL,
+                     'uuid': ALL, }
 
     def obj_create(self, bundle, request=None, **kwargs):
         bundle.obj.jenkins =\
@@ -277,6 +280,7 @@ class PipelineResource(CommonResource):
         detail_allowed_methods = ['get', 'post', 'delete']  # individual
         authorization = Authorization()
         always_return_data = True
+        filtering = {'uuid': ALL, }
 
     def obj_create(self, bundle, request=None, **kwargs):
         bundle.obj.build_executor = models.BuildExecutor.objects.get(
@@ -349,6 +353,8 @@ class BuildResource(CommonResource):
                   'build_status', 'job_type']
         authorization = Authorization()
         always_return_data = True
+        filtering = {'uuid': ALL,
+                     'build_id': ALL, }
 
     def obj_create(self, bundle, request=None, **kwargs):
         bundle.obj.build_id = bundle.data['build_id']
@@ -406,6 +412,7 @@ class TargetFileGlobResource(CommonResource):
         fields = ['glob_pattern', 'job_type']
         authorization = Authorization()
         always_return_data = True
+        filtering = {'glob_pattern': ALL, }
 
     def obj_create(self, bundle, request=None, **kwargs):
         bundle.obj.glob_pattern = bundle.data['glob_pattern']
@@ -453,6 +460,8 @@ class KnownBugRegexResource(CommonResource):
                   'created_at', 'updated_at']
         authorization = Authorization()
         always_return_data = True
+        filtering = {'uuid': ALL,
+                     'regex': ALL, }
 
     def obj_create(self, bundle, request=None, **kwargs):
         bundle.obj.regex = bundle.data['regex']
@@ -599,6 +608,9 @@ class BugOccurrenceResource(CommonResource):
         fields = ['uuid', 'build', 'regex', 'created_at', 'updated_at']
         authorization = Authorization()
         always_return_data = True
+        filtering = {'uuid': ALL,
+                     'build': ALL_WITH_RELATIONS,
+                     'regex': ALL_WITH_RELATIONS, }
 
     def obj_create(self, bundle, request=None, **kwargs):
         if 'build' in bundle.data:

@@ -1,0 +1,27 @@
+Source: weebl
+Section: python
+Priority: extra
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+XSBC-Original-Maintainer: Darren Hoyland <darren.hoyland@canonical.com>
+Build-Depends: debhelper (>= 9.0.0),
+ python-all (>= 2.6.6-3~),
+ python-nose,
+ python-testtools,
+ python-requests,
+ python-setuptools,
+ python-six
+Standards-Version: 3.9.5
+XS-Python-Version: >= 2.6
+
+Package: python-weeblclient
+Architecture: all
+Section: python
+Depends: python-requests,
+ ${misc:Depends},
+ ${python:Depends}
+Provides: ${python:Provides}
+XB-Python-Version: ${python:Versions}
+Description: Python 2 SDK for interacting with Canonical's OIL webapp, Weebl.
+ Contains python 2 modules for interacting with the Weebl server.
+ .
+ This package provides the Python 2 modules for interacting with the Weebl server via it's REST API.
