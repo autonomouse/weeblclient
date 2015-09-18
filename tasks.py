@@ -338,7 +338,7 @@ def deploy_with_apache(apacheconf, deployloc, application, wsgifile="wsgi.py",
         author_email_list = [admin for admin in su.readlines() if
                              'author_email' in admin]
     pattern = re.compile("<.*>")
-    author_email = pattern.findall(str(author_email_list))[0][1:-1]
+    author_email = pattern.findall(str(author_email_list[0]))[0][1:-1]
 
     a2conf = "ServerName {2}\n"
     a2conf += "LogLevel debug\n"
