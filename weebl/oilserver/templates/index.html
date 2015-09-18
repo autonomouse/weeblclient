@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="no-js" lang="en" data-ng-app="weebl">
+<html class="no-js" lang="en" data-ng-app="stats">
 <head>
     <base href="{% url 'index' %}">
     <title data-ng-bind="title + ' | ' + site + ' weebl'"></title>
@@ -66,8 +66,8 @@
             <div id="main-content" data-maas-error-overlay>
             <div id="content" class="six-col" data-ng-view>
                 {% verbatim %}
-                <div data-ng-controller="weeblController as builds">
-                    I have {{ builds.count }} builds.
+                <div data-ng-controller="statsController as stats">
+                    I have {{ stats.count }} builds.
                 </div>
                 {% endverbatim %}
             </div>
