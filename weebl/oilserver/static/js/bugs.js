@@ -1,4 +1,4 @@
-var app = angular.module('stats', []);
+var app = angular.module('stats', ['ngRoute']);
 
 app.controller('bugsController', ['bugsRetriever', function(bugsRetriever) {
     bugsRetriever.refresh(this);

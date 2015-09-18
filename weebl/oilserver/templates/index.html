@@ -18,6 +18,7 @@
     <link rel="shortcut icon" href="{{ STATIC_URL }}img/favicon.ico" type="image/x-icon" />
 
     {% include "css-conf.html" %}
+    <script type="text/javascript" src="{{STATIC_URL}}js/stats.js"></script>
     {% include "js-conf.html" %}
 </head>
 <body data-ng-init="site = 'OIL'">
@@ -67,10 +68,29 @@
             <div id="content" class="six-col" data-ng-view>
                 {% verbatim %}
                 <div data-ng-controller="buildsController as builds">
-                    I have {{ builds.count }} builds.
-                <div data-ng-controller="bugsController as bugs">
-                    I have {{ bugs.count }} bugs.
-                </div>
+                    <div data-ng-controller="bugsController as bugs">
+                        <p>I have {{ builds.count }} builds...</p>
+                        <p>I have {{ bugs.count }} bugs...</p>
+                        <!------------------------------------------------>
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>UUID</th>
+                                <th>summary</th>
+                                <th>description</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr ng-repeat="bug in bugs.objects">
+                                <td>{{ bug.uuid }}</td>
+                                <td>{{ bug.summary }}</td>
+                                <td>{{ bug.description }}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <!------------------------------------------------>
+                    </div>
+                </div>      
                 {% endverbatim %}
             </div>
             </div>
