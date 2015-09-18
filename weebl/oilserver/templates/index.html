@@ -66,8 +66,10 @@
             <div id="main-content" data-maas-error-overlay>
             <div id="content" class="six-col" data-ng-view>
                 {% verbatim %}
-                <div data-ng-controller="statsController as stats">
-                    I have {{ stats.count }} builds.
+                <div data-ng-controller="buildsController as builds">
+                    I have {{ builds.count }} builds.
+                <div data-ng-controller="bugsController as bugs">
+                    I have {{ bugs.count }} bugs.
                 </div>
                 {% endverbatim %}
             </div>
