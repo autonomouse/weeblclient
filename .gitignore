@@ -4,10 +4,11 @@ usr/share/doc/weebl/changelog.gz
 usr/share/doc/weebl/weebl.html
 data/*
 *~
-__pycache__
+__pycache__/
 *.pyc
 node_modules/
 *.orig
 weebl/oilserver/static/admin/
 weebl/oilserver/static/tastypie_swagger/
-
+**/*.py[cod]
+**/__pycache__/

@@ -150,6 +150,15 @@ class EnvironmentResourceTest(ResourceTests):
         self.assertEqual(non_obj.count(), 0)
         self.assertEqual(response.status_code, 204)
 
+    def test_get_filter_by_uuid(self):
+        r_dict0 = self.make_environment()
+        uuid = r_dict0['uuid']
+        response = self.api_client.get('/api/{}/environment/?uuid={}'
+                                       .format(self.version, uuid))
+        r_dict = self.deserialize(response)['objects'][0]
+        returned_uuid = r_dict['uuid']
+        self.assertEqual(uuid, returned_uuid)
+
 
 class ServiceStatusResourceTests(ResourceTests):
 
@@ -282,6 +291,14 @@ class JenkinsResourceTests(ResourceTests):
         first_object = r_dict1['objects'][0]
         value = first_object.get('service_status').rstrip('/').split('/')[-1]
         self.assertTrue(value in ['unknown', 'up', 'unstable', 'down'])
+
+    def test_get_filter_by_uuid(self):
+        uuid, random_name = self.make_environment_and_jenkins()
+        response = self.api_client.get('/api/{}/jenkins/?uuid={}'
+                                       .format(self.version, uuid))
+        r_dict = self.deserialize(response)['objects'][0]
+        returned_uuid = r_dict['uuid']
+        self.assertEqual(uuid, returned_uuid)
 
 
 class BuildExecutorResourceTests(ResourceTests):
@@ -421,6 +438,37 @@ class BuildExecutorResourceTests(ResourceTests):
         self.assertEqual(non_obj.count(), 0)
         self.assertEqual(response.status_code, 204)
 
+    def test_get_filter_by_uuid(self):
+        r_dict0, status_code = self.make_build_executor()
+        uuid = r_dict0['uuid']
+        response = self.api_client.get('/api/{}/build_executor/?uuid={}'
+                                       .format(self.version, uuid))
+        r_dict = self.deserialize(response)['objects'][0]
+        returned_uuid = r_dict['uuid']
+        self.assertEqual(uuid, returned_uuid)
+
+    def test_get_filter_by_name(self):
+        r_dict0, status_code = self.make_build_executor()
+        name = r_dict0['name']
+        response = self.api_client.get('/api/{}/build_executor/?name={}'
+                                       .format(self.version, name))
+        r_dict = self.deserialize(response)['objects'][0]
+        returned_name = r_dict['name']
+        self.assertEqual(name, returned_name)
+
+    def test_get_filter_by_uuid_and_name(self):
+        r_dict0, status_code = self.make_build_executor()
+        uuid = r_dict0['uuid']
+        name = r_dict0['name']
+        response = self.api_client.get(
+            '/api/{}/build_executor/?uuid={}&name={}'
+            .format(self.version, uuid, name))
+        r_dict = self.deserialize(response)['objects'][0]
+        returned_uuid = r_dict['uuid']
+        returned_name = r_dict['name']
+        self.assertEqual(uuid, returned_uuid)
+        self.assertEqual(name, returned_name)
+
 
 class PipelineResourceTests(ResourceTests):
 
@@ -505,6 +553,15 @@ class PipelineResourceTests(ResourceTests):
         non_obj = models.Pipeline.objects.filter(uuid=pipeline_id)
         self.assertEqual(non_obj.count(), 0)
         self.assertEqual(response.status_code, 204)
+
+    def test_get_filter_by_uuid(self):
+        r_dict0, status_code = self.make_pipeline()
+        uuid = r_dict0['uuid']
+        response = self.api_client.get('/api/{}/pipeline/?uuid={}'
+                                       .format(self.version, uuid))
+        r_dict = self.deserialize(response)['objects'][0]
+        returned_uuid = r_dict['uuid']
+        self.assertEqual(uuid, returned_uuid)
 
 
 class BuildStatusResourceTests(ResourceTests):
@@ -771,6 +828,36 @@ class BuildResourceTests(ResourceTests):
         value = first_object.get('build_status').rstrip('/').split('/')[-1]
         self.assertTrue(value in ['unknown', 'success', 'failure', 'aborted'])
 
+    def test_get_filter_by_uuid(self):
+        r_dict0, status_code = self.make_build()
+        uuid = r_dict0['uuid']
+        response = self.api_client.get('/api/{}/build/?uuid={}'
+                                       .format(self.version, uuid))
+        r_dict = self.deserialize(response)['objects'][0]
+        returned_uuid = r_dict['uuid']
+        self.assertEqual(uuid, returned_uuid)
+
+    def test_get_filter_by_build_id(self):
+        r_dict0, status_code = self.make_build()
+        build_id = r_dict0['build_id']
+        response = self.api_client.get('/api/{}/build/?build_id={}'
+                                       .format(self.version, build_id))
+        r_dict = self.deserialize(response)['objects'][0]
+        returned_build_id = r_dict['build_id']
+        self.assertEqual(build_id, returned_build_id)
+
+    def test_get_filter_by_build_id_and_uuid(self):
+        r_dict0, status_code = self.make_build()
+        uuid = r_dict0['uuid']
+        build_id = r_dict0['build_id']
+        response = self.api_client.get('/api/{}/build/?uuid={}&build_id={}'
+                                       .format(self.version, uuid, build_id))
+        r_dict = self.deserialize(response)['objects'][0]
+        returned_uuid = r_dict['uuid']
+        returned_build_id = r_dict['build_id']
+        self.assertEqual(uuid, returned_uuid)
+        self.assertEqual(build_id, returned_build_id)
+
 
 class TargetFileGlobResourceTests(ResourceTests):
 
@@ -880,6 +967,16 @@ class TargetFileGlobResourceTests(ResourceTests):
             glob_pattern=target_file_glob_name)
         self.assertEqual(non_obj.count(), 0)
         self.assertEqual(response.status_code, 204)
+
+    def test_get_filter_by_glob_pattern(self):
+        r_dict0, status_code = self.make_target_file_glob()
+        glob_pattern = r_dict0['glob_pattern']
+        response = self.api_client.get(
+            '/api/{}/target_file_glob/?glob_pattern={}'
+            .format(self.version, glob_pattern))
+        r_dict = self.deserialize(response)['objects'][0]
+        returned_glob_pattern = r_dict['glob_pattern']
+        self.assertEqual(glob_pattern, returned_glob_pattern)
 
 
 class KnownBugRegexResourceTests(ResourceTests):
@@ -1133,6 +1230,37 @@ class KnownBugRegexResourceTests(ResourceTests):
                          msg="KnownBugRegex not deleted")
         self.assertEqual(response.status_code, 204,
                          msg="Incorrect status code")
+
+    def test_get_filter_by_uuid(self):
+        r_dict0, status_code = self.make_known_bug_regex()
+        uuid = r_dict0['uuid']
+        response = self.api_client.get('/api/{}/known_bug_regex/?uuid={}'
+                                       .format(self.version, uuid))
+        r_dict = self.deserialize(response)['objects'][0]
+        returned_uuid = r_dict['uuid']
+        self.assertEqual(uuid, returned_uuid)
+
+    def test_get_filter_by_regex(self):
+        r_dict0, status_code = self.make_known_bug_regex()
+        regex = r_dict0['regex']
+        response = self.api_client.get('/api/{}/known_bug_regex/?regex={}'
+                                       .format(self.version, regex))
+        r_dict = self.deserialize(response)['objects'][0]
+        returned_regex = r_dict['regex']
+        self.assertEqual(regex, returned_regex)
+
+    def test_get_filter_by_regex_and_uuid(self):
+        r_dict0, status_code = self.make_known_bug_regex()
+        uuid = r_dict0['uuid']
+        regex = r_dict0['regex']
+        response = self.api_client.get(
+            '/api/{}/known_bug_regex/?uuid={}&regex={}'
+            .format(self.version, uuid, regex))
+        r_dict = self.deserialize(response)['objects'][0]
+        returned_uuid = r_dict['uuid']
+        returned_regex = r_dict['regex']
+        self.assertEqual(uuid, returned_uuid)
+        self.assertEqual(regex, returned_regex)
 
 
 class BugResourceTests(ResourceTests):
@@ -1569,3 +1697,44 @@ class BugOccurrenceResourceTests(ResourceTests):
         self.assertEqual(non_obj.count(), 0, msg="Bug not deleted")
         self.assertEqual(response.status_code, 204,
                          msg="Incorrect status code")
+
+    def test_get_filter_by_uuid(self):
+        r_dict0, status_code = self.make_bug_occurrence()
+        uuid = r_dict0['uuid']
+        response = self.api_client.get('/api/{}/bug_occurrence/?uuid={}'
+                                       .format(self.version, uuid))
+        r_dict = self.deserialize(response)['objects'][0]
+        returned_uuid = r_dict['uuid']
+        self.assertEqual(uuid, returned_uuid)
+
+    def test_get_filter_by_regex(self):
+        regex = self.make_known_bug_regex()[0].get('uuid')
+        r_dict0, status_code = self.make_bug_occurrence(regex=regex)
+        response = self.api_client.get('/api/{}/bug_occurrence/?regex__uuid={}'
+                                       .format(self.version, regex))
+        r_dict = self.deserialize(response)['objects'][0]
+        returned_regex = r_dict['regex']
+        self.assertIn(regex, returned_regex)
+
+    def test_get_filter_by_build(self):
+        build = self.make_build()[0].get('uuid')
+        r_dict0, status_code = self.make_bug_occurrence(build=build)
+        response = self.api_client.get('/api/{}/bug_occurrence/?build__uuid={}'
+                                       .format(self.version, build))
+        r_dict = self.deserialize(response)['objects'][0]
+        returned_build = r_dict['build']
+        self.assertIn(build, returned_build)
+
+    def test_get_filter_by_regex_and_build(self):
+        regex = self.make_known_bug_regex()[0].get('uuid')
+        build = self.make_build()[0].get('uuid')
+        r_dict0, status_code = self.make_bug_occurrence(
+            regex=regex, build=build)
+        response = self.api_client.get(
+            '/api/{}/bug_occurrence/?regex__uuid={}&build__uuid={}'
+            .format(self.version, regex, build))
+        r_dict = self.deserialize(response)['objects'][0]
+        returned_regex = r_dict['regex']
+        returned_build = r_dict['build']
+        self.assertIn(regex, returned_regex)
+        self.assertIn(build, returned_build)
