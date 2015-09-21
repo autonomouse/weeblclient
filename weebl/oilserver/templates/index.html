@@ -70,6 +70,8 @@
                     <div data-ng-controller="bugsController as bugs">
                         <p>I have {{ builds.pipeline_count }} pipelines...</p>
                         <p>I have {{ builds.pass_deploy_count }} successful pipeline deploys...</p>
+                        <p>I have {{ builds.pass_prepare_count }} successful pipeline prepares...</p>
+                        <p>I have {{ builds.pass_test_cloud_image_count }} successful guest OS tests...</p>
                         <p>I have {{ bugs.count }} bugs...</p>
                         <!------------------------------------------------>
                         <table>
