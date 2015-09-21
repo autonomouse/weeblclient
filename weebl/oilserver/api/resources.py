@@ -275,12 +275,15 @@ class PipelineResource(CommonResource):
 
     class Meta:
         queryset = models.Pipeline.objects.all()
-        fields = ['uuid', 'build_executor']
+        fields = ['uuid', 'build_executor', 'completed_at']
         list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'delete']  # individual
         authorization = Authorization()
         always_return_data = True
-        filtering = {'uuid': ALL, }
+        filtering = {
+            'completed_at': ALL,
+            'uuid': ALL,
+        }
 
     def obj_create(self, bundle, request=None, **kwargs):
         bundle.obj.build_executor = models.BuildExecutor.objects.get(
@@ -333,6 +336,7 @@ class JobTypeResource(CommonResource):
         fields = ['name', 'description']
         authorization = Authorization()
         always_return_data = True
+        filtering = {'name': ALL, }
 
     def dehydrate(self, bundle):
         replace_with = [('resource_uri', bundle.obj.name), ]
@@ -354,7 +358,9 @@ class BuildResource(CommonResource):
         authorization = Authorization()
         always_return_data = True
         filtering = {'uuid': ALL,
-                     'build_id': ALL, }
+                     'build_id': ALL,
+                     'job_type': ALL_WITH_RELATIONS,
+                     'pipeline': ALL_WITH_RELATIONS}
 
     def obj_create(self, bundle, request=None, **kwargs):
         bundle.obj.build_id = bundle.data['build_id']
@@ -391,9 +397,10 @@ class BuildResource(CommonResource):
 
     def dehydrate(self, bundle):
         replace_with = [('resource_uri', bundle.obj.uuid),
-                        ('build_status', bundle.obj.build_status),
-                        ('job_type', bundle.obj.job_type),
+                        ('build_status', bundle.obj.build_status.name),
+                        ('job_type', bundle.obj.job_type.name),
                         ('pipeline', bundle.obj.pipeline.uuid), ]
+
         return self.replace_bundle_item_with_alternative(bundle, replace_with)
 
     def hydrate(self, bundle):
