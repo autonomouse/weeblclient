@@ -204,6 +204,11 @@ class Pipeline(models.Model):
         null=False,
         help_text="The pipeline ID (a UUID).")
     build_executor = models.ForeignKey(BuildExecutor)
+    completed_at = models.DateTimeField(
+        default=None,
+        blank=True,
+        null=True,
+        help_text="DateTime the pipeline was completed at.")
 
     def __str__(self):
         return self.uuid
