@@ -68,7 +68,8 @@
                 {% verbatim %}
                 <div data-ng-controller="buildsController as builds">
                     <div data-ng-controller="bugsController as bugs">
-                        <p>I have {{ builds.count }} pipelines...</p>
+                        <p>I have {{ builds.pipeline_count }} pipelines...</p>
+                        <p>I have {{ builds.pass_deploy_count }} successful pipeline deploys...</p>
                         <p>I have {{ bugs.count }} bugs...</p>
                         <!------------------------------------------------>
                         <table>
