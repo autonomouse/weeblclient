@@ -11,6 +11,7 @@ builds_app.controller('buildsController', [
         binding = this;
 
         function updateStats(start_date, finish_date) {
+            console.log("Filtering dates from %s to %s", start_date, finish_date);
             buildsRetriever.refresh(binding, 'pipeline_count',
                                     'pipeline_deploy', start_date,
                                     finish_date);
@@ -25,23 +26,37 @@ builds_app.controller('buildsController', [
                                     finish_date, 'success');
         };
 
-        updateStats('2015-01-01', '2016-01-01');
+        function dateToString(date) {
+            return date.getFullYear() + "-" + date.getMonth() + "-" + date.getDate();
+        }
 
         function updateDates(value) {
+            var days_offset = 0;
             switch(value) {
                 case "Last 24 Hours":
-                    console.log("Updating to last 24 hours.");
+                    days_offset = 1;
                     break;
                 case "Last 7 Days":
-                    console.log("Updating to last 7 days.");
+                    days_offset = 7;
                     break;
                 case "Last 30 Days":
-                    console.log("Updating to last 30 days.");
+                    days_offset = 30;
+                    break;
+                case "Last Year":
+                    days_offset = 365;
                     break;
                 default:
                     console.log("Bad date value: " + value);
             }
+            console.log("Updating to last %d days.", days_offset);
+            today = new Date();
+            prior_date = new Date(new Date().setDate(today.getDate()-days_offset));
+            start_date = dateToString(prior_date);
+            finish_date = dateToString(today);
+            updateStats(start_date, finish_date);
         }
+
+        updateDates('Last Year');
 
         $scope.updateFilter = function(type, value, tab) {
             console.log("Updating filter! %s %s %s", type, value, tab);

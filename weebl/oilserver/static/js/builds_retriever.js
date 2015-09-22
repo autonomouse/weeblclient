@@ -1,13 +1,13 @@
 builds_app.factory('buildsRetriever', ['$http', function($http) {
-  var refresh = function(scope, field_name, job_type_name, created_at_start, created_at_end, build_status_name) {
+  var refresh = function(scope, field_name, job_type_name, completed_at_start, completed_at_end, build_status_name) {
     var url = "/api/v1/build/";
     var parameters = [];
     if (job_type_name)
         parameters['job_type__name'] = job_type_name;
-    if (created_at_start)
-        parameters['created_at__gte'] = created_at_start;
-    if (created_at_end)
-        parameters['created_at__lte'] = created_at_end;
+    if (completed_at_start)
+        parameters['pipeline__completed_at__gte'] = completed_at_start;
+    if (completed_at_end)
+        parameters['pipeline__completed_at__lte'] = completed_at_end;
     if (build_status_name)
         parameters['build_status__name'] = build_status_name;
 
