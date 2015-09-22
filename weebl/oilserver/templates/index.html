@@ -63,6 +63,7 @@
             </div>
         </header>
         <main id="body">
+        <div data-ng-controller="buildsController as builds">
             <div class="inner-wrapper">
             <div class="accordion three-col maas-accordion">
                 <h3 class="accordion__title">Filter by</h3>
@@ -71,13 +72,13 @@
                     <div class="accordion__tab-content">
                         <ul class="accordion__tab-list">
                             <li class="accordion__tab-item" data-ng-class="{ active: isFilterActive('date', 'Last 24 Hours', 'builds') }">
-                                <a class="accordion__tab-link" href="" data-ng-click="toggleFilter('date', 'Last 24 Hours', 'builds')">Last 24 Hours</a>
+                                <a class="accordion__tab-link" href="" data-ng-click="updateFilter('date', 'Last 24 Hours', 'builds')">Last 24 Hours</a>
                             </li>
                             <li class="accordion__tab-item" data-ng-class="{ active: isFilterActive('date', 'Last 7 Days', 'builds') }">
-                                <a class="accordion__tab-link" href="" data-ng-click="toggleFilter('date', 'Last 7 Days', 'builds')">Last 7 Days</a>
+                                <a class="accordion__tab-link" href="" data-ng-click="updateFilter('date', 'Last 7 Days', 'builds')">Last 7 Days</a>
                             </li>
                             <li class="accordion__tab-item" data-ng-class="{ active: isFilterActive('date', 'Last 30 Days', 'builds') }">
-                                <a class="accordion__tab-link" href="" data-ng-click="toggleFilter('date', 'Last 30 Days', 'builds')">Last 30 Days</a>
+                                <a class="accordion__tab-link" href="" data-ng-click="updateFilter('date', 'Last 30 Days', 'builds')">Last 30 Days</a>
                             </li>
                         </ul>
                     </div>
@@ -87,13 +88,13 @@
                     <div class="accordion__tab-content">
                         <ul class="accordion__tab-list">
                             <li class="accordion__tab-item" data-ng-class="{ active: isFilterActive('openstack', 'Icehouse', 'builds') }">
-                                <a class="accordion__tab-link" href="" data-ng-click="toggleFilter('openstack', 'Icehouse', 'builds')">Icehouse</a>
+                                <a class="accordion__tab-link" href="" data-ng-click="updateFilter('openstack', 'Icehouse', 'builds')">Icehouse</a>
                             </li>
                             <li class="accordion__tab-item" data-ng-class="{ active: isFilterActive('openstack', 'Juno', 'builds') }">
-                                <a class="accordion__tab-link" href="" data-ng-click="toggleFilter('openstack', 'Juno', 'builds')">Juno</a>
+                                <a class="accordion__tab-link" href="" data-ng-click="updateFilter('openstack', 'Juno', 'builds')">Juno</a>
                             </li>
                             <li class="accordion__tab-item" data-ng-class="{ active: isFilterActive('openstack', 'Kilo', 'builds') }">
-                                <a class="accordion__tab-link" href="" data-ng-click="toggleFilter('openstack', 'Kilo', 'builds')">Kilo</a>
+                                <a class="accordion__tab-link" href="" data-ng-click="updateFilter('openstack', 'Kilo', 'builds')">Kilo</a>
                             </li>
                         </ul>
                     </div>
@@ -101,17 +102,14 @@
             </div>
             <div id="main-content" data-maas-error-overlay>
             <div id="content" class="six-col" data-ng-view>
-                {% verbatim %}
-                <div data-ng-controller="buildsController as builds">
-                    <p>I have {{ builds.pipeline_count }} pipelines...</p>
-                    <p>I have {{ builds.pass_deploy_count }} successful pipeline deploys...</p>
-                    <p>I have {{ builds.pass_prepare_count }} successful pipeline prepares...</p>
-                    <p>I have {{ builds.pass_test_cloud_image_count }} successful guest OS tests...</p>
-                </div>      
-                {% endverbatim %}
+                    <p>I have {$ builds.pipeline_count $} pipelines...</p>
+                    <p>I have {$ builds.pass_deploy_count $} successful pipeline deploys...</p>
+                    <p>I have {$ builds.pass_prepare_count $} successful pipeline prepares...</p>
+                    <p>I have {$ builds.pass_test_cloud_image_count $} successful guest OS tests...</p>
             </div>
             </div>
             </div>
+        </div>
         </main>
     </div>
     <div class="footer-wrapper" data-maas-error-toggle>
