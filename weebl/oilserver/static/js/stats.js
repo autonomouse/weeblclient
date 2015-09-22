@@ -1,4 +1,4 @@
-var builds_app = angular.module('stats', []);
+var builds_app = angular.module('weebl', []);
 
 builds_app.controller('buildsController', ['buildsRetriever', function(buildsRetriever) {
     start_date = '2015-01-01';
