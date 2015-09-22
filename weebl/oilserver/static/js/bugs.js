@@ -1,6 +1,5 @@
-var app = angular.module('stats', ['ngRoute']);
+var bugs_app = angular.module('bugs', []);
 
-app.controller('bugsController', ['bugsRetriever', function(bugsRetriever) {
+bugs_app.controller('bugsController', ['bugsRetriever', function(bugsRetriever) {
     bugsRetriever.refresh(this);
- //   this.count = bugsRetriever.total_count;
  }]);

@@ -26,6 +26,10 @@ def main_page(request):
     return render(request, 'index.html')
 
 
+def bugs(request):
+    return render(request, 'bugs.html')
+
+
 def weekly_main_page(request, time_range='weekly'):
     return main_page(request, time_range)
 

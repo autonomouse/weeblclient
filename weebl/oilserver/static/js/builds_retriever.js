@@ -1,4 +1,4 @@
-app.factory('buildsRetriever', ['$http', function($http) {
+builds_app.factory('buildsRetriever', ['$http', function($http) {
   var refresh = function(scope, field_name, job_type_name, created_at_start, created_at_end, build_status_name) {
     var url = "/api/v1/build/";
     var parameters = [];

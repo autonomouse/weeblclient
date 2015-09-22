@@ -1,4 +1,4 @@
-app.factory('bugsRetriever', ['$http', function($http) {
+bugs_app.factory('bugsRetriever', ['$http', function($http) {
   var refresh = function(scope) {
     var url = "/api/v1/bug/";
     return $http.get(url).success(function(data) {

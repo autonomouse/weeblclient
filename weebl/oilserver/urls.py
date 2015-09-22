@@ -16,6 +16,10 @@ urlpatterns = patterns('',
                            views.main_page,
                            name='index'),
 
+                       url('bugs/' + end,
+                           views.bugs,
+                           name='bugs'),
+
                        url("Settings/" + end,
                            views.settings_page,
                            name='settings_page'),
