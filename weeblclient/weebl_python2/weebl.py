@@ -128,8 +128,9 @@ class Weebl(object):
             "bug_occurrence", [('build__uuid', build_uuid),
                                ('regex__uuid', regex_uuid)])
         build_uuids = [bugocc.get('uuid') for bugocc in
-              bug_occurrence_instances if build_uuid in bugocc['build']
-              and regex_uuid in bugocc['regex']]
+                       bug_occurrence_instances
+                       if build_uuid in bugocc['build']
+                       and regex_uuid in bugocc['regex']]
         return True if build_uuids != [] else False
 
     def target_file_glob_exists(self, glob_pattern):
@@ -239,7 +240,7 @@ class Weebl(object):
         if bug is not None:
             data['bug'] = bug
         response = self.make_request('post', url=url, data=json.dumps(data))
-        returned_regex = json.loads(response.text).get('known_bug_regex')
+        # returned_regex = json.loads(response.text).get('known_bug_regex')
         if response.status_code == 201:
             self.LOG.info(
                 "Regex \"{}\" successfully created in Weebl".format(regex))
@@ -361,7 +362,6 @@ class Weebl(object):
         return self.munge_bug_info_data(
             known_bug_regex_instances, bug_instances,
             bug_tracker_bug_instances, target_file_glob)
-
 
     def munge_bug_info_data(self, known_bug_regex_instances, bug_instances,
                             bug_tracker_bug_instances, target_file_globs):

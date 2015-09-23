@@ -529,15 +529,59 @@ class PipelineResourceTests(ResourceTests):
         self.assertEqual(response.status_code, 200,
                          msg="Incorrect status code")
 
-    def test_put_method_not_allowed(self):
+    def test_put_update_existing_pipeline(self):
         """PUT to update an existing pipeline instance."""
         r_dict0, status_code = self.make_pipeline()
         pipeline_id = r_dict0['uuid']
+
+        before = self.api_client.get('/api/{}/pipeline/{}/'
+                                    .format(self.version, pipeline_id),
+                                    format='json')
+        r_dict1 = self.deserialize(before)
+        self.assertEqual(pipeline_id, r_dict1['uuid'])
+        self.assertEqual(None, r_dict1['completed_at'],
+                         msg="completed_at already set on new pipeline")
+        self.assertEqual(before.status_code, 200,
+                         msg="Incorrect status code")
+
+        new_completed_at = utils.time_now()
+        data = {'completed_at': new_completed_at}
         response = self.api_client.put('/api/{}/pipeline/{}/'
-                                       .format(self.version, pipeline_id),
-                                       data={}, format='json')
-        self.assertIsNone(self.deserialize(response))
-        self.assertEqual(response.status_code, 405)
+                                       .format(self.version, uuid), data=data)
+        self.assertEqual(response.status_code, 200,
+                         msg="Incorrect status code")
+
+        after = self.api_client.get('/api/{}/pipeline/{}/'
+                                    .format(self.version, pipeline_id),
+                                    format='json')
+        r_dict2 = self.deserialize(after)
+        self.assertEqual(pipeline_id, r_dict2['uuid'])
+        self.assertEqual(new_completed_at, r_dict2['completed_at'],
+                         msg="completed_at timestamp does not match")
+        self.assertEqual(after.status_code, 200,
+                         msg="Incorrect status code")
+
+    def test_put_cannot_update_existing_pipeline_uuid(self):
+        """PUT to update an existing pipeline instance."""
+        r_dict, status_code = self.make_pipeline()
+        uuid = r_dict['uuid']
+        uuid2 = utils.generate_uuid()
+        data = {'uuid': uuid2}
+        before = models.Pipeline.objects.filter(uuid=uuid2).exists()
+        self.assertFalse(before)
+
+        response = self.api_client.put('/api/{}/pipeline/{}/'
+                                       .format(self.version, uuid), data=data)
+
+        after = models.Pipeline.objects.filter(uuid=uuid2).exists()
+        self.assertFalse(after, msg="pipeline UUID has been altered!")
+        new_r_dict = self.deserialize(response)
+
+        self.assertEqual(uuid, new_r_dict['uuid'],
+                         msg="UUID should not have been updated!")
+        self.assertNotEqual(uuid2, new_r_dict['uuid'])
+        self.assertEqual(response.status_code, 200,
+                         msg="Incorrect status code")
 
     def test_delete_pipeline(self):
         """DELETE an existing pipeline instance."""

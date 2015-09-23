@@ -275,16 +275,19 @@ class PipelineResource(CommonResource):
 
     class Meta:
         queryset = models.Pipeline.objects.all()
-        fields = ['uuid', 'build_executor']
+        fields = ['uuid', 'build_executor', 'completed_at']
         list_allowed_methods = ['get', 'post', 'delete']  # all items
-        detail_allowed_methods = ['get', 'post', 'delete']  # individual
+        detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
         authorization = Authorization()
         always_return_data = True
-        filtering = {'uuid': ALL, }
+        filtering = {'uuid': ALL,
+                    'completed_at': ALL,}
 
     def obj_create(self, bundle, request=None, **kwargs):
         bundle.obj.build_executor = models.BuildExecutor.objects.get(
             uuid=bundle.data['build_executor'])
+        if 'completed_at' in bundle.data:
+            bundle.obj.completed_at = bundle.data['completed_at']
         if 'pipeline' in bundle.data:
             bundle.obj.uuid = bundle.data['pipeline']
         bundle.obj.save()
@@ -303,7 +306,8 @@ class PipelineResource(CommonResource):
 
     def dehydrate(self, bundle):
         replace_with = [('resource_uri', bundle.obj.uuid),
-                        ('build_executor', bundle.obj.build_executor.uuid), ]
+                        ('build_executor', bundle.obj.build_executor.uuid),
+                        ('completed_at', bundle.obj.completed_at),]
         return self.replace_bundle_item_with_alternative(bundle, replace_with)
 
 
