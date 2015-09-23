@@ -11,6 +11,10 @@ class TimeStampedBaseModel(models.Model):
     particular, any that are part of the initial fixtures file do not
     (weeblsetting, servicestatus, buildstatus, and jobtype).
     """
+
+    class Meta:
+        abstract = True
+
     created_at = models.DateTimeField(
         default=None,
         blank=True,
@@ -81,7 +85,7 @@ class WeeblSetting(models.Model):
         return __api_version__
 
 
-class Environment(models.Model):
+class Environment(TimeStampedBaseModel):
     """The environment (e.g. Prodstack, Staging)."""
     uuid = models.CharField(
         max_length=36,
@@ -139,7 +143,7 @@ class ServiceStatus(models.Model):
         return self.name
 
 
-class Jenkins(models.Model):
+class Jenkins(TimeStampedBaseModel):
     """The Continuous Integration Server."""
     environment = models.OneToOneField(Environment)
     service_status = models.ForeignKey(ServiceStatus)
@@ -165,7 +169,7 @@ class Jenkins(models.Model):
         return self.environment.uuid
 
 
-class BuildExecutor(models.Model):
+class BuildExecutor(TimeStampedBaseModel):
     """The Jenkins build executor (master or slave)."""
     uuid = models.CharField(
         max_length=36,
@@ -194,7 +198,7 @@ class BuildExecutor(models.Model):
         return self.uuid
 
 
-class Pipeline(TimeStampedBaseModel, models.Model):
+class Pipeline(TimeStampedBaseModel):
     """The pipelines currently recorded."""
     uuid = models.CharField(
         max_length=36,
@@ -251,7 +255,7 @@ class JobType(models.Model):
         return self.name
 
 
-class Build(models.Model):
+class Build(TimeStampedBaseModel):
     """The build numbers for each job."""
     uuid = models.CharField(
         max_length=36,
@@ -291,7 +295,7 @@ class Build(models.Model):
         return self.uuid
 
 
-class TargetFileGlob(models.Model):
+class TargetFileGlob(TimeStampedBaseModel):
     """The target file."""
     glob_pattern = models.TextField(
         unique=True,
@@ -303,7 +307,7 @@ class TargetFileGlob(models.Model):
         return self.glob_pattern
 
 
-class BugTrackerBug(TimeStampedBaseModel, models.Model):
+class BugTrackerBug(TimeStampedBaseModel):
     """An error that has resulted in an incorrect or unexpected behaviour or
     result, externally recorded on a bug-tracker (such as Launchpad).
     """
@@ -329,7 +333,7 @@ class BugTrackerBug(TimeStampedBaseModel, models.Model):
         return self.uuid
 
 
-class Bug(TimeStampedBaseModel, models.Model):
+class Bug(TimeStampedBaseModel):
     """An error in OIL that has resulted in an incorrect or unexpected
     behaviour or result.
     """
@@ -357,7 +361,7 @@ class Bug(TimeStampedBaseModel, models.Model):
         return self.uuid
 
 
-class KnownBugRegex(TimeStampedBaseModel, models.Model):
+class KnownBugRegex(TimeStampedBaseModel):
     """The regex used to identify a bug."""
     bug = models.ForeignKey(Bug, null=True, blank=True, default=None)
     uuid = models.CharField(
@@ -377,7 +381,7 @@ class KnownBugRegex(TimeStampedBaseModel, models.Model):
         return self.uuid
 
 
-class BugOccurrence(TimeStampedBaseModel, models.Model):
+class BugOccurrence(TimeStampedBaseModel):
     """The occurrence of a bug."""
     uuid = models.CharField(
         max_length=36,
