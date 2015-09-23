@@ -194,7 +194,7 @@ class BuildExecutor(models.Model):
         return self.uuid
 
 
-class Pipeline(models.Model):
+class Pipeline(TimeStampedBaseModel, models.Model):
     """The pipelines currently recorded."""
     uuid = models.CharField(
         max_length=36,
@@ -203,6 +203,10 @@ class Pipeline(models.Model):
         blank=False,
         null=False,
         help_text="The pipeline ID (a UUID).")
+    completed_at = models.DateTimeField(
+        default=None,
+        auto_now_add=False,
+        help_text="DateTime the pipeline was completed.")
     build_executor = models.ForeignKey(BuildExecutor)
     completed_at = models.DateTimeField(
         default=None,
