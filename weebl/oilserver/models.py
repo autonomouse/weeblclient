@@ -208,11 +208,6 @@ class Pipeline(TimeStampedBaseModel, models.Model):
         auto_now_add=False,
         help_text="DateTime the pipeline was completed.")
     build_executor = models.ForeignKey(BuildExecutor)
-    completed_at = models.DateTimeField(
-        default=None,
-        blank=True,
-        null=True,
-        help_text="DateTime the pipeline was completed at.")
 
     def __str__(self):
         return self.uuid
