@@ -12,3 +12,7 @@ weebl/oilserver/static/admin/
 weebl/oilserver/static/tastypie_swagger/
 **/*.py[cod]
 **/__pycache__/
+tags
+build
+dist
+weebl.egg-info/
