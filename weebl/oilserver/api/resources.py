@@ -320,6 +320,7 @@ class BuildStatusResource(CommonResource):
         fields = ['name', 'description']
         authorization = Authorization()
         always_return_data = True
+        filtering = {'name': ALL, }
 
     def dehydrate(self, bundle):
         replace_with = [('resource_uri', bundle.obj.name), ]
@@ -336,6 +337,7 @@ class JobTypeResource(CommonResource):
         fields = ['name', 'description']
         authorization = Authorization()
         always_return_data = True
+        filtering = {'name': ALL, }
 
     def dehydrate(self, bundle):
         replace_with = [('resource_uri', bundle.obj.name), ]
@@ -357,7 +359,10 @@ class BuildResource(CommonResource):
         authorization = Authorization()
         always_return_data = True
         filtering = {'uuid': ALL,
-                     'build_id': ALL, }
+                     'build_id': ALL,
+                     'job_type': ALL_WITH_RELATIONS,
+                     'pipeline': ALL_WITH_RELATIONS,
+                     'build_status': ALL_WITH_RELATIONS}
 
     def obj_create(self, bundle, request=None, **kwargs):
         bundle.obj.build_id = bundle.data['build_id']
