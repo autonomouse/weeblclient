@@ -208,6 +208,8 @@ class Pipeline(TimeStampedBaseModel):
         null=False,
         help_text="The pipeline ID (a UUID).")
     completed_at = models.DateTimeField(
+        blank=True,
+        null=True,
         default=None,
         auto_now_add=False,
         help_text="DateTime the pipeline was completed.")
