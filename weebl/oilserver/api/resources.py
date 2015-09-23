@@ -400,10 +400,9 @@ class BuildResource(CommonResource):
 
     def dehydrate(self, bundle):
         replace_with = [('resource_uri', bundle.obj.uuid),
-                        ('build_status', bundle.obj.build_status.name),
-                        ('job_type', bundle.obj.job_type.name),
+                        ('build_status', bundle.obj.build_status),
+                        ('job_type', bundle.obj.job_type),
                         ('pipeline', bundle.obj.pipeline.uuid), ]
-
         return self.replace_bundle_item_with_alternative(bundle, replace_with)
 
     def hydrate(self, bundle):
