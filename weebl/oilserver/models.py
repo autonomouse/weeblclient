@@ -207,10 +207,43 @@ class Pipeline(TimeStampedBaseModel, models.Model):
         default=None,
         auto_now_add=False,
         help_text="DateTime the pipeline was completed.")
+    ubuntu_version = models.ForeignKey(UbuntuVersion)
+    openstack_version = models.ForeignKey(OpenstackVersion)
     build_executor = models.ForeignKey(BuildExecutor)
 
     def __str__(self):
         return self.uuid
+
+
+class UbuntuVersion(models.Model):
+    """
+    """
+    name = models.CharField(
+        max_length=255,
+        unique=True,
+        default="",
+        help_text="The name of the version of the Ubuntu system.")
+    number = models.CharField(
+        max_length=10,
+        unique=True,
+        default="14.04",
+        help_text="The numerical version of the Ubuntu system")
+
+    def __str__(self):
+        return self.name
+
+
+class OpenstackVersion(models.Model):
+    """
+    """
+    name = models.CharField(
+        max_length=255,
+        unique=True,
+        default="",
+        help_text="The name of the version of the OpenStack system.")
+
+    def __str__(self):
+        return self.name
 
 
 class BuildStatus(models.Model):

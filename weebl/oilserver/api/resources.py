@@ -272,6 +272,9 @@ class BuildExecutorResource(CommonResource):
 
 class PipelineResource(CommonResource):
     build_executor = fields.ForeignKey(BuildExecutorResource, 'build_executor')
+    ubuntu_version = fields.ForeignKey(UbuntuVersionResource, 'ubuntu_version')
+    openstack_version = fields.ForeignKey(OpenstackVersionResource,
+                                          'openstack_version')
 
     class Meta:
         queryset = models.Pipeline.objects.all()
@@ -308,6 +311,52 @@ class PipelineResource(CommonResource):
         replace_with = [('resource_uri', bundle.obj.uuid),
                         ('build_executor', bundle.obj.build_executor.uuid),
                         ('completed_at', bundle.obj.completed_at),]
+        return self.replace_bundle_item_with_alternative(bundle, replace_with)
+
+
+class UbuntuVersionResource(CommonResource):
+
+    class Meta:
+        queryset = models.UbuntuVersion.objects.all()
+        list_allowed_methods = ['get', 'post', 'delete']  # all items
+        detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
+        fields = ['name', 'number']
+        authorization = Authorization()
+        always_return_data = True
+        filtering = {'name': ALL, }
+
+    def obj_create(self, bundle, request=None, **kwargs):
+        if 'name' in bundle.data:
+            bundle.obj.name = bundle.data['name']
+        if 'number' in bundle.data:
+            bundle.obj.number = bundle.data['number']
+        bundle.obj.save()
+        return bundle
+
+    def dehydrate(self, bundle):
+        replace_with = [('resource_uri', bundle.obj.name), ]
+        return self.replace_bundle_item_with_alternative(bundle, replace_with)
+
+
+class OpenstackVersionResource(CommonResource):
+
+    class Meta:
+        queryset = models.OpenstackVersion.objects.all()
+        list_allowed_methods = ['get', 'post', 'delete']  # all items
+        detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
+        fields = ['name']
+        authorization = Authorization()
+        always_return_data = True
+        filtering = {'name': ALL, }
+
+    def obj_create(self, bundle, request=None, **kwargs):
+        if 'name' in bundle.data:
+            bundle.obj.name = bundle.data['name']
+        bundle.obj.save()
+        return bundle
+
+    def dehydrate(self, bundle):
+        replace_with = [('resource_uri', bundle.obj.name), ]
         return self.replace_bundle_item_with_alternative(bundle, replace_with)
 
 
