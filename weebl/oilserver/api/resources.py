@@ -306,8 +306,7 @@ class PipelineResource(CommonResource):
 
     def dehydrate(self, bundle):
         replace_with = [('resource_uri', bundle.obj.uuid),
-                        ('build_executor', bundle.obj.build_executor.uuid),
-                        ('completed_at', bundle.obj.completed_at),]
+                        ('build_executor', bundle.obj.build_executor.uuid),]
         return self.replace_bundle_item_with_alternative(bundle, replace_with)
 
 
