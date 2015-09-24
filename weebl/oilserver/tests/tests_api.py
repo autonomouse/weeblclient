@@ -1,11 +1,23 @@
 #! /usr/bin/env python3
 import utils
 import arrow
-from common_test_methods import ResourceTests
-from oilserver import models
+
+from tastypie.resources import (
+    ALL,
+    ALL_WITH_RELATIONS,
+    )
 from freezegun import freeze_time
 from django.db.utils import IntegrityError
+
+from common_test_methods import ResourceTests
+from oilserver import models
 from exceptions import NonUserEditableError
+from oilserver.api.resources import (
+    BuildResource,
+    BuildStatusResource,
+    JobTypeResource,
+    )
+
 
 
 class TimeStampedBaseModelTest(ResourceTests):
@@ -647,6 +659,14 @@ class BuildStatusResourceTests(ResourceTests):
         self.assertIsNone(r_dict)
         self.assertEqual(response.status_code, 405)
 
+    def test_resource_filtering(self):
+        expected_filtering = {
+            'name': ALL,
+        }
+        self.assertEqual(
+            expected_filtering,
+            BuildStatusResource._meta.filtering)
+
 
 class JobTypeResourceTests(ResourceTests):
 
@@ -689,6 +709,14 @@ class JobTypeResourceTests(ResourceTests):
 
         self.assertIsNone(r_dict)
         self.assertEqual(response.status_code, 405)
+
+    def test_resource_filtering(self):
+        expected_filtering = {
+            'name': ALL,
+        }
+        self.assertEqual(
+            expected_filtering,
+            JobTypeResource._meta.filtering)
 
 
 class BuildResourceTests(ResourceTests):
@@ -869,35 +897,17 @@ class BuildResourceTests(ResourceTests):
         value = first_object.get('build_status').rstrip('/').split('/')[-1]
         self.assertTrue(value in ['unknown', 'success', 'failure', 'aborted'])
 
-    def test_get_filter_by_uuid(self):
-        r_dict0, status_code = self.make_build()
-        uuid = r_dict0['uuid']
-        response = self.api_client.get('/api/{}/build/?uuid={}'
-                                       .format(self.version, uuid))
-        r_dict = self.deserialize(response)['objects'][0]
-        returned_uuid = r_dict['uuid']
-        self.assertEqual(uuid, returned_uuid)
-
-    def test_get_filter_by_build_id(self):
-        r_dict0, status_code = self.make_build()
-        build_id = r_dict0['build_id']
-        response = self.api_client.get('/api/{}/build/?build_id={}'
-                                       .format(self.version, build_id))
-        r_dict = self.deserialize(response)['objects'][0]
-        returned_build_id = r_dict['build_id']
-        self.assertEqual(build_id, returned_build_id)
-
-    def test_get_filter_by_build_id_and_uuid(self):
-        r_dict0, status_code = self.make_build()
-        uuid = r_dict0['uuid']
-        build_id = r_dict0['build_id']
-        response = self.api_client.get('/api/{}/build/?uuid={}&build_id={}'
-                                       .format(self.version, uuid, build_id))
-        r_dict = self.deserialize(response)['objects'][0]
-        returned_uuid = r_dict['uuid']
-        returned_build_id = r_dict['build_id']
-        self.assertEqual(uuid, returned_uuid)
-        self.assertEqual(build_id, returned_build_id)
+    def test_resource_filtering(self):
+        expected_filtering = {
+            'uuid': ALL,
+            'build_id': ALL,
+            'job_type': ALL_WITH_RELATIONS,
+            'pipeline': ALL_WITH_RELATIONS,
+            'build_status': ALL_WITH_RELATIONS
+        }
+        self.assertEqual(
+            expected_filtering,
+            BuildResource._meta.filtering)
 
 
 class TargetFileGlobResourceTests(ResourceTests):
