@@ -16,3 +16,4 @@ tags
 build
 dist
 weebl.egg-info/
+*.swp
