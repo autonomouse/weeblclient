@@ -6,9 +6,10 @@ $interpolateProvider.endSymbol('$}');
 }]);
 
 builds_app.controller('buildsController', [
-    '$scope', 'buildsRetriever',
-    function($scope, buildsRetriever) {
+    '$scope', 'buildsRetriever', 'SearchService',
+    function($scope, buildsRetriever, SearchService) {
         binding = this;
+        $scope.filters = SearchService.getEmptyFilter();
 
         function updateStats(start_date, finish_date) {
             console.log("Filtering dates from %s to %s", start_date, finish_date);
@@ -30,39 +31,41 @@ builds_app.controller('buildsController', [
             return date.getFullYear() + "-" + date.getMonth() + "-" + date.getDate();
         }
 
+        var dateSymbolToDays = {
+            'Last 24 Hours': 1,
+            'Last 7 Days': 7,
+            'Last 30 Days': 30,
+            'Last Year': 365
+        };
+
         function updateDates(value) {
-            var days_offset = 0;
-            switch(value) {
-                case "Last 24 Hours":
-                    days_offset = 1;
-                    break;
-                case "Last 7 Days":
-                    days_offset = 7;
-                    break;
-                case "Last 30 Days":
-                    days_offset = 30;
-                    break;
-                case "Last Year":
-                    days_offset = 365;
-                    break;
-                default:
-                    console.log("Bad date value: " + value);
-            }
+            var days_offset = dateSymbolToDays[value];
             console.log("Updating to last %d days.", days_offset);
             today = new Date();
             prior_date = new Date(new Date().setDate(today.getDate()-days_offset));
             start_date = dateToString(prior_date);
             finish_date = dateToString(today);
             updateStats(start_date, finish_date);
-        }
-
-        updateDates('Last Year');
+        };
 
         $scope.updateFilter = function(type, value, tab) {
             console.log("Updating filter! %s %s %s", type, value, tab);
 
             if (type == "date") {
                 updateDates(value);
+                // Only one date can be set at a time.
+                $scope.filters["date"] = ["=" + value];
+            } else {
+                $scope.filters = SearchService.toggleFilter(
+                    $scope.filters, type, value, true);
             }
-        }
+        };
+
+        $scope.isFilterActive = function(type, value, tab) {
+            return SearchService.isFilterActive(
+                $scope.filters, type, value, true);
+        };
+
+        $scope.updateFilter('date', 'Last Year', 'builds');
+
     }]);
