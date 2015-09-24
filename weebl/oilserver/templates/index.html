@@ -124,10 +124,32 @@
             </div>
             <div id="main-content" data-maas-error-overlay>
             <div id="content" class="six-col" data-ng-view>
+                <div data-ng-show="currentpage === 'stats'">
                     <p>I have {$ builds.pipeline_count $} pipelines...</p>
                     <p>I have {$ builds.pass_deploy_count $} successful pipeline deploys...</p>
                     <p>I have {$ builds.pass_prepare_count $} successful pipeline prepares...</p>
                     <p>I have {$ builds.pass_test_cloud_image_count $} successful guest OS tests...</p>
+                </div>
+                <div data-ng-show="currentpage === 'bugs'">
+                    <p>I have {$ bugs.count $} bugs...</p>
+                    <!------------------------------------------------>
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>UUID</th>
+                            <th>summary</th>
+                            <th>description</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="bug in bugs.objects">
+                            <td>{$ bug.uuid $}</td>
+                            <td>{$ bug.summary $}</td>
+                            <td>{$ bug.description $}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
             </div>
             </div>

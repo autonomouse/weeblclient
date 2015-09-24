@@ -1,16 +1,17 @@
-var builds_app = angular.module('weebl', []);
+var app = angular.module('weebl', []);
 
-builds_app.config(['$interpolateProvider', function ($interpolateProvider) {
+app.config(['$interpolateProvider', function ($interpolateProvider) {
 $interpolateProvider.startSymbol('{$');
 $interpolateProvider.endSymbol('$}');
 }]);
 
-builds_app.controller('buildsController', [
-    '$scope', '$rootScope', 'buildsRetriever', 'SearchService',
-    function($scope, $rootScope, buildsRetriever, SearchService) {
+app.controller('buildsController', [
+    '$scope', '$rootScope', 'buildsRetriever', 'bugsRetriever', 'SearchService',
+    function($scope, $rootScope, buildsRetriever, bugsRetriever, SearchService) {
         binding = this;
         $scope.filters = SearchService.getEmptyFilter();
         $scope.currentpage = "stats";
+        $scope.bugs = {};
 
         function updateStats(start_date, finish_date) {
             console.log("Filtering dates from %s to %s", start_date, finish_date);
@@ -60,6 +61,7 @@ builds_app.controller('buildsController', [
                 $scope.filters = SearchService.toggleFilter(
                     $scope.filters, type, value, true);
             }
+            bugsRetriever.refresh($scope);
         };
 
         $scope.isFilterActive = function(type, value, tab) {
