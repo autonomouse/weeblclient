@@ -64,6 +64,25 @@
         </header>
         <main id="body">
         <div data-ng-controller="buildsController as builds">
+            <header class="page-header margin-bottom" data-maas-sticky-header>
+            <div class="inner-wrapper">
+                <h1 class="page-header__title">{$ $parent.site $}
+                <span class="page-header__title--identicator" id="bulk-actions">
+                    <!-- XXX blake_r 2015-02-19 - Need to add e2e test. -->
+                    <a href=""
+                        data-ng-class="{ active: currentpage === 'stats' }"
+                        data-ng-click="toggleTab('stats')">Stats</a>
+                    <span class="divide"></span>
+                    <a href=""
+                        data-ng-class="{ active: currentpage === 'bugs' }"
+                        data-ng-click="toggleTab('bugs')">Bugs</a>
+                    <span class="power-status--power" data-ng-show="loading">
+                        <span class="loader"></span>
+                        Loading...
+                    </span>
+                </span>
+            </div>
+            </header>
             <div class="inner-wrapper">
             <div class="accordion three-col maas-accordion">
                 <h3 class="accordion__title">Filter by</h3>

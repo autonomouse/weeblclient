@@ -6,10 +6,11 @@ $interpolateProvider.endSymbol('$}');
 }]);
 
 builds_app.controller('buildsController', [
-    '$scope', 'buildsRetriever', 'SearchService',
-    function($scope, buildsRetriever, SearchService) {
+    '$scope', '$rootScope', 'buildsRetriever', 'SearchService',
+    function($scope, $rootScope, buildsRetriever, SearchService) {
         binding = this;
         $scope.filters = SearchService.getEmptyFilter();
+        $scope.currentpage = "stats";
 
         function updateStats(start_date, finish_date) {
             console.log("Filtering dates from %s to %s", start_date, finish_date);
@@ -64,6 +65,20 @@ builds_app.controller('buildsController', [
         $scope.isFilterActive = function(type, value, tab) {
             return SearchService.isFilterActive(
                 $scope.filters, type, value, true);
+        };
+
+        $scope.tabs = {}
+        $scope.tabs.stats = {};
+        $scope.tabs.stats.pagetitle = "Stats";
+        $scope.tabs.stats.currentpage = "Stats";
+        $scope.tabs.bugs = {};
+        $scope.tabs.bugs.pagetitle = "Bugs";
+        $scope.tabs.bugs.currentpage = "Bugs";
+
+        // Toggles between the current tab.
+        $scope.toggleTab = function(tab) {
+            $rootScope.title = $scope.tabs[tab].pagetitle;
+            $scope.currentpage = tab;
         };
 
         $scope.updateFilter('date', 'Last Year', 'builds');
