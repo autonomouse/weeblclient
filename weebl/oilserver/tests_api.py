@@ -13,15 +13,17 @@ class TimeStampedBaseModelTest(ResourceTests):
     def test_save_generates_timestamps(self):
         with freeze_time("Jan 1 2000 00:00:00"):
             timestamp1 = utils.time_now()
-            base = models.TimeStampedBaseModel()
-            base.save()
-        self.assertEqual(base.created_at, timestamp1)
-        self.assertEqual(base.updated_at, timestamp1)
+            # Environment uses TimeStampedBaseModel and is easy to
+            # make.
+            environment = models.Environment(name="environment")
+            environment.save()
+        self.assertEqual(environment.created_at, timestamp1)
+        self.assertEqual(environment.updated_at, timestamp1)
         with freeze_time("Jan 2 2000 00:00:00"):
             timestamp2 = utils.time_now()
-            base.save()
-        self.assertEqual(base.created_at, timestamp1)
-        self.assertEqual(base.updated_at, timestamp2)
+            environment.save()
+        self.assertEqual(environment.created_at, timestamp1)
+        self.assertEqual(environment.updated_at, timestamp2)
 
 
 class EnvironmentResourceTest(ResourceTests):
@@ -547,19 +549,14 @@ class PipelineResourceTests(ResourceTests):
         new_completed_at = utils.time_now()
         data = {'completed_at': new_completed_at}
         response = self.api_client.put('/api/{}/pipeline/{}/'
-                                       .format(self.version, uuid), data=data)
+                                       .format(self.version, pipeline_id),
+                                       data=data)
         self.assertEqual(response.status_code, 200,
                          msg="Incorrect status code")
-
-        after = self.api_client.get('/api/{}/pipeline/{}/'
-                                    .format(self.version, pipeline_id),
-                                    format='json')
-        r_dict2 = self.deserialize(after)
-        self.assertEqual(pipeline_id, r_dict2['uuid'])
-        self.assertEqual(new_completed_at, r_dict2['completed_at'],
-                         msg="completed_at timestamp does not match")
-        self.assertEqual(after.status_code, 200,
-                         msg="Incorrect status code")
+        pipeline = models.Pipeline.objects.get(uuid=pipeline_id)
+        self.assertEqual(
+            new_completed_at, pipeline.completed_at,
+            msg="completed_at was not updated.")
 
     def test_put_cannot_update_existing_pipeline_uuid(self):
         """PUT to update an existing pipeline instance."""
