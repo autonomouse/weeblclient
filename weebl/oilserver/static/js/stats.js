@@ -10,8 +10,15 @@ app.controller('buildsController', [
     function($scope, $rootScope, buildsRetriever, bugsRetriever, SearchService) {
         binding = this;
         $scope.filters = SearchService.getEmptyFilter();
-        $scope.currentpage = "builds";
         $scope.bugs = {};
+
+        $scope.tabs = {}
+        $scope.tabs.builds = {};
+        $scope.tabs.builds.pagetitle = "Builds";
+        $scope.tabs.builds.currentpage = "builds";
+        $scope.tabs.bugs = {};
+        $scope.tabs.bugs.pagetitle = "Bugs";
+        $scope.tabs.bugs.currentpage = "bugs";
 
         function updateStats(start_date, finish_date) {
             console.log("Filtering dates from %s to %s", start_date, finish_date);
@@ -69,14 +76,6 @@ app.controller('buildsController', [
                 $scope.filters, type, value, true);
         };
 
-        $scope.tabs = {}
-        $scope.tabs.builds = {};
-        $scope.tabs.builds.pagetitle = "Builds";
-        $scope.tabs.builds.currentpage = "builds";
-        $scope.tabs.bugs = {};
-        $scope.tabs.bugs.pagetitle = "Bugs";
-        $scope.tabs.bugs.currentpage = "bugs";
-
         // Toggles between the current tab.
         $scope.toggleTab = function(tab) {
             $rootScope.title = $scope.tabs[tab].pagetitle;
@@ -84,5 +83,6 @@ app.controller('buildsController', [
         };
 
         $scope.updateFilter('date', 'Last Year', 'builds');
+        $scope.toggleTab('builds');
 
     }]);
