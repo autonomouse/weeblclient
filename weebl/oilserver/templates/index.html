@@ -31,10 +31,7 @@
                 </div>
                 <ul id="main-nav" class="nav">
                     <li>
-                        <a data-ng-class="{ active: page === 'stats' }" href="{% url 'index' %}">Stats</a>
-                    </li>
-                    <li>
-                        <a data-ng-class="{ active: page === 'bugs' }" href="{% url 'bugs' %}">Bugs</a>
+                        <a data-ng-class="{ active: page === 'builds' }" href="{% url 'index' %}">History</a>
                     </li>
                 </ul>
                 {% if user.is_authenticated %}
@@ -70,8 +67,8 @@
                 <span class="page-header__title--identicator" id="bulk-actions">
                     <!-- XXX blake_r 2015-02-19 - Need to add e2e test. -->
                     <a href=""
-                        data-ng-class="{ active: currentpage === 'stats' }"
-                        data-ng-click="toggleTab('stats')">Stats</a>
+                        data-ng-class="{ active: currentpage === 'builds' }"
+                        data-ng-click="toggleTab('builds')">Builds</a>
                     <span class="divide"></span>
                     <a href=""
                         data-ng-class="{ active: currentpage === 'bugs' }"
@@ -124,7 +121,7 @@
             </div>
             <div id="main-content" data-maas-error-overlay>
             <div id="content" class="six-col" data-ng-view>
-                <div data-ng-show="currentpage === 'stats'">
+                <div data-ng-show="currentpage === 'builds'">
                     <p>I have {$ builds.pipeline_count $} pipelines...</p>
                     <p>I have {$ builds.pass_deploy_count $} successful pipeline deploys...</p>
                     <p>I have {$ builds.pass_prepare_count $} successful pipeline prepares...</p>

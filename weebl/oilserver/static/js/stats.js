@@ -10,7 +10,7 @@ app.controller('buildsController', [
     function($scope, $rootScope, buildsRetriever, bugsRetriever, SearchService) {
         binding = this;
         $scope.filters = SearchService.getEmptyFilter();
-        $scope.currentpage = "stats";
+        $scope.currentpage = "builds";
         $scope.bugs = {};
 
         function updateStats(start_date, finish_date) {
@@ -70,12 +70,12 @@ app.controller('buildsController', [
         };
 
         $scope.tabs = {}
-        $scope.tabs.stats = {};
-        $scope.tabs.stats.pagetitle = "Stats";
-        $scope.tabs.stats.currentpage = "Stats";
+        $scope.tabs.builds = {};
+        $scope.tabs.builds.pagetitle = "Builds";
+        $scope.tabs.builds.currentpage = "builds";
         $scope.tabs.bugs = {};
         $scope.tabs.bugs.pagetitle = "Bugs";
-        $scope.tabs.bugs.currentpage = "Bugs";
+        $scope.tabs.bugs.currentpage = "bugs";
 
         // Toggles between the current tab.
         $scope.toggleTab = function(tab) {
