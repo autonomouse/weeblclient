@@ -270,24 +270,102 @@ class BuildExecutorResource(CommonResource):
         return self.replace_bundle_item_with_alternative(bundle, replace_with)
 
 
+class UbuntuVersionResource(CommonResource):
+
+    class Meta:
+        queryset = models.UbuntuVersion.objects.all()
+        list_allowed_methods = ['get', 'post', 'delete']  # all items
+        detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
+        fields = ['name', 'number']
+        authorization = Authorization()
+        always_return_data = True
+        filtering = {'name': ALL, }
+
+    def obj_create(self, bundle, request=None, **kwargs):
+        if 'name' in bundle.data:
+            bundle.obj.name = bundle.data['name']
+        if 'number' in bundle.data:
+            bundle.obj.number = bundle.data['number']
+        bundle.obj.save()
+        return bundle
+
+    def dehydrate(self, bundle):
+        replace_with = [('resource_uri', bundle.obj.name), ]
+        return self.replace_bundle_item_with_alternative(bundle, replace_with)
+
+
+class OpenstackVersionResource(CommonResource):
+
+    class Meta:
+        queryset = models.OpenstackVersion.objects.all()
+        list_allowed_methods = ['get', 'post', 'delete']  # all items
+        detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
+        fields = ['name']
+        authorization = Authorization()
+        always_return_data = True
+        filtering = {'name': ALL, }
+
+    def obj_create(self, bundle, request=None, **kwargs):
+        if 'name' in bundle.data:
+            bundle.obj.name = bundle.data['name']
+        bundle.obj.save()
+        return bundle
+
+    def dehydrate(self, bundle):
+        replace_with = [('resource_uri', bundle.obj.name), ]
+        return self.replace_bundle_item_with_alternative(bundle, replace_with)
+
+
+class SDNResource(CommonResource):
+
+    class Meta:
+        queryset = models.SDN.objects.all()
+        list_allowed_methods = ['get', 'post', 'delete']  # all items
+        detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
+        fields = ['name']
+        authorization = Authorization()
+        always_return_data = True
+        filtering = {'name': ALL, }
+
+    def obj_create(self, bundle, request=None, **kwargs):
+        if 'name' in bundle.data:
+            bundle.obj.name = bundle.data['name']
+        bundle.obj.save()
+        return bundle
+
+    def dehydrate(self, bundle):
+        replace_with = [('resource_uri', bundle.obj.name), ]
+        return self.replace_bundle_item_with_alternative(bundle, replace_with)
+
+
 class PipelineResource(CommonResource):
     build_executor = fields.ForeignKey(BuildExecutorResource, 'build_executor')
+    ubuntu_version = fields.ForeignKey(UbuntuVersionResource, 'ubuntu_version')
+    openstack_version = fields.ForeignKey(OpenstackVersionResource,
+                                          'openstack_version')
+    sdn = fields.ForeignKey(SDNResource, 'sdn')
 
     class Meta:
         queryset = models.Pipeline.objects.all()
-        fields = ['uuid', 'build_executor', 'completed_at']
+        fields = ['uuid', 'build_executor', 'completed_at', 'ubuntu_version',
+                  'openstack_version', 'sdn']
         list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
         authorization = Authorization()
         always_return_data = True
         filtering = {'uuid': ALL,
-                    'completed_at': ALL,}
+                     'completed_at': ALL,
+                     'ubuntu_version': ALL_WITH_RELATIONS,
+                     'openstack_version': ALL_WITH_RELATIONS,
+                     'sdn': ALL_WITH_RELATIONS}
 
     def obj_create(self, bundle, request=None, **kwargs):
         bundle.obj.build_executor = models.BuildExecutor.objects.get(
             uuid=bundle.data['build_executor'])
         if 'completed_at' in bundle.data:
             bundle.obj.completed_at = bundle.data['completed_at']
+        else:
+            bundle.obj.completed_at = None
         if 'pipeline' in bundle.data:
             bundle.obj.uuid = bundle.data['pipeline']
         bundle.obj.save()
@@ -306,7 +384,7 @@ class PipelineResource(CommonResource):
 
     def dehydrate(self, bundle):
         replace_with = [('resource_uri', bundle.obj.uuid),
-                        ('build_executor', bundle.obj.build_executor.uuid),]
+                        ('build_executor', bundle.obj.build_executor.uuid), ]
         return self.replace_bundle_item_with_alternative(bundle, replace_with)
 
 

@@ -198,6 +198,50 @@ class BuildExecutor(TimeStampedBaseModel):
         return self.uuid
 
 
+class UbuntuVersion(models.Model):
+    """
+    """
+    name = models.CharField(
+        max_length=255,
+        unique=True,
+        default="",
+        help_text="The name of the version of the Ubuntu system.")
+    number = models.CharField(
+        max_length=10,
+        unique=True,
+        default="",
+        help_text="The numerical version of the Ubuntu system")
+
+    def __str__(self):
+        return self.name
+
+
+class OpenstackVersion(models.Model):
+    """
+    """
+    name = models.CharField(
+        max_length=255,
+        unique=True,
+        default="",
+        help_text="The name of the version of the OpenStack system.")
+
+    def __str__(self):
+        return self.name
+
+
+class SDN(models.Model):
+    """
+    """
+    name = models.CharField(
+        max_length=255,
+        unique=True,
+        default="",
+        help_text="The name of the SDN.")
+
+    def __str__(self):
+        return self.name
+
+
 class Pipeline(TimeStampedBaseModel):
     """The pipelines currently recorded."""
     uuid = models.CharField(
@@ -213,6 +257,9 @@ class Pipeline(TimeStampedBaseModel):
         default=None,
         auto_now_add=False,
         help_text="DateTime the pipeline was completed.")
+    ubuntu_version = models.ForeignKey(UbuntuVersion)
+    openstack_version = models.ForeignKey(OpenstackVersion)
+    sdn = models.ForeignKey(SDN)
     build_executor = models.ForeignKey(BuildExecutor)
 
     def __str__(self):

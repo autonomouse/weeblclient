@@ -2,22 +2,15 @@
 import utils
 import arrow
 
-from tastypie.resources import (
-    ALL,
-    ALL_WITH_RELATIONS,
-    )
+from tastypie.resources import ALL, ALL_WITH_RELATIONS
 from freezegun import freeze_time
 from django.db.utils import IntegrityError
 
 from common_test_methods import ResourceTests
 from oilserver import models
 from exceptions import NonUserEditableError
-from oilserver.api.resources import (
-    BuildResource,
-    BuildStatusResource,
-    JobTypeResource,
-    )
-
+from oilserver.api.resources import BuildResource, BuildStatusResource,\
+    JobTypeResource
 
 
 class TimeStampedBaseModelTest(ResourceTests):
@@ -549,8 +542,8 @@ class PipelineResourceTests(ResourceTests):
         pipeline_id = r_dict0['uuid']
 
         before = self.api_client.get('/api/{}/pipeline/{}/'
-                                    .format(self.version, pipeline_id),
-                                    format='json')
+                                     .format(self.version, pipeline_id),
+                                     format='json')
         r_dict1 = self.deserialize(before)
         self.assertEqual(pipeline_id, r_dict1['uuid'])
         self.assertEqual(None, r_dict1['completed_at'],
