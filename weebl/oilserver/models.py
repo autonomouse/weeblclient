@@ -199,8 +199,7 @@ class BuildExecutor(TimeStampedBaseModel):
 
 
 class UbuntuVersion(models.Model):
-    """
-    """
+    """The version of the Ubuntu operating system in a pipeline."""
     name = models.CharField(
         max_length=255,
         unique=True,
@@ -217,8 +216,7 @@ class UbuntuVersion(models.Model):
 
 
 class OpenstackVersion(models.Model):
-    """
-    """
+    """The version of OpenStack running in a pipeline."""
     name = models.CharField(
         max_length=255,
         unique=True,
@@ -230,8 +228,7 @@ class OpenstackVersion(models.Model):
 
 
 class SDN(models.Model):
-    """
-    """
+    """The type of SDN being used in a pipeline."""
     name = models.CharField(
         max_length=255,
         unique=True,
