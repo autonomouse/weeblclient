@@ -9,6 +9,26 @@ from oilserver import models
 from tastypie.exceptions import BadRequest
 from exceptions import NonUserEditableError
 
+def fixup_set_filters(model_names, applicable_filters):
+    """Hack to fix tastypie filter strings.
+
+    Tastypie tries to make filter strings like 'bugoccurrences_set'
+    instead of 'bugoccurences'. This replaces the former with the latter
+    for a set of model names.
+
+    TODO: see if this can be fixed by specifying reverse relation names
+    on models.
+    """
+    for model_name in model_names:
+        bad_keys = []
+        set_name = model_name + "_set"
+        for key in applicable_filters.keys():
+            if set_name in key:
+                bad_keys.append(key)
+        for bad_key in bad_keys:
+            value = applicable_filters.pop(bad_key)
+            new_key = bad_key.replace(set_name, model_name)
+            applicable_filters[new_key] = value
 
 class CommonResource(ModelResource):
 
@@ -458,6 +478,9 @@ class TargetFileGlobResource(CommonResource):
 
 
 class KnownBugRegexResource(CommonResource):
+    bug_occurrences = fields.ToManyField(
+        'oilserver.api.resources.BugOccurrenceResource',
+        'bugoccurrence_set', full=True, null=True)
 
     class Meta:
         resource_name = 'known_bug_regex'
@@ -465,11 +488,17 @@ class KnownBugRegexResource(CommonResource):
         list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
         fields = ['bug', 'uuid', 'regex', 'target_file_globs',
-                  'created_at', 'updated_at']
+                  'created_at', 'updated_at', 'bugoccurrence']
         authorization = Authorization()
         always_return_data = True
         filtering = {'uuid': ALL,
-                     'regex': ALL, }
+                     'regex': ALL,
+                     'bug_occurrences': ALL_WITH_RELATIONS}
+
+    def apply_filters(self, request, applicable_filters):
+        fixup_set_filters(['bugoccurrence'], applicable_filters)
+        return super(KnownBugRegexResource, self).apply_filters(
+            request, applicable_filters).distinct()
 
     def obj_create(self, bundle, request=None, **kwargs):
         bundle.obj.regex = bundle.data['regex']
@@ -522,7 +551,47 @@ class KnownBugRegexResource(CommonResource):
         return super(KnownBugRegexResource, self).hydrate(bundle)
 
 
+REPLACE_PREFIX = 'knownbugregex__bug_occurrences__'
+
+def get_bug_occurrences(bundle):
+    """Get the bug occurrences to include in the bug.
+
+    When bugs are found by bug occurrence properties, we only include
+    bug occurrences that match those properties. So if we filter for
+    bugs with occurrences in pipelines that completed in 2015, only
+    the bug occurrences that completed in 2015 will be included in the
+    response.
+    """
+    query_dict = bundle.request.GET
+    bug_occurrence_filters = {}
+    for key, value in query_dict.items():
+        if not key.startswith(REPLACE_PREFIX):
+            continue
+        filter_name = key.replace(REPLACE_PREFIX, '')
+        bug_occurrence_filters[filter_name] = value
+
+    bug_occurrence_filters['regex__bug__uuid'] = bundle.obj.uuid
+    return models.BugOccurrence.objects.filter(**bug_occurrence_filters)
+
+
 class BugResource(CommonResource):
+    """API Resource for 'Bug' model.
+
+    The bug list now includes the list of bug occurrences for the bug.
+    TODO: Perhaps the list of occurrences should only be included
+    when explicitly requested with a separate parameter, like
+    get_occurrence=True?
+
+    Bugs can be filtered by bug occurrence properties (via
+    knownbugregex). This allows filtering based on pipeline properties
+    such as completed_at, ubuntu_version, etc, by extension.
+    """
+    bugoccurrence = fields.ToManyField(
+        'oilserver.api.resources.BugOccurrenceResource',
+        attribute=get_bug_occurrences,
+        null=True, full=True)
+
+    knownbugregex = fields.ToManyField(KnownBugRegexResource, 'knownbugregex_set', null=True)
 
     class Meta:
         queryset = models.Bug.objects.all()
@@ -532,6 +601,13 @@ class BugResource(CommonResource):
                   'created_at', 'updated_at']
         authorization = Authorization()
         always_return_data = True
+        filtering = {
+                'knownbugregex': ALL_WITH_RELATIONS}
+
+    def apply_filters(self, request, applicable_filters):
+        fixup_set_filters(['bugoccurrence', 'knownbugregex'], applicable_filters)
+        return super(BugResource, self).apply_filters(
+            request, applicable_filters).distinct()
 
     def obj_create(self, bundle, request=None, **kwargs):
         # Update details if supplied:
