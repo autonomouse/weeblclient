@@ -12,6 +12,9 @@ app.controller('buildsController', [
         $scope.filters = SearchService.getEmptyFilter();
         $scope.bugs = {};
 
+        $scope.start_date = null;
+        $scope.finish_date = null;
+
         $scope.tabs = {}
         $scope.tabs.builds = {};
         $scope.tabs.builds.pagetitle = "Builds";
@@ -20,7 +23,9 @@ app.controller('buildsController', [
         $scope.tabs.bugs.pagetitle = "Bugs";
         $scope.tabs.bugs.currentpage = "bugs";
 
-        function updateStats(start_date, finish_date) {
+        function updateStats() {
+            start_date = $scope.start_date;
+            finish_date = $scope.finish_date;
             console.log("Filtering dates from %s to %s", start_date, finish_date);
             buildsRetriever.refresh(binding, 'pipeline_count',
                                     'pipeline_deploy', start_date,
@@ -52,9 +57,8 @@ app.controller('buildsController', [
             console.log("Updating to last %d days.", days_offset);
             today = new Date();
             prior_date = new Date(new Date().setDate(today.getDate()-days_offset));
-            start_date = dateToString(prior_date);
-            finish_date = dateToString(today);
-            updateStats(start_date, finish_date);
+            $scope.start_date = dateToString(prior_date);
+            $scope.finish_date = dateToString(today);
         };
 
         $scope.updateFilter = function(type, value, tab) {
@@ -68,6 +72,7 @@ app.controller('buildsController', [
                 $scope.filters = SearchService.toggleFilter(
                     $scope.filters, type, value, true);
             }
+            updateStats();
             bugsRetriever.refresh($scope);
         };
 
