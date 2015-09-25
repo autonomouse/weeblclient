@@ -41,6 +41,12 @@ app.controller('buildsController', [
                                     finish_date, 'success');
         };
 
+        function updateBugs() {
+            bugsRetriever.refresh($scope,
+                $scope.start_date,
+                $scope.finish_date);
+        }
+
         function dateToString(date) {
             return date.getFullYear() + "-" + date.getMonth() + "-" + date.getDate();
         }
@@ -73,7 +79,7 @@ app.controller('buildsController', [
                     $scope.filters, type, value, true);
             }
             updateStats();
-            bugsRetriever.refresh($scope);
+            updateBugs();
         };
 
         $scope.isFilterActive = function(type, value, tab) {

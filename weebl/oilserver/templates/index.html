@@ -117,13 +117,13 @@
             <div id="main-content" data-maas-error-overlay>
             <div id="content" class="six-col" data-ng-view>
                 <div data-ng-show="currentpage === 'builds'">
-                    <p>I have {$ builds.pipeline_count $} pipelines...</p>
+                    <p>I have {$ builds.pipeline_count $} matching pipelines...</p>
                     <p>I have {$ builds.pass_deploy_count $} successful pipeline deploys...</p>
                     <p>I have {$ builds.pass_prepare_count $} successful pipeline prepares...</p>
                     <p>I have {$ builds.pass_test_cloud_image_count $} successful guest OS tests...</p>
                 </div>
                 <div data-ng-show="currentpage === 'bugs'">
-                    <p>I have {$ bugs.count $} bugs...</p>
+                    <p>I have {$ bugs.count $} matching bugs...</p>
                     <!------------------------------------------------>
                     <table>
                         <thead>
