@@ -48,7 +48,7 @@ app.controller('buildsController', [
         }
 
         function dateToString(date) {
-            return date.getFullYear() + "-" + date.getMonth() + "-" + date.getDate();
+            return date.getUTCFullYear() + "-" + (date.getUTCMonth() + 1) + "-" + date.getUTCDate();
         }
 
         var dateSymbolToDays = {
