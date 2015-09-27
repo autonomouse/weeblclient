@@ -154,6 +154,7 @@ class Jenkins(TimeStampedBaseModel):
         unique=True,
         default=None,
         blank=True,
+        null=True,
         help_text="A URL used internally (e.g. behind a firewall) for access \
         to this server.")
     service_status_updated_at = models.DateTimeField(
@@ -270,6 +271,8 @@ class Build(TimeStampedBaseModel):
         max_length=255,
         help_text="The build number or other identifier used by jenkins.")
     artifact_location = models.URLField(
+        default=None,
+        null=True,
         unique=True,
         help_text="URL where build artifacts can be obtainedIf archived, then \
         jenkins has been wiped and the build numbers reset, so this data is \
@@ -309,32 +312,6 @@ class TargetFileGlob(TimeStampedBaseModel):
         return self.glob_pattern
 
 
-class BugTrackerBug(TimeStampedBaseModel):
-    """An error that has resulted in an incorrect or unexpected behaviour or
-    result, externally recorded on a bug-tracker (such as Launchpad).
-    """
-    bug_id = models.CharField(
-        max_length=255,
-        default=utils.generate_uuid,
-        unique=True,
-        blank=False,
-        null=False,
-        help_text="Designation of this bug (e.g. Launchpad bug number).")
-    uuid = models.CharField(
-        max_length=36,
-        default=utils.generate_uuid,
-        unique=True,
-        blank=False,
-        null=False,
-        help_text="UUID of this bug.")
-    # For now bug_id needs to be unique, however, once the BugTracker model is
-    # implemented (which represents Launchpad and potentially others, e.g.
-    # GitHub), this will need to be unique_together with bug_tracker.
-
-    def __str__(self):
-        return self.uuid
-
-
 class Bug(TimeStampedBaseModel):
     """An error in OIL that has resulted in an incorrect or unexpected
     behaviour or result.
@@ -356,8 +333,28 @@ class Bug(TimeStampedBaseModel):
         blank=True,
         null=True,
         help_text="Full description of bug.")
-    bug_tracker_bugs = models.ManyToManyField(
-        BugTrackerBug, null=True, blank=True, default=None)
+
+
+class BugTrackerBug(TimeStampedBaseModel):
+    """An error that has resulted in an incorrect or unexpected behaviour or
+    result, externally recorded on a bug-tracker (such as Launchpad).
+    """
+    bug_number = models.CharField(
+        max_length=255,
+        unique=True,
+        blank=False,
+        null=False,
+        help_text="Designation of this bug (e.g. Launchpad bug number).")
+    uuid = models.CharField(
+        max_length=36,
+        default=utils.generate_uuid,
+        unique=True,
+        blank=False,
+        null=False,
+        help_text="UUID of this bug.")
+    bug = models.ForeignKey(
+        Bug,
+        help_text="Bug associated with this bug tracker bug.")
 
     def __str__(self):
         return self.uuid
