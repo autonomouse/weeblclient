@@ -156,12 +156,38 @@ def make_bug():
     return bug
 
 
+def random_regex():
+    return "%s{%s}-%s(%s)" % (
+            random.randint(0,100000),
+            random.randint(0,100000),
+            random.randint(0,100000),
+            random.randint(0,100000)
+    )
+
+
+def make_known_bug_regex(bug):
+    while True:
+        try:
+            regex = random_regex()
+            known_bug_regex = models.KnownBugRegex(
+                bug=bug,
+                regex=regex)
+            known_bug_regex.save()
+        except IntegrityError:
+            pass
+        else:
+            break
+
+    return known_bug_regex
+
+
 def make_bugs():
     target_count = 30
     current_count = models.Bug.objects.count()
     for i in range(current_count, target_count):
         bug = make_bug()
         make_bugtracker_bug(bug)
+        make_known_bug_regex(bug)
 
 
 def random_date(start, end):
@@ -190,6 +216,15 @@ def get_build_status(success_rate):
     return build_status
 
 
+def make_bug_occurrence(build):
+    regexes = models.KnownBugRegex.objects.all()
+    regex = random.choice(regexes)
+    bug_occurrence = models.BugOccurrence(
+        build=build,
+        regex=regex)
+    bug_occurrence.save()
+
+
 def make_build(pipeline, job_type, success_rate):
     build_status = get_build_status(success_rate)
     build = models.Build(
@@ -197,6 +232,10 @@ def make_build(pipeline, job_type, success_rate):
         build_status=build_status,
         job_type=job_type)
     build.save()
+
+    if build_status.name == 'failure':
+        make_bug_occurrence(build)
+
     return build
 
 
