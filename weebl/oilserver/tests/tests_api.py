@@ -1158,10 +1158,11 @@ class KnownBugRegexResourceTests(ResourceTests):
         r_dict0, status_code = self.make_known_bug_regex(bug=bug_uuid)
         before = False
         for obj in models.KnownBugRegex.objects.all():
-            if bug_uuid == obj.bug.uuid:
-                before = True
-                break
-        self.assertTrue(before)
+            if obj.bug is not None:
+                if bug_uuid == obj.bug.uuid:
+                    before = True
+                    break
+        self.assertTrue(before, msg="Bug UUID was not initially set!")
         updated_bug_uuid = utils.generate_random_string()
         data = {'bug': updated_bug_uuid}
         self.api_client.put('/api/{}/known_bug_regex/{}/'.format(
