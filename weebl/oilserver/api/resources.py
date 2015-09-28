@@ -371,7 +371,8 @@ class BuildResource(CommonResource):
     job_type = fields.ForeignKey(JobTypeResource, 'job_type')
 
     class Meta:
-        queryset = models.Build.objects.all()
+        queryset = models.Build.objects.select_related(
+            'pipeline', 'job_type', 'build_status').all()
         list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
         fields = ['uuid', 'build_id', 'artifact_location', 'build_started_at',
