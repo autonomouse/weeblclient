@@ -355,7 +355,7 @@ class PipelineResource(CommonResource):
 
     class Meta:
         queryset = models.Pipeline.objects.all()
-        fields = ['uuid', 'build_executor', 'completed_at', 'ubuntu_version', 
+        fields = ['uuid', 'build_executor', 'completed_at', 'ubuntu_version',
                   'openstack_version', 'sdn']
         list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
