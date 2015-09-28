@@ -11,40 +11,4 @@ uuid = r'(?P<uuid>{})/'.format(utils.uuid_re_pattern())
 weekly = r'weekly/'
 
 
-urlpatterns = patterns('',
-                       url(catch_all + end,
-                           views.main_page,
-                           name='index'),
-
-                       url('bugs/' + end,
-                           views.bugs,
-                           name='bugs'),
-
-                       url("Settings/" + end,
-                           views.settings_page,
-                           name='settings_page'),
-
-                       url(job_path + time_range + specific_env + end,
-                           views.job_specific_bugs_list,
-                           name='job_specific_bugs_list'),
-
-                       url(job_path + time_range + end,
-                           views.job_specific_bugs_list,
-                           name='job_specific_bugs_list'),
-
-                       url(job_path + end,
-                           views.job_specific_bugs_list,
-                           name='job_specific_bugs_list'),
-
-                       url(job_path + weekly + end,
-                           views.job_specific_bugs_list,
-                           name='job_specific_bugs_list'),
-
-                       url(weekly + end,
-                           views.weekly_main_page,
-                           name='weekly_main_page'),
-
-                       url("^environment/" + uuid + end,
-                           views.environment_page,
-                           name='environment_page'),
-                       )
+urlpatterns = patterns('', url(r'^$', views.main_page, name='index'), )
