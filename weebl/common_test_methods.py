@@ -68,6 +68,36 @@ class ResourceTests(ResourceTestCase):
             data['sdn'] = utils.generate_random_string()
         return self.post_create_instance('pipeline', data=data)
 
+    def make_ubuntuversion(self, name=None, number=None):
+        if name is None:
+            name = utils.generate_random_string()
+        if number is None:
+            number = utils.generate_random_string()
+        data = {'name': name,
+                'number': number}
+        a = self.post_create_instance_without_status_code(
+            'ubuntuversion', data=data)
+
+
+        print(a)
+
+
+        return a
+
+    def make_openstackversion(self, name=None):
+        if name is None:
+            name = utils.generate_random_string()
+        data = {'name': name}
+        return self.post_create_instance_without_status_code(
+            'openstackversion', data=data)
+
+    def make_sdn(self, name=None):
+        if name is None:
+            name = utils.generate_random_string()
+        data = {'name': name}
+        return self.post_create_instance_without_status_code(
+            'sdn', data=data)
+
     def make_build(self, pipeline=None):
         if pipeline is None:
             response = self.make_pipeline()

@@ -95,3 +95,19 @@
   fields:
     name: test_cloud_image
     description: Cloud image tests.
+
+- model: oilserver.ubuntuversion
+  pk: 1
+  fields:
+    name: trusty
+    number: 14.04
+
+- model: oilserver.openstackversion
+  pk: 1
+  fields:
+    name: kilo
+
+- model: oilserver.sdn
+  pk: 1
+  fields:
+    name: neutron

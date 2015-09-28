@@ -202,7 +202,8 @@ class Weebl(object):
         response = self.make_request('put', url=url)
         return json.loads(response.text).get('uuid')
 
-    def create_pipeline(self, pipeline_id, build_executor_name):
+    def create_pipeline(self, pipeline_id, build_executor_name, ubuntu_version,
+                        openstack_version, sdn):
         if self.pipeline_exists(pipeline_id):
             self.LOG.info("Pipeline exists with UUID: {}".format(pipeline_id))
             return pipeline_id
@@ -214,7 +215,10 @@ class Weebl(object):
         # Create pipeline:
         url = "{}/pipeline/".format(self.base_url)
         data = {'build_executor': build_executor,
-                'pipeline': pipeline_id}
+                'pipeline': pipeline_id,
+                'ubuntu_version': ubuntu_version,
+                'openstack_version': openstack_version,
+                'sdn': sdn}
         response = self.make_request('post', url=url, data=json.dumps(data))
         self.LOG.info("Pipeline {} successfully created in Weebl db"
                       .format(pipeline_id))
@@ -228,6 +232,19 @@ class Weebl(object):
             raise Exception(msg)
 
         return returned_pipeline
+
+    def update_completed_pipeline(self, pipeline_id):
+        if not self.pipeline_exists(pipeline_id):
+            self.LOG.info("Pipeline does not exist with UUID: {}".format(
+                pipeline_id))
+            return None
+
+        completed_at = datetime.now()
+        url = "{}/pipeline/{}".format(self.base_url, pipeline_id)
+        data = {'pipeline': pipeline_id,
+                'completed_at': completed_at}
+        response = self.make_request('put', url=url, data=json.dumps(data))
+        return json.loads(response.text).get('completed_at')
 
     def create_known_bug_regex(self, glob_pattern, regex, bug=None):
         if self.known_bug_regex_exists(regex):
