@@ -9,6 +9,7 @@ from oilserver import models
 from tastypie.exceptions import BadRequest
 from exceptions import NonUserEditableError
 
+
 def fixup_set_filters(model_names, applicable_filters):
     """Hack to fix tastypie filter strings.
 
@@ -383,6 +384,11 @@ class BuildResource(CommonResource):
                      'job_type': ALL_WITH_RELATIONS,
                      'pipeline': ALL_WITH_RELATIONS,
                      'build_status': ALL_WITH_RELATIONS}
+
+    def alter_list_data_to_serialize(self, request, data):
+        if request.GET.get('meta_only'):
+            return {'meta': data['meta']}
+        return data
 
     def obj_create(self, bundle, request=None, **kwargs):
         bundle.obj.build_id = bundle.data['build_id']
