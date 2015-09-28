@@ -42,10 +42,40 @@ SERVICE_STATUSES = [
     'down',
 ]
 
+
+OPENSTACK_VERSIONS = [
+    'icehouse',
+    'juno',
+    'kilo',
+    'liberty',
+]
+
+
+SDNS = [
+    'nova-networking',
+    'neutron-openvswitch',
+    'calico',
+    'contrail',
+    'odl-openvswitch',
+    'nvp',
+    'nsx',
+    'hyperv',
+    'hyperv-openvswitch',
+]
+
+
+UBUNTU_VERSIONS = [
+    ('precise', '12.04'),
+    ('trusty', '14.04'),
+]
+
+
 ENUM_MAPPINGS = [
     (models.JobType, JOB_TYPES),
     (models.BuildStatus, BUILD_STATUSES),
     (models.ServiceStatus, SERVICE_STATUSES),
+    (models.OpenstackVersion, OPENSTACK_VERSIONS),
+    (models.SDN, SDNS),
 ]
 
 
@@ -64,12 +94,14 @@ COMPONENT_NAME = [
     'keystone',
 ]
 
+
 FAILURE_VERB = [
     'failed to',
     'did not',
     'reported failure to',
     'crashed while attempting to',
 ]
+
 
 OBJECT = [
     'start up',
@@ -81,6 +113,16 @@ OBJECT = [
     'end process',
     'restart charm',
 ]
+
+
+def populate_ubuntu_versions():
+    for ubuntu_name, ubuntu_number in UBUNTU_VERSIONS:
+        if models.UbuntuVersion.objects.filter(
+                name=ubuntu_name).exists():
+            continue
+        ubuntu_version = models.UbuntuVersion(
+            name=ubuntu_name, number=ubuntu_number)
+        ubuntu_version.save()
 
 
 def populate_enum_object(enum_class, enum_list):
@@ -195,13 +237,24 @@ def random_date(start, end):
         seconds=random.randint(0, int((end - start).total_seconds())))
 
 
+def random_enum(enum_class):
+    enum_values = enum_class.objects.all()
+    return random.choice(enum_values)
+
+
 def make_pipeline():
     completed_at = random_date(
         datetime(2015, 1, 1, tzinfo=timezone.utc),
         datetime.now(timezone.utc))
+    openstack_versions = models.OpenstackVersion.objects.all()
+    openstack_version = random.choice(openstack_versions)
     pipeline = models.Pipeline(
         completed_at=completed_at,
-        build_executor=models.BuildExecutor.objects.first())
+        build_executor=models.BuildExecutor.objects.first(),
+        openstack_version=random_enum(models.OpenstackVersion),
+        ubuntu_version=random_enum(models.UbuntuVersion),
+        sdn=random_enum(models.SDN),
+        )
     pipeline.save()
     return pipeline
 
@@ -277,6 +330,7 @@ def make_pipelines():
 
 def populate_data():
     populate_enum_objects()
+    populate_ubuntu_versions()
     make_infrastructure()
     make_bugs()
     make_pipelines()
