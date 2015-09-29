@@ -16,11 +16,13 @@ class Weebl(object):
         self.LOG = utils.get_logger("weeblSDK_python2")
         self.env_name = env_name
         self.uuid = uuid
+        self.weebl_api_version = weebl_api_ver
         self.weebl_url = weebl_url
         self.weebl_auth = weebl_auth
         self.headers = {"content-type": "application/json",
                         "limit": None}
         self.base_url = "{}/api/{}".format(weebl_url, weebl_api_ver)
+        self._jenkins_uuid = None
 
     def convert_timestamp_to_dt_obj(self, timestamp):
         timestamp_in_ms = timestamp / 1000
@@ -33,7 +35,7 @@ class Weebl(object):
 
     def make_request(self, method, raise_exception=True, **params):
         params['headers'] = self.headers
-        params['auth'] = self.weebl_auth
+        #params['auth'] = self.weebl_auth
         if method == 'get':
             response = requests.get(**params)
         elif method == 'post':
@@ -83,19 +85,21 @@ class Weebl(object):
             return True
         return False
 
-    def jenkins_exists(self, uuid):
-        jkns_instances = self.filter_instances("jenkins", [('uuid', uuid)])
-        if jkns_instances is not None:
-            if self.uuid in [jkns.get('uuid') for jkns in jkns_instances]:
+    def jenkins_exists(self, environment_uuid):
+        jkns_instances = self.filter_instances(
+            "jenkins", [('environment__uuid', environment_uuid)])
+        if len(jkns_instances) > 0:
                 return True
         return False
 
-    def build_executor_exists(self, name, env_uuid):
+    def build_executor_exists(self, name):
         build_executor_instances = self.filter_instances(
-            "build_executor", [('name', name)])
-        b_ex_in_env = [bex.get('name') for bex in build_executor_instances
-                       if env_uuid in bex['jenkins']]
-        return True if name in b_ex_in_env else False
+            "build_executor", [
+                    ('name', name),
+                    ('jenkins__uuid', self._get_jenkins_uuid()),
+            ]
+        )
+        return len(build_executor_instances) > 0
 
     def pipeline_exists(self, pipeline_id):
         pipeline_instances = self.filter_instances(
@@ -127,11 +131,7 @@ class Weebl(object):
         bug_occurrence_instances = self.filter_instances(
             "bug_occurrence", [('build__uuid', build_uuid),
                                ('regex__uuid', regex_uuid)])
-        build_uuids = [bugocc.get('uuid') for bugocc in
-                       bug_occurrence_instances
-                       if build_uuid in bugocc['build']
-                       and regex_uuid in bugocc['regex']]
-        return True if build_uuids != [] else False
+        return len(bug_occurrence_instances) > 0
 
     def target_file_glob_exists(self, glob_pattern):
         target_file_glob_instances = self.filter_instances(
@@ -142,19 +142,30 @@ class Weebl(object):
                 return True
         return False
 
+    def _get_jenkins_uuid(self):
+        if self._jenkins_uuid is None:
+            [jenkins] = self.filter_instances(
+                "jenkins", [('environment__uuid', self.uuid)])
+            self._jenkins_uuid = jenkins['uuid']
+        return self._jenkins_uuid
+
+    def create_build_executor(self, build_executor_name):
+        jenkins_resource_uri = self._pk_uri(
+            'jenkins', self._get_jenkins_uuid())
+        url = "{}/build_executor/".format(self.base_url)
+        data = {'name': build_executor_name,
+                'jenkins': jenkins_resource_uri}
+        self.make_request('post', url=url, data=json.dumps(data))
+
     def set_up_new_build_executors(self, ci_server_api):
         newly_created_build_executors = []
 
         for build_executor in ci_server_api.get_nodes().iteritems():
             name = build_executor[0]
-            if self.build_executor_exists(name, self.uuid):
+            if self.build_executor_exists(name):
                 continue
-
             # Create this build executor for this environment:
-            url = "{}/build_executor/".format(self.base_url)
-            data = {'name': name,
-                    'jenkins': self.uuid}
-            self.make_request('post', url=url, data=json.dumps(data))
+            self.create_build_executor(name)
             newly_created_build_executors.append(name)
         if newly_created_build_executors != []:
             msg = "Created the following {} environment build executor(s):\n{}"
@@ -183,23 +194,34 @@ class Weebl(object):
         self.LOG.info("Set up new {} environment: {}".format(
             self.env_name, self.uuid))
 
+    def _pk_uri(self, resource, value):
+        return "/api/%s/%s/%s/" % (
+            self.weebl_api_version, resource, value)
+
     def set_up_new_jenkins(self, jenkins_host):
         if self.jenkins_exists(self.uuid):
-            self.LOG.info("Jenkins exists with UUID: {}".format(self.uuid))
+            self.LOG.info(
+                "Jenkins exists for environment with UUID: {}".format(self.uuid))
             return
 
         # Create new jenkins:
         url = "{}/jenkins/".format(self.base_url)
-        data = {'environment': self.uuid,
-                'external_access_url': jenkins_host}
+        data = {
+            'environment': self._pk_uri('environment', self.uuid),
+            'external_access_url': jenkins_host,
+            'internal_access_url': jenkins_host,
+            'service_status': self._pk_uri('service_status', 'up'),
+        }
         # TODO: Add internal_access_url once it's reimplemented in the API:
         # data['internal_access_url'] = self.get_internal_url_of_this_machine()
         self.make_request('post', url=url, data=json.dumps(data))
-        self.LOG.info("Set up new jenkins: {}".format(self.uuid))
+        self.LOG.info("Set up new jenkins for environment {}".format(
+            self.uuid))
 
     def check_in_to_jenkins(self, ci_server_api):
-        url = "{}/jenkins/{}/".format(self.base_url, self.uuid)
-        response = self.make_request('put', url=url)
+        url = "{}/jenkins/{}/".format(
+            self.base_url, self._get_jenkins_uuid())
+        response = self.make_request('put', url=url, data=json.dumps({}))
         return json.loads(response.text).get('uuid')
 
     def create_pipeline(self, pipeline_id, build_executor_name):
@@ -213,8 +235,10 @@ class Weebl(object):
 
         # Create pipeline:
         url = "{}/pipeline/".format(self.base_url)
-        data = {'build_executor': build_executor,
-                'pipeline': pipeline_id}
+        data = {
+            'build_executor': self._pk_uri('build_executor', build_executor),
+            'uuid': pipeline_id
+        }
         response = self.make_request('post', url=url, data=json.dumps(data))
         self.LOG.info("Pipeline {} successfully created in Weebl db"
                       .format(pipeline_id))
@@ -229,13 +253,15 @@ class Weebl(object):
 
         return returned_pipeline
 
-    def create_known_bug_regex(self, glob_pattern, regex, bug=None):
+    def create_known_bug_regex(self, glob_patterns, regex, bug=None):
         if self.known_bug_regex_exists(regex):
             return
 
         # Create known_bug_regex:
         url = "{}/known_bug_regex/".format(self.base_url)
-        data = {"target_file_globs": glob_pattern,
+        data = {"target_file_globs":
+                [self._pk_uri('target_file_glob', glob_pattern)
+                 for glob_pattern in glob_patterns],
                 "regex": regex}
         if bug is not None:
             data['bug'] = bug
@@ -253,7 +279,9 @@ class Weebl(object):
         # Create target_file_glob:
         data = {"glob_pattern": glob_pattern}
         if job_types is not None:
-            data["job_types"] = job_types
+            data["job_types"] = [
+                self._pk_uri('job_type', job_type)
+                for job_type in job_types]
         if self.target_file_glob_exists(glob_pattern):
             url = "{}/target_file_glob/{}/".format(self.base_url, glob_pattern)
             response = self.make_request('put', url=url, data=json.dumps(data))
@@ -290,8 +318,8 @@ class Weebl(object):
 
     def get_build_executor_uuid_from_name(self, build_executor_name):
         url = "{}/build_executor/".format(self.base_url)
-        url_with_args = "{}?jenkins={}&name={}".format(url, self.uuid,
-                                                       build_executor_name)
+        url_with_args = "{}?jenkins__uuid={}&name={}".format(
+            url, self._get_jenkins_uuid(), build_executor_name)
         response = self.make_request('get', url=url_with_args)
         objects = json.loads(response.text)['objects']
 
@@ -312,10 +340,11 @@ class Weebl(object):
 
         # Create build:
         url = "{}/build/".format(self.base_url)
-        data = {'build_id': build_id,
-                'pipeline': pipeline,
-                'build_status': build_status.lower(),
-                'job_type': job_type}
+        data = {
+            'build_id': build_id,
+            'pipeline': self._pk_uri('pipeline', pipeline),
+            'build_status': self._pk_uri('build_status', build_status.lower()),
+            'job_type': self._pk_uri('job_type', job_type)}
         if build_started_at:
             data['build_started_at'] =\
                 self.convert_timestamp_to_string(build_started_at, ts_format)
@@ -344,8 +373,10 @@ class Weebl(object):
 
         # Create Bug Occurrence:
         url = "{}/bug_occurrence/".format(self.base_url)
-        data = {'build': build_uuid,
-                'regex': regex_uuid}
+        data = {
+            'build': self._pk_uri('build', build_uuid),
+            'regex': self._pk_uri('known_bug_regex', regex_uuid)
+        }
         response = self.make_request('post', url=url, data=json.dumps(data))
         bug_occurrence_uuid = json.loads(response.text).get('uuid')
         self.LOG.info("Bug Occurrence created (bug occurrence uuid: {})"

@@ -146,6 +146,13 @@ class ServiceStatus(models.Model):
 class Jenkins(TimeStampedBaseModel):
     """The Continuous Integration Server."""
     environment = models.OneToOneField(Environment)
+    uuid = models.CharField(
+        max_length=36,
+        default=utils.generate_uuid,
+        unique=True,
+        blank=False,
+        null=False,
+        help_text="UUID of the jenkins instance.")
     service_status = models.ForeignKey(ServiceStatus)
     external_access_url = models.URLField(
         unique=True,
@@ -164,10 +171,6 @@ class Jenkins(TimeStampedBaseModel):
     def __str__(self):
         return self.external_access_url
 
-    @property
-    def uuid(self):
-        return self.environment.uuid
-
 
 class BuildExecutor(TimeStampedBaseModel):
     """The Jenkins build executor (master or slave)."""
@@ -180,7 +183,6 @@ class BuildExecutor(TimeStampedBaseModel):
         help_text="UUID of the jenkins build executor.")
     name = models.CharField(
         max_length=255,
-        default=uuid.default,
         help_text="Name of the jenkins build executor.")
     jenkins = models.ForeignKey(Jenkins)
 
