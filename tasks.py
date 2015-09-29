@@ -4,6 +4,7 @@ import re
 import sys
 import psycopg2
 import psutil
+import shutil
 from invoke import task, run
 from datetime import datetime
 
@@ -24,6 +25,14 @@ sites_available_location = "/etc/apache2/sites-available/weebl.conf"
 file_loc = os.path.dirname(os.path.abspath(__file__))
 deploy_path = "{}/{}".format(file_loc, application)  # change
 setup_file_loc = "setup.py"
+angular_src_dir = "/usr/share/javascript/angular.js/"
+angular_dest_dir = os.path.join(file_loc, "weebl/oilserver/static/js/angular/")
+angular_files = ['angular.min.js',
+                 'angular-route.min.js',
+                 'angular-cookies.min.js',
+                 'angular-resource.js',
+                 ]
+
 
 ''' REQUIRES install_deps to have been run first. '''
 
@@ -39,12 +48,14 @@ def list():
             'port': "Port to run server on. Defaults to 8000."})
 def go(database, server="apache", ip_addr="127.0.0.1", port=8000):
     """Set up and run weebl using either a test or a production database."""
+    copy_system_angularjs()
     initialise_database(database)
     deploy(ip_addr, port, server)
 
 @task
 def run_tests():
     """Run unit, functional, and lint tests for each app."""
+    copy_system_angularjs()
     initialise_database("test")
     load_fixtures()
     run_lint_tests()
@@ -374,3 +385,23 @@ def deploy_with_apache(apacheconf, deployloc, application, wsgifile="wsgi.py",
     run("sudo a2ensite weebl.conf") #
     run("sudo service apache2 reload")
     run("sudo service apache2 restart")
+
+def mkdir(directory):
+    """ Make a directory, check and throw an error if failed. """
+    if not os.path.isdir(directory):
+        try:
+            os.makedirs(directory)
+        except OSError:
+            if not os.path.isdir(directory):
+                raise
+                
+def copy_system_angularjs():
+    """Copies Angularjs files from system dir (installed via the install_deps 
+    script) and copies them to local folder (which is in the gitignore file).
+    This obviously assumes that install_deps has been run first.
+    """
+    mkdir(angular_dest_dir)
+    for angular_js in angular_files:
+        src = "{}{}".format(angular_src_dir, angular_js)
+        dest = "{}{}".format(angular_dest_dir, angular_js)
+        shutil.copy2(src, dest) 

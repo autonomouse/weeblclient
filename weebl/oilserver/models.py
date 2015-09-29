@@ -221,7 +221,7 @@ class OpenstackVersion(models.Model):
     name = models.CharField(
         max_length=255,
         unique=True,
-        default="",
+        default="unknown",
         help_text="The name of the version of the OpenStack system.")
 
     def __str__(self):
@@ -233,8 +233,8 @@ class SDN(models.Model):
     name = models.CharField(
         max_length=255,
         unique=True,
-        default="",
-        help_text="The name of the SDN.")
+        default="unknown",
+        help_text="The name of the software defined network.")
 
     def __str__(self):
         return self.name
@@ -255,9 +255,11 @@ class Pipeline(TimeStampedBaseModel):
         default=None,
         auto_now_add=False,
         help_text="DateTime the pipeline was completed.")
-    ubuntu_version = models.ForeignKey(UbuntuVersion)
-    openstack_version = models.ForeignKey(OpenstackVersion)
-    sdn = models.ForeignKey(SDN)
+    ubuntu_version = models.ForeignKey(
+        UbuntuVersion, null=True, blank=True, default=None)
+    openstack_version = models.ForeignKey(
+        OpenstackVersion, null=True, blank=True, default=None)
+    sdn = models.ForeignKey(SDN, null=True, blank=True, default=None)
     build_executor = models.ForeignKey(BuildExecutor)
 
     def __str__(self):

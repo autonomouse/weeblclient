@@ -59,14 +59,18 @@ class CommonResource(ModelResource):
         resource_list = [resources] if type(resources) != list else resources
         output = []
         for resource in resource_list:
-            field_filter = {field: resource}
-            if not model.objects.filter(**field_filter).exists():
-                # Create target file if doesn't exist:
-                instance = model()
-                setattr(instance, field, resource)
-                instance.save()
-            output.append(model.objects.get(**field_filter))
+            output.append(self.get_or_create_if_doesnt_exist(
+                          resource, model, field, bundle))
         return output
+
+    def get_or_create_if_doesnt_exist(self, resource, model, field, bundle):
+        field_filter = {field: resource}
+        if not model.objects.filter(**field_filter).exists():
+            # Create target file if doesn't exist:
+            instance = model()
+            setattr(instance, field, resource)
+            instance.save()
+        return model.objects.get(**field_filter)
 
     def hydrate(self, bundle):
         # Timestamp data should be generated interanlly and not editable:
@@ -294,6 +298,7 @@ class BuildExecutorResource(CommonResource):
 class UbuntuVersionResource(CommonResource):
 
     class Meta:
+        resource_name = 'ubuntu_version'
         queryset = models.UbuntuVersion.objects.all()
         list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
@@ -318,6 +323,7 @@ class UbuntuVersionResource(CommonResource):
 class OpenstackVersionResource(CommonResource):
 
     class Meta:
+        resource_name = 'openstack_version'
         queryset = models.OpenstackVersion.objects.all()
         list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
@@ -340,6 +346,7 @@ class OpenstackVersionResource(CommonResource):
 class SDNResource(CommonResource):
 
     class Meta:
+        resource_name = 'sdn'
         queryset = models.SDN.objects.all()
         list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
@@ -361,10 +368,11 @@ class SDNResource(CommonResource):
 
 class PipelineResource(CommonResource):
     build_executor = fields.ForeignKey(BuildExecutorResource, 'build_executor')
-    ubuntu_version = fields.ForeignKey(UbuntuVersionResource, 'ubuntu_version')
-    openstack_version = fields.ForeignKey(OpenstackVersionResource,
-                                          'openstack_version')
-    sdn = fields.ForeignKey(SDNResource, 'sdn')
+    ubuntu_version = fields.ForeignKey(UbuntuVersionResource, 'ubuntu_version',
+                                       full=True, null=True)
+    openstack_version = fields.ForeignKey(
+        OpenstackVersionResource, 'openstack_version', full=True, null=True)
+    sdn = fields.ForeignKey(SDNResource, 'sdn', full=True, null=True)
 
     class Meta:
         queryset = models.Pipeline.objects.all()
@@ -389,6 +397,18 @@ class PipelineResource(CommonResource):
             bundle.obj.completed_at = None
         if 'pipeline' in bundle.data:
             bundle.obj.uuid = bundle.data['pipeline']
+
+        if 'ubuntu_version' in bundle.data:
+            bundle.obj.ubuntu_version = self.get_or_create_if_doesnt_exist(
+                bundle.data['ubuntu_version'], models.UbuntuVersion,
+                'name', bundle)
+        if 'openstack_version' in bundle.data:
+            bundle.obj.openstack_version = self.get_or_create_if_doesnt_exist(
+                bundle.data['openstack_version'], models.OpenstackVersion,
+                'name', bundle)
+        if 'sdn' in bundle.data:
+            bundle.obj.sdn = self.get_or_create_if_doesnt_exist(
+                bundle.data['sdn'], models.SDN, 'name', bundle)
         bundle.obj.save()
         return bundle
 
@@ -589,18 +609,9 @@ class KnownBugRegexResource(CommonResource):
         bundle.obj.regex = bundle.data['regex']
         bundle.obj.save()
 
-        # Specify bug uuid:
-        uuid = bundle.data.get('bug', None)
-
-        if models.Bug.objects.filter(uuid=uuid).exists():
-            bug = models.Bug.objects.get(uuid=uuid)
-        else:
-            # Create bug if doesn't exist:
-            bug = models.Bug()
-            if uuid is not None:
-                bug.uuid = uuid
-            bug.save()
-        bundle.obj.bug = bug
+        if 'bug' in bundle.data:
+            bundle.obj.bug = self.get_or_create_if_doesnt_exist(
+                bundle.data['bug'], models.Bug, 'uuid', bundle)
         bundle.obj.target_file_globs = self.specify_many_to_many_fields(
             "target_file_globs", models.TargetFileGlob, 'glob_pattern', bundle)
         bundle.obj.save()
@@ -719,8 +730,9 @@ class BugResource(CommonResource):
 
     def dehydrate(self, bundle):
         if hasattr(bundle.obj, 'bug_tracker_bugs'):
+            bug_tracker_bugs_list = bundle.obj.bug_tracker_bugs.all()
             bundle.data['bug_tracker_bugs'] = [
-                usbugs.bug_id for usbugs in bundle.obj.bug_tracker_bugs.all()]
+                usbugs.bug_id for usbugs in bug_tracker_bugs_list]
         replace_with = [('resource_uri', bundle.obj.uuid), ]
         return self.replace_bundle_item_with_alternative(bundle, replace_with)
 
