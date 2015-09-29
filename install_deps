@@ -24,6 +24,9 @@ apt-get -y --no-upgrade install \
     python3-freezegun \
     python3-pip \
     python3-arrow \
+    libjs-yui3-min \
+    libjs-angularjs \
+    libjs-yui \
     --fix-missing
 
 # export https_proxy=http://91.189.89.33:3128

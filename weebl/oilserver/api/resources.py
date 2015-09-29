@@ -647,8 +647,9 @@ class BugResource(CommonResource):
 
     def dehydrate(self, bundle):
         if hasattr(bundle.obj, 'bug_tracker_bugs'):
+            bug_tracker_bugs_list = bundle.obj.bug_tracker_bugs.all()
             bundle.data['bug_tracker_bugs'] = [
-                usbugs.bug_id for usbugs in bundle.obj.bug_tracker_bugs.all()]
+                usbugs.bug_id for usbugs in bug_tracker_bugs_list]
         replace_with = [('resource_uri', bundle.obj.uuid), ]
         return self.replace_bundle_item_with_alternative(bundle, replace_with)
 
