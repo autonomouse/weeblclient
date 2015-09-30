@@ -353,11 +353,6 @@ class KnownBugRegexResource(CommonResource):
                      'bug_occurrences': ALL_WITH_RELATIONS}
         detail_uri_name = 'uuid'
 
-    def apply_filters(self, request, applicable_filters):
-        fixup_set_filters(['bugoccurrence'], applicable_filters)
-        return super(KnownBugRegexResource, self).apply_filters(
-            request, applicable_filters).distinct()
-
 
 class BugOccurrenceResource(CommonResource):
     build = fields.ForeignKey(BuildResource, 'build')
