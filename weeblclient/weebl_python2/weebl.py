@@ -21,7 +21,8 @@ class Weebl(object):
         self.weebl_auth = weebl_auth
         self.headers = {"content-type": "application/json",
                         "limit": None}
-        self.base_url = "{}/api/{}".format(weebl_url, weebl_api_ver)
+        self.resource_url = "/api/{}/".format(weebl_api_ver)
+        self.base_url = "{}/{}".format(weebl_url, self.resource_url)
         self._jenkins_uuid = None
 
     def convert_timestamp_to_dt_obj(self, timestamp):
@@ -139,6 +140,15 @@ class Weebl(object):
         if target_file_glob_instances is not None:
             if glob_pattern in [tfglobs.get('glob_pattern') for tfglobs in
                                 target_file_glob_instances]:
+                return True
+        return False
+
+    def bug_tracker_bug_exists(self, bug_number):
+        bug_tracker_bug_instances = self.filter_instances(
+            "bug_tracker_bug", [('bug_number', bug_number)])
+        if bug_tracker_bug_instances is not None:
+            if bug_number in [btbugs.get('bug_number') for btbugs in
+                              bug_tracker_bug_instances]:
                 return True
         return False
 
@@ -305,6 +315,25 @@ class Weebl(object):
         else:
             self.LOG.info("TargetFileglob \"{}\" successfully created"
                           .format(glob_pattern))
+
+    def create_bug_tracker_bug(self, bug_number, bug_uuid=None):
+        if self.bug_tracker_bug_exists(bug_number):
+            return
+
+        # Create bug_tracker_bug:
+        url = "{}/bug_tracker_bug/".format(self.base_url)
+        data = {"bug_number": bug_number}
+        if bug_uuid is not None:
+            data['bug'] = "{}/bug/{}".format(self.resource_url, bug_uuid)
+        response = self.make_request('post', url=url, data=json.dumps(data))
+        if response.status_code == 201:
+            self.LOG.info("BugTrackerBug \"{}\" successfully created in Weebl"
+                          .format(bug_number))
+        else:
+            msg = "Error submitting BugTrackerBug \"{}\" to Weebl"
+            msg = msg.format(bug_number)
+            self.LOG.error(msg)
+            raise Exception(msg)
 
     def get_env_name_from_uuid(self, uuid):
         url = "{}/environment/{}/".format(self.base_url, uuid)

@@ -357,32 +357,6 @@ class TargetFileGlob(TimeStampedBaseModel):
         return self.glob_pattern
 
 
-class BugTrackerBug(TimeStampedBaseModel):
-    """An error that has resulted in an incorrect or unexpected behaviour or
-    result, externally recorded on a bug-tracker (such as Launchpad).
-    """
-    bug_id = models.CharField(
-        max_length=255,
-        default=utils.generate_uuid,
-        unique=True,
-        blank=False,
-        null=False,
-        help_text="Designation of this bug (e.g. Launchpad bug number).")
-    uuid = models.CharField(
-        max_length=36,
-        default=utils.generate_uuid,
-        unique=True,
-        blank=False,
-        null=False,
-        help_text="UUID of this bug.")
-    # For now bug_id needs to be unique, however, once the BugTracker model is
-    # implemented (which represents Launchpad and potentially others, e.g.
-    # GitHub), this will need to be unique_together with bug_tracker.
-
-    def __str__(self):
-        return self.uuid
-
-
 class Bug(TimeStampedBaseModel):
     """An error in OIL that has resulted in an incorrect or unexpected
     behaviour or result.
@@ -404,8 +378,29 @@ class Bug(TimeStampedBaseModel):
         blank=True,
         null=True,
         help_text="Full description of bug.")
-    bug_tracker_bugs = models.ManyToManyField(
-        BugTrackerBug, null=True, blank=True, default=None)
+
+    def __str__(self):
+        return self.uuid
+
+
+class BugTrackerBug(TimeStampedBaseModel):
+    """An error that has resulted in an incorrect or unexpected behaviour or
+    result, externally recorded on a bug-tracker (such as Launchpad).
+    """
+    bug_number = models.CharField(
+        max_length=255,
+        unique=True,
+        blank=False,
+        null=False,
+        help_text="Designation of this bug (e.g. Launchpad bug number).")
+    uuid = models.CharField(
+        max_length=36,
+        default=utils.generate_uuid,
+        unique=True,
+        blank=False,
+        null=False,
+        help_text="UUID of this bug.")
+    bug = models.ForeignKey(Bug, null=True, blank=True, default=None)
 
     def __str__(self):
         return self.uuid

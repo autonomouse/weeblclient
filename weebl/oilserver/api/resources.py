@@ -260,10 +260,24 @@ class BugResource(CommonResource):
         queryset = models.Bug.objects.all()
         list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
-        fields = ['uuid', 'summary', 'description',
-                  'created_at', 'updated_at']
+        fields = ['uuid', 'summary', 'description', 'created_at', 'updated_at']
         authorization = Authorization()
         always_return_data = True
+        detail_uri_name = 'uuid'
+
+
+class BugTrackerBugResource(CommonResource):
+    bug = fields.ForeignKey(BugResource, 'bug', full=True, null=True)
+
+    class Meta:
+        resource_name = 'bug_tracker_bug'
+        queryset = models.BugTrackerBug.objects.all()
+        list_allowed_methods = ['get', 'post', 'delete']  # all items
+        detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
+        fields = ['uuid', 'bug_number', 'bug', 'created_at', 'updated_at']
+        authorization = Authorization()
+        always_return_data = True
+        filtering = {'bug_number': ALL, }
         detail_uri_name = 'uuid'
 
 
@@ -284,19 +298,6 @@ class KnownBugRegexResource(CommonResource):
         filtering = {'uuid': ALL,
                      'regex': ALL,
                      'target_file_globs': ALL_WITH_RELATIONS}
-        detail_uri_name = 'uuid'
-
-
-class BugTrackerBugResource(CommonResource):
-
-    class Meta:
-        resource_name = 'bug_tracker_bug'
-        queryset = models.BugTrackerBug.objects.all()
-        list_allowed_methods = ['get', 'post', 'delete']  # all items
-        detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
-        fields = ['uuid', 'bug_id', 'created_at', 'updated_at']
-        authorization = Authorization()
-        always_return_data = True
         detail_uri_name = 'uuid'
 
 
