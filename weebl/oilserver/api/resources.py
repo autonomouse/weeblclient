@@ -8,6 +8,28 @@ from oilserver import models
 from exceptions import NonUserEditableError
 
 
+def fixup_set_filters(model_names, applicable_filters):
+    """Hack to fix tastypie filter strings.
+
+    Tastypie tries to make filter strings like 'bugoccurrences_set'
+    instead of 'bugoccurences'. This replaces the former with the latter
+    for a set of model names.
+
+    TODO: see if this can be fixed by specifying reverse relation names
+    on models.
+    """
+    for model_name in model_names:
+        bad_keys = []
+        set_name = model_name + "_set"
+        for key in applicable_filters.keys():
+            if set_name in key:
+                bad_keys.append(key)
+        for bad_key in bad_keys:
+            value = applicable_filters.pop(bad_key)
+            new_key = bad_key.replace(set_name, model_name)
+            applicable_filters[new_key] = value
+
+
 def raise_error_if_in_bundle(bundle, error_if_fields):
     bad_fields = []
     for field in error_if_fields:
@@ -25,6 +47,11 @@ class CommonResource(ModelResource):
         error_if_fields = ['created_at', 'updated_at']
         raise_error_if_in_bundle(bundle, error_if_fields)
         return bundle
+
+    def alter_list_data_to_serialize(self, request, data):
+        if request.GET.get('meta_only'):
+            return {'meta': data['meta']}
+        return data
 
     def get_bundle_detail_data(self, bundle):
         # FIXME: There is apparently a bug in tastypie's ModelResource
@@ -223,7 +250,8 @@ class BuildResource(CommonResource):
     job_type = fields.ForeignKey(JobTypeResource, 'job_type')
 
     class Meta:
-        queryset = models.Build.objects.all()
+        queryset = models.Build.objects.select_related(
+            'pipeline', 'job_type', 'build_status').all()
         list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
         fields = ['uuid', 'build_id', 'artifact_location', 'build_started_at',
@@ -255,6 +283,20 @@ class TargetFileGlobResource(CommonResource):
 
 
 class BugResource(CommonResource):
+    """API Resource for 'Bug' model.
+
+    The bug list now includes the list of bug occurrences for the bug.
+    TODO: Perhaps the list of occurrences should only be included
+    when explicitly requested with a separate parameter, like
+    get_occurrence=True?
+
+    Bugs can be filtered by bug occurrence properties (via
+    knownbugregex). This allows filtering based on pipeline properties
+    such as completed_at, ubuntu_version, etc, by extension.
+    """
+    knownbugregex = fields.ToManyField(
+        'oilserver.api.resources.KnownBugRegexResource',
+        'knownbugregex_set', null=True)
 
     class Meta:
         queryset = models.Bug.objects.all()
@@ -263,7 +305,14 @@ class BugResource(CommonResource):
         fields = ['uuid', 'summary', 'description', 'created_at', 'updated_at']
         authorization = Authorization()
         always_return_data = True
+        filtering = {'knownbugregex': ALL_WITH_RELATIONS}
         detail_uri_name = 'uuid'
+
+    def apply_filters(self, request, applicable_filters):
+        fixup_set_filters(
+            ['bugoccurrence', 'knownbugregex'], applicable_filters)
+        return super(BugResource, self).apply_filters(
+            request, applicable_filters).distinct()
 
 
 class BugTrackerBugResource(CommonResource):
@@ -285,6 +334,9 @@ class KnownBugRegexResource(CommonResource):
     target_file_globs = fields.ToManyField(
         TargetFileGlobResource, 'target_file_globs')
     bug = fields.ForeignKey(BugResource, 'bug', null=True)
+    bug_occurrences = fields.ToManyField(
+        'oilserver.api.resources.BugOccurrenceResource',
+        'bugoccurrence_set', full=True, null=True)
 
     class Meta:
         resource_name = 'known_bug_regex'
@@ -297,7 +349,8 @@ class KnownBugRegexResource(CommonResource):
         always_return_data = True
         filtering = {'uuid': ALL,
                      'regex': ALL,
-                     'target_file_globs': ALL_WITH_RELATIONS}
+                     'target_file_globs': ALL_WITH_RELATIONS,
+                     'bug_occurrences': ALL_WITH_RELATIONS}
         detail_uri_name = 'uuid'
 
 

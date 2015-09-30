@@ -161,6 +161,7 @@ class Jenkins(TimeStampedBaseModel):
         unique=True,
         default=None,
         blank=True,
+        null=True,
         help_text="A URL used internally (e.g. behind a firewall) for access \
         to this server.")
     service_status_updated_at = models.DateTimeField(
@@ -318,6 +319,8 @@ class Build(TimeStampedBaseModel):
         max_length=255,
         help_text="The build number or other identifier used by jenkins.")
     artifact_location = models.URLField(
+        default=None,
+        null=True,
         unique=True,
         help_text="URL where build artifacts can be obtainedIf archived, then \
         jenkins has been wiped and the build numbers reset, so this data is \
@@ -400,7 +403,12 @@ class BugTrackerBug(TimeStampedBaseModel):
         blank=False,
         null=False,
         help_text="UUID of this bug.")
-    bug = models.ForeignKey(Bug, null=True, blank=True, default=None)
+    bug = models.ForeignKey(
+        Bug,
+        null=True,
+        blank=True,
+        default=None,
+        help_text="Bug associated with this bug tracker bug.")
 
     def __str__(self):
         return self.uuid
