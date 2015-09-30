@@ -77,11 +77,6 @@ class ResourceTests(ResourceTestCase):
                 'number': number}
         a = self.post_create_instance_without_status_code(
             'ubuntuversion', data=data)
-
-
-        print(a)
-
-
         return a
 
     def make_openstackversion(self, name=None):
