@@ -6,8 +6,8 @@ $interpolateProvider.endSymbol('$}');
 }]);
 
 app.controller('buildsController', [
-    '$scope', '$rootScope', 'buildsRetriever', 'bugsRetriever', 'SearchService',
-    function($scope, $rootScope, buildsRetriever, bugsRetriever, SearchService) {
+    '$scope', '$rootScope', 'buildsRetriever', 'bugsRetriever', 'SearchService', 'metadataRetriever',
+    function($scope, $rootScope, buildsRetriever, bugsRetriever, SearchService, metadataRetriever) {
         binding = this;
         $scope.filters = SearchService.getEmptyFilter();
         $scope.bugs = {};
@@ -15,7 +15,9 @@ app.controller('buildsController', [
         $scope.start_date = null;
         $scope.finish_date = null;
 
-        $scope.tabs = {}
+        $scope.metadata = {};
+
+        $scope.tabs = {};
         $scope.tabs.builds = {};
         $scope.tabs.builds.pagetitle = "Builds";
         $scope.tabs.builds.currentpage = "builds";
@@ -93,6 +95,7 @@ app.controller('buildsController', [
             $scope.currentpage = tab;
         };
 
+        metadataRetriever.refresh($scope);
         $scope.updateFilter('date', 'Last Year', 'builds');
         $scope.toggleTab('builds');
 
