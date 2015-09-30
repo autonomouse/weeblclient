@@ -403,7 +403,8 @@ class BugTrackerBug(TimeStampedBaseModel):
         blank=False,
         null=False,
         help_text="UUID of this bug.")
-    bug = models.ForeignKey(Bug,
+    bug = models.ForeignKey(
+        Bug,
         null=True,
         blank=True,
         default=None,

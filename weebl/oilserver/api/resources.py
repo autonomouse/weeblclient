@@ -317,10 +317,6 @@ class BugResource(CommonResource):
     knownbugregex). This allows filtering based on pipeline properties
     such as completed_at, ubuntu_version, etc, by extension.
     """
-    bugoccurrence = fields.ToManyField(
-        'oilserver.api.resources.BugOccurrenceResource',
-        attribute=get_bug_occurrences,
-        null=True, full=True)
     knownbugregex = fields.ToManyField(
         'oilserver.api.resources.KnownBugRegexResource',
         'knownbugregex_set', null=True)
@@ -332,12 +328,12 @@ class BugResource(CommonResource):
         fields = ['uuid', 'summary', 'description', 'created_at', 'updated_at']
         authorization = Authorization()
         always_return_data = True
-        filtering = {
-                'knownbugregex': ALL_WITH_RELATIONS}
+        filtering = {'knownbugregex': ALL_WITH_RELATIONS}
         detail_uri_name = 'uuid'
 
     def apply_filters(self, request, applicable_filters):
-        fixup_set_filters(['bugoccurrence', 'knownbugregex'], applicable_filters)
+        fixup_set_filters(
+            ['bugoccurrence', 'knownbugregex'], applicable_filters)
         return super(BugResource, self).apply_filters(
             request, applicable_filters).distinct()
 
