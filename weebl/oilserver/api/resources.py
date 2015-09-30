@@ -282,29 +282,6 @@ class TargetFileGlobResource(CommonResource):
         detail_uri_name = 'glob_pattern'
 
 
-REPLACE_PREFIX = 'knownbugregex__bug_occurrences__'
-
-def get_bug_occurrences(bundle):
-    """Get the bug occurrences to include in the bug.
-
-    When bugs are found by bug occurrence properties, we only include
-    bug occurrences that match those properties. So if we filter for
-    bugs with occurrences in pipelines that completed in 2015, only
-    the bug occurrences that completed in 2015 will be included in the
-    response.
-    """
-    query_dict = bundle.request.GET
-    bug_occurrence_filters = {}
-    for key, value in query_dict.items():
-        if not key.startswith(REPLACE_PREFIX):
-            continue
-        filter_name = key.replace(REPLACE_PREFIX, '')
-        bug_occurrence_filters[filter_name] = value
-
-    bug_occurrence_filters['regex__bug__uuid'] = bundle.obj.uuid
-    return models.BugOccurrence.objects.filter(**bug_occurrence_filters)
-
-
 class BugResource(CommonResource):
     """API Resource for 'Bug' model.
 
