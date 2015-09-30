@@ -1,6 +1,11 @@
-var app = angular.module('weebl');
+var app = angular.module('weebl', []);
 
-app.controller('patternsController', [
+app.config(['$interpolateProvider', function ($interpolateProvider) {
+$interpolateProvider.startSymbol('{$');
+$interpolateProvider.endSymbol('$}');
+}]);
+
+app.controller('buildsController', [
     '$scope', '$rootScope', 'buildsRetriever', 'bugsRetriever', 'SearchService',
     function($scope, $rootScope, buildsRetriever, bugsRetriever, SearchService) {
         binding = this;
@@ -17,9 +22,6 @@ app.controller('patternsController', [
         $scope.tabs.bugs = {};
         $scope.tabs.bugs.pagetitle = "Bugs";
         $scope.tabs.bugs.currentpage = "bugs";
-        $scope.tabs.patterns = {};
-        $scope.tabs.patterns.pagetitle = "Patterns";
-        $scope.tabs.patterns.currentpage = "patterns";
 
         function updateStats() {
             start_date = $scope.start_date;

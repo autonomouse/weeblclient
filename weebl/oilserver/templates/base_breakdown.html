@@ -1,0 +1,27 @@
+
+<div class="inner-wrapper" id="content">
+    <h2>Breakdown by category:</h2> 
+        
+        <div class="middle">  
+            <div class="left">    
+                <table>
+                    <tr>
+                        <td><h3>Category</h3></td>
+                        <td><h3>Number</h3></td>
+                    </tr>
+                    {% for category, bug_count in breakdown.items %}
+                    <tr>
+                        <td>{{ category }}</td>
+                        <td>{{ bug_count }}</td>
+                    </tr>
+                    {% endfor %} 
+                </table>  
+            </div>
+            <div class="right">  
+                <!-- pie chart here -->
+                {% block chart_categories %}
+                    {% include "chart_categories.html" %}
+                {% endblock %}  
+            </div>
+        </div>
+</div>

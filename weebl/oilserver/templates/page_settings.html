@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block page_title %}Weebl - Settings{% endblock %}
+{% block user_info %}{% endblock %}
+
+{% block main %}
+    {% if updated != None %}
+        <div class="inner-wrapper" id="content">
+        {% if updated == True %}
+            <span style="color:green">Settings Updated (Page will require refreshing before results are apparent)</span>
+        {% elif updated == False %}
+            <span style="color:red">Settings Not Updated</span>
+        {% endif %}
+        </div>
+    {% endif %}
+
+
+    <div class="inner-wrapper" id="content">
+        <h3>Settings:</h3>
+        <form action="." method="POST">{% csrf_token %}
+            <table>
+                {{ form.as_table }}
+            </table>
+            <input type="submit" value="Submit">
+        </form>
+    </div>
+{% endblock %}
