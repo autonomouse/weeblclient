@@ -1,9 +1,9 @@
-import utils
 import random
+import utils
 from weebl import urls
-from oilserver import models
 from django.test import TestCase
 from tastypie.test import ResourceTestCase
+from oilserver import models
 
 
 class WeeblTestCase(TestCase):
@@ -29,120 +29,124 @@ class ResourceTests(ResourceTestCase):
         return self.post_create_instance_without_status_code(
             'environment', data=data)
 
-    def make_jenkins(self, environment_uuid, url=None):
-        if url is None:
-            url = utils.generate_random_url()
-        data = {'environment': environment_uuid,
-                'external_access_url': url}
-        return self.post_create_instance_without_status_code(
-            'jenkins', data=data)
 
-    def make_environment_and_jenkins(self):
-        response1 = self.make_environment()
-        env_uuid = response1['uuid']
-        env_name = response1['name']
-        self.make_jenkins(env_uuid)
-        return env_uuid, env_name
+def make_environment():
+    environment = models.Environment(
+        name=utils.generate_random_string())
+    environment.save()
+    return environment
 
-    def make_build_executor(self, name=None, env_uuid=None):
-        if env_uuid is None:
-            env_uuid, env_name = self.make_environment_and_jenkins()
-        if name is None:
-            data = {'jenkins': env_uuid}
+
+def make_jenkins(environment=None):
+    if environment is None:
+        if models.Environment.objects.exists():
+            environment = models.Environment.objects.first()
         else:
-            data = {'name': name,
-                    'jenkins': env_uuid}
-        return self.post_create_instance('build_executor', data=data)
+            environment = make_environment()
 
-    def make_pipeline(self, build_executor=None, pipeline=None, sdn=None,
-                      ubuntu_version='trusty', openstack_version='havana'):
-        if build_executor is None:
-            response = self.make_build_executor()
-            build_executor = response[0]['uuid']
-        data = {'build_executor': build_executor}
-        if pipeline is not None:
-            data['pipeline'] = pipeline
-        data['ubuntu_version'] = ubuntu_version
-        data['openstack_version'] = openstack_version
-        if sdn is None:
-            data['sdn'] = utils.generate_random_string()
-        return self.post_create_instance('pipeline', data=data)
+    service_status = models.ServiceStatus.objects.get(name='up')
 
-    def make_ubuntuversion(self, name=None, number=None):
-        if name is None:
-            name = utils.generate_random_string()
-        if number is None:
-            number = utils.generate_random_string()
-        data = {'name': name,
-                'number': number}
-        a = self.post_create_instance_without_status_code(
-            'ubuntuversion', data=data)
-        return a
+    jenkins = models.Jenkins(
+        environment=environment,
+        service_status=service_status,
+        external_access_url=utils.generate_random_string())
+    jenkins.save()
+    return jenkins
 
-    def make_openstackversion(self, name=None):
-        if name is None:
-            name = utils.generate_random_string()
-        data = {'name': name}
-        return self.post_create_instance_without_status_code(
-            'openstackversion', data=data)
 
-    def make_sdn(self, name=None):
-        if name is None:
-            name = utils.generate_random_string()
-        data = {'name': name}
-        return self.post_create_instance_without_status_code(
-            'sdn', data=data)
+def make_build_executor(jenkins=None):
+    if jenkins is None:
+        if models.Jenkins.objects.exists():
+            jenkins = models.Jenkins.objects.first()
+        else:
+            jenkins = make_jenkins()
+    build_executor = models.BuildExecutor(jenkins=jenkins)
+    build_executor.save()
+    return build_executor
 
-    def make_build(self, pipeline=None):
-        if pipeline is None:
-            response = self.make_pipeline()
-            pipeline = response[0]['uuid']
-        build_id = utils.generate_random_number_as_string()
-        build_status = models.BuildStatus.objects.all()[1].name
-        job_type = models.JobType.objects.all()[0].name
-        data = {'build_id': str(build_id),
-                'pipeline': pipeline,
-                'build_status': build_status,
-                'job_type': job_type}
-        return self.post_create_instance('build', data=data)
 
-    def make_target_file_glob(self, job_types=None):
+def make_pipeline(build_executor=None):
+    if build_executor is None:
+        build_executor = make_build_executor()
+
+    pipeline = models.Pipeline(build_executor=build_executor)
+    pipeline.save()
+    return pipeline
+
+
+def make_ubuntuversion(self, name=None, number=None):
+    if name is None:
         name = utils.generate_random_string()
-        data = {'glob_pattern': name}
-        if job_types is not None:
-            data['job_types'] = job_types
-        return self.post_create_instance('target_file_glob', data=data)
+    if number is None:
+        number = utils.generate_random_string()
+    data = {'name': name,
+            'number': number}
+    return self.post_create_instance_without_status_code(
+        'ubuntuversion', data=data)
 
-    def make_known_bug_regex(self, target_file_globs=None, bug=None):
-        if target_file_globs is None:
-            x = random.randint(2, 9)
-            target_file_globs = [utils.generate_random_string() for _ in
-                                 range(x)]
-        data = {"target_file_globs": target_file_globs,
-                "regex": utils.generate_random_string()}
-        if bug is not None:
-            data['bug'] = bug
-        return self.post_create_instance('known_bug_regex', data=data)
 
-    def make_bug(self, uuid=None, summary=None, description=None):
-        data = {'summary': summary if summary is not None else
-                utils.generate_random_string()}
-        if uuid is not None:
-            data['uuid'] = uuid
-        if description is not None:
-            data['description'] = description
-        return self.post_create_instance('bug', data=data)
+def make_openstackversion(self, name=None):
+    if name is None:
+        name = utils.generate_random_string()
+    data = {'name': name}
+    return self.post_create_instance_without_status_code(
+        'openstackversion', data=data)
 
-    def make_bug_tracker_bug(self, bug_id=None):
-        if bug_id is None:
-            bug_id = utils.generate_random_number_as_string()
-        data = {'bug_id': bug_id}
-        return self.post_create_instance('bug_tracker_bug', data=data)
 
-    def make_bug_occurrence(self, regex=None, build=None):
-        if regex is None:
-            regex = self.make_known_bug_regex()[0].get('uuid')
-        if build is None:
-            build = self.make_build()[0].get('uuid')
-        data = {'regex': regex, 'build': build}
-        return self.post_create_instance('bug_occurrence', data=data)
+def make_sdn(self, name=None):
+    if name is None:
+        name = utils.generate_random_string()
+    data = {'name': name}
+    return self.post_create_instance_without_status_code(
+        'sdn', data=data)
+
+
+def make_build(build_id=None, build_status=None, job_type=None, pipeline=None):
+    if build_id is None:
+        build_id = str(random.randint(1, 1000000))
+
+    if build_status is None:
+        build_status = models.BuildStatus.objects.get(name='success')
+
+    if job_type is None:
+        job_type = models.JobType.objects.get(name='pipeline_deploy')
+
+    if pipeline is None:
+        pipeline = make_pipeline()
+
+    build = models.Build(
+        build_id=build_id,
+        build_status=build_status,
+        job_type=job_type,
+        pipeline=pipeline)
+    build.save()
+    return build
+
+
+def make_bug():
+    bug = models.Bug(summary=utils.generate_random_string())
+    bug.save()
+    return bug
+
+
+def make_known_bug_regex(bug=None):
+    if bug is None:
+        bug = make_bug()
+
+    regex = models.KnownBugRegex(
+        regex=utils.generate_random_string(),
+        bug=bug)
+    regex.save()
+    return regex
+
+
+def make_bug_occurrence(regex=None, build=None):
+    if regex is None:
+        regex = make_known_bug_regex()
+
+    if build is None:
+        build = make_build()
+
+    bug_occurrence = models.BugOccurrence(regex=regex, build=build)
+    bug_occurrence.save()
+    return bug_occurrence

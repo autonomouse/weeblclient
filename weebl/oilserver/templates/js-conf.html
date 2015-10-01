@@ -1,0 +1,28 @@
+<script type="text/javascript" src="{{STATIC_URL}}jquery.min.js"></script>
+<script type="text/javascript" src="{{STATIC_URL}}angular.min.js"></script>
+<script type="text/javascript" src="{{STATIC_URL}}angular-route.min.js"></script>
+<script type="text/javascript" src="{{STATIC_URL}}angular-cookies.min.js"></script>
+<script type="text/javascript">
+<!--
+var YUI_config = {
+    debug: {% if YUI_DEBUG %}true{% else %}false{% endif %},
+    combine: true,
+    filter: {% if YUI_DEBUG %}'raw'{% else %}'min'{% endif %},
+    root: '',
+    base: '{{STATIC_URL}}',
+    comboBase: '{{STATIC_URL}}',
+};
+var WEEBL_config = {
+    uris: {
+        statics: '{{ STATIC_URL }}',
+        },
+    debug: {% if YUI_DEBUG %}true{% else %}false{% endif %}
+};
+// -->
+</script>
+<script type="text/javascript" src="{{STATIC_URL}}yui-base/yui-base-min.js"></script>
+<script type="text/javascript" src="{{STATIC_URL}}js/stats.js"></script>
+<script type="text/javascript" src="{{STATIC_URL}}js/builds_retriever.js"></script>
+<script type="text/javascript" src="{{STATIC_URL}}js/bugs_retriever.js"></script>
+<script type="text/javascript" src="{{STATIC_URL}}js/accordion.js"></script>
+<script type="text/javascript" src="{{STATIC_URL}}js/search.js"></script>

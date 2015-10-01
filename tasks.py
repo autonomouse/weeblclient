@@ -331,12 +331,7 @@ def yes_no(val):
 def i_am_sure(val):
     return True if val.lower() == "i am sure" else False
 
-def collectstatic():
-    print("Collecting static files")
-    run("{}/manage.py collectstatic --noinput".format(application), pty=True)
-
 def deploy(ipaddr=None, port=None, server="apache"):
-    collectstatic()
     if server == "apache":
         deploy_with_apache(sites_available_location, deploy_path, application)
     else:
