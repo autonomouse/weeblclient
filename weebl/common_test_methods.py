@@ -74,7 +74,7 @@ def make_pipeline(build_executor=None):
     return pipeline
 
 
-def make_ubuntuversion(self, name=None, number=None):
+def make_ubuntu_version(self, name=None, number=None):
     if name is None:
         name = utils.generate_random_string()
     if number is None:
@@ -85,7 +85,7 @@ def make_ubuntuversion(self, name=None, number=None):
         'ubuntuversion', data=data)
 
 
-def make_openstackversion(self, name=None):
+def make_openstack_version(self, name=None):
     if name is None:
         name = utils.generate_random_string()
     data = {'name': name}
