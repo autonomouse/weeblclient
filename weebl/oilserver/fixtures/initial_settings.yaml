@@ -99,8 +99,8 @@
 - model: oilserver.ubuntuversion
   pk: 1
   fields:
-    name: trusty
-    number: 14.04
+    name: precise
+    number: 12.04
 
 - model: oilserver.openstackversion
   pk: 1
@@ -110,4 +110,4 @@
 - model: oilserver.sdn
   pk: 1
   fields:
-    name: neutron
+    name: nova-networking
