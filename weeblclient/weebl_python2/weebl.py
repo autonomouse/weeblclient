@@ -36,7 +36,7 @@ class Weebl(object):
 
     def make_request(self, method, raise_exception=True, **params):
         params['headers'] = self.headers
-        #params['auth'] = self.weebl_auth
+        # params['auth'] = self.weebl_auth
         if method == 'get':
             response = requests.get(**params)
         elif method == 'post':
@@ -96,8 +96,8 @@ class Weebl(object):
     def build_executor_exists(self, name):
         build_executor_instances = self.filter_instances(
             "build_executor", [
-                    ('name', name),
-                    ('jenkins__uuid', self._get_jenkins_uuid()),
+                ('name', name),
+                ('jenkins__uuid', self._get_jenkins_uuid()),
             ]
         )
         return len(build_executor_instances) > 0
@@ -211,7 +211,8 @@ class Weebl(object):
     def set_up_new_jenkins(self, jenkins_host):
         if self.jenkins_exists(self.uuid):
             self.LOG.info(
-                "Jenkins exists for environment with UUID: {}".format(self.uuid))
+                "Jenkins exists for environment with UUID: {}".format(
+                    self.uuid))
             return
 
         # Create new jenkins:
@@ -234,7 +235,8 @@ class Weebl(object):
         response = self.make_request('put', url=url, data=json.dumps({}))
         return json.loads(response.text).get('uuid')
 
-    def create_pipeline(self, pipeline_id, build_executor_name):
+    def create_pipeline(self, pipeline_id, build_executor_name, ubuntu_version,
+                        openstack_version, sdn):
         if self.pipeline_exists(pipeline_id):
             self.LOG.info("Pipeline exists with UUID: {}".format(pipeline_id))
             return pipeline_id
@@ -247,7 +249,10 @@ class Weebl(object):
         url = "{}/pipeline/".format(self.base_url)
         data = {
             'build_executor': self._pk_uri('build_executor', build_executor),
-            'uuid': pipeline_id
+            'uuid': pipeline_id,
+            'ubuntu_version': ubuntu_version,
+            'openstack_version': openstack_version,
+            'sdn': sdn
         }
         response = self.make_request('post', url=url, data=json.dumps(data))
         self.LOG.info("Pipeline {} successfully created in Weebl db"
@@ -262,6 +267,20 @@ class Weebl(object):
             raise Exception(msg)
 
         return returned_pipeline
+
+    def update_completed_pipeline(self, pipeline_id, completed_at=None):
+        if not self.pipeline_exists(pipeline_id):
+            self.LOG.info("Pipeline does not exist with UUID: {}".format(
+                pipeline_id))
+            return None
+
+        if completed_at is None:
+            completed_at = datetime.now()
+        url = "{}/pipeline/{}".format(self.base_url, pipeline_id)
+        data = {'pipeline': pipeline_id,
+                'completed_at': completed_at}
+        response = self.make_request('put', url=url, data=json.dumps(data))
+        return json.loads(response.text).get('completed_at')
 
     def create_known_bug_regex(self, glob_patterns, regex, bug=None):
         if self.known_bug_regex_exists(regex):

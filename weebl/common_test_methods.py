@@ -74,6 +74,33 @@ def make_pipeline(build_executor=None):
     return pipeline
 
 
+def make_ubuntu_version(self, name=None, number=None):
+    if name is None:
+        name = utils.generate_random_string()
+    if number is None:
+        number = utils.generate_random_string()
+    data = {'name': name,
+            'number': number}
+    return self.post_create_instance_without_status_code(
+        'ubuntuversion', data=data)
+
+
+def make_openstack_version(self, name=None):
+    if name is None:
+        name = utils.generate_random_string()
+    data = {'name': name}
+    return self.post_create_instance_without_status_code(
+        'openstackversion', data=data)
+
+
+def make_sdn(self, name=None):
+    if name is None:
+        name = utils.generate_random_string()
+    data = {'name': name}
+    return self.post_create_instance_without_status_code(
+        'sdn', data=data)
+
+
 def make_build(build_id=None, build_status=None, job_type=None, pipeline=None):
     if build_id is None:
         build_id = str(random.randint(1, 1000000))
