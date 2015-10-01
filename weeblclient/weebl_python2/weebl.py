@@ -279,7 +279,7 @@ class Weebl(object):
                 pipeline_id))
             return None
 
-        if not completed_at:
+        if completed_at is None:
             completed_at = datetime.now()
         url = "{}/pipeline/{}".format(self.base_url, pipeline_id)
         data = {'pipeline': pipeline_id,
