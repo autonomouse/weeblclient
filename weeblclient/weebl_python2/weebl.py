@@ -268,13 +268,14 @@ class Weebl(object):
 
         return returned_pipeline
 
-    def update_completed_pipeline(self, pipeline_id):
+    def update_completed_pipeline(self, pipeline_id, completed_at=None):
         if not self.pipeline_exists(pipeline_id):
             self.LOG.info("Pipeline does not exist with UUID: {}".format(
                 pipeline_id))
             return None
 
-        completed_at = datetime.now()
+        if not completed_at:
+            completed_at = datetime.now()
         url = "{}/pipeline/{}".format(self.base_url, pipeline_id)
         data = {'pipeline': pipeline_id,
                 'completed_at': completed_at}
