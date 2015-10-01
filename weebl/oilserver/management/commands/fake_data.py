@@ -70,12 +70,36 @@ UBUNTU_VERSIONS = [
 ]
 
 
+COMPUTES = [
+    'nova-kvm',
+]
+
+
+BLOCK_STORAGES = [
+    'cinder-iscsi',
+]
+
+
+IMAGE_STORAGES = [
+    'default',
+]
+
+
+DATABASES = [
+    'default',
+]
+
+
 ENUM_MAPPINGS = [
     (models.JobType, JOB_TYPES),
     (models.BuildStatus, BUILD_STATUSES),
     (models.ServiceStatus, SERVICE_STATUSES),
     (models.OpenstackVersion, OPENSTACK_VERSIONS),
     (models.SDN, SDNS),
+    (models.Compute, COMPUTES),
+    (models.BlockStorage, BLOCK_STORAGES),
+    (models.ImageStorage, IMAGE_STORAGES),
+    (models.Database, DATABASES),
 ]
 
 
@@ -246,14 +270,16 @@ def make_pipeline():
     completed_at = random_date(
         datetime(2015, 1, 1, tzinfo=timezone.utc),
         datetime.now(timezone.utc))
-    openstack_versions = models.OpenstackVersion.objects.all()
-    openstack_version = random.choice(openstack_versions)
     pipeline = models.Pipeline(
         completed_at=completed_at,
         build_executor=models.BuildExecutor.objects.first(),
         openstack_version=random_enum(models.OpenstackVersion),
         ubuntu_version=random_enum(models.UbuntuVersion),
         sdn=random_enum(models.SDN),
+        compute=random_enum(models.Compute),
+        block_storage=random_enum(models.BlockStorage),
+        image_storage=random_enum(models.ImageStorage),
+        database=random_enum(models.Database),
         )
     pipeline.save()
     return pipeline

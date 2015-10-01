@@ -242,6 +242,54 @@ class SDN(models.Model):
         return self.name
 
 
+class Compute(models.Model):
+    """The type of Compute being used in a pipeline."""
+    name = models.CharField(
+        max_length=255,
+        unique=True,
+        default="unknown",
+        help_text="The name of the Compute type.")
+
+    def __str__(self):
+        return self.name
+
+
+class BlockStorage(models.Model):
+    """The type of Block Storage being used in a pipeline."""
+    name = models.CharField(
+        max_length=255,
+        unique=True,
+        default="unknown",
+        help_text="The name of the Block Storage type.")
+
+    def __str__(self):
+        return self.name
+
+
+class ImageStorage(models.Model):
+    """The type of Image Storage being used in a pipeline."""
+    name = models.CharField(
+        max_length=255,
+        unique=True,
+        default="unknown",
+        help_text="The name of the Image Storage type.")
+
+    def __str__(self):
+        return self.name
+
+
+class Database(models.Model):
+    """The type of Database being used in a pipeline."""
+    name = models.CharField(
+        max_length=255,
+        unique=True,
+        default="unknown",
+        help_text="The name of the Database type.")
+
+    def __str__(self):
+        return self.name
+
+
 class Pipeline(TimeStampedBaseModel):
     """The pipelines currently recorded."""
     uuid = models.CharField(
@@ -262,6 +310,12 @@ class Pipeline(TimeStampedBaseModel):
     openstack_version = models.ForeignKey(
         OpenstackVersion, null=True, blank=True, default=None)
     sdn = models.ForeignKey(SDN, null=True, blank=True, default=None)
+    compute = models.ForeignKey(Compute, null=True, blank=True, default=None)
+    block_storage = models.ForeignKey(BlockStorage, null=True, blank=True,
+                                      default=None)
+    image_storage = models.ForeignKey(ImageStorage, null=True, blank=True,
+                                      default=None)
+    database = models.ForeignKey(Database, null=True, blank=True, default=None)
     build_executor = models.ForeignKey(BuildExecutor)
 
     def __str__(self):

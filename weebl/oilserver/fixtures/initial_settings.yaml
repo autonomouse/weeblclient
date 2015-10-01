@@ -111,3 +111,23 @@
   pk: 1
   fields:
     name: nova-networking
+
+- model: oilserver.compute
+  pk: 1
+  fields:
+    name: nova-kvm
+
+- model: oilserver.blockstorage
+  pk: 1
+  fields:
+    name: cinder-iscsi
+
+- model: oilserver.imagestorage
+  pk: 1
+  fields:
+    name: default
+
+- model: oilserver.database
+  pk: 1
+  fields:
+    name: default

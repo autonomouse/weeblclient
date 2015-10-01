@@ -101,6 +101,38 @@ def make_sdn(self, name=None):
         'sdn', data=data)
 
 
+def make_compute(self, name=None):
+    if name is None:
+        name = utils.generate_random_string()
+    data = {'name': name}
+    return self.post_create_instance_without_status_code(
+        'compute', data=data)
+
+
+def make_block_storage(self, name=None):
+    if name is None:
+        name = utils.generate_random_string()
+    data = {'name': name}
+    return self.post_create_instance_without_status_code(
+        'block_storage', data=data)
+
+
+def make_image_storage(self, name=None):
+    if name is None:
+        name = utils.generate_random_string()
+    data = {'name': name}
+    return self.post_create_instance_without_status_code(
+        'image_storage', data=data)
+
+
+def make_database(self, name=None):
+    if name is None:
+        name = utils.generate_random_string()
+    data = {'name': name}
+    return self.post_create_instance_without_status_code(
+        'database', data=data)
+
+
 def make_build(build_id=None, build_status=None, job_type=None, pipeline=None):
     if build_id is None:
         build_id = str(random.randint(1, 1000000))

@@ -192,6 +192,62 @@ class SDNResource(CommonResource):
         detail_uri_name = 'name'
 
 
+class ComputeResource(CommonResource):
+
+    class Meta:
+        resource_name = 'compute'
+        queryset = models.Compute.objects.all()
+        list_allowed_methods = ['get', 'post', 'delete']  # all items
+        detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
+        fields = ['name']
+        authorization = Authorization()
+        always_return_data = True
+        filtering = {'name': ALL, }
+        detail_uri_name = 'name'
+
+
+class BlockStorageResource(CommonResource):
+
+    class Meta:
+        resource_name = 'block_storage'
+        queryset = models.BlockStorage.objects.all()
+        list_allowed_methods = ['get', 'post', 'delete']  # all items
+        detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
+        fields = ['name']
+        authorization = Authorization()
+        always_return_data = True
+        filtering = {'name': ALL, }
+        detail_uri_name = 'name'
+
+
+class ImageStorageResource(CommonResource):
+
+    class Meta:
+        resource_name = 'image_storage'
+        queryset = models.ImageStorage.objects.all()
+        list_allowed_methods = ['get', 'post', 'delete']  # all items
+        detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
+        fields = ['name']
+        authorization = Authorization()
+        always_return_data = True
+        filtering = {'name': ALL, }
+        detail_uri_name = 'name'
+
+
+class DatabaseResource(CommonResource):
+
+    class Meta:
+        resource_name = 'database'
+        queryset = models.Database.objects.all()
+        list_allowed_methods = ['get', 'post', 'delete']  # all items
+        detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
+        fields = ['name']
+        authorization = Authorization()
+        always_return_data = True
+        filtering = {'name': ALL, }
+        detail_uri_name = 'name'
+
+
 class PipelineResource(CommonResource):
     build_executor = fields.ForeignKey(BuildExecutorResource, 'build_executor')
     ubuntu_version = fields.ForeignKey(UbuntuVersionResource, 'ubuntu_version',
@@ -199,11 +255,20 @@ class PipelineResource(CommonResource):
     openstack_version = fields.ForeignKey(
         OpenstackVersionResource, 'openstack_version', full=True, null=True)
     sdn = fields.ForeignKey(SDNResource, 'sdn', full=True, null=True)
+    compute = fields.ForeignKey(ComputeResource, 'compute',
+                                full=True, null=True)
+    block_storage = fields.ForeignKey(BlockStorageResource, 'block_storage',
+                                      full=True, null=True)
+    image_storage = fields.ForeignKey(ImageStorageResource, 'image_storage',
+                                      full=True, null=True)
+    database = fields.ForeignKey(DatabaseResource, 'database',
+                                      full=True, null=True)
 
     class Meta:
         queryset = models.Pipeline.objects.all()
         fields = ['uuid', 'build_executor', 'completed_at', 'ubuntu_version',
-                  'openstack_version', 'sdn']
+                  'openstack_version', 'sdn', 'compute', 'block_storage',
+                  'image_storage', 'database']
         list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
         authorization = Authorization()
@@ -212,7 +277,12 @@ class PipelineResource(CommonResource):
                      'completed_at': ALL,
                      'ubuntu_version': ALL_WITH_RELATIONS,
                      'openstack_version': ALL_WITH_RELATIONS,
-                     'sdn': ALL_WITH_RELATIONS}
+                     'sdn': ALL_WITH_RELATIONS,
+                     'compute': ALL_WITH_RELATIONS,
+                     'block_storage': ALL_WITH_RELATIONS,
+                     'image_storage': ALL_WITH_RELATIONS,
+                     'database': ALL_WITH_RELATIONS
+                     }
         detail_uri_name = 'uuid'
 
 

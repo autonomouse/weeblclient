@@ -236,7 +236,8 @@ class Weebl(object):
         return json.loads(response.text).get('uuid')
 
     def create_pipeline(self, pipeline_id, build_executor_name, ubuntu_version,
-                        openstack_version, sdn):
+                        openstack_version, sdn, compute, block_storage,
+                        image_storage, database):
         if self.pipeline_exists(pipeline_id):
             self.LOG.info("Pipeline exists with UUID: {}".format(pipeline_id))
             return pipeline_id
@@ -252,7 +253,11 @@ class Weebl(object):
             'uuid': pipeline_id,
             'ubuntu_version': ubuntu_version,
             'openstack_version': openstack_version,
-            'sdn': sdn
+            'sdn': sdn,
+            'compute': compute,
+            'block_storage': block_storage,
+            'image_storage': image_storage,
+            'database': database
         }
         response = self.make_request('post', url=url, data=json.dumps(data))
         self.LOG.info("Pipeline {} successfully created in Weebl db"

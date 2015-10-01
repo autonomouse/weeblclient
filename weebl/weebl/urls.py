@@ -21,6 +21,10 @@ v_api.register(resources.BugOccurrenceResource())
 v_api.register(resources.UbuntuVersionResource())
 v_api.register(resources.OpenstackVersionResource())
 v_api.register(resources.SDNResource())
+v_api.register(resources.ComputeResource())
+v_api.register(resources.BlockStorageResource())
+v_api.register(resources.ImageStorageResource())
+v_api.register(resources.DatabaseResource())
 
 urlpatterns = patterns('',
                        url(r'^', include('oilserver.urls')),
