@@ -25,13 +25,15 @@ sites_available_location = "/etc/apache2/sites-available/weebl.conf"
 file_loc = os.path.dirname(os.path.abspath(__file__))
 deploy_path = "{}/{}".format(file_loc, application)  # change
 setup_file_loc = "setup.py"
-angular_src_dir = "/usr/share/javascript/angular.js/"
-angular_dest_dir = os.path.join(file_loc, "weebl/oilserver/static/js/angular/")
-angular_files = ['angular.min.js',
-                 'angular-route.min.js',
-                 'angular-cookies.min.js',
-                 'angular-resource.js',
-                 ]
+jslibs_src_dir = "/usr/share/javascript/"
+jslibs_dest_dir = os.path.join(file_loc, "weebl/oilserver/static/js/jslibs/")
+jslibs_files = ['jquery/jquery.js',
+                'angular.js/angular.js',
+                'angular.js/angular-route.js',
+                'angular.js/angular-cookies.js',
+                'angular.js/angular-resource.js',
+                'yui3/yui-base/yui-base-min.js',
+                ]
 
 
 ''' REQUIRES install_deps to have been run first. '''
@@ -134,6 +136,10 @@ def initialise_database(database):
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "{0}.{1}"
                           .format(application, stngs))
     createdb(database)
+
+@task()
+def fake_data():
+    run('{}/manage.py fake_data'.format(application))
 
 def migrate():
     """Make migrations and migrate."""
@@ -400,8 +406,9 @@ def copy_system_angularjs():
     script) and copies them to local folder (which is in the gitignore file).
     This obviously assumes that install_deps has been run first.
     """
-    mkdir(angular_dest_dir)
-    for angular_js in angular_files:
-        src = "{}{}".format(angular_src_dir, angular_js)
-        dest = "{}{}".format(angular_dest_dir, angular_js)
-        shutil.copy2(src, dest) 
+    mkdir(jslibs_dest_dir)
+    for jslibs_js in jslibs_files:
+        src = "{}{}".format(jslibs_src_dir, jslibs_js)
+        dest = "{}{}".format(jslibs_dest_dir, jslibs_js)
+        mkdir(os.path.dirname(dest))
+        shutil.copy2(src, dest)
