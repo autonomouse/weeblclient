@@ -95,19 +95,6 @@ DATABASES = [
 ]
 
 
-ENUM_MAPPINGS = [
-    (models.JobType, JOB_TYPES),
-    (models.BuildStatus, BUILD_STATUSES),
-    (models.ServiceStatus, SERVICE_STATUSES),
-    (models.OpenstackVersion, OPENSTACK_VERSIONS),
-    (models.SDN, SDNS),
-    (models.Compute, COMPUTES),
-    (models.BlockStorage, BLOCK_STORAGES),
-    (models.ImageStorage, IMAGE_STORAGES),
-    (models.Database, DATABASES),
-]
-
-
 COMPONENT_NAME = [
     'neutron',
     'oil-ci',
@@ -121,6 +108,20 @@ COMPONENT_NAME = [
     'glance',
     'swift',
     'keystone',
+]
+
+
+ENUM_MAPPINGS = [
+    (models.JobType, JOB_TYPES),
+    (models.BuildStatus, BUILD_STATUSES),
+    (models.ServiceStatus, SERVICE_STATUSES),
+    (models.OpenstackVersion, OPENSTACK_VERSIONS),
+    (models.SDN, SDNS),
+    (models.Compute, COMPUTES),
+    (models.BlockStorage, BLOCK_STORAGES),
+    (models.ImageStorage, IMAGE_STORAGES),
+    (models.Database, DATABASES),
+    (models.Project, COMPONENT_NAME),
 ]
 
 
@@ -196,12 +197,15 @@ def make_infrastructure():
     make_build_executor()
 
 
-def make_bugtracker_bug(bug):
+def make_bugtracker_bug(bug, component):
     while True:
         try:
             bug_number = random.randint(100000, 3000000)
+            project = models.Project.objects.get(name=component)
             bug_tracker_bug = models.BugTrackerBug(
-                bug_number=bug_number, bug=bug)
+                bug_number=bug_number,
+                bug=bug,
+                project=project)
             bug_tracker_bug.save()
         except IntegrityError:
             pass
@@ -209,7 +213,9 @@ def make_bugtracker_bug(bug):
             break
 
 
-def make_bug():
+def make_bug(component=None):
+    if component is None:
+        component = random.choice(COMPONENT_NAME)
     while True:
         try:
             summary = "%s %s %s" % (
@@ -254,8 +260,9 @@ def make_bugs():
     target_count = 30
     current_count = models.Bug.objects.count()
     for i in range(current_count, target_count):
-        bug = make_bug()
-        make_bugtracker_bug(bug)
+        component = random.choice(COMPONENT_NAME)
+        bug = make_bug(component=component)
+        make_bugtracker_bug(bug, component)
         make_known_bug_regex(bug)
 
 
@@ -282,7 +289,8 @@ def make_pipeline():
         compute=random_enum(models.Compute),
         block_storage=random_enum(models.BlockStorage),
         image_storage=random_enum(models.ImageStorage),
-        database=random_enum(models.Database), )
+        database=random_enum(models.Database),
+        )
     pipeline.save()
     return pipeline
 

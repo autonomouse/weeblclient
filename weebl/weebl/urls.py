@@ -25,6 +25,7 @@ v_api.register(resources.ComputeResource())
 v_api.register(resources.BlockStorageResource())
 v_api.register(resources.ImageStorageResource())
 v_api.register(resources.DatabaseResource())
+v_api.register(resources.ProjectResource())
 
 urlpatterns = patterns('',
                        url(r'^', include('oilserver.urls')),

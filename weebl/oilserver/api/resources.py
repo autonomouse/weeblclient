@@ -352,6 +352,19 @@ class TargetFileGlobResource(CommonResource):
         detail_uri_name = 'glob_pattern'
 
 
+class ProjectResource(CommonResource):
+
+    class Meta:
+        queryset = models.Project.objects.all()
+        list_allowed_methods = ['get', 'post', 'delete']  # all items
+        detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
+        fields = ['name', 'bug_tracker']
+        authorization = Authorization()
+        always_return_data = True
+        filtering = {'name': ALL, }
+        detail_uri_name = 'name'
+
+
 class BugResource(CommonResource):
     """API Resource for 'Bug' model.
 
@@ -387,13 +400,16 @@ class BugResource(CommonResource):
 
 class BugTrackerBugResource(CommonResource):
     bug = fields.ForeignKey(BugResource, 'bug', full=True, null=True)
+    project = fields.ForeignKey(
+        ProjectResource, 'project', full=True, null=True)
 
     class Meta:
         resource_name = 'bug_tracker_bug'
         queryset = models.BugTrackerBug.objects.all()
         list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
-        fields = ['uuid', 'bug_number', 'bug', 'created_at', 'updated_at']
+        fields = ['uuid', 'bug_number', 'bug', 'project', 'created_at', 
+                  'updated_at']
         authorization = Authorization()
         always_return_data = True
         filtering = {'bug_number': ALL, }

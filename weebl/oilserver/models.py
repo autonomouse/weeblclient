@@ -414,6 +414,17 @@ class TargetFileGlob(TimeStampedBaseModel):
         return self.glob_pattern
 
 
+class Project(TimeStampedBaseModel):
+    """A system for tracking bugs (e.g. Launchpad). """
+    name = models.CharField(
+        max_length=255,
+        unique=True,
+        help_text="Name of project.")
+
+    def __str__(self):
+        return self.name
+
+
 class Bug(TimeStampedBaseModel):
     """An error in OIL that has resulted in an incorrect or unexpected
     behaviour or result.
@@ -463,6 +474,7 @@ class BugTrackerBug(TimeStampedBaseModel):
         blank=True,
         default=None,
         help_text="Bug associated with this bug tracker bug.")
+    project = models.ForeignKey(Project, null=True, blank=True, default=None)
 
     def __str__(self):
         return self.uuid
