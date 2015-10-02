@@ -2,7 +2,11 @@ app.factory('metadataRetriever', ['$http', function($http) {
     var enum_fields = {
         'openstack_releases': 'openstack_version',
         'ubuntu_releases': 'ubuntu_version',
-        'networking': 'sdn'
+        'networking': 'sdn',
+        'compute': 'compute',
+        'block_storage': 'block_storage',
+        'image_storage': 'image_storage',
+        'database': 'database'
     }
 
     var refresh = function(scope) {

@@ -71,21 +71,27 @@ UBUNTU_VERSIONS = [
 
 COMPUTES = [
     'nova-kvm',
+    'nova-hyperv',
+    'nova-vmware',
+    'nova-lxc',
 ]
 
 
 BLOCK_STORAGES = [
     'cinder-iscsi',
+    'cinder-ceph',
 ]
 
 
 IMAGE_STORAGES = [
-    'default',
+    'glance-swift',
+    'glance-ceph',
 ]
 
 
 DATABASES = [
-    'default',
+    'mysql',
+    'galera',
 ]
 
 

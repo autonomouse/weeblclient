@@ -117,12 +117,52 @@
                         </ul>
                     </div>
                 </div>
+                <div class="ng-hide accordion__tab" data-ng-show="metadata.compute.length">
+                    <h4 class="accordion__tab-title maas-accordion-tab">Compute</h4>
+                    <div class="accordion__tab-content">
+                        <ul class="accordion__tab-list">
+                            <li class="accordion__tab-item" data-ng-repeat="compute in metadata.compute | orderBy:['name']"  data-ng-class="{ active: isFilterActive('compute', compute.name, 'builds') }">
+                                <a class="accordion__tab-link" href="" data-ng-click="updateFilter('compute', compute.name, 'builds')">{$ compute.name $}</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
                 <div class="ng-hide accordion__tab" data-ng-show="metadata.networking.length">
                     <h4 class="accordion__tab-title maas-accordion-tab">Networking</h4>
                     <div class="accordion__tab-content">
                         <ul class="accordion__tab-list">
                             <li class="accordion__tab-item" data-ng-repeat="sdn in metadata.networking | orderBy:['name']"  data-ng-class="{ active: isFilterActive('networking', sdn.name, 'builds') }">
                                 <a class="accordion__tab-link" href="" data-ng-click="updateFilter('networking', sdn.name, 'builds')">{$ sdn.name $}</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="ng-hide accordion__tab" data-ng-show="metadata.block_storage.length">
+                    <h4 class="accordion__tab-title maas-accordion-tab">Block Storage</h4>
+                    <div class="accordion__tab-content">
+                        <ul class="accordion__tab-list">
+                            <li class="accordion__tab-item" data-ng-repeat="block_storage in metadata.block_storage | orderBy:['name']"  data-ng-class="{ active: isFilterActive('block_storage', block_storage.name, 'builds') }">
+                                <a class="accordion__tab-link" href="" data-ng-click="updateFilter('block_storage', block_storage.name, 'builds')">{$ block_storage.name $}</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="ng-hide accordion__tab" data-ng-show="metadata.image_storage.length">
+                    <h4 class="accordion__tab-title maas-accordion-tab">Image Storage</h4>
+                    <div class="accordion__tab-content">
+                        <ul class="accordion__tab-list">
+                            <li class="accordion__tab-item" data-ng-repeat="image_storage in metadata.image_storage | orderBy:['name']"  data-ng-class="{ active: isFilterActive('image_storage', image_storage.name, 'builds') }">
+                                <a class="accordion__tab-link" href="" data-ng-click="updateFilter('image_storage', image_storage.name, 'builds')">{$ image_storage.name $}</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="ng-hide accordion__tab" data-ng-show="metadata.database.length">
+                    <h4 class="accordion__tab-title maas-accordion-tab">Database</h4>
+                    <div class="accordion__tab-content">
+                        <ul class="accordion__tab-list">
+                            <li class="accordion__tab-item" data-ng-repeat="database in metadata.database | orderBy:['name']"  data-ng-class="{ active: isFilterActive('database', database.name, 'builds') }">
+                                <a class="accordion__tab-link" href="" data-ng-click="updateFilter('database', database.name, 'builds')">{$ database.name $}</a>
                             </li>
                         </ul>
                     </div>
