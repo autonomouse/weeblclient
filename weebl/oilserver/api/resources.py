@@ -365,6 +365,38 @@ class ProjectResource(CommonResource):
         detail_uri_name = 'name'
 
 
+REPLACE_PREFIX = 'knownbugregex__bug_occurrences__'
+
+
+def get_bug_occurrence_filters(bundle):
+    query_dict = bundle.request.GET
+    bug_occurrence_filters = {}
+    for key, value in query_dict.items():
+        if not key.startswith(REPLACE_PREFIX):
+            continue
+        filter_name = key.replace(REPLACE_PREFIX, '')
+
+        if filter_name.endswith('__in'):
+            bug_occurrence_filters[filter_name] = \
+                bundle.request.GET.getlist(key)
+        else:
+            bug_occurrence_filters[filter_name] = value
+    bug_occurrence_filters['regex__bug__uuid'] = bundle.obj.uuid
+    return bug_occurrence_filters
+
+
+def get_bug_occurrences(bundle):
+    """Get the bug occurrences that match a bug's filter.
+
+    When bugs are found by bug occurrence properties, this matches
+    bug occurrences that match those properties. So if we filter for
+    bugs with occurrences in pipelines that completed in 2015, only
+    the bug occurrences that completed in 2015 will be included.
+    """
+    bug_occurrence_filters = get_bug_occurrence_filters(bundle)
+    return models.BugOccurrence.objects.filter(**bug_occurrence_filters)
+
+
 class BugResource(CommonResource):
     """API Resource for 'Bug' model.
 
@@ -380,9 +412,12 @@ class BugResource(CommonResource):
     knownbugregex = fields.ToManyField(
         'oilserver.api.resources.KnownBugRegexResource',
         'knownbugregex_set', null=True)
+    bugtrackerbug = fields.ToOneField(
+        'oilserver.api.resources.BugTrackerBugResource',
+        'bug_tracker_bug', full=True, null=True)
 
     class Meta:
-        queryset = models.Bug.objects.all()
+        queryset = models.Bug.objects.select_related('bugtrackerbug').all()
         list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
         fields = ['uuid', 'summary', 'description', 'created_at', 'updated_at']
@@ -397,9 +432,17 @@ class BugResource(CommonResource):
         return super(BugResource, self).apply_filters(
             request, applicable_filters).distinct()
 
+    def dehydrate(self, bundle):
+        bundle = super(BugResource, self).dehydrate(bundle)
+        bug_occurrences = get_bug_occurrences(bundle)
+        bundle.data['occurrence_count'] = bug_occurrences.count()
+        if bug_occurrences.exists():
+            bundle.data['last_seen'] = bug_occurrences.latest(
+                'build__pipeline__completed_at').build.pipeline.completed_at
+        return bundle
+
 
 class BugTrackerBugResource(CommonResource):
-    bug = fields.ForeignKey(BugResource, 'bug', full=True, null=True)
     project = fields.ForeignKey(
         ProjectResource, 'project', full=True, null=True)
 
@@ -409,8 +452,7 @@ class BugTrackerBugResource(CommonResource):
         list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
         fields = [
-            'uuid', 'bug_number', 'bug', 'project', 'created_at',
-            'updated_at'
+            'uuid', 'bug_number', 'project', 'created_at', 'updated_at'
         ]
         authorization = Authorization()
         always_return_data = True

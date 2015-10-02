@@ -67,8 +67,10 @@ def make_build_executor(jenkins=None):
 
 def make_pipeline(build_executor=None):
     if build_executor is None:
-        build_executor = make_build_executor()
-
+        if models.BuildExecutor.objects.exists():
+            build_executor = models.BuildExecutor.objects.first()
+        else:
+            build_executor = make_build_executor()
     pipeline = models.Pipeline(build_executor=build_executor)
     pipeline.save()
     return pipeline

@@ -425,6 +425,29 @@ class Project(TimeStampedBaseModel):
         return self.name
 
 
+class BugTrackerBug(TimeStampedBaseModel):
+    """An error that has resulted in an incorrect or unexpected behaviour or
+    result, externally recorded on a bug-tracker (such as Launchpad).
+    """
+    bug_number = models.CharField(
+        max_length=255,
+        unique=True,
+        blank=False,
+        null=False,
+        help_text="Designation of this bug (e.g. Launchpad bug number).")
+    uuid = models.CharField(
+        max_length=36,
+        default=utils.generate_uuid,
+        unique=True,
+        blank=False,
+        null=False,
+        help_text="UUID of this bug.")
+    project = models.ForeignKey(Project, null=True, blank=True, default=None)
+
+    def __str__(self):
+        return self.uuid
+
+
 class Bug(TimeStampedBaseModel):
     """An error in OIL that has resulted in an incorrect or unexpected
     behaviour or result.
@@ -446,35 +469,12 @@ class Bug(TimeStampedBaseModel):
         blank=True,
         null=True,
         help_text="Full description of bug.")
-
-    def __str__(self):
-        return self.uuid
-
-
-class BugTrackerBug(TimeStampedBaseModel):
-    """An error that has resulted in an incorrect or unexpected behaviour or
-    result, externally recorded on a bug-tracker (such as Launchpad).
-    """
-    bug_number = models.CharField(
-        max_length=255,
-        unique=True,
-        blank=False,
-        null=False,
-        help_text="Designation of this bug (e.g. Launchpad bug number).")
-    uuid = models.CharField(
-        max_length=36,
-        default=utils.generate_uuid,
-        unique=True,
-        blank=False,
-        null=False,
-        help_text="UUID of this bug.")
-    bug = models.ForeignKey(
-        Bug,
-        null=True,
+    bug_tracker_bug = models.OneToOneField(
+        BugTrackerBug,
+        help_text="Bug tracker bug associated with this bug.",
         blank=True,
-        default=None,
-        help_text="Bug associated with this bug tracker bug.")
-    project = models.ForeignKey(Project, null=True, blank=True, default=None)
+        null=True,
+        default=None)
 
     def __str__(self):
         return self.uuid

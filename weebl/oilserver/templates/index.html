@@ -192,16 +192,20 @@
                     <table class="table-listing">
                         <thead>
                         <tr>
-                            <th>UUID</th>
+                            <th>number</th>
+                            <th>project</th>
                             <th>summary</th>
-                            <th>description</th>
+                            <th>occurrences</th>
+                            <th>last seen</th>
                         </tr>
                         </thead>
                         <tbody>
                         <tr ng-repeat="bug in bugs.objects">
-                            <td>{$ bug.uuid $}</td>
+                            <td>{$ bug.bugtrackerbug.bug_number $}</td>
+                            <td>{$ bug.bugtrackerbug.project.name $}</td>
                             <td>{$ bug.summary $}</td>
-                            <td>{$ bug.description $}</td>
+                            <td>{$ bug.occurrence_count $}</td>
+                            <td>{$ bug.last_seen $}</td>
                         </tr>
                         </tbody>
                     </table>

@@ -197,33 +197,33 @@ def make_infrastructure():
     make_build_executor()
 
 
-def make_bugtracker_bug(bug, component):
+def make_bug_tracker_bug(component):
     while True:
         try:
             bug_number = random.randint(100000, 3000000)
             project = models.Project.objects.get(name=component)
             bug_tracker_bug = models.BugTrackerBug(
                 bug_number=bug_number,
-                bug=bug,
                 project=project)
             bug_tracker_bug.save()
+            return bug_tracker_bug
         except IntegrityError:
             pass
-        else:
-            break
 
 
-def make_bug(component=None):
-    if component is None:
-        component = random.choice(COMPONENT_NAME)
+def make_bug():
+    component = random.choice(COMPONENT_NAME)
     while True:
         try:
             summary = "%s %s %s" % (
-                random.choice(COMPONENT_NAME),
+                component,
                 random.choice(FAILURE_VERB),
                 random.choice(OBJECT),
             )
-            bug = models.Bug(summary=summary)
+            bug = models.Bug(
+                summary=summary,
+                bug_tracker_bug=make_bug_tracker_bug(component)
+            )
             bug.save()
         except IntegrityError:
             pass
@@ -260,9 +260,7 @@ def make_bugs():
     target_count = 30
     current_count = models.Bug.objects.count()
     for i in range(current_count, target_count):
-        component = random.choice(COMPONENT_NAME)
-        bug = make_bug(component=component)
-        make_bugtracker_bug(bug, component)
+        bug = make_bug()
         make_known_bug_regex(bug)
 
 
