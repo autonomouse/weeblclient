@@ -139,6 +139,8 @@ def initialise_database(database):
 
 @task()
 def fake_data():
+    initialise_database("production")
+    print("Creating fake data...")
     run('{}/manage.py fake_data'.format(application))
 
 def migrate():

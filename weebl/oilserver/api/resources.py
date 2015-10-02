@@ -262,7 +262,7 @@ class PipelineResource(CommonResource):
     image_storage = fields.ForeignKey(ImageStorageResource, 'image_storage',
                                       full=True, null=True)
     database = fields.ForeignKey(DatabaseResource, 'database',
-                                      full=True, null=True)
+                                 full=True, null=True)
 
     class Meta:
         queryset = models.Pipeline.objects.all()

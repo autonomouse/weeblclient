@@ -3,8 +3,7 @@ import random
 from datetime import (
     datetime,
     timedelta,
-    timezone,
-    )
+    timezone, )
 
 from django.core.management.base import BaseCommand
 from django.db.utils import IntegrityError
@@ -19,8 +18,8 @@ DEPENDENT_JOBS = [
 
 
 INDEPENDENT_JOBS = [
-   'test_tempest_smoke',
-   'test_bundletests',
+    'test_tempest_smoke',
+    'test_bundletests',
 ]
 
 
@@ -171,20 +170,18 @@ def make_jenkins():
     if models.Jenkins.objects.exists():
         return
 
-    models.Jenkins(
-        environment=models.Environment.objects.first(),
-        service_status=models.ServiceStatus.objects.get(name='up'),
-        ).save()
+    models.Jenkins(environment=models.Environment.objects.first(),
+                   service_status=models.ServiceStatus.objects.get(name='up'),
+                   ).save()
 
 
 def make_build_executor():
     if models.BuildExecutor.objects.exists():
         return
 
-    models.BuildExecutor(
-        name='Sample Build Executor',
-        jenkins=models.Jenkins.objects.first(),
-        ).save()
+    models.BuildExecutor(name='Sample Build Executor',
+                         jenkins=models.Jenkins.objects.first(),
+                         ).save()
 
 
 def make_infrastructure():
@@ -197,7 +194,8 @@ def make_bugtracker_bug(bug):
     while True:
         try:
             bug_number = random.randint(100000, 3000000)
-            bug_tracker_bug = models.BugTrackerBug(bug_number=bug_number, bug=bug)
+            bug_tracker_bug = models.BugTrackerBug(
+                bug_number=bug_number, bug=bug)
             bug_tracker_bug.save()
         except IntegrityError:
             pass
@@ -224,11 +222,10 @@ def make_bug():
 
 def random_regex():
     return "%s{%s}-%s(%s)" % (
-            random.randint(0,100000),
-            random.randint(0,100000),
-            random.randint(0,100000),
-            random.randint(0,100000)
-    )
+        random.randint(0, 100000),
+        random.randint(0, 100000),
+        random.randint(0, 100000),
+        random.randint(0, 100000), )
 
 
 def make_known_bug_regex(bug):
@@ -279,8 +276,7 @@ def make_pipeline():
         compute=random_enum(models.Compute),
         block_storage=random_enum(models.BlockStorage),
         image_storage=random_enum(models.ImageStorage),
-        database=random_enum(models.Database),
-        )
+        database=random_enum(models.Database), )
     pipeline.save()
     return pipeline
 
@@ -344,8 +340,8 @@ def make_builds(pipeline):
         return
 
     make_independent_builds(pipeline)
-   
- 
+
+
 def make_pipelines():
     target_count = 1000
     current_count = models.Pipeline.objects.count()
