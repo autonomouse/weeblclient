@@ -1,7 +1,7 @@
 app.factory('metadataRetriever', ['$http', function($http) {
     var enum_fields = {
-        'openstack_releases': 'openstack_version',
-        'ubuntu_releases': 'ubuntu_version',
+        'openstack_release': 'openstack_version',
+        'ubuntu_release': 'ubuntu_version',
         'networking': 'sdn',
         'compute': 'compute',
         'block_storage': 'block_storage',
@@ -21,6 +21,7 @@ app.factory('metadataRetriever', ['$http', function($http) {
     };
 
     return {
-        refresh: refresh
+        refresh: refresh,
+        enum_fields: enum_fields,
     };
 }]);

@@ -12,9 +12,6 @@ app.controller('buildsController', [
         $scope.filters = SearchService.getEmptyFilter();
         $scope.bugs = {};
 
-        $scope.start_date = null;
-        $scope.finish_date = null;
-
         $scope.metadata = {};
 
         $scope.tabs = {};
@@ -25,28 +22,45 @@ app.controller('buildsController', [
         $scope.tabs.bugs.pagetitle = "Bugs";
         $scope.tabs.bugs.currentpage = "bugs";
 
-        function updateStats() {
-            start_date = $scope.start_date;
-            finish_date = $scope.finish_date;
-            console.log("Filtering dates from %s to %s", start_date, finish_date);
+        function generatePipelineFilters() {
+            var pipeline_filters = {};
+
+            if ($scope.start_date)
+                pipeline_filters['completed_at__gte'] = $scope.start_date;
+            if ($scope.finish_date)
+                pipeline_filters['completed_at__lte'] = $scope.finish_date;
+
+            for (var enum_field in $scope.filters) {
+                if (!(enum_field in $scope.metadata))
+                    continue;
+
+                enum_values = [];
+                $scope.filters[enum_field].forEach(function(enum_value) {
+                    enum_values.push(enum_value.substr(1));
+                });
+                api_enum_name = metadataRetriever.enum_fields[enum_field];
+                pipeline_filters[api_enum_name + '__name__in'] = enum_values;
+            }
+
+            return pipeline_filters;
+        }
+
+        function updateStats(pipeline_filters) {
             buildsRetriever.refresh(binding, 'pipeline_count',
-                                    'pipeline_deploy', start_date,
-                                    finish_date);
+                                    'pipeline_deploy', pipeline_filters);
             buildsRetriever.refresh(binding, 'pass_deploy_count',
-                                    'pipeline_deploy', start_date,
-                                    finish_date, 'success');
+                                    'pipeline_deploy', pipeline_filters,
+                                    'success');
             buildsRetriever.refresh(binding, 'pass_prepare_count',
-                                    'pipeline_prepare', start_date,
-                                    finish_date, 'success');
+                                    'pipeline_prepare', pipeline_filters,
+                                    'success');
             buildsRetriever.refresh(binding, 'pass_test_cloud_image_count',
-                                    'test_cloud_image', start_date,
-                                    finish_date, 'success');
+                                    'test_cloud_image', pipeline_filters,
+                                    'success');
         };
 
-        function updateBugs() {
-            bugsRetriever.refresh($scope,
-                $scope.start_date,
-                $scope.finish_date);
+        function updateBugs(pipeline_filters) {
+            bugsRetriever.refresh($scope, pipeline_filters);
         }
 
         function dateToString(date) {
@@ -69,19 +83,54 @@ app.controller('buildsController', [
             $scope.finish_date = dateToString(today);
         };
 
+        function updateFromServer() {
+            pipeline_filters = generatePipelineFilters();
+            updateStats(pipeline_filters);
+            updateBugs(pipeline_filters);
+        }
+
+        // Clear the search bar.
+        $scope.clearSearch = function() {
+            $scope.search = "";
+            $scope.start_date = null;
+            $scope.finish_date = null;
+            $scope.updateSearch();
+        };
+
+        // Update the filters object when the search bar is updated.
+        $scope.updateSearch = function() {
+            var filters = SearchService.getCurrentFilters(
+                $scope.search);
+            if(filters === null) {
+                $scope.filters = SearchService.getEmptyFilter();
+                $scope.searchValid = false;
+            } else {
+                $scope.filters = filters;
+                $scope.searchValid = true;
+            }
+            updateFromServer();
+        };
+
         $scope.updateFilter = function(type, value, tab) {
             console.log("Updating filter! %s %s %s", type, value, tab);
 
             if (type == "date") {
-                updateDates(value);
                 // Only one date can be set at a time.
-                $scope.filters["date"] = ["=" + value];
+                new_value = "=" + value;
+                if ($scope.filters["date"] && $scope.filters["date"][0] == new_value) {
+                    $scope.filters["date"] = [];
+                    $scope.start_date = null;
+                    $scope.finish_date = null;
+                } else {
+                    updateDates(value);
+                    $scope.filters["date"] = [new_value];
+                }
             } else {
                 $scope.filters = SearchService.toggleFilter(
                     $scope.filters, type, value, true);
             }
-            updateStats();
-            updateBugs();
+            $scope.search = SearchService.filtersToString($scope.filters);
+            updateFromServer();
         };
 
         $scope.isFilterActive = function(type, value, tab) {
@@ -96,7 +145,7 @@ app.controller('buildsController', [
         };
 
         metadataRetriever.refresh($scope);
-        $scope.updateFilter('date', 'Last Year', 'builds');
+        $scope.updateFilter('date', 'Last 24 Hours', 'builds');
         $scope.toggleTab('builds');
 
     }]);
