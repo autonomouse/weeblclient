@@ -312,6 +312,7 @@ def run_unit_tests(app=None):
     except Exception as e:
         print("Some tests failed")
 
+@task
 def run_lint_tests():
     print("Running flake8 lint tests...")
     try:

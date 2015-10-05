@@ -408,8 +408,10 @@ class BugTrackerBugResource(CommonResource):
         queryset = models.BugTrackerBug.objects.all()
         list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
-        fields = ['uuid', 'bug_number', 'bug', 'project', 'created_at', 
-                  'updated_at']
+        fields = [
+            'uuid', 'bug_number', 'bug', 'project', 'created_at',
+            'updated_at'
+        ]
         authorization = Authorization()
         always_return_data = True
         filtering = {'bug_number': ALL, }

@@ -290,7 +290,7 @@ def make_pipeline():
         block_storage=random_enum(models.BlockStorage),
         image_storage=random_enum(models.ImageStorage),
         database=random_enum(models.Database),
-        )
+    )
     pipeline.save()
     return pipeline
 
