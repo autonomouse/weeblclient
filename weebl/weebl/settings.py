@@ -42,6 +42,7 @@ INSTALLED_APPS = (
     'oilserver',
     'tastypie',
     'tastypie_swagger',
+    'django_extensions',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -101,3 +102,8 @@ STATICFILES_DIRS = (
     "/usr/share/javascript/angular.js/",
     "/usr/share/javascript/yui3/"
 )
+
+GRAPH_MODELS = {
+  'all_applications': True,
+  'group_models': True,
+}

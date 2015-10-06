@@ -41,6 +41,8 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'oilserver',
     'tastypie',
+    'tastypie_swagger',
+    'django_extensions',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -94,3 +96,15 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'oilserver', 'static')
 TASTYPIE_DEFAULT_FORMATS = ['json']
 
 API_LIMIT_PER_PAGE = 0
+
+STATICFILES_DIRS = (
+    "/usr/share/javascript/jquery/",
+    "/usr/share/javascript/angular.js/",
+    "/usr/share/javascript/yui3/"
+)
+
+GRAPH_MODELS = {
+  'all_applications': True,
+  'group_models': True,
+}
+

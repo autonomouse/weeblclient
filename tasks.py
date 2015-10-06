@@ -45,7 +45,7 @@ def list():
     run('invoke --help')
 
 @task(help={'database': "Type test or production",
-			'server': "Defaults to Apache. Can alternatively user 'runserver'",
+            'server': "Defaults to Apache. Can alternatively user 'runserver'",
             'ip-addr': "IP to run server on. Defaults to 127.0.0.1.",
             'port': "Port to run server on. Defaults to 8000."})
 def go(database, server="apache", ip_addr="127.0.0.1", port=8000):
@@ -57,6 +57,7 @@ def go(database, server="apache", ip_addr="127.0.0.1", port=8000):
 @task
 def run_tests():
     """Run unit, functional, and lint tests for each app."""
+    destroy_db(test_db_name, test_pwd, force=True, backup=False)
     copy_system_angularjs()
     initialise_database("test")
     load_fixtures()
@@ -142,6 +143,13 @@ def fake_data():
     initialise_database("production")
     print("Creating fake data...")
     run('{}/manage.py fake_data'.format(application))
+
+@task(help={'filetype': "Format of output file (defaults to .png)"})
+def schema(filetype="png"):
+    run('{0}/manage.py graph_models -a > {0}.dot'.format(application))
+    run('dot -T{1} {0}.dot -o {0}_schema.{1}'.format(application, filetype))
+    run('rm {}.dot'.format(application))
+    print("Schema generated at {0}_schema.{1}".format(application, filetype))
 
 def migrate():
     """Make migrations and migrate."""
@@ -351,7 +359,7 @@ def deploy_with_runserver(ipaddr, port):
                  application, ipaddr, port), pty=True)
 
 def deploy_with_apache(apacheconf, deployloc, application, wsgifile="wsgi.py",
-					   static_dir="oilserver/static", user_group = "www-data"):
+                       static_dir="oilserver/static", user_group = "www-data"):
     """Writes apache conf file and restarts the service."""
 
     with open(setup_file_loc, 'r') as su:
@@ -403,9 +411,9 @@ def mkdir(directory):
         except OSError:
             if not os.path.isdir(directory):
                 raise
-                
+
 def copy_system_angularjs():
-    """Copies Angularjs files from system dir (installed via the install_deps 
+    """Copies Angularjs files from system dir (installed via the install_deps
     script) and copies them to local folder (which is in the gitignore file).
     This obviously assumes that install_deps has been run first.
     """

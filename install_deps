@@ -27,7 +27,10 @@ apt-get -y --no-upgrade install \
     libjs-yui3-min \
     libjs-angularjs \
     libjs-yui \
+    python3-pyparsing \
+    python3-pydot \
     --fix-missing
 
 # export https_proxy=http://91.189.89.33:3128
 pip3 install django-tastypie-swagger
+pip3 install django-extensions
