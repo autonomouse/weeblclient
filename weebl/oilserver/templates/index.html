@@ -204,35 +204,44 @@
 
                                 <div data-ng-show="currentpage === 'bugs'">
                                     <div id="content" class="nine-col last-col">
-                                        <p>I have {$ bugs.count $} matching bugs...</p>
+                                         <p>{$ bugs.count $} matching bugs.</p>
                                         <table class="table-listing">
                                             <thead>
-                                                <tr>
-                                                    <th>number</th>
-                                                    <th>project</th>
-                                                    <th>summary</th>
-                                                    <th>occurrences</th>
-                                                    <th>last seen</th>
+                                                <tr class="table-listing__row">
+                                                    <th class="table-listing__header">
+                                                        <a href="" class="table-listing__header-link sort-asc" data-ng-click="sortTable('bugtrackerbug.bug_number', 'bugs')" data-ng-class="{sort: tabs.bugs.predicate === 'bugtrackerbug.bug_number', 'sort-asc': tabs.bugs.reverse === false, 'sort-desc': tabs.nodes.reverse === true}">number</a>
+                                                    </th>
+                                                    <th class="table-listing__header">
+                                                        <a href="" class="table-listing__header-link sort-asc" data-ng-click="sortTable('bugtrackerbug.project.name', 'bugs')" data-ng-class="{sort: tabs.bugs.predicate === 'bugtrackerbug.project.name', 'sort-asc': tabs.bugs.reverse === false, 'sort-desc': tabs.nodes.reverse === true}">project</a>
+                                                    </th>
+                                                    <th class="table-listing__header">
+                                                        <a href="" class="table-listing__header-link sort-asc" data-ng-click="sortTable('summary', 'bugs')" data-ng-class="{sort: tabs.bugs.predicate === 'summary', 'sort-asc': tabs.bugs.reverse === false, 'sort-desc': tabs.nodes.reverse === true}">summary</a>
+                                                    </th>
+                                                    <th class="table-listing__header">
+                                                        <a href="" class="table-listing__header-link sort sort-asc" data-ng-click="sortTable('occurrence_count', 'bugs')" data-ng-class="{sort: tabs.bugs.predicate === 'occurrence_count', 'sort-asc': tabs.bugs.reverse === false, 'sort-desc': tabs.nodes.reverse === true}">occurrences</a>
+                                                    </th>
+                                                    <th class="table-listing__header">
+                                                        <a href="" class="table-listing__header-link sort-asc" data-ng-click="sortTable('last_seen', 'bugs')" data-ng-class="{sort: tabs.bugs.predicate === 'last_seen', 'sort-asc': tabs.bugs.reverse === false, 'sort-desc': tabs.nodes.reverse === true}">last seen</a>
+                                                    </th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <tr ng-repeat="bug in bugs.objects">
-                                                    <td>{$ bug.bugtrackerbug.bug_number $}</td>
-                                                    <td>{$ bug.bugtrackerbug.project.name $}</td>
-                                                    <td>{$ bug.summary $}</td>
-                                                    <td>{$ bug.occurrence_count $}</td>
-                                                    <td>{$ bug.last_seen $}</td>
+                                                <tr class="table-listing__row" ng-repeat="bug in bugs.objects | orderBy:tabs.bugs.predicate:tabs.bugs.reverse">
+                                                    <td class="table-listing__cell">{$ bug.bugtrackerbug.bug_number $}</td>
+                                                    <td class="table-listing__cell">{$ bug.bugtrackerbug.project.name $}</td>
+                                                    <td class="table-listing__cell">{$ bug.summary $}</td>
+                                                    <td class="table-listing__cell">{$ bug.occurrence_count $}</td>
+                                                    <td class="table-listing__cell">{$ bug.last_seen $}</td>
                                                 </tr>
                                             </tbody>
                                         </table>
                                     </div>
-                                </div>
 
                                 <!------------------------------------------------>
 
+                                </div>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </main>

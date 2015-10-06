@@ -429,8 +429,7 @@ class BugTrackerBug(TimeStampedBaseModel):
     """An error that has resulted in an incorrect or unexpected behaviour or
     result, externally recorded on a bug-tracker (such as Launchpad).
     """
-    bug_number = models.CharField(
-        max_length=255,
+    bug_number = models.IntegerField(
         unique=True,
         blank=False,
         null=False,

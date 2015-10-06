@@ -16,6 +16,8 @@ app.controller('overviewController', [
         $scope.tabs.bugs = {};
         $scope.tabs.bugs.pagetitle = "Bugs";
         $scope.tabs.bugs.currentpage = "bugs";
+        $scope.tabs.bugs.predicate = "occurrences";
+        $scope.tabs.bugs.reverse = false;
 
         function generatePipelineFilters() {
             var pipeline_filters = {};
@@ -129,8 +131,14 @@ app.controller('overviewController', [
             $scope.currentpage = tab;
         };
 
+        // Sorts the table by predicate.
+        $scope.sortTable = function(predicate, tab) {
+            $scope.tabs[tab].predicate = predicate;
+            $scope.tabs[tab].reverse = !$scope.tabs[tab].reverse;
+        };
+
         metadataRetriever.refresh($scope);
         $scope.updateFilter('date', 'Last 24 Hours', 'overview');
         $scope.toggleTab('overview');
-
+        $scope.sortTable('occurrence_count', 'bugs');
     }]);
