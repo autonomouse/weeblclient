@@ -125,6 +125,19 @@ def load_fixtures(fixture="initial_settings.yaml"):
     print("Adding data from {} into database".format(fixture))
     run('{}/manage.py loaddata "{}"'.format(application, fixture))
 
+@task()
+def fake_data():
+    initialise_database("production")
+    print("Creating fake data...")
+    run('{}/manage.py fake_data'.format(application))
+
+@task(help={'filetype': "Format of output file (defaults to .png)"})
+def schema(filetype="png"):
+    run('{0}/manage.py graph_models -X TimeStampedBaseModel -a > {0}.dot'.format(application))
+    run('dot -T{1} {0}.dot -o {0}_schema.{1}'.format(application, filetype))
+    run('rm {}.dot'.format(application))
+    print("Schema generated at {0}_schema.{1}".format(application, filetype))
+
 def initialise_database(database):
     if database == "production":
         stngs = prdctn_settings
@@ -137,19 +150,6 @@ def initialise_database(database):
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "{0}.{1}"
                           .format(application, stngs))
     createdb(database)
-
-@task()
-def fake_data():
-    initialise_database("production")
-    print("Creating fake data...")
-    run('{}/manage.py fake_data'.format(application))
-
-@task(help={'filetype': "Format of output file (defaults to .png)"})
-def schema(filetype="png"):
-    run('{0}/manage.py graph_models -a > {0}.dot'.format(application))
-    run('dot -T{1} {0}.dot -o {0}_schema.{1}'.format(application, filetype))
-    run('rm {}.dot'.format(application))
-    print("Schema generated at {0}_schema.{1}".format(application, filetype))
 
 def migrate():
     """Make migrations and migrate."""
