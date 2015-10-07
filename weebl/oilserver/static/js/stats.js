@@ -1,11 +1,6 @@
-var app = angular.module('weebl', []);
+var app = angular.module('weebl');
 
-app.config(['$interpolateProvider', function ($interpolateProvider) {
-$interpolateProvider.startSymbol('{$');
-$interpolateProvider.endSymbol('$}');
-}]);
-
-app.controller('buildsController', [
+app.controller('overviewController', [
     '$scope', '$rootScope', 'buildsRetriever', 'bugsRetriever', 'SearchService', 'metadataRetriever',
     function($scope, $rootScope, buildsRetriever, bugsRetriever, SearchService, metadataRetriever) {
         binding = this;
@@ -15,9 +10,9 @@ app.controller('buildsController', [
         $scope.metadata = {};
 
         $scope.tabs = {};
-        $scope.tabs.builds = {};
-        $scope.tabs.builds.pagetitle = "Builds";
-        $scope.tabs.builds.currentpage = "builds";
+        $scope.tabs.overview = {};
+        $scope.tabs.overview.pagetitle = "Overview";
+        $scope.tabs.overview.currentpage = "overview";
         $scope.tabs.bugs = {};
         $scope.tabs.bugs.pagetitle = "Bugs";
         $scope.tabs.bugs.currentpage = "bugs";
@@ -46,22 +41,12 @@ app.controller('buildsController', [
         }
 
         function updateStats(pipeline_filters) {
-            buildsRetriever.refresh(binding, 'pipeline_count',
-                                    'pipeline_deploy', pipeline_filters);
-            buildsRetriever.refresh(binding, 'pass_deploy_count',
-                                    'pipeline_deploy', pipeline_filters,
-                                    'success');
-            buildsRetriever.refresh(binding, 'pass_prepare_count',
-                                    'pipeline_prepare', pipeline_filters,
-                                    'success');
-            buildsRetriever.refresh(binding, 'pass_test_cloud_image_count',
-                                    'test_cloud_image', pipeline_filters,
-                                    'success');
+            buildsRetriever.refresh(binding, pipeline_filters);
         };
 
         function updateBugs(pipeline_filters) {
             bugsRetriever.refresh($scope, pipeline_filters);
-        }
+        };
 
         function dateToString(date) {
             return date.getUTCFullYear() + "-" + (date.getUTCMonth() + 1) + "-" + date.getUTCDate();
@@ -145,7 +130,7 @@ app.controller('buildsController', [
         };
 
         metadataRetriever.refresh($scope);
-        $scope.updateFilter('date', 'Last 24 Hours', 'builds');
-        $scope.toggleTab('builds');
+        $scope.updateFilter('date', 'Last 24 Hours', 'overview');
+        $scope.toggleTab('overview');
 
     }]);

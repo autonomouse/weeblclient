@@ -1,230 +1,252 @@
 <!DOCTYPE html>
 <html class="no-js" lang="en" data-ng-app="weebl">
-<head>
-    <base href="{% url 'index' %}">
-    <title data-ng-bind="title + ' | ' + site + ' weebl'"></title>
-
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1" />
-    <meta name="description" content="{% block meta_description %}{% endblock %}" />
-    <meta name="keywords" content="{% block meta_keywords %}{% endblock %}" />
-    <meta name="author" content="Canonical" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-    <!--[if IE]>
+    <head>
+        <base href="{% url 'index' %}">
+        <title data-ng-bind="title + ' | ' + site + ' weebl'"></title>
+        <meta charset="utf-8"> <!-- Do not change charset please - utf-8 is important for d3.js -->
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1" />
+        <meta name="description" content="{% block meta_description %}{% endblock %}" />
+        <meta name="keywords" content="{% block meta_keywords %}{% endblock %}" />
+        <meta name="author" content="Canonical" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <!--[if IE]>
         <meta http-equiv="X-UA-Compatible" content="IE=8">
-    <![endif]-->
+        <![endif]-->
+        <link rel="shortcut icon" href="{{ STATIC_URL }}img/favicon.ico" type="image/x-icon" />
+        {% include "css-conf.html" %}
+        {% include "js-conf.html" %}
+    </head>
 
-    <link rel="shortcut icon" href="{{ STATIC_URL }}img/favicon.ico" type="image/x-icon" />
-
-    {% include "css-conf.html" %}
-    {% include "js-conf.html" %}
-</head>
-<body data-ng-init="site = 'OIL'">
-    <div class="wrapper maas-wrapper">
-        <header class="banner global fixed" role="banner">
-            <nav role="navigation" class="nav-primary nav-right">
-                <div class="logo">
-                    <a class="logo-ubuntu" href="{% url 'index' %}">
+    <body data-ng-init="site = 'OIL'">
+        <div class="wrapper maas-wrapper">
+            <header class="banner global fixed" role="banner">
+                <nav role="navigation" class="nav-primary nav-right">
+                    <div class="logo">
+                        <a class="logo-ubuntu" href="{% url 'index' %}">
                         <img width="110" height"10" src="{{ STATIC_URL }}img/logos/logo.svg" alt="OIL" />
-                    </a>
-                </div>
-                <ul id="main-nav" class="nav">
-                </ul>
-                <ul id="right-nav" class="nav">
-                    <li id="user-link">
-                        <a href="">
+                        </a>
+                    </div>
+                    <ul id="main-nav" class="nav">
+                    </ul>
+                    <ul id="right-nav" class="nav">
+                        <li id="user-link">
+                            <a href="">
                             <img src="{{ STATIC_URL }}img/icons/user_dark.png" alt="" class="normal">
                             <img src="{{ STATIC_URL }}img/icons/user_light.png" alt="" class="hover">
                             User
-                        </a>
-                        <ul class="nav" id="user-options">
-                            <li>
-                                <a data-ng-class="{ active: page == 'account' }" href="{% url 'index' %}">Account</a>
-                            </li>
-                            <li>
-                                <a href="{% url 'index' %}">Logout</a>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-            </nav>
-            <div class="nav-toggles">
-                <a href="#canonlist" class="nav-toggle open"></a>
-                <a href="#" class="nav-toggle close"></a>
-            </div>
-        </header>
-        <main id="body">
-        <div data-ng-controller="buildsController as builds">
-            <header class="page-header margin-bottom" data-maas-sticky-header>
-            <div class="inner-wrapper">
-                <h1 class="page-header__title">{$ $parent.site $}
-                <span class="page-header__title--identicator" id="bulk-actions">
-                    <!-- XXX blake_r 2015-02-19 - Need to add e2e test. -->
-                    <a href=""
-                        data-ng-class="{ active: currentpage === 'builds' }"
-                        data-ng-click="toggleTab('builds')">Builds</a>
-                    <span class="divide"></span>
-                    <a href=""
-                        data-ng-class="{ active: currentpage === 'bugs' }"
-                        data-ng-click="toggleTab('bugs')">Bugs</a>
-                    <span class="power-status--power" data-ng-show="loading">
-                        <span class="loader"></span>
-                        Loading...
-                    </span>
-                </span>
-            </div>
+                            </a>
+                            <ul class="nav" id="user-options">
+                                <li>
+                                    <a data-ng-class="{ active: page == 'account' }" href="{% url 'index' %}">Account</a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'index' %}">Logout</a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </nav>
+                <div class="nav-toggles">
+                    <a href="#canonlist" class="nav-toggle open"></a>
+                    <a href="#" class="nav-toggle close"></a>
+                </div>
             </header>
-            <div class="inner-wrapper">
-            <div class="accordion three-col maas-accordion">
-                <h3 class="accordion__title">Filter by</h3>
-                <div class="ng-hide accordion__tab" data-ng-show="1">
-                    <h4 class="accordion__tab-title maas-accordion-tab active">Date</h4>
-                    <div class="accordion__tab-content">
-                        <ul class="accordion__tab-list">
-                            <li class="accordion__tab-item" data-ng-class="{ active: isFilterActive('date', 'Last 24 Hours', 'builds') }">
-                                <a class="accordion__tab-link" href="" data-ng-click="updateFilter('date', 'Last 24 Hours', 'builds')">Last 24 Hours</a>
-                            </li>
-                            <li class="accordion__tab-item" data-ng-class="{ active: isFilterActive('date', 'Last 7 Days', 'builds') }">
-                                <a class="accordion__tab-link" href="" data-ng-click="updateFilter('date', 'Last 7 Days', 'builds')">Last 7 Days</a>
-                            </li>
-                            <li class="accordion__tab-item" data-ng-class="{ active: isFilterActive('date', 'Last 30 Days', 'builds') }">
-                                <a class="accordion__tab-link" href="" data-ng-click="updateFilter('date', 'Last 30 Days', 'builds')">Last 30 Days</a>
-                            </li>
-                            <li class="accordion__tab-item" data-ng-class="{ active: isFilterActive('date', 'Last Year', 'builds') }">
-                                <a class="accordion__tab-link" href="" data-ng-click="updateFilter('date', 'Last Year', 'builds')">Last Year</a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="ng-hide accordion__tab" data-ng-show="metadata.openstack_release.length">
-                    <h4 class="accordion__tab-title maas-accordion-tab">OpenStack Release</h4>
-                    <div class="accordion__tab-content">
-                        <ul class="accordion__tab-list">
-                            <li class="accordion__tab-item" data-ng-repeat="release in metadata.openstack_release | orderBy:['name']"  data-ng-class="{ active: isFilterActive('openstack_release', release.name, 'builds') }">
-                                <a class="accordion__tab-link" href="" data-ng-click="updateFilter('openstack_release', release.name, 'builds')">{$ release.name $}</a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="ng-hide accordion__tab" data-ng-show="metadata.ubuntu_release.length">
-                    <h4 class="accordion__tab-title maas-accordion-tab">Ubuntu Release</h4>
-                    <div class="accordion__tab-content">
-                        <ul class="accordion__tab-list">
-                            <li class="accordion__tab-item" data-ng-repeat="release in metadata.ubuntu_release | orderBy:['name']"  data-ng-class="{ active: isFilterActive('ubuntu_release', release.name, 'builds') }">
-                                <a class="accordion__tab-link" href="" data-ng-click="updateFilter('ubuntu_release', release.name, 'builds')">{$ release.name $} ({$ release.number $})</a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="ng-hide accordion__tab" data-ng-show="metadata.compute.length">
-                    <h4 class="accordion__tab-title maas-accordion-tab">Compute</h4>
-                    <div class="accordion__tab-content">
-                        <ul class="accordion__tab-list">
-                            <li class="accordion__tab-item" data-ng-repeat="compute in metadata.compute | orderBy:['name']"  data-ng-class="{ active: isFilterActive('compute', compute.name, 'builds') }">
-                                <a class="accordion__tab-link" href="" data-ng-click="updateFilter('compute', compute.name, 'builds')">{$ compute.name $}</a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="ng-hide accordion__tab" data-ng-show="metadata.networking.length">
-                    <h4 class="accordion__tab-title maas-accordion-tab">Networking</h4>
-                    <div class="accordion__tab-content">
-                        <ul class="accordion__tab-list">
-                            <li class="accordion__tab-item" data-ng-repeat="sdn in metadata.networking | orderBy:['name']"  data-ng-class="{ active: isFilterActive('networking', sdn.name, 'builds') }">
-                                <a class="accordion__tab-link" href="" data-ng-click="updateFilter('networking', sdn.name, 'builds')">{$ sdn.name $}</a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="ng-hide accordion__tab" data-ng-show="metadata.block_storage.length">
-                    <h4 class="accordion__tab-title maas-accordion-tab" ng-class="active">Block Storage</h4>
-                    <div class="accordion__tab-content">
-                        <ul class="accordion__tab-list">
-                            <li class="accordion__tab-item" data-ng-repeat="block_storage in metadata.block_storage | orderBy:['name']"  data-ng-class="{ active: isFilterActive('block_storage', block_storage.name, 'builds') }">
-                                <a class="accordion__tab-link" href="" data-ng-click="updateFilter('block_storage', block_storage.name, 'builds')">{$ block_storage.name $}</a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="ng-hide accordion__tab" data-ng-show="metadata.image_storage.length">
-                    <h4 class="accordion__tab-title maas-accordion-tab">Image Storage</h4>
-                    <div class="accordion__tab-content">
-                        <ul class="accordion__tab-list">
-                            <li class="accordion__tab-item" data-ng-repeat="image_storage in metadata.image_storage | orderBy:['name']"  data-ng-class="{ active: isFilterActive('image_storage', image_storage.name, 'builds') }">
-                                <a class="accordion__tab-link" href="" data-ng-click="updateFilter('image_storage', image_storage.name, 'builds')">{$ image_storage.name $}</a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="ng-hide accordion__tab" data-ng-show="metadata.database.length">
-                    <h4 class="accordion__tab-title maas-accordion-tab">Database</h4>
-                    <div class="accordion__tab-content">
-                        <ul class="accordion__tab-list">
-                            <li class="accordion__tab-item" data-ng-repeat="database in metadata.database | orderBy:['name']"  data-ng-class="{ active: isFilterActive('database', database.name, 'builds') }">
-                                <a class="accordion__tab-link" href="" data-ng-click="updateFilter('database', database.name, 'builds')">{$ database.name $}</a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            <div id="main-content" data-maas-error-overlay>
-            <div id="content" class="nine-col last-col" data-ng-view>
-            <div id="search-bar" class="search">
-                <input
-                    type="search" placeholder="Search pipelines" class="search__input"
-                    data-ng-model="search" data-ng-change="updateSearch()"
-                                           data-ng-class="{ error: !searchValid }"/>
-                <input type="submit" class="search__submit"
-                    data-ng-class="{ close: search.length > 0 }"
-                    data-ng-click="clearSearch()" />
-            </div>
+            <main id="body">
+                <div data-ng-controller="overviewController as overview">
+                    <header class="page-header margin-bottom" data-maas-sticky-header>
+                        <div class="inner-wrapper">
+                            <h1 class="page-header__title">
+                                {$ $parent.site $}
+                                <span class="page-header__title--identicator" id="bulk-actions">
+                                    <!-- XXX blake_r 2015-02-19 - Need to add e2e test. -->
+                                    <a href=""
+                                        data-ng-class="{ active: currentpage === 'overview' }"
+                                        data-ng-click="toggleTab('overview')">Overview</a>
+                                    <span class="divide"></span>
+                                    <a href=""
+                                        data-ng-class="{ active: currentpage === 'bugs' }"
+                                        data-ng-click="toggleTab('bugs')">Bugs</a>
+                                    <span class="power-status--power" data-ng-show="loading">
+                                    <span class="loader"></span>
+                                    Loading...
+                                    </span>
+                                </span>
+                            </h1>
+                        </div>
+                    </header>
 
-                <div data-ng-show="currentpage === 'builds'">
-                    <p>I have {$ builds.pipeline_count $} matching pipelines...</p>
-                    <p>I have {$ builds.pass_deploy_count $} successful pipeline deploys...</p>
-                    <p>I have {$ builds.pass_prepare_count $} successful pipeline prepares...</p>
-                    <p>I have {$ builds.pass_test_cloud_image_count $} successful guest OS tests...</p>
+                    <div class="inner-wrapper">
+
+                        <!-- accordion -->
+                        <div class="accordion three-col maas-accordion">
+                            <h3 class="accordion__title">Filter by</h3>
+                            <div class="ng-hide accordion__tab" data-ng-show="1">
+                                <h4 class="accordion__tab-title maas-accordion-tab active">Date</h4>
+                                <div class="accordion__tab-content">
+                                    <ul class="accordion__tab-list">
+                                        <li class="accordion__tab-item" data-ng-class="{ active: isFilterActive('date', 'Last 24 Hours', 'overview') }">
+                                            <a class="accordion__tab-link" href="" data-ng-click="updateFilter('date', 'Last 24 Hours', 'overview')">Last 24 Hours</a>
+                                        </li>
+                                        <li class="accordion__tab-item" data-ng-class="{ active: isFilterActive('date', 'Last 7 Days', 'overview') }">
+                                            <a class="accordion__tab-link" href="" data-ng-click="updateFilter('date', 'Last 7 Days', 'overview')">Last 7 Days</a>
+                                        </li>
+                                        <li class="accordion__tab-item" data-ng-class="{ active: isFilterActive('date', 'Last 30 Days', 'overview') }">
+                                            <a class="accordion__tab-link" href="" data-ng-click="updateFilter('date', 'Last 30 Days', 'overview')">Last 30 Days</a>
+                                        </li>
+                                        <li class="accordion__tab-item" data-ng-class="{ active: isFilterActive('date', 'Last Year', 'overview') }">
+                                            <a class="accordion__tab-link" href="" data-ng-click="updateFilter('date', 'Last Year', 'overview')">Last Year</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="ng-hide accordion__tab" data-ng-show="metadata.openstack_release.length">
+                                <h4 class="accordion__tab-title maas-accordion-tab">OpenStack Release</h4>
+                                <div class="accordion__tab-content">
+                                    <ul class="accordion__tab-list">
+                                        <li class="accordion__tab-item" data-ng-repeat="release in metadata.openstack_release | orderBy:['name']"  data-ng-class="{ active: isFilterActive('openstack_release', release.name, 'overview') }">
+                                            <a class="accordion__tab-link" href="" data-ng-click="updateFilter('openstack_release', release.name, 'overview')">{$ release.name $}</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="ng-hide accordion__tab" data-ng-show="metadata.ubuntu_release.length">
+                                <h4 class="accordion__tab-title maas-accordion-tab">Ubuntu Release</h4>
+                                <div class="accordion__tab-content">
+                                    <ul class="accordion__tab-list">
+                                        <li class="accordion__tab-item" data-ng-repeat="release in metadata.ubuntu_release | orderBy:['name']"  data-ng-class="{ active: isFilterActive('ubuntu_release', release.name, 'overview') }">
+                                            <a class="accordion__tab-link" href="" data-ng-click="updateFilter('ubuntu_release', release.name, 'overview')">{$ release.name $} ({$ release.number $})</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="ng-hide accordion__tab" data-ng-show="metadata.compute.length">
+                                <h4 class="accordion__tab-title maas-accordion-tab">Compute</h4>
+                                <div class="accordion__tab-content">
+                                    <ul class="accordion__tab-list">
+                                        <li class="accordion__tab-item" data-ng-repeat="compute in metadata.compute | orderBy:['name']"  data-ng-class="{ active: isFilterActive('compute', compute.name, 'overview') }">
+                                            <a class="accordion__tab-link" href="" data-ng-click="updateFilter('compute', compute.name, 'overview')">{$ compute.name $}</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="ng-hide accordion__tab" data-ng-show="metadata.networking.length">
+                                <h4 class="accordion__tab-title maas-accordion-tab">Networking</h4>
+                                <div class="accordion__tab-content">
+                                    <ul class="accordion__tab-list">
+                                        <li class="accordion__tab-item" data-ng-repeat="sdn in metadata.networking | orderBy:['name']"  data-ng-class="{ active: isFilterActive('networking', sdn.name, 'overview') }">
+                                            <a class="accordion__tab-link" href="" data-ng-click="updateFilter('networking', sdn.name, 'overview')">{$ sdn.name $}</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="ng-hide accordion__tab" data-ng-show="metadata.block_storage.length">
+                                <h4 class="accordion__tab-title maas-accordion-tab" ng-class="active">Block Storage</h4>
+                                <div class="accordion__tab-content">
+                                    <ul class="accordion__tab-list">
+                                        <li class="accordion__tab-item" data-ng-repeat="block_storage in metadata.block_storage | orderBy:['name']"  data-ng-class="{ active: isFilterActive('block_storage', block_storage.name, 'overview') }">
+                                            <a class="accordion__tab-link" href="" data-ng-click="updateFilter('block_storage', block_storage.name, 'overview')">{$ block_storage.name $}</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="ng-hide accordion__tab" data-ng-show="metadata.image_storage.length">
+                                <h4 class="accordion__tab-title maas-accordion-tab">Image Storage</h4>
+                                <div class="accordion__tab-content">
+                                    <ul class="accordion__tab-list">
+                                        <li class="accordion__tab-item" data-ng-repeat="image_storage in metadata.image_storage | orderBy:['name']"  data-ng-class="{ active: isFilterActive('image_storage', image_storage.name, 'overview') }">
+                                            <a class="accordion__tab-link" href="" data-ng-click="updateFilter('image_storage', image_storage.name, 'overview')">{$ image_storage.name $}</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="ng-hide accordion__tab" data-ng-show="metadata.database.length">
+                                <h4 class="accordion__tab-title maas-accordion-tab">Database</h4>
+                                <div class="accordion__tab-content">
+                                    <ul class="accordion__tab-list">
+                                        <li class="accordion__tab-item" data-ng-repeat="database in metadata.database | orderBy:['name']"  data-ng-class="{ active: isFilterActive('database', database.name, 'overview') }">
+                                            <a class="accordion__tab-link" href="" data-ng-click="updateFilter('database', database.name, 'overview')">{$ database.name $}</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- main content -->
+                        <div id="main-content" data-maas-error-overlay>
+                            <div data-ng-view>
+
+                                <!------------------------------------------------>
+
+                                <div id="content" class="nine-col last-col">
+                                    <div id="search-bar" class="search">
+                                        <input
+                                            type="search" placeholder="Search pipelines" class="search__input"
+                                            data-ng-model="search" data-ng-change="updateSearch()"
+                                            data-ng-class="{ error: !searchValid }"/>
+                                        <input type="submit" class="search__submit"
+                                            data-ng-class="{ close: search.length > 0 }"
+                                            data-ng-click="clearSearch()" />
+                                    </div>
+                                </div>
+
+                                <!------------------------------------------------>
+
+                                <div data-ng-show="currentpage === 'overview'">
+                                    <div class="nine-col last-col">
+                                        <nvd3 options="overview.stack_bar_options"
+                                            data="overview.stack_bar_data"
+                                            config="overview.stack_bar_config"
+                                            ></nvd3>
+                                    </div>
+                                </div>
+
+                                <!------------------------------------------------>
+
+                                <div data-ng-show="currentpage === 'bugs'">
+                                    <div id="content" class="nine-col last-col">
+                                        <p>I have {$ bugs.count $} matching bugs...</p>
+                                        <table class="table-listing">
+                                            <thead>
+                                                <tr>
+                                                    <th>number</th>
+                                                    <th>project</th>
+                                                    <th>summary</th>
+                                                    <th>occurrences</th>
+                                                    <th>last seen</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="bug in bugs.objects">
+                                                    <td>{$ bug.bugtrackerbug.bug_number $}</td>
+                                                    <td>{$ bug.bugtrackerbug.project.name $}</td>
+                                                    <td>{$ bug.summary $}</td>
+                                                    <td>{$ bug.occurrence_count $}</td>
+                                                    <td>{$ bug.last_seen $}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <!------------------------------------------------>
+
+                            </div>
+                        </div>
+
+                    </div>
                 </div>
-                <div data-ng-show="currentpage === 'bugs'">
-                    <p>I have {$ bugs.count $} matching bugs...</p>
-                    <!------------------------------------------------>
-                    <table class="table-listing">
-                        <thead>
-                        <tr>
-                            <th>number</th>
-                            <th>project</th>
-                            <th>summary</th>
-                            <th>occurrences</th>
-                            <th>last seen</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr ng-repeat="bug in bugs.objects">
-                            <td>{$ bug.bugtrackerbug.bug_number $}</td>
-                            <td>{$ bug.bugtrackerbug.project.name $}</td>
-                            <td>{$ bug.summary $}</td>
-                            <td>{$ bug.occurrence_count $}</td>
-                            <td>{$ bug.last_seen $}</td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            </div>
+            </main>
+
+            <div class="footer-wrapper" data-maas-error-toggle>
+                <footer class="global inner-wrapper clearfix">
+                    <div class="legal clearfix">
+                        <div class="legal-inner">
+                            <p class="copy">weebl REST api v1<a href="/api">try in browser</a></p>
+                            <p class="twelve-col copy">&copy; 2015 Canonical Ltd. Ubuntu and Canonical are registered trademarks of Canonical Ltd.</p>
+                        </div>
+                    </div>
+                </footer>
             </div>
         </div>
-        </main>
-    </div>
-    <div class="footer-wrapper" data-maas-error-toggle>
-        <footer class="global inner-wrapper clearfix">
-            <div class="legal clearfix">
-                <div class="legal-inner">
-                    <p class="copy">weebl REST api v1<a href="/api">try in browser</a></p>
-                    <p class="twelve-col copy">&copy; 2015 Canonical Ltd. Ubuntu and Canonical are registered trademarks of Canonical Ltd.</p>
-                </div>
-            </div>
-        </footer>
-    </div>
-</body>
+    </body>
 </html>
