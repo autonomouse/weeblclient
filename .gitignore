@@ -30,5 +30,8 @@ weebl/oilserver/static/tastypie_swagger/
 
 # Angular files copied from /usr/share/javascript/angular.js/
 
-weebl/oilserver/static/js/jslibs
+weebl/oilserver/static/js/jslibs/angular.js
+weebl/oilserver/static/js/jslibs/jquery
+weebl/oilserver/static/js/jslibs/yui3
+weebl/oilserver/static/js/jslibs/node_modules/
 
