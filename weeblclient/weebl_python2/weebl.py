@@ -79,6 +79,11 @@ class Weebl(object):
         if ci_server_api is not None and hasattr(ci_server_api, 'jenkins_api'):
             self.set_up_new_build_executors(ci_server_api.jenkins_api)
 
+    def weeblify_environment_jenkinsAPI(self, jenkins_host, jenkins_api):
+        self.set_up_new_environment()
+        self.set_up_new_jenkins(jenkins_host)
+        self.set_up_new_build_executors(jenkins_api)
+
     def environment_exists(self, uuid):
         environment_instances = self.filter_instances(
             "environment", [('uuid', uuid)])
