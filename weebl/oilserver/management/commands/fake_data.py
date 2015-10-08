@@ -11,6 +11,7 @@ from oilserver import models
 
 
 DEPENDENT_JOBS = [
+    'pipeline_start',
     'pipeline_deploy',
     'pipeline_prepare',
     'test_cloud_image'
@@ -43,23 +44,21 @@ SERVICE_STATUSES = [
 
 
 OPENSTACK_VERSIONS = [
+    'havana',
     'icehouse',
     'juno',
     'kilo',
-    'liberty',
 ]
 
 
 SDNS = [
-    'nova-networking',
+    'nova-network-flatdhcp',
     'neutron-openvswitch',
-    'calico',
-    'contrail',
-    'odl-openvswitch',
-    'nvp',
-    'nsx',
-    'hyperv',
-    'hyperv-openvswitch',
+    'neutron-contrail',
+    'neutron-nvp',
+    'neutron-nsx',
+    'neutron-openvswitch-hyperv',
+    'neutron-metaswitch',
 ]
 
 
@@ -80,6 +79,8 @@ COMPUTES = [
 BLOCK_STORAGES = [
     'cinder-iscsi',
     'cinder-ceph',
+    'cinder-vmware',
+    'cinder-vnx',
 ]
 
 
@@ -91,7 +92,7 @@ IMAGE_STORAGES = [
 
 DATABASES = [
     'mysql',
-    'galera',
+    'galera-cluster',
 ]
 
 
@@ -186,7 +187,7 @@ def make_build_executor():
     if models.BuildExecutor.objects.exists():
         return
 
-    models.BuildExecutor(name='Sample Build Executor',
+    models.BuildExecutor(name='unknown',
                          jenkins=models.Jenkins.objects.first(),
                          ).save()
 
