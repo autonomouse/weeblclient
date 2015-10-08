@@ -34,7 +34,11 @@ jslibs_files = ['jquery/jquery.js',
                 'angular.js/angular-resource.js',
                 'yui3/yui-base/yui-base-min.js',
                 ]
-
+npm_pkgs = ['d3',
+            'nvd3',
+            'angular-nvd3',
+            ]
+https_proxy = "http://91.189.89.33:3128"
 
 ''' REQUIRES install_deps to have been run first. '''
 
@@ -124,6 +128,17 @@ def backup_database(database, force=False):
 def load_fixtures(fixture="initial_settings.yaml"):
     print("Adding data from {} into database".format(fixture))
     run('{}/manage.py loaddata "{}"'.format(application, fixture))
+
+@task(help={'proxy': "https_proxy url (e.g. http://91.189.89.33:3128)"})
+def install_npm_pkgs(proxy=None):
+    print("Installing packages via npm")
+    mkdir(jslibs_dest_dir)
+    npm_pkg_list = " ".join(npm_pkgs)
+    if proxy is not None:
+        run('export https_proxy={}'.format(https_proxy))
+    run('npm install --prefix {} {}'.format(jslibs_dest_dir, npm_pkg_list))
+    if proxy is not None:
+        run('unset https_proxy')
 
 @task()
 def fake_data():
@@ -417,7 +432,7 @@ def copy_system_angularjs():
     script) and copies them to local folder (which is in the gitignore file).
     This obviously assumes that install_deps has been run first.
     """
-    mkdir(jslibs_dest_dir)
+    install_npm_pkgs()
     for jslibs_js in jslibs_files:
         src = "{}{}".format(jslibs_src_dir, jslibs_js)
         dest = "{}{}".format(jslibs_dest_dir, jslibs_js)

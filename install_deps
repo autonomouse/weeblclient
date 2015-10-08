@@ -37,9 +37,7 @@ apt-get -y --no-upgrade install \
 echo "Installing packages via pip3"
 pip3 install django-tastypie-swagger django-extensions
 
-echo "Installing packages via npm"
-mkdir -p ./weebl/oilserver/static/js/jslibs/
-npm install --prefix ./weebl/oilserver/static/js/jslibs/ d3 nvd3 angular-nvd3
+echo "(Run 'invoke install_npm_pkgs' to install packages via npm)"
 
 echo "Done"
 # unset https_proxy
