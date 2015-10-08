@@ -102,7 +102,7 @@ app.factory('buildsRetriever', ['$http', '$q', function($http, $q) {
     var guestos = $http.get(url, {'params': guestos_parameters}).success(function(data) {
         scope['pass_test_cloud_image_count'] = data.meta.total_count;});
 
-    $q.all([deploy, prepare, guestos]).then(function(arrayOfResults) {
+    $q.all([total_builds, deploy, prepare, guestos]).then(function(arrayOfResults) {
         plot(scope['pipeline_count'],
              scope['pass_deploy_count'],
              scope['pass_prepare_count'],
