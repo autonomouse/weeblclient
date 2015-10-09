@@ -19,8 +19,17 @@ app.factory('buildsRetriever', ['$http', '$q', function($http, $q) {
 
         return parameters;
     }
+    function calcPercentage(value, total) {
+        var percentage = d3.format(',.2f')(((value / total) * 100))
+        if (percentage == "NaN"){
+            return "0%";
+        } else {
+            return percentage + "%";
+        }
+        
+    }
 
-    function plot(total, pass_deploy_count, pass_prepare_count, pass_test_cloud_image_count) {
+    function updateChartData(total, pass_deploy_count, pass_prepare_count, pass_test_cloud_image_count) {
         var stack_bar_config = {
             visible: true,
             extended: false,
@@ -39,8 +48,7 @@ app.factory('buildsRetriever', ['$http', '$q', function($http, $q) {
                 y: function(d){return d.value;},
                 showValues: true,
                 valueFormat: function(d){
-                    return d3.format(',.2f')(
-                        (d / total) * 100) + '%';
+                    return calcPercentage(d, total)
                 },
                 transitionDuration: 500,
                 xAxis: {
@@ -103,10 +111,12 @@ app.factory('buildsRetriever', ['$http', '$q', function($http, $q) {
         scope['pass_test_cloud_image_count'] = data.meta.total_count;});
 
     $q.all([total_builds, deploy, prepare, guestos]).then(function(arrayOfResults) {
-        plot(scope['pipeline_count'],
-             scope['pass_deploy_count'],
-             scope['pass_prepare_count'],
-             scope['pass_test_cloud_image_count'])
+        updateChartData(
+            scope['pipeline_count'],
+            scope['pass_deploy_count'],
+            scope['pass_prepare_count'],
+            scope['pass_test_cloud_image_count']
+        )
       })
   };
 

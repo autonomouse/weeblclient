@@ -127,6 +127,7 @@ app.controller('overviewController', [
 
         // Toggles between the current tab.
         $scope.toggleTab = function(tab) {
+            updateFromServer(); // FIXME: Temporary hack. Need to refresh plot rather than redownloading data.
             $rootScope.title = $scope.tabs[tab].pagetitle;
             $scope.currentpage = tab;
         };
