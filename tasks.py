@@ -51,10 +51,12 @@ def list():
 @task(help={'database': "Type test or production",
             'server': "Defaults to Apache. Can alternatively user 'runserver'",
             'ip-addr': "IP to run server on. Defaults to 127.0.0.1.",
-            'port': "Port to run server on. Defaults to 8000."})
-def go(database, server="apache", ip_addr="127.0.0.1", port=8000):
+            'port': "Port to run server on. Defaults to 8000.",
+            'quick': "Do not do npm install nor copy system angular files."})
+def go(database, server="apache", ip_addr="127.0.0.1", port=8000, quick=False):
     """Set up and run weebl using either a test or a production database."""
-    copy_system_angularjs()
+    if quick is not True:
+        copy_system_angularjs()
     initialise_database(database)
     deploy(ip_addr, port, server)
 
@@ -132,6 +134,7 @@ def load_fixtures(fixture="initial_settings.yaml"):
 @task(help={'proxy': "https_proxy url (e.g. http://91.189.89.33:3128)"})
 def install_npm_pkgs(proxy=None):
     print("Installing packages via npm")
+    print("(If this hangs, it might need the https_proxy env value setting)")
     mkdir(jslibs_dest_dir)
     npm_pkg_list = " ".join(npm_pkgs)
     if proxy is not None:
