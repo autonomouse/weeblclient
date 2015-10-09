@@ -60,11 +60,12 @@ def go(database, server="apache", ip_addr="127.0.0.1", port=8000, quick=False):
     initialise_database(database)
     deploy(ip_addr, port, server)
 
-@task
-def run_tests():
+@task(help={'quick': "Do not do npm install nor copy system angular files."})
+def run_tests(quick=False):
     """Run unit, functional, and lint tests for each app."""
     destroy_db(test_db_name, test_pwd, force=True, backup=False)
-    copy_system_angularjs()
+    if quick is not True:
+        copy_system_angularjs()
     initialise_database("test")
     load_fixtures()
     run_lint_tests()
@@ -134,7 +135,7 @@ def load_fixtures(fixture="initial_settings.yaml"):
 @task(help={'proxy': "https_proxy url (e.g. http://91.189.89.33:3128)"})
 def install_npm_pkgs(proxy=None):
     print("Installing packages via npm")
-    print("(If this hangs, it might need the https_proxy env value setting)")
+    print("(If this hangs, it might need the https_proxy env value setting.)")
     mkdir(jslibs_dest_dir)
     npm_pkg_list = " ".join(npm_pkgs)
     if proxy is not None:
