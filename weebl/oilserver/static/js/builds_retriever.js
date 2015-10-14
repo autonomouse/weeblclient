@@ -55,7 +55,10 @@ app.factory('buildsRetriever', ['$http', '$q', function($http, $q) {
                     axisLabel: 'Job Name'
                 },
                 yAxis: {
-                    axisLabel: 'Pipeline Count'
+                    axisLabel: 'Pipeline Count',
+                    tickFormat: function(d) {
+                        return d3.format(',d')(d);
+                    }
                 },
                 yDomain: [0, total]
             },
