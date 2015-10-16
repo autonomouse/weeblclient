@@ -99,11 +99,12 @@ class ServiceStatusResource(CommonResource):
     class Meta:
         resource_name = 'service_status'
         queryset = models.ServiceStatus.objects.all()
-        list_allowed_methods = ['get']  # all items
+        list_allowed_methods = ['get', 'post']  # all items
         detail_allowed_methods = ['get']  # individual
         fields = ['name', 'description']
         authorization = Authorization()
         always_return_data = True
+        filtering = {'name': ('exact',), }
         detail_uri_name = 'name'
 
 
@@ -338,7 +339,8 @@ class BuildResource(CommonResource):
 
 
 class TargetFileGlobResource(CommonResource):
-    job_types = fields.ToManyField(JobTypeResource, 'job_types', null=True)
+    job_types = fields.ToManyField('oilserver.api.resources.JobTypeResource',
+                                   'job_types', null=True)
 
     class Meta:
         resource_name = 'target_file_glob'
@@ -348,7 +350,8 @@ class TargetFileGlobResource(CommonResource):
         fields = ['glob_pattern', 'job_types']
         authorization = Authorization()
         always_return_data = True
-        filtering = {'glob_pattern': ALL, }
+        filtering = {'glob_pattern': ALL,
+                     'job_types': ALL_WITH_RELATIONS, }
         detail_uri_name = 'glob_pattern'
 
 
@@ -414,16 +417,19 @@ class BugResource(CommonResource):
         'knownbugregex_set', null=True)
     bugtrackerbug = fields.ToOneField(
         'oilserver.api.resources.BugTrackerBugResource',
-        'bug_tracker_bug', full=True, null=True)
+        'bugtrackerbug', full=True, null=True)
 
     class Meta:
         queryset = models.Bug.objects.select_related('bugtrackerbug').all()
         list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
-        fields = ['uuid', 'summary', 'description', 'created_at', 'updated_at']
+        fields = ['uuid', 'summary', 'description', 'knownbugregex',
+                  'bugtrackerbug', 'created_at', 'updated_at']
         authorization = Authorization()
         always_return_data = True
-        filtering = {'knownbugregex': ALL_WITH_RELATIONS}
+        filtering = {'summary': ('contains'),
+                     'knownbugregex': ALL_WITH_RELATIONS,
+                     'bugtrackerbug': ALL_WITH_RELATIONS, }
         detail_uri_name = 'uuid'
 
     def apply_filters(self, request, applicable_filters):
@@ -451,9 +457,7 @@ class BugTrackerBugResource(CommonResource):
         queryset = models.BugTrackerBug.objects.all()
         list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
-        fields = [
-            'uuid', 'bug_number', 'project', 'created_at', 'updated_at'
-        ]
+        fields = ['uuid', 'bug_number', 'project', 'created_at', 'updated_at']
         authorization = Authorization()
         always_return_data = True
         filtering = {'bug_number': ALL, }

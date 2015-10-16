@@ -401,7 +401,6 @@ class Build(TimeStampedBaseModel):
     def __str__(self):
         return self.uuid
 
-
 class TargetFileGlob(TimeStampedBaseModel):
     """The target file."""
     glob_pattern = models.TextField(

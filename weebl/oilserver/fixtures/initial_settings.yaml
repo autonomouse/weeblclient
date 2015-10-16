@@ -95,7 +95,6 @@
   fields:
     name: test_cloud_image
     description: Cloud image tests.
-
 - model: oilserver.ubuntuversion
   pk: 1
   fields:

@@ -204,7 +204,8 @@
 
                                 <div data-ng-show="currentpage === 'bugs'">
                                     <div id="content" class="nine-col last-col">
-                                         <p>{$ bugs.count $} matching bugs.</p>
+                                        <p>{$ bugs.count $} matching bugs.</p>
+
                                         <table class="table-listing">
                                             <thead>
                                                 <tr class="table-listing__row">
@@ -227,7 +228,7 @@
                                             </thead>
                                             <tbody>
                                                 <tr class="table-listing__row" ng-repeat="bug in bugs.objects | orderBy:tabs.bugs.predicate:tabs.bugs.reverse">
-                                                    <td class="table-listing__cell">{$ bug.bugtrackerbug.bug_number $}</td>
+                                                    <td class="table-listing__cell"><a href="https://bugs.launchpad.net/bugs/{$ bug.bugtrackerbug.bug_number $}/">{$ bug.bugtrackerbug.bug_number $}</td></a>
                                                     <td class="table-listing__cell">{$ bug.bugtrackerbug.project.name $}</td>
                                                     <td class="table-listing__cell">{$ bug.summary $}</td>
                                                     <td class="table-listing__cell">{$ bug.occurrence_count $}</td>
