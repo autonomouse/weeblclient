@@ -2,7 +2,7 @@
 <html class="no-js" lang="en" data-ng-app="weebl">
     <head>
         <base href="{% url 'index' %}">
-        <title data-ng-bind="title + ' | ' + site + ' weebl'"></title>
+        <title data-ng-bind="title + ' | ' + site"></title>
         <meta charset="utf-8"> <!-- Do not change charset please - utf-8 is important for d3.js -->
         <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1" />
         <meta name="description" content="{% block meta_description %}{% endblock %}" />
@@ -228,7 +228,7 @@
                                             </thead>
                                             <tbody>
                                                 <tr class="table-listing__row" ng-repeat="bug in bugs.objects | orderBy:tabs.bugs.predicate:tabs.bugs.reverse">
-                                                    <td class="table-listing__cell"><a href="https://bugs.launchpad.net/bugs/{$ bug.bugtrackerbug.bug_number $}/">{$ bug.bugtrackerbug.bug_number $}</td></a>
+                                                    <td class="table-listing__cell"><a href="https://bugs.launchpad.net/bugs/{$ bug.bugtrackerbug.bug_number $}/" class="external">{$ bug.bugtrackerbug.bug_number $}</a></td>
                                                     <td class="table-listing__cell">{$ bug.bugtrackerbug.project.name $}</td>
                                                     <td class="table-listing__cell">{$ bug.summary $}</td>
                                                     <td class="table-listing__cell">{$ bug.occurrence_count $}</td>
@@ -251,7 +251,7 @@
                 <footer class="global inner-wrapper clearfix">
                     <div class="legal clearfix">
                         <div class="legal-inner">
-                            <p class="copy">weebl REST api v1<a href="/api">try in browser</a></p>
+                            <p class="copy">OIL REST api v1<a href="/api">try in browser</a></p>
                             <p class="twelve-col copy">&copy; 2015 Canonical Ltd. Ubuntu and Canonical are registered trademarks of Canonical Ltd.</p>
                         </div>
                     </div>
