@@ -6,6 +6,8 @@ app.factory('bugsRetriever', ['$http', function($http) {
         key = "knownbugregex__bug_occurrences__build__pipeline__" + filter;
         parameters[key] = pipeline_filters[filter];
     }
+    // uuid_gte check ensures only bugs with bug occurrences are returned.
+    parameters['knownbugregex__bug_occurrences__uuid__gte'] = 0;
     return $http.get(url, {'params': parameters}).success(function(data) {
         scope.bugs.count = data.meta.total_count;
         scope.bugs.objects = data.objects;
