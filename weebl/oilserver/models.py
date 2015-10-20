@@ -153,7 +153,7 @@ class Jenkins(TimeStampedBaseModel):
         blank=False,
         null=False,
         help_text="UUID of the jenkins instance.")
-    service_status = models.ForeignKey(ServiceStatus)
+    servicestatus = models.ForeignKey(ServiceStatus)
     external_access_url = models.URLField(
         unique=True,
         help_text="A URL for external access to this server.")
@@ -164,7 +164,7 @@ class Jenkins(TimeStampedBaseModel):
         null=True,
         help_text="A URL used internally (e.g. behind a firewall) for access \
         to this server.")
-    service_status_updated_at = models.DateTimeField(
+    servicestatus_updated_at = models.DateTimeField(
         default=utils.time_now,
         auto_now_add=True,
         help_text="DateTime the service status was last updated.")
@@ -305,18 +305,18 @@ class Pipeline(TimeStampedBaseModel):
         default=None,
         auto_now_add=False,
         help_text="DateTime the pipeline was completed.")
-    ubuntu_version = models.ForeignKey(
+    ubuntuversion = models.ForeignKey(
         UbuntuVersion, null=True, blank=True, default=None)
-    openstack_version = models.ForeignKey(
+    openstackversion = models.ForeignKey(
         OpenstackVersion, null=True, blank=True, default=None)
     sdn = models.ForeignKey(SDN, null=True, blank=True, default=None)
     compute = models.ForeignKey(Compute, null=True, blank=True, default=None)
-    block_storage = models.ForeignKey(BlockStorage, null=True, blank=True,
-                                      default=None)
-    image_storage = models.ForeignKey(ImageStorage, null=True, blank=True,
-                                      default=None)
+    blockstorage = models.ForeignKey(BlockStorage, null=True, blank=True,
+                                     default=None)
+    imagestorage = models.ForeignKey(ImageStorage, null=True, blank=True,
+                                     default=None)
     database = models.ForeignKey(Database, null=True, blank=True, default=None)
-    build_executor = models.ForeignKey(BuildExecutor)
+    buildexecutor = models.ForeignKey(BuildExecutor)
 
     def __str__(self):
         return self.uuid
@@ -395,18 +395,19 @@ class Build(TimeStampedBaseModel):
         null=True,
         help_text="DateTime build analysed by weebl, or None if unanalysed.")
     pipeline = models.ForeignKey(Pipeline)
-    build_status = models.ForeignKey(BuildStatus)
-    job_type = models.ForeignKey(JobType)
+    buildstatus = models.ForeignKey(BuildStatus)
+    jobtype = models.ForeignKey(JobType)
 
     def __str__(self):
         return self.uuid
+
 
 class TargetFileGlob(TimeStampedBaseModel):
     """The target file."""
     glob_pattern = models.TextField(
         unique=True,
         help_text="Glob pattern used to match one or more target files.")
-    job_types = models.ManyToManyField(
+    jobtypes = models.ManyToManyField(
         JobType, null=True, blank=True, default=None)
 
     def __str__(self):
@@ -467,7 +468,7 @@ class Bug(TimeStampedBaseModel):
         blank=True,
         null=True,
         help_text="Full description of bug.")
-    bug_tracker_bug = models.OneToOneField(
+    bugtrackerbug = models.OneToOneField(
         BugTrackerBug,
         help_text="Bug tracker bug associated with this bug.",
         blank=True,
@@ -492,7 +493,7 @@ class KnownBugRegex(TimeStampedBaseModel):
     regex = models.TextField(
         unique=True,
         help_text="The regular expression used to identify a bug occurrence.")
-    target_file_globs = models.ManyToManyField(TargetFileGlob)
+    targetfileglobs = models.ManyToManyField(TargetFileGlob)
 
     def __str__(self):
         return self.uuid

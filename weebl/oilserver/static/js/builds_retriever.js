@@ -2,20 +2,20 @@ app.factory('buildsRetriever', ['$http', '$q', function($http, $q) {
   var refresh = function(scope, pipeline_filters) {
     var url = "/api/v1/build/";
 
-    function create_params(job_type_name, build_status_name) {
+    function create_params(jobtype_name, buildstatus_name) {
         var parameters = {
             'meta_only': true,
             'limit': 1}
 
-        if (job_type_name)
-            parameters['job_type__name'] = job_type_name;
+        if (jobtype_name)
+            parameters['jobtype__name'] = jobtype_name;
 
         for (var filter in pipeline_filters) {
             parameters["pipeline__" + filter] = pipeline_filters[filter];
         }
 
-        if (build_status_name)
-            parameters['build_status__name'] = build_status_name;
+        if (buildstatus_name)
+            parameters['buildstatus__name'] = buildstatus_name;
 
         return parameters;
     }
@@ -26,7 +26,7 @@ app.factory('buildsRetriever', ['$http', '$q', function($http, $q) {
         } else {
             return percentage + "%";
         }
-        
+
     }
 
     function updateChartData(total, pass_deploy_count, pass_prepare_count, pass_test_cloud_image_count) {

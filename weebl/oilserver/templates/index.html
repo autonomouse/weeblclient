@@ -139,22 +139,22 @@
                                     </ul>
                                 </div>
                             </div>
-                            <div class="ng-hide accordion__tab" data-ng-show="metadata.block_storage.length">
+                            <div class="ng-hide accordion__tab" data-ng-show="metadata.blockstorage.length">
                                 <h4 class="accordion__tab-title maas-accordion-tab" ng-class="active">Block Storage</h4>
                                 <div class="accordion__tab-content">
                                     <ul class="accordion__tab-list">
-                                        <li class="accordion__tab-item" data-ng-repeat="block_storage in metadata.block_storage | orderBy:['name']"  data-ng-class="{ active: isFilterActive('block_storage', block_storage.name, 'overview') }">
-                                            <a class="accordion__tab-link" href="" data-ng-click="updateFilter('block_storage', block_storage.name, 'overview')">{$ block_storage.name $}</a>
+                                        <li class="accordion__tab-item" data-ng-repeat="blockstorage in metadata.blockstorage | orderBy:['name']"  data-ng-class="{ active: isFilterActive('blockstorage', blockstorage.name, 'overview') }">
+                                            <a class="accordion__tab-link" href="" data-ng-click="updateFilter('blockstorage', blockstorage.name, 'overview')">{$ blockstorage.name $}</a>
                                         </li>
                                     </ul>
                                 </div>
                             </div>
-                            <div class="ng-hide accordion__tab" data-ng-show="metadata.image_storage.length">
+                            <div class="ng-hide accordion__tab" data-ng-show="metadata.imagestorage.length">
                                 <h4 class="accordion__tab-title maas-accordion-tab">Image Storage</h4>
                                 <div class="accordion__tab-content">
                                     <ul class="accordion__tab-list">
-                                        <li class="accordion__tab-item" data-ng-repeat="image_storage in metadata.image_storage | orderBy:['name']"  data-ng-class="{ active: isFilterActive('image_storage', image_storage.name, 'overview') }">
-                                            <a class="accordion__tab-link" href="" data-ng-click="updateFilter('image_storage', image_storage.name, 'overview')">{$ image_storage.name $}</a>
+                                        <li class="accordion__tab-item" data-ng-repeat="imagestorage in metadata.imagestorage | orderBy:['name']"  data-ng-class="{ active: isFilterActive('imagestorage', imagestorage.name, 'overview') }">
+                                            <a class="accordion__tab-link" href="" data-ng-click="updateFilter('imagestorage', imagestorage.name, 'overview')">{$ imagestorage.name $}</a>
                                         </li>
                                     </ul>
                                 </div>

@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 import utils
-from common_test_methods import WeeblTestCase
+from oilserver.tests.common_test_methods import WeeblTestCase
 from oilserver.status_checker import StatusChecker
 from oilserver import models
 from freezegun import freeze_time

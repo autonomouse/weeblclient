@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 import utils
 import random
-from common_test_methods import WeeblTestCase
+from oilserver.tests.common_test_methods import WeeblTestCase
 from datetime import datetime, timedelta
 from django.core.validators import URLValidator, ValidationError
 from freezegun import freeze_time

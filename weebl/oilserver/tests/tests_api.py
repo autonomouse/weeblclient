@@ -1,14 +1,14 @@
 #! /usr/bin/env python3
 import utils
 from freezegun import freeze_time
-from common_test_methods import (
+from oilserver.tests.common_test_methods import (
     make_bug,
-    make_bug_occurrence,
+    make_bugoccurrence,
     ResourceTests,
 )
 from oilserver import models
 from oilserver.api.resources import (
-    get_bug_occurrence_filters,
+    get_bugoccurrence_filters,
 )
 
 
@@ -38,7 +38,7 @@ class CommonResourceTest(ResourceTests):
     """
     def test_get_meta_only(self):
         """Ensure only meta is returned when meta_only flag is in request."""
-        url = '/api/%s/service_status/?meta_only=true' % (self.version)
+        url = '/api/%s/servicestatus/?meta_only=true' % (self.version)
         response = self.api_client.get(url, format='json')
         response_dict = self.deserialize(response)
         self.assertEqual(response.status_code, 200,
@@ -71,37 +71,37 @@ class BugResourceTest(ResourceTests):
         response_dict = self.deserialize(response)
         return response_dict
 
-    def test_filter_on_bug_occurrences(self):
+    def test_filter_on_bugoccurrences(self):
         """Make sure filtering on bug occurrences for a bug works.
 
         This tests BugResource.apply_filters.
         """
-        bug_occurrence = make_bug_occurrence()
-        url = '/api/%s/bug/?knownbugregex__bug_occurrences__uuid=%s' % (
-            self.version, bug_occurrence.uuid)
+        bugoccurrence = make_bugoccurrence()
+        url = '/api/%s/bug/?knownbugregex__bugoccurrences__uuid=%s' % (
+            self.version, bugoccurrence.uuid)
         response = self.api_client.get(url, format='json')
         self.assertEqual(response.status_code, 200,
                          msg="Incorrect status code")
         response_dict = self.deserialize(response)
         self.assertEqual(
-            bug_occurrence.regex.bug.uuid,
+            bugoccurrence.regex.bug.uuid,
             response_dict['objects'][0]['uuid'],
-            msg="Expected bug from bug_occurrence.")
+            msg="Expected bug from bugoccurrence.")
 
-    def test_includes_bug_occurrence_count_zero(self):
+    def test_includes_bugoccurrence_count_zero(self):
         bug = make_bug()
         response_dict = self.retrieve_bug(bug.uuid)
         self.assertEqual(0, response_dict['occurrence_count'])
         self.assertNotIn('last_seen', response_dict)
 
-    def test_includes_bug_occurrence_count_nonzero(self):
-        bug_occurrence = make_bug_occurrence()
-        response_dict = self.retrieve_bug(bug_occurrence.regex.bug.uuid)
+    def test_includes_bugoccurrence_count_nonzero(self):
+        bugoccurrence = make_bugoccurrence()
+        response_dict = self.retrieve_bug(bugoccurrence.regex.bug.uuid)
         self.assertEqual(1, response_dict['occurrence_count'])
 
     def test_includes_last_seen_time(self):
-        first_occurrence = make_bug_occurrence()
-        last_occurrence = make_bug_occurrence(regex=first_occurrence.regex)
+        first_occurrence = make_bugoccurrence()
+        last_occurrence = make_bugoccurrence(regex=first_occurrence.regex)
         response_dict = self.retrieve_bug(first_occurrence.regex.bug.uuid)
         self.assertEqual(
             last_occurrence.build.pipeline.completed_at,
@@ -135,16 +135,16 @@ class GetBugOccurrenceFiltersTest(ResourceTests):
     def test_ignores_non_bug_occurence_filters(self):
         bundle = make_mock_bug_bundle()
         bundle.request.GET['knownbugregex__uuid'] = 'abc'
-        filters = get_bug_occurrence_filters(bundle)
+        filters = get_bugoccurrence_filters(bundle)
         self.assertEqual(
             {'regex__bug__uuid': bundle.obj.uuid},
             filters)
 
     def test_includes_bug_occurence_filters(self):
         bundle = make_mock_bug_bundle()
-        key = 'knownbugregex__bug_occurrences__uuid'
+        key = 'knownbugregex__bugoccurrences__uuid'
         bundle.request.GET[key] = "abc"
-        filters = get_bug_occurrence_filters(bundle)
+        filters = get_bugoccurrence_filters(bundle)
         expected_filters = {
             'regex__bug__uuid': bundle.obj.uuid,
             'uuid': "abc"
@@ -153,9 +153,9 @@ class GetBugOccurrenceFiltersTest(ResourceTests):
 
     def test_includes_bug_occurence_list_filters(self):
         bundle = make_mock_bug_bundle()
-        list_key = 'knownbugregex__bug_occurrences__uuid__in'
+        list_key = 'knownbugregex__bugoccurrences__uuid__in'
         bundle.request.GET.setlist(list_key, ['a', 'b'])
-        filters = get_bug_occurrence_filters(bundle)
+        filters = get_bugoccurrence_filters(bundle)
         expected_filters = {
             'regex__bug__uuid': bundle.obj.uuid,
             'uuid__in': ['a', 'b']

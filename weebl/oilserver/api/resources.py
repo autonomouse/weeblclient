@@ -97,7 +97,6 @@ class EnvironmentResource(CommonResource):
 class ServiceStatusResource(CommonResource):
 
     class Meta:
-        resource_name = 'service_status'
         queryset = models.ServiceStatus.objects.all()
         list_allowed_methods = ['get', 'post']  # all items
         detail_allowed_methods = ['get']  # individual
@@ -110,12 +109,12 @@ class ServiceStatusResource(CommonResource):
 
 class JenkinsResource(CommonResource):
     environment = fields.ForeignKey(EnvironmentResource, 'environment')
-    service_status = fields.ForeignKey(ServiceStatusResource, 'service_status')
+    servicestatus = fields.ForeignKey(ServiceStatusResource, 'servicestatus')
 
     class Meta:
         queryset = models.Jenkins.objects.all()
-        fields = ['environment', 'service_status', 'external_access_url',
-                  'internal_access_url', 'service_status_updated_at', 'uuid']
+        fields = ['environment', 'servicestatus', 'external_access_url',
+                  'internal_access_url', 'servicestatus_updated_at', 'uuid']
         list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
         authorization = Authorization()
@@ -130,7 +129,7 @@ class JenkinsResource(CommonResource):
         # Update timestamp (also prevents user submitting timestamp data):
         # FIXME: No need for this field now that we have updated_at from
         # the base model.
-        bundle.data['service_status_updated_at'] = utils.time_now()
+        bundle.data['servicestatus_updated_at'] = utils.time_now()
         return super(JenkinsResource, self).hydrate(bundle)
 
 
@@ -138,7 +137,6 @@ class BuildExecutorResource(CommonResource):
     jenkins = fields.ForeignKey(JenkinsResource, 'jenkins')
 
     class Meta:
-        resource_name = 'build_executor'
         queryset = models.BuildExecutor.objects.all()
         fields = ['name', 'uuid', 'jenkins']
         list_allowed_methods = ['get', 'post', 'delete']  # all items
@@ -154,7 +152,6 @@ class BuildExecutorResource(CommonResource):
 class UbuntuVersionResource(CommonResource):
 
     class Meta:
-        resource_name = 'ubuntu_version'
         queryset = models.UbuntuVersion.objects.all()
         list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
@@ -168,7 +165,6 @@ class UbuntuVersionResource(CommonResource):
 class OpenstackVersionResource(CommonResource):
 
     class Meta:
-        resource_name = 'openstack_version'
         queryset = models.OpenstackVersion.objects.all()
         list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
@@ -196,7 +192,6 @@ class SDNResource(CommonResource):
 class ComputeResource(CommonResource):
 
     class Meta:
-        resource_name = 'compute'
         queryset = models.Compute.objects.all()
         list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
@@ -210,7 +205,6 @@ class ComputeResource(CommonResource):
 class BlockStorageResource(CommonResource):
 
     class Meta:
-        resource_name = 'block_storage'
         queryset = models.BlockStorage.objects.all()
         list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
@@ -224,7 +218,6 @@ class BlockStorageResource(CommonResource):
 class ImageStorageResource(CommonResource):
 
     class Meta:
-        resource_name = 'image_storage'
         queryset = models.ImageStorage.objects.all()
         list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
@@ -238,7 +231,6 @@ class ImageStorageResource(CommonResource):
 class DatabaseResource(CommonResource):
 
     class Meta:
-        resource_name = 'database'
         queryset = models.Database.objects.all()
         list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
@@ -250,38 +242,38 @@ class DatabaseResource(CommonResource):
 
 
 class PipelineResource(CommonResource):
-    build_executor = fields.ForeignKey(BuildExecutorResource, 'build_executor')
-    ubuntu_version = fields.ForeignKey(UbuntuVersionResource, 'ubuntu_version',
-                                       full=True, null=True)
-    openstack_version = fields.ForeignKey(
-        OpenstackVersionResource, 'openstack_version', full=True, null=True)
+    buildexecutor = fields.ForeignKey(BuildExecutorResource, 'buildexecutor')
+    ubuntuversion = fields.ForeignKey(UbuntuVersionResource, 'ubuntuversion',
+                                      full=True, null=True)
+    openstackversion = fields.ForeignKey(
+        OpenstackVersionResource, 'openstackversion', full=True, null=True)
     sdn = fields.ForeignKey(SDNResource, 'sdn', full=True, null=True)
     compute = fields.ForeignKey(ComputeResource, 'compute',
                                 full=True, null=True)
-    block_storage = fields.ForeignKey(BlockStorageResource, 'block_storage',
-                                      full=True, null=True)
-    image_storage = fields.ForeignKey(ImageStorageResource, 'image_storage',
-                                      full=True, null=True)
+    blockstorage = fields.ForeignKey(BlockStorageResource, 'blockstorage',
+                                     full=True, null=True)
+    imagestorage = fields.ForeignKey(ImageStorageResource, 'imagestorage',
+                                     full=True, null=True)
     database = fields.ForeignKey(DatabaseResource, 'database',
                                  full=True, null=True)
 
     class Meta:
         queryset = models.Pipeline.objects.all()
-        fields = ['uuid', 'build_executor', 'completed_at', 'ubuntu_version',
-                  'openstack_version', 'sdn', 'compute', 'block_storage',
-                  'image_storage', 'database']
+        fields = ['uuid', 'buildexecutor', 'completed_at', 'ubuntuversion',
+                  'openstackversion', 'sdn', 'compute', 'blockstorage',
+                  'imagestorage', 'database']
         list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
         authorization = Authorization()
         always_return_data = True
         filtering = {'uuid': ALL,
                      'completed_at': ALL,
-                     'ubuntu_version': ALL_WITH_RELATIONS,
-                     'openstack_version': ALL_WITH_RELATIONS,
+                     'ubuntuversion': ALL_WITH_RELATIONS,
+                     'openstackversion': ALL_WITH_RELATIONS,
                      'sdn': ALL_WITH_RELATIONS,
                      'compute': ALL_WITH_RELATIONS,
-                     'block_storage': ALL_WITH_RELATIONS,
-                     'image_storage': ALL_WITH_RELATIONS,
+                     'blockstorage': ALL_WITH_RELATIONS,
+                     'imagestorage': ALL_WITH_RELATIONS,
                      'database': ALL_WITH_RELATIONS
                      }
         detail_uri_name = 'uuid'
@@ -290,7 +282,6 @@ class PipelineResource(CommonResource):
 class BuildStatusResource(CommonResource):
 
     class Meta:
-        resource_name = 'build_status'
         queryset = models.BuildStatus.objects.all()
         list_allowed_methods = ['get']  # all items
         detail_allowed_methods = ['get']  # individual
@@ -304,7 +295,6 @@ class BuildStatusResource(CommonResource):
 class JobTypeResource(CommonResource):
 
     class Meta:
-        resource_name = 'job_type'
         queryset = models.JobType.objects.all()
         list_allowed_methods = ['get']  # all items
         detail_allowed_methods = ['get']  # individual
@@ -317,41 +307,40 @@ class JobTypeResource(CommonResource):
 
 class BuildResource(CommonResource):
     pipeline = fields.ForeignKey(PipelineResource, 'pipeline')
-    build_status = fields.ForeignKey(BuildStatusResource, 'build_status')
-    job_type = fields.ForeignKey(JobTypeResource, 'job_type')
+    buildstatus = fields.ForeignKey(BuildStatusResource, 'buildstatus')
+    jobtype = fields.ForeignKey(JobTypeResource, 'jobtype')
 
     class Meta:
         queryset = models.Build.objects.select_related(
-            'pipeline', 'job_type', 'build_status').all()
+            'pipeline', 'jobtype', 'buildstatus').all()
         list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
         fields = ['uuid', 'build_id', 'artifact_location', 'build_started_at',
                   'build_finished_at', 'build_analysed_at', 'pipeline',
-                  'build_status', 'job_type']
+                  'buildstatus', 'jobtype']
         authorization = Authorization()
         always_return_data = True
         filtering = {'uuid': ALL,
                      'build_id': ALL,
-                     'job_type': ALL_WITH_RELATIONS,
+                     'jobtype': ALL_WITH_RELATIONS,
                      'pipeline': ALL_WITH_RELATIONS,
-                     'build_status': ALL_WITH_RELATIONS}
+                     'buildstatus': ALL_WITH_RELATIONS}
         detail_uri_name = 'uuid'
 
 
 class TargetFileGlobResource(CommonResource):
-    job_types = fields.ToManyField('oilserver.api.resources.JobTypeResource',
-                                   'job_types', null=True)
+    jobtypes = fields.ToManyField('oilserver.api.resources.JobTypeResource',
+                                  'jobtypes', null=True)
 
     class Meta:
-        resource_name = 'target_file_glob'
         queryset = models.TargetFileGlob.objects.all()
         list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
-        fields = ['glob_pattern', 'job_types']
+        fields = ['glob_pattern', 'jobtypes']
         authorization = Authorization()
         always_return_data = True
         filtering = {'glob_pattern': ALL,
-                     'job_types': ALL_WITH_RELATIONS, }
+                     'jobtypes': ALL_WITH_RELATIONS, }
         detail_uri_name = 'glob_pattern'
 
 
@@ -368,27 +357,27 @@ class ProjectResource(CommonResource):
         detail_uri_name = 'name'
 
 
-REPLACE_PREFIX = 'knownbugregex__bug_occurrences__'
+REPLACE_PREFIX = 'knownbugregex__bugoccurrences__'
 
 
-def get_bug_occurrence_filters(bundle):
+def get_bugoccurrence_filters(bundle):
     query_dict = bundle.request.GET
-    bug_occurrence_filters = {}
+    bugoccurrence_filters = {}
     for key, value in query_dict.items():
         if not key.startswith(REPLACE_PREFIX):
             continue
         filter_name = key.replace(REPLACE_PREFIX, '')
 
         if filter_name.endswith('__in'):
-            bug_occurrence_filters[filter_name] = \
+            bugoccurrence_filters[filter_name] = \
                 bundle.request.GET.getlist(key)
         else:
-            bug_occurrence_filters[filter_name] = value
-    bug_occurrence_filters['regex__bug__uuid'] = bundle.obj.uuid
-    return bug_occurrence_filters
+            bugoccurrence_filters[filter_name] = value
+    bugoccurrence_filters['regex__bug__uuid'] = bundle.obj.uuid
+    return bugoccurrence_filters
 
 
-def get_bug_occurrences(bundle):
+def get_bugoccurrences(bundle):
     """Get the bug occurrences that match a bug's filter.
 
     When bugs are found by bug occurrence properties, this matches
@@ -396,8 +385,8 @@ def get_bug_occurrences(bundle):
     bugs with occurrences in pipelines that completed in 2015, only
     the bug occurrences that completed in 2015 will be included.
     """
-    bug_occurrence_filters = get_bug_occurrence_filters(bundle)
-    return models.BugOccurrence.objects.filter(**bug_occurrence_filters)
+    bugoccurrence_filters = get_bugoccurrence_filters(bundle)
+    return models.BugOccurrence.objects.filter(**bugoccurrence_filters)
 
 
 class BugResource(CommonResource):
@@ -410,7 +399,7 @@ class BugResource(CommonResource):
 
     Bugs can be filtered by bug occurrence properties (via
     knownbugregex). This allows filtering based on pipeline properties
-    such as completed_at, ubuntu_version, etc, by extension.
+    such as completed_at, ubuntuversion, etc, by extension.
     """
     knownbugregex = fields.ToManyField(
         'oilserver.api.resources.KnownBugRegexResource',
@@ -440,10 +429,10 @@ class BugResource(CommonResource):
 
     def dehydrate(self, bundle):
         bundle = super(BugResource, self).dehydrate(bundle)
-        bug_occurrences = get_bug_occurrences(bundle)
-        bundle.data['occurrence_count'] = bug_occurrences.count()
-        if bug_occurrences.exists():
-            bundle.data['last_seen'] = bug_occurrences.latest(
+        bugoccurrences = get_bugoccurrences(bundle)
+        bundle.data['occurrence_count'] = bugoccurrences.count()
+        if bugoccurrences.exists():
+            bundle.data['last_seen'] = bugoccurrences.latest(
                 'build__pipeline__completed_at').build.pipeline.completed_at
         return bundle
 
@@ -453,7 +442,6 @@ class BugTrackerBugResource(CommonResource):
         ProjectResource, 'project', full=True, null=True)
 
     class Meta:
-        resource_name = 'bug_tracker_bug'
         queryset = models.BugTrackerBug.objects.all()
         list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
@@ -465,26 +453,25 @@ class BugTrackerBugResource(CommonResource):
 
 
 class KnownBugRegexResource(CommonResource):
-    target_file_globs = fields.ToManyField(
-        TargetFileGlobResource, 'target_file_globs')
+    targetfileglobs = fields.ToManyField(
+        TargetFileGlobResource, 'targetfileglobs')
     bug = fields.ForeignKey(BugResource, 'bug', null=True)
-    bug_occurrences = fields.ToManyField(
+    bugoccurrences = fields.ToManyField(
         'oilserver.api.resources.BugOccurrenceResource',
         'bugoccurrence_set', full=True, null=True)
 
     class Meta:
-        resource_name = 'known_bug_regex'
         queryset = models.KnownBugRegex.objects.all()
         list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
-        fields = ['bug', 'uuid', 'regex', 'target_file_globs',
+        fields = ['bug', 'uuid', 'regex', 'targetfileglobs',
                   'created_at', 'updated_at']
         authorization = Authorization()
         always_return_data = True
         filtering = {'uuid': ALL,
                      'regex': ALL,
-                     'target_file_globs': ALL_WITH_RELATIONS,
-                     'bug_occurrences': ALL_WITH_RELATIONS}
+                     'targetfileglobs': ALL_WITH_RELATIONS,
+                     'bugoccurrences': ALL_WITH_RELATIONS}
         detail_uri_name = 'uuid'
 
 
@@ -493,7 +480,6 @@ class BugOccurrenceResource(CommonResource):
     regex = fields.ForeignKey(KnownBugRegexResource, 'regex')
 
     class Meta:
-        resource_name = 'bug_occurrence'
         queryset = models.BugOccurrence.objects.all()
         list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual

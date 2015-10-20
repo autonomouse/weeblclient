@@ -179,7 +179,7 @@ def make_jenkins():
         return
 
     models.Jenkins(environment=models.Environment.objects.first(),
-                   service_status=models.ServiceStatus.objects.get(name='up'),
+                   servicestatus=models.ServiceStatus.objects.get(name='up'),
                    ).save()
 
 
@@ -198,16 +198,16 @@ def make_infrastructure():
     make_build_executor()
 
 
-def make_bug_tracker_bug(component):
+def make_bugtrackerbug(component):
     while True:
         try:
             bug_number = random.randint(100000, 3000000)
             project = models.Project.objects.get(name=component)
-            bug_tracker_bug = models.BugTrackerBug(
+            bugtrackerbug = models.BugTrackerBug(
                 bug_number=bug_number,
                 project=project)
-            bug_tracker_bug.save()
-            return bug_tracker_bug
+            bugtrackerbug.save()
+            return bugtrackerbug
         except IntegrityError:
             pass
 
@@ -223,7 +223,7 @@ def make_bug():
             )
             bug = models.Bug(
                 summary=summary,
-                bug_tracker_bug=make_bug_tracker_bug(component)
+                bugtrackerbug=make_bugtrackerbug(component)
             )
             bug.save()
         except IntegrityError:
@@ -281,13 +281,13 @@ def make_pipeline():
         datetime.now(timezone.utc))
     pipeline = models.Pipeline(
         completed_at=completed_at,
-        build_executor=models.BuildExecutor.objects.first(),
-        openstack_version=random_enum(models.OpenstackVersion),
-        ubuntu_version=random_enum(models.UbuntuVersion),
+        buildexecutor=models.BuildExecutor.objects.first(),
+        openstackversion=random_enum(models.OpenstackVersion),
+        ubuntuversion=random_enum(models.UbuntuVersion),
         sdn=random_enum(models.SDN),
         compute=random_enum(models.Compute),
-        block_storage=random_enum(models.BlockStorage),
-        image_storage=random_enum(models.ImageStorage),
+        blockstorage=random_enum(models.BlockStorage),
+        imagestorage=random_enum(models.ImageStorage),
         database=random_enum(models.Database),
     )
     pipeline.save()
@@ -313,12 +313,12 @@ def make_bug_occurrence(build):
     bug_occurrence.save()
 
 
-def make_build(pipeline, job_type, success_rate):
+def make_build(pipeline, jobtype, success_rate):
     build_status = get_build_status(success_rate)
     build = models.Build(
         pipeline=pipeline,
-        build_status=build_status,
-        job_type=job_type)
+        buildstatus=build_status,
+        jobtype=jobtype)
     build.save()
 
     if build_status.name == 'failure':
@@ -328,23 +328,23 @@ def make_build(pipeline, job_type, success_rate):
 
 
 def make_dependent_builds(pipeline):
-    for job_type_name in DEPENDENT_JOBS:
+    for jobtype_name in DEPENDENT_JOBS:
         build = make_build(
             pipeline=pipeline,
-            job_type=models.JobType.objects.get(name=job_type_name),
+            jobtype=models.JobType.objects.get(name=jobtype_name),
             success_rate=0.9)
 
-        if build.build_status.name == 'failure':
+        if build.buildstatus.name == 'failure':
             return False
 
     return True
 
 
 def make_independent_builds(pipeline):
-    for job_type_name in INDEPENDENT_JOBS:
+    for jobtype_name in INDEPENDENT_JOBS:
         make_build(
             pipeline=pipeline,
-            job_type=models.JobType.objects.get(name=job_type_name),
+            jobtype=models.JobType.objects.get(name=jobtype_name),
             success_rate=0.5)
 
 

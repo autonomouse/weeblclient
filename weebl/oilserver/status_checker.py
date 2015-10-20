@@ -21,8 +21,8 @@ class StatusChecker():
         oil_state = 'up'
         oil_situation = []
 
-        #initial_status = environment.jenkins.service_status.name
-        last_active = environment.jenkins.service_status_updated_at
+        #initial_status = environment.jenkins.servicestatus.name
+        last_active = environment.jenkins.servicestatus_updated_at
         delta, time_msg = self.calc_time_since_last_checkin(last_active)
 
         overdue_state = self.get_overdue_state(delta)
@@ -30,7 +30,7 @@ class StatusChecker():
             oil_state, oil_situation = self.set_oil_state(
                 oil_state, oil_situation, overdue_state, time_msg)
 
-        environment.service_status = ServStat.objects.get(name=oil_state)
+        environment.servicestatus = ServStat.objects.get(name=oil_state)
         return (oil_state, oil_situation)
 
     def calc_time_since_last_checkin(self, timestamp):

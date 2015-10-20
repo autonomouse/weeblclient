@@ -44,34 +44,34 @@ def make_jenkins(environment=None):
         else:
             environment = make_environment()
 
-    service_status = models.ServiceStatus.objects.get(name='up')
+    servicestatus = models.ServiceStatus.objects.get(name='up')
 
     jenkins = models.Jenkins(
         environment=environment,
-        service_status=service_status,
+        servicestatus=servicestatus,
         external_access_url=utils.generate_random_string())
     jenkins.save()
     return jenkins
 
 
-def make_build_executor(jenkins=None):
+def make_buildexecutor(jenkins=None):
     if jenkins is None:
         if models.Jenkins.objects.exists():
             jenkins = models.Jenkins.objects.first()
         else:
             jenkins = make_jenkins()
-    build_executor = models.BuildExecutor(jenkins=jenkins)
-    build_executor.save()
-    return build_executor
+    buildexecutor = models.BuildExecutor(jenkins=jenkins)
+    buildexecutor.save()
+    return buildexecutor
 
 
-def make_pipeline(build_executor=None):
-    if build_executor is None:
+def make_pipeline(buildexecutor=None):
+    if buildexecutor is None:
         if models.BuildExecutor.objects.exists():
-            build_executor = models.BuildExecutor.objects.first()
+            buildexecutor = models.BuildExecutor.objects.first()
         else:
-            build_executor = make_build_executor()
-    pipeline = models.Pipeline(build_executor=build_executor)
+            buildexecutor = make_buildexecutor()
+    pipeline = models.Pipeline(buildexecutor=buildexecutor)
     pipeline.save()
     return pipeline
 
@@ -99,16 +99,14 @@ def make_sdn(self, name=None):
     if name is None:
         name = utils.generate_random_string()
     data = {'name': name}
-    return self.post_create_instance_without_status_code(
-        'sdn', data=data)
+    return self.post_create_instance_without_status_code('sdn', data=data)
 
 
 def make_compute(self, name=None):
     if name is None:
         name = utils.generate_random_string()
     data = {'name': name}
-    return self.post_create_instance_without_status_code(
-        'compute', data=data)
+    return self.post_create_instance_without_status_code('compute', data=data)
 
 
 def make_block_storage(self, name=None):
@@ -135,23 +133,23 @@ def make_database(self, name=None):
         'database', data=data)
 
 
-def make_build(build_id=None, build_status=None, job_type=None, pipeline=None):
+def make_build(build_id=None, buildstatus=None, jobtype=None, pipeline=None):
     if build_id is None:
         build_id = str(random.randint(1, 1000000))
 
-    if build_status is None:
-        build_status = models.BuildStatus.objects.get(name='success')
+    if buildstatus is None:
+        buildstatus = models.BuildStatus.objects.get(name='success')
 
-    if job_type is None:
-        job_type = models.JobType.objects.get(name='pipeline_deploy')
+    if jobtype is None:
+        jobtype = models.JobType.objects.get(name='pipeline_deploy')
 
     if pipeline is None:
         pipeline = make_pipeline()
 
     build = models.Build(
         build_id=build_id,
-        build_status=build_status,
-        job_type=job_type,
+        buildstatus=buildstatus,
+        jobtype=jobtype,
         pipeline=pipeline)
     build.save()
     return build
@@ -174,13 +172,13 @@ def make_known_bug_regex(bug=None):
     return regex
 
 
-def make_bug_occurrence(regex=None, build=None):
+def make_bugoccurrence(regex=None, build=None):
     if regex is None:
         regex = make_known_bug_regex()
 
     if build is None:
         build = make_build()
 
-    bug_occurrence = models.BugOccurrence(regex=regex, build=build)
-    bug_occurrence.save()
-    return bug_occurrence
+    bugoccurrence = models.BugOccurrence(regex=regex, build=build)
+    bugoccurrence.save()
+    return bugoccurrence
