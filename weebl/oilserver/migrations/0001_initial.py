@@ -15,8 +15,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='BlockStorage',
             fields=[
-                ('id', models.AutoField(primary_key=True, verbose_name='ID', serialize=False, auto_created=True)),
-                ('name', models.CharField(unique=True, max_length=255, help_text='The name of the Block Storage type.', default='unknown')),
+                ('id', models.AutoField(primary_key=True, auto_created=True, serialize=False, verbose_name='ID')),
+                ('name', models.CharField(unique=True, default='unknown', max_length=255, help_text='The name of the Block Storage type.')),
             ],
             options={
             },
@@ -25,12 +25,12 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Bug',
             fields=[
-                ('id', models.AutoField(primary_key=True, verbose_name='ID', serialize=False, auto_created=True)),
-                ('created_at', models.DateTimeField(blank=True, null=True, help_text='DateTime this model instance was created.', default=None)),
-                ('updated_at', models.DateTimeField(help_text='DateTime this model instance was last updated.', auto_now_add=True, default=utils.time_now)),
-                ('uuid', models.CharField(unique=True, max_length=36, help_text='UUID of this bug.', default=utils.generate_uuid)),
-                ('summary', models.CharField(unique=True, max_length=255, help_text='Brief overview of bug.', default=utils.generate_uuid)),
-                ('description', models.TextField(blank=True, null=True, help_text='Full description of bug.', default=None)),
+                ('id', models.AutoField(primary_key=True, auto_created=True, serialize=False, verbose_name='ID')),
+                ('created_at', models.DateTimeField(blank=True, default=None, help_text='DateTime this model instance was created.', null=True)),
+                ('updated_at', models.DateTimeField(auto_now_add=True, default=utils.time_now, help_text='DateTime this model instance was last updated.')),
+                ('uuid', models.CharField(unique=True, default=utils.generate_uuid, max_length=36, help_text='UUID of this bug.')),
+                ('summary', models.CharField(unique=True, default=utils.generate_uuid, max_length=255, help_text='Brief overview of bug.')),
+                ('description', models.TextField(blank=True, default=None, help_text='Full description of bug.', null=True)),
             ],
             options={
                 'abstract': False,
@@ -40,10 +40,10 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='BugOccurrence',
             fields=[
-                ('id', models.AutoField(primary_key=True, verbose_name='ID', serialize=False, auto_created=True)),
-                ('created_at', models.DateTimeField(blank=True, null=True, help_text='DateTime this model instance was created.', default=None)),
-                ('updated_at', models.DateTimeField(help_text='DateTime this model instance was last updated.', auto_now_add=True, default=utils.time_now)),
-                ('uuid', models.CharField(unique=True, max_length=36, help_text='UUID of this bug occurrence.', default=utils.generate_uuid)),
+                ('id', models.AutoField(primary_key=True, auto_created=True, serialize=False, verbose_name='ID')),
+                ('created_at', models.DateTimeField(blank=True, default=None, help_text='DateTime this model instance was created.', null=True)),
+                ('updated_at', models.DateTimeField(auto_now_add=True, default=utils.time_now, help_text='DateTime this model instance was last updated.')),
+                ('uuid', models.CharField(unique=True, default=utils.generate_uuid, max_length=36, help_text='UUID of this bug occurrence.')),
             ],
             options={
             },
@@ -52,11 +52,11 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='BugTrackerBug',
             fields=[
-                ('id', models.AutoField(primary_key=True, verbose_name='ID', serialize=False, auto_created=True)),
-                ('created_at', models.DateTimeField(blank=True, null=True, help_text='DateTime this model instance was created.', default=None)),
-                ('updated_at', models.DateTimeField(help_text='DateTime this model instance was last updated.', auto_now_add=True, default=utils.time_now)),
+                ('id', models.AutoField(primary_key=True, auto_created=True, serialize=False, verbose_name='ID')),
+                ('created_at', models.DateTimeField(blank=True, default=None, help_text='DateTime this model instance was created.', null=True)),
+                ('updated_at', models.DateTimeField(auto_now_add=True, default=utils.time_now, help_text='DateTime this model instance was last updated.')),
                 ('bug_number', models.IntegerField(unique=True, help_text='Designation of this bug (e.g. Launchpad bug number).')),
-                ('uuid', models.CharField(unique=True, max_length=36, help_text='UUID of this bug.', default=utils.generate_uuid)),
+                ('uuid', models.CharField(unique=True, default=utils.generate_uuid, max_length=36, help_text='UUID of this bug.')),
             ],
             options={
                 'abstract': False,
@@ -66,15 +66,15 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Build',
             fields=[
-                ('id', models.AutoField(primary_key=True, verbose_name='ID', serialize=False, auto_created=True)),
-                ('created_at', models.DateTimeField(blank=True, null=True, help_text='DateTime this model instance was created.', default=None)),
-                ('updated_at', models.DateTimeField(help_text='DateTime this model instance was last updated.', auto_now_add=True, default=utils.time_now)),
-                ('uuid', models.CharField(unique=True, max_length=36, help_text='UUID of this build.', default=utils.generate_uuid)),
+                ('id', models.AutoField(primary_key=True, auto_created=True, serialize=False, verbose_name='ID')),
+                ('created_at', models.DateTimeField(blank=True, default=None, help_text='DateTime this model instance was created.', null=True)),
+                ('updated_at', models.DateTimeField(auto_now_add=True, default=utils.time_now, help_text='DateTime this model instance was last updated.')),
+                ('uuid', models.CharField(unique=True, default=utils.generate_uuid, max_length=36, help_text='UUID of this build.')),
                 ('build_id', models.CharField(max_length=255, help_text='The build number or other identifier used by jenkins.')),
-                ('artifact_location', models.URLField(unique=True, null=True, help_text='URL where build artifacts can be obtainedIf archived, then         jenkins has been wiped and the build numbers reset, so this data is         no longer accessble via jenkins link', default=None)),
-                ('build_started_at', models.DateTimeField(blank=True, null=True, help_text='DateTime the build was started.', default=None)),
-                ('build_finished_at', models.DateTimeField(blank=True, null=True, help_text='DateTime the build finished.', default=None)),
-                ('build_analysed_at', models.DateTimeField(blank=True, null=True, help_text='DateTime build analysed by weebl, or None if unanalysed.', default=None)),
+                ('artifact_location', models.URLField(unique=True, null=True, default=None, help_text='URL where build artifacts can be obtainedIf archived, then         jenkins has been wiped and the build numbers reset, so this data is         no longer accessble via jenkins link')),
+                ('build_started_at', models.DateTimeField(blank=True, default=None, help_text='DateTime the build was started.', null=True)),
+                ('build_finished_at', models.DateTimeField(blank=True, default=None, help_text='DateTime the build finished.', null=True)),
+                ('build_analysed_at', models.DateTimeField(blank=True, default=None, help_text='DateTime build analysed by weebl, or None if unanalysed.', null=True)),
             ],
             options={
                 'abstract': False,
@@ -84,10 +84,10 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='BuildExecutor',
             fields=[
-                ('id', models.AutoField(primary_key=True, verbose_name='ID', serialize=False, auto_created=True)),
-                ('created_at', models.DateTimeField(blank=True, null=True, help_text='DateTime this model instance was created.', default=None)),
-                ('updated_at', models.DateTimeField(help_text='DateTime this model instance was last updated.', auto_now_add=True, default=utils.time_now)),
-                ('uuid', models.CharField(unique=True, max_length=36, help_text='UUID of the jenkins build executor.', default=utils.generate_uuid)),
+                ('id', models.AutoField(primary_key=True, auto_created=True, serialize=False, verbose_name='ID')),
+                ('created_at', models.DateTimeField(blank=True, default=None, help_text='DateTime this model instance was created.', null=True)),
+                ('updated_at', models.DateTimeField(auto_now_add=True, default=utils.time_now, help_text='DateTime this model instance was last updated.')),
+                ('uuid', models.CharField(unique=True, default=utils.generate_uuid, max_length=36, help_text='UUID of the jenkins build executor.')),
                 ('name', models.CharField(max_length=255, help_text='Name of the jenkins build executor.')),
             ],
             options={
@@ -98,9 +98,9 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='BuildStatus',
             fields=[
-                ('id', models.AutoField(primary_key=True, verbose_name='ID', serialize=False, auto_created=True)),
-                ('name', models.CharField(unique=True, max_length=255, help_text='The resulting state of the build.', default='unknown')),
-                ('description', models.TextField(blank=True, null=True, help_text='Optional description for state.', default=None)),
+                ('id', models.AutoField(primary_key=True, auto_created=True, serialize=False, verbose_name='ID')),
+                ('name', models.CharField(unique=True, default='unknown', max_length=255, help_text='The resulting state of the build.')),
+                ('description', models.TextField(blank=True, default=None, help_text='Optional description for state.', null=True)),
             ],
             options={
             },
@@ -109,8 +109,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Compute',
             fields=[
-                ('id', models.AutoField(primary_key=True, verbose_name='ID', serialize=False, auto_created=True)),
-                ('name', models.CharField(unique=True, max_length=255, help_text='The name of the Compute type.', default='unknown')),
+                ('id', models.AutoField(primary_key=True, auto_created=True, serialize=False, verbose_name='ID')),
+                ('name', models.CharField(unique=True, default='unknown', max_length=255, help_text='The name of the Compute type.')),
             ],
             options={
             },
@@ -119,8 +119,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Database',
             fields=[
-                ('id', models.AutoField(primary_key=True, verbose_name='ID', serialize=False, auto_created=True)),
-                ('name', models.CharField(unique=True, max_length=255, help_text='The name of the Database type.', default='unknown')),
+                ('id', models.AutoField(primary_key=True, auto_created=True, serialize=False, verbose_name='ID')),
+                ('name', models.CharField(unique=True, default='unknown', max_length=255, help_text='The name of the Database type.')),
             ],
             options={
             },
@@ -129,11 +129,11 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Environment',
             fields=[
-                ('id', models.AutoField(primary_key=True, verbose_name='ID', serialize=False, auto_created=True)),
-                ('created_at', models.DateTimeField(blank=True, null=True, help_text='DateTime this model instance was created.', default=None)),
-                ('updated_at', models.DateTimeField(help_text='DateTime this model instance was last updated.', auto_now_add=True, default=utils.time_now)),
-                ('uuid', models.CharField(unique=True, max_length=36, help_text='UUID of environment.', default=utils.generate_uuid)),
-                ('name', models.CharField(unique=True, blank=True, max_length=255, default=utils.generate_uuid, null=True, help_text='Name of environment.')),
+                ('id', models.AutoField(primary_key=True, auto_created=True, serialize=False, verbose_name='ID')),
+                ('created_at', models.DateTimeField(blank=True, default=None, help_text='DateTime this model instance was created.', null=True)),
+                ('updated_at', models.DateTimeField(auto_now_add=True, default=utils.time_now, help_text='DateTime this model instance was last updated.')),
+                ('uuid', models.CharField(unique=True, default=utils.generate_uuid, max_length=36, help_text='UUID of environment.')),
+                ('name', models.CharField(unique=True, default=utils.generate_uuid, max_length=255, blank=True, help_text='Name of environment.', null=True)),
             ],
             options={
                 'abstract': False,
@@ -143,8 +143,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='ImageStorage',
             fields=[
-                ('id', models.AutoField(primary_key=True, verbose_name='ID', serialize=False, auto_created=True)),
-                ('name', models.CharField(unique=True, max_length=255, help_text='The name of the Image Storage type.', default='unknown')),
+                ('id', models.AutoField(primary_key=True, auto_created=True, serialize=False, verbose_name='ID')),
+                ('name', models.CharField(unique=True, default='unknown', max_length=255, help_text='The name of the Image Storage type.')),
             ],
             options={
             },
@@ -153,13 +153,13 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Jenkins',
             fields=[
-                ('id', models.AutoField(primary_key=True, verbose_name='ID', serialize=False, auto_created=True)),
-                ('created_at', models.DateTimeField(blank=True, null=True, help_text='DateTime this model instance was created.', default=None)),
-                ('updated_at', models.DateTimeField(help_text='DateTime this model instance was last updated.', auto_now_add=True, default=utils.time_now)),
-                ('uuid', models.CharField(unique=True, max_length=36, help_text='UUID of the jenkins instance.', default=utils.generate_uuid)),
+                ('id', models.AutoField(primary_key=True, auto_created=True, serialize=False, verbose_name='ID')),
+                ('created_at', models.DateTimeField(blank=True, default=None, help_text='DateTime this model instance was created.', null=True)),
+                ('updated_at', models.DateTimeField(auto_now_add=True, default=utils.time_now, help_text='DateTime this model instance was last updated.')),
+                ('uuid', models.CharField(unique=True, default=utils.generate_uuid, max_length=36, help_text='UUID of the jenkins instance.')),
                 ('external_access_url', models.URLField(unique=True, help_text='A URL for external access to this server.')),
-                ('internal_access_url', models.URLField(unique=True, blank=True, default=None, null=True, help_text='A URL used internally (e.g. behind a firewall) for access         to this server.')),
-                ('service_status_updated_at', models.DateTimeField(help_text='DateTime the service status was last updated.', auto_now_add=True, default=utils.time_now)),
+                ('internal_access_url', models.URLField(unique=True, default=None, blank=True, help_text='A URL used internally (e.g. behind a firewall) for access         to this server.', null=True)),
+                ('servicestatus_updated_at', models.DateTimeField(auto_now_add=True, default=utils.time_now, help_text='DateTime the service status was last updated.')),
                 ('environment', models.OneToOneField(to='oilserver.Environment')),
             ],
             options={
@@ -170,9 +170,9 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='JobType',
             fields=[
-                ('id', models.AutoField(primary_key=True, verbose_name='ID', serialize=False, auto_created=True)),
-                ('name', models.CharField(unique=True, max_length=255, help_text='The type of job.', default='pipeline_deploy')),
-                ('description', models.TextField(blank=True, null=True, help_text='Optional description of job type.', default=None)),
+                ('id', models.AutoField(primary_key=True, auto_created=True, serialize=False, verbose_name='ID')),
+                ('name', models.CharField(unique=True, default='pipeline_deploy', max_length=255, help_text='The type of job.')),
+                ('description', models.TextField(blank=True, default=None, help_text='Optional description of job type.', null=True)),
             ],
             options={
             },
@@ -181,12 +181,12 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='KnownBugRegex',
             fields=[
-                ('id', models.AutoField(primary_key=True, verbose_name='ID', serialize=False, auto_created=True)),
-                ('created_at', models.DateTimeField(blank=True, null=True, help_text='DateTime this model instance was created.', default=None)),
-                ('updated_at', models.DateTimeField(help_text='DateTime this model instance was last updated.', auto_now_add=True, default=utils.time_now)),
-                ('uuid', models.CharField(unique=True, max_length=36, help_text='UUID of this pattern.', default=utils.generate_uuid)),
+                ('id', models.AutoField(primary_key=True, auto_created=True, serialize=False, verbose_name='ID')),
+                ('created_at', models.DateTimeField(blank=True, default=None, help_text='DateTime this model instance was created.', null=True)),
+                ('updated_at', models.DateTimeField(auto_now_add=True, default=utils.time_now, help_text='DateTime this model instance was last updated.')),
+                ('uuid', models.CharField(unique=True, default=utils.generate_uuid, max_length=36, help_text='UUID of this pattern.')),
                 ('regex', models.TextField(unique=True, help_text='The regular expression used to identify a bug occurrence.')),
-                ('bug', models.ForeignKey(default=None, null=True, blank=True, to='oilserver.Bug')),
+                ('bug', models.ForeignKey(to='oilserver.Bug', default=None, blank=True, null=True)),
             ],
             options={
                 'abstract': False,
@@ -196,8 +196,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='OpenstackVersion',
             fields=[
-                ('id', models.AutoField(primary_key=True, verbose_name='ID', serialize=False, auto_created=True)),
-                ('name', models.CharField(unique=True, max_length=255, help_text='The name of the version of the OpenStack system.', default='unknown')),
+                ('id', models.AutoField(primary_key=True, auto_created=True, serialize=False, verbose_name='ID')),
+                ('name', models.CharField(unique=True, default='unknown', max_length=255, help_text='The name of the version of the OpenStack system.')),
             ],
             options={
             },
@@ -206,17 +206,17 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Pipeline',
             fields=[
-                ('id', models.AutoField(primary_key=True, verbose_name='ID', serialize=False, auto_created=True)),
-                ('created_at', models.DateTimeField(blank=True, null=True, help_text='DateTime this model instance was created.', default=None)),
-                ('updated_at', models.DateTimeField(help_text='DateTime this model instance was last updated.', auto_now_add=True, default=utils.time_now)),
-                ('uuid', models.CharField(unique=True, max_length=36, help_text='The pipeline ID (a UUID).', default=utils.generate_uuid)),
-                ('completed_at', models.DateTimeField(blank=True, null=True, help_text='DateTime the pipeline was completed.', default=None)),
-                ('block_storage', models.ForeignKey(default=None, null=True, blank=True, to='oilserver.BlockStorage')),
-                ('build_executor', models.ForeignKey(to='oilserver.BuildExecutor')),
-                ('compute', models.ForeignKey(default=None, null=True, blank=True, to='oilserver.Compute')),
-                ('database', models.ForeignKey(default=None, null=True, blank=True, to='oilserver.Database')),
-                ('image_storage', models.ForeignKey(default=None, null=True, blank=True, to='oilserver.ImageStorage')),
-                ('openstack_version', models.ForeignKey(default=None, null=True, blank=True, to='oilserver.OpenstackVersion')),
+                ('id', models.AutoField(primary_key=True, auto_created=True, serialize=False, verbose_name='ID')),
+                ('created_at', models.DateTimeField(blank=True, default=None, help_text='DateTime this model instance was created.', null=True)),
+                ('updated_at', models.DateTimeField(auto_now_add=True, default=utils.time_now, help_text='DateTime this model instance was last updated.')),
+                ('uuid', models.CharField(unique=True, default=utils.generate_uuid, max_length=36, help_text='The pipeline ID (a UUID).')),
+                ('completed_at', models.DateTimeField(blank=True, default=None, help_text='DateTime the pipeline was completed.', null=True)),
+                ('blockstorage', models.ForeignKey(to='oilserver.BlockStorage', default=None, blank=True, null=True)),
+                ('buildexecutor', models.ForeignKey(to='oilserver.BuildExecutor')),
+                ('compute', models.ForeignKey(to='oilserver.Compute', default=None, blank=True, null=True)),
+                ('database', models.ForeignKey(to='oilserver.Database', default=None, blank=True, null=True)),
+                ('imagestorage', models.ForeignKey(to='oilserver.ImageStorage', default=None, blank=True, null=True)),
+                ('openstackversion', models.ForeignKey(to='oilserver.OpenstackVersion', default=None, blank=True, null=True)),
             ],
             options={
                 'abstract': False,
@@ -226,10 +226,10 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Project',
             fields=[
-                ('id', models.AutoField(primary_key=True, verbose_name='ID', serialize=False, auto_created=True)),
-                ('created_at', models.DateTimeField(blank=True, null=True, help_text='DateTime this model instance was created.', default=None)),
-                ('updated_at', models.DateTimeField(help_text='DateTime this model instance was last updated.', auto_now_add=True, default=utils.time_now)),
-                ('name', models.CharField(unique=True, help_text='Name of project.', max_length=255)),
+                ('id', models.AutoField(primary_key=True, auto_created=True, serialize=False, verbose_name='ID')),
+                ('created_at', models.DateTimeField(blank=True, default=None, help_text='DateTime this model instance was created.', null=True)),
+                ('updated_at', models.DateTimeField(auto_now_add=True, default=utils.time_now, help_text='DateTime this model instance was last updated.')),
+                ('name', models.CharField(unique=True, max_length=255, help_text='Name of project.')),
             ],
             options={
                 'abstract': False,
@@ -239,8 +239,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='SDN',
             fields=[
-                ('id', models.AutoField(primary_key=True, verbose_name='ID', serialize=False, auto_created=True)),
-                ('name', models.CharField(unique=True, max_length=255, help_text='The name of the software defined network.', default='unknown')),
+                ('id', models.AutoField(primary_key=True, auto_created=True, serialize=False, verbose_name='ID')),
+                ('name', models.CharField(unique=True, default='unknown', max_length=255, help_text='The name of the software defined network.')),
             ],
             options={
             },
@@ -249,9 +249,9 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='ServiceStatus',
             fields=[
-                ('id', models.AutoField(primary_key=True, verbose_name='ID', serialize=False, auto_created=True)),
-                ('name', models.CharField(unique=True, max_length=255, help_text='Current state of the environment.', default='unknown')),
-                ('description', models.TextField(blank=True, null=True, help_text='Optional description for status.', default=None)),
+                ('id', models.AutoField(primary_key=True, auto_created=True, serialize=False, verbose_name='ID')),
+                ('name', models.CharField(unique=True, default='unknown', max_length=255, help_text='Current state of the environment.')),
+                ('description', models.TextField(blank=True, default=None, help_text='Optional description for status.', null=True)),
             ],
             options={
             },
@@ -260,11 +260,11 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='TargetFileGlob',
             fields=[
-                ('id', models.AutoField(primary_key=True, verbose_name='ID', serialize=False, auto_created=True)),
-                ('created_at', models.DateTimeField(blank=True, null=True, help_text='DateTime this model instance was created.', default=None)),
-                ('updated_at', models.DateTimeField(help_text='DateTime this model instance was last updated.', auto_now_add=True, default=utils.time_now)),
+                ('id', models.AutoField(primary_key=True, auto_created=True, serialize=False, verbose_name='ID')),
+                ('created_at', models.DateTimeField(blank=True, default=None, help_text='DateTime this model instance was created.', null=True)),
+                ('updated_at', models.DateTimeField(auto_now_add=True, default=utils.time_now, help_text='DateTime this model instance was last updated.')),
                 ('glob_pattern', models.TextField(unique=True, help_text='Glob pattern used to match one or more target files.')),
-                ('job_types', models.ManyToManyField(to='oilserver.JobType', null=True, blank=True, default=None)),
+                ('jobtypes', models.ManyToManyField(blank=True, to='oilserver.JobType', default=None, null=True)),
             ],
             options={
                 'abstract': False,
@@ -274,9 +274,9 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='UbuntuVersion',
             fields=[
-                ('id', models.AutoField(primary_key=True, verbose_name='ID', serialize=False, auto_created=True)),
-                ('name', models.CharField(unique=True, max_length=255, help_text='The name of the version of the Ubuntu system.', default='')),
-                ('number', models.CharField(unique=True, max_length=10, help_text='The numerical version of the Ubuntu system', default='')),
+                ('id', models.AutoField(primary_key=True, auto_created=True, serialize=False, verbose_name='ID')),
+                ('name', models.CharField(unique=True, default='', max_length=255, help_text='The name of the version of the Ubuntu system.')),
+                ('number', models.CharField(unique=True, default='', max_length=10, help_text='The numerical version of the Ubuntu system')),
             ],
             options={
             },
@@ -285,17 +285,17 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='WeeblSetting',
             fields=[
-                ('id', models.AutoField(primary_key=True, verbose_name='ID', serialize=False, auto_created=True)),
-                ('check_in_unstable_threshold', models.IntegerField(help_text='The time (sec) taken for jenkins to check in, problem         suspected if over.', default=300)),
-                ('check_in_down_threshold', models.IntegerField(help_text='The time (sec) taken for jenkins to check in, definate         problem if over.', default=1800)),
-                ('low_build_queue_threshold', models.IntegerField(help_text='There are too few builds in queue when lower than this.', default=3)),
-                ('overall_unstable_th', models.IntegerField(help_text='Overall success rate unstable thresholds.', default=65)),
-                ('overall_down_th', models.IntegerField(help_text='Overall success rate down thresholds.', default=50)),
-                ('down_colour', models.CharField(max_length=25, help_text='Highlight when warning.', default='red')),
-                ('unstable_colour', models.CharField(max_length=25, help_text='Highlight when unstable.', default='orange')),
-                ('up_colour', models.CharField(max_length=25, help_text='Highlight when no problems (up).', default='green')),
-                ('weebl_documentation', models.URLField(blank=True, help_text='URL to documentation.', default=None)),
-                ('site', models.OneToOneField(help_text='To make sure there is only ever one instance per website.', to='sites.Site')),
+                ('id', models.AutoField(primary_key=True, auto_created=True, serialize=False, verbose_name='ID')),
+                ('check_in_unstable_threshold', models.IntegerField(default=300, help_text='The time (sec) taken for jenkins to check in, problem         suspected if over.')),
+                ('check_in_down_threshold', models.IntegerField(default=1800, help_text='The time (sec) taken for jenkins to check in, definate         problem if over.')),
+                ('low_build_queue_threshold', models.IntegerField(default=3, help_text='There are too few builds in queue when lower than this.')),
+                ('overall_unstable_th', models.IntegerField(default=65, help_text='Overall success rate unstable thresholds.')),
+                ('overall_down_th', models.IntegerField(default=50, help_text='Overall success rate down thresholds.')),
+                ('down_colour', models.CharField(default='red', max_length=25, help_text='Highlight when warning.')),
+                ('unstable_colour', models.CharField(default='orange', max_length=25, help_text='Highlight when unstable.')),
+                ('up_colour', models.CharField(default='green', max_length=25, help_text='Highlight when no problems (up).')),
+                ('weebl_documentation', models.URLField(blank=True, default=None, help_text='URL to documentation.')),
+                ('site', models.OneToOneField(to='sites.Site', help_text='To make sure there is only ever one instance per website.')),
             ],
             options={
             },
@@ -304,24 +304,24 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='pipeline',
             name='sdn',
-            field=models.ForeignKey(default=None, null=True, blank=True, to='oilserver.SDN'),
+            field=models.ForeignKey(to='oilserver.SDN', default=None, blank=True, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='pipeline',
-            name='ubuntu_version',
-            field=models.ForeignKey(default=None, null=True, blank=True, to='oilserver.UbuntuVersion'),
+            name='ubuntuversion',
+            field=models.ForeignKey(to='oilserver.UbuntuVersion', default=None, blank=True, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='knownbugregex',
-            name='target_file_globs',
+            name='targetfileglobs',
             field=models.ManyToManyField(to='oilserver.TargetFileGlob'),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='jenkins',
-            name='service_status',
+            name='servicestatus',
             field=models.ForeignKey(to='oilserver.ServiceStatus'),
             preserve_default=True,
         ),
@@ -337,13 +337,13 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='build',
-            name='build_status',
+            name='buildstatus',
             field=models.ForeignKey(to='oilserver.BuildStatus'),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='build',
-            name='job_type',
+            name='jobtype',
             field=models.ForeignKey(to='oilserver.JobType'),
             preserve_default=True,
         ),
@@ -356,7 +356,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='bugtrackerbug',
             name='project',
-            field=models.ForeignKey(default=None, null=True, blank=True, to='oilserver.Project'),
+            field=models.ForeignKey(to='oilserver.Project', default=None, blank=True, null=True),
             preserve_default=True,
         ),
         migrations.AddField(
@@ -377,8 +377,8 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='bug',
-            name='bug_tracker_bug',
-            field=models.OneToOneField(blank=True, default=None, null=True, help_text='Bug tracker bug associated with this bug.', to='oilserver.BugTrackerBug'),
+            name='bugtrackerbug',
+            field=models.OneToOneField(to='oilserver.BugTrackerBug', default=None, blank=True, help_text='Bug tracker bug associated with this bug.', null=True),
             preserve_default=True,
         ),
     ]
