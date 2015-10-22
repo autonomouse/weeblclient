@@ -1,3 +1,22 @@
+weebl (1.0.0) precise; urgency=medium
+
+  * Separate stas/builds into different modules with separate controllers.
+  * UI improvements.
+  * Filters now work.
+  * Added fake_data command to generate test data.
+  * Removed django views and view tests - now fully reliant on AngularJS for UI.
+  * Vastly simplified the API code and removed redundant tests.
+  * Changed relation between Bug and BugTrackerBug from a ManyToMany to a ForeignKey.
+  * Added Compute, Block Storage, Image Storage, Database models.
+  * Fix for running on Apache - All javascript libraries can now imported into static. 
+  * Added Project model.
+  * Invoke (tasks.py) improvements.
+  * Table sorting now works.
+  * Fixed migrations file 0001.
+  * Renamed many models fields and API variables to not use underscores to maintain consistent naming across weebl, django and tastypie.
+
+ -- Darren Hoyland <darren.hoyland@canonical.com>  Thu, 22 Oct 2015 09:45:32 +0100
+
 weebl (0.7.2) precise; urgency=medium
 
   * Added filtering for REST API on EnvironmentResource, JenkinsResource, BuildExecutorResource, PipelineResource, BuildResource, TargetFileGlobResource, KnownBugRegexResource and BugOccurrenceResource.

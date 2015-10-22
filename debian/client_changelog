@@ -1,0 +1,8 @@
+weeblclient (1.0.0) precise; urgency=medium
+
+   * Fixed weeblclient so works with new models and resource files - does not do as much hand-holding now, for example, checking for existence before instance creation has been removed, so this now needs to be done by whatever is calling the client.
+   * Allows doberman to get bug info in the expected format.
+   * Client now also has tests. (Client is still lacking docstrings to document how to use it).
+   * Version bumped to 1.0.0 because weebl server is now accepting real data. Please keep this version number as 1.x.x unless the API version (currently at v1) is also increased to v2 in weebl
+
+  -- Darren Hoyland <darren.hoyland@canonical.com>  Thu, 22 Oct 2015 09:45:32 +0100
