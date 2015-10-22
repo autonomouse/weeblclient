@@ -72,6 +72,7 @@ def run_tests(quick=False):
     for app in apps:
         run_unit_tests(app)
     run_functional_tests()
+    run_client_tests()
 
 @task(help={'database': "Type test or production"})
 def createdb(database):
@@ -341,11 +342,23 @@ def run_unit_tests(app=None):
 
 @task
 def run_lint_tests():
-    print("Running flake8 lint tests...")
+    lint_weebl()
+    lint_weeblclient()
+
+def lint_weebl():
+    print("Running flake8 lint tests on weebl code...")
     try:
         cmd = "/usr/bin/python3 -m flake8 --exclude={0}/tests/,"
         cmd += "{0}/oilserver/migrations/ {0} --ignore=F403"
         run(cmd.format(application), pty=True)
+        print('OK')
+    except Exception as e:
+        print("Some tests failed")
+
+def lint_weeblclient():
+    print("Running flake8 lint tests on weeblclient code...")
+    try:
+        run("flake8 weeblclient/weebl_python2/")
         print('OK')
     except Exception as e:
         print("Some tests failed")
@@ -356,7 +369,20 @@ def run_functional_tests(app=None):
     As a result, it is being run separately under Python2.
     """
     print("Running functional tests")
-    run("python2 {}/tests_functional.py".format(application))
+    try:
+        run("python2 {}/tests_functional.py".format(application))
+        print('OK')
+    except Exception as e:
+        print("Some tests failed")
+
+def run_client_tests():
+    print("Running client tests")
+    client_code = "weeblclient/weebl_python2/tests/test_weebl_python2_client.py"
+    try:
+        run("py.test {}".format(client_code))
+        print('OK')
+    except Exception as e:
+        print("Some tests failed")
 
 def yes_no(val):
     YES_OR_NO = re.compile("^(y|n|yes|no)$",re.IGNORECASE)

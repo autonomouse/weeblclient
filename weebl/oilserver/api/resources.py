@@ -98,7 +98,7 @@ class ServiceStatusResource(CommonResource):
 
     class Meta:
         queryset = models.ServiceStatus.objects.all()
-        list_allowed_methods = ['get', 'post']  # all items
+        list_allowed_methods = ['get']  # all items
         detail_allowed_methods = ['get']  # individual
         fields = ['name', 'description']
         authorization = Authorization()
@@ -416,7 +416,7 @@ class BugResource(CommonResource):
                   'bugtrackerbug', 'created_at', 'updated_at']
         authorization = Authorization()
         always_return_data = True
-        filtering = {'summary': ('contains'),
+        filtering = {'summary': ('contains', 'exact'),
                      'knownbugregex': ALL_WITH_RELATIONS,
                      'bugtrackerbug': ALL_WITH_RELATIONS, }
         detail_uri_name = 'uuid'
