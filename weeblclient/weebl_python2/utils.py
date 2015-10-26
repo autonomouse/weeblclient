@@ -84,7 +84,7 @@ def munge_bug_info_data(target_file_globs, known_bug_regexes, wbugs):
 def build_dict_of_linked_items(target_file_globs, known_bug_regexes, wbugs):
     """Builds a dictionary with each regex as the key and associates to that
     regex a tuple containing the target_file_glob, job_type and launchpad bug
-    (bug_tracker_bug).
+    (bugtrackerbug).
     """
     regex_dict = {}
     tfile_list = []

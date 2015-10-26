@@ -35,3 +35,5 @@ weebl/oilserver/static/js/jslibs/jquery
 weebl/oilserver/static/js/jslibs/yui3
 weebl/oilserver/static/js/jslibs/node_modules/
 
+# Remote access files:
+test-catalog-auth.json

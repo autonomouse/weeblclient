@@ -9,7 +9,8 @@ else:
 from datetime import datetime
 from weeblclient.weebl_python2 import utils
 from requests.exceptions import ConnectionError
-from weeblclient.weebl_python2.exception import UnexpectedStatusCode
+from weeblclient.weebl_python2.exception import (
+    UnexpectedStatusCode, MissingData)
 
 
 class Weebl(object):
@@ -159,6 +160,53 @@ class Weebl(object):
         bugs = self.get_objects("bug")
         return utils.munge_bug_info_data(
             targetfileglobs, knownbugregexes, bugs)
+
+    def upload_bugs_from_yaml(self, sample_mock_db_yaml):
+        self.LOG.info("Uploading bugs from {} to Weebl @ {}".format(
+                      sample_mock_db_yaml, self.weebl_url))
+        with open(sample_mock_db_yaml, 'r') as f:
+            db = yaml.load(f.read())
+        for count, (lp_bug_no, entry) in enumerate(db['bugs'].items()):
+            if lp_bug_no == 'GenericBug_Ignore':
+                continue
+            summary = entry['description']
+            if summary in [None, '']:
+                msg = "Bug number {} is missing a summary in {}!"
+                raise MissingData(msg.format(lp_bug_no, sample_mock_db_yaml))
+            entry.pop('category')
+            entry.pop('description')
+            for job, job_entry in entry.items():
+                for item in job_entry:
+                    for targetfileglob, value in item.iteritems():
+                        regex_list = value['regexp']
+                        for regex in regex_list:
+                            if not self.bugtrackerbug_exists(lp_bug_no):
+                                self.create_bugtrackerbug(lp_bug_no)
+                            bugtrackerbug =\
+                                self.get_bugtrackerbug_from_bug_number(
+                                    lp_bug_no)
+
+                            job_resource = [self.get_job_from_job_type(job)]
+                            tfile_exists = self.targetfileglob_exists(
+                                targetfileglob)
+                            if not tfile_exists:
+                                self.create_targetfileglob(
+                                    targetfileglob, job_resource)
+                            t_file_glob_resource =\
+                                self.get_targetfileglob_from_glob(
+                                    targetfileglob)
+
+                            if not self.knownbugregex_exists(regex):
+                                self.create_knownbugregex(
+                                    t_file_glob_resource, regex)
+                            regex_resource =\
+                                self.get_knownbugregex_from_regex(regex)
+
+                            if not self.bug_exists(summary):
+                                self.create_bug(
+                                    summary, bugtrackerbug, regex_resource)
+            print("{}. {} - {}".format(count + 1, lp_bug_no, summary))
+        print("\n{} bugs uploaded.\n".format(count + 1))
 
     # Model CRUD Operations (In Alphabetical Order):
     # Bug
@@ -392,7 +440,7 @@ class Weebl(object):
         url = self.make_url("knownbugregex")
         data = {"targetfileglobs": glob_patterns_list,
                 "regex": regex}
-        response = self.make_request('post', url=url, data=json.dumps(data))
+        self.make_request('post', url=url, data=json.dumps(data))
 
     def get_knownbugregex_from_regex(self, regex):
         knownbugregex_instances = self.get_instance_data(
