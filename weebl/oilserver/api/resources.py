@@ -258,7 +258,10 @@ class PipelineResource(CommonResource):
                                  full=True, null=True)
 
     class Meta:
-        queryset = models.Pipeline.objects.all()
+        queryset = models.Pipeline.objects.select_related(
+            'ubuntuversion', 'openstackversion', 'sdn', 'compute',
+            'blockstorage', 'imagestorage', 'database',
+            'buildexecutor').all()
         fields = ['uuid', 'buildexecutor', 'completed_at', 'ubuntuversion',
                   'openstackversion', 'sdn', 'compute', 'blockstorage',
                   'imagestorage', 'database']
@@ -442,7 +445,7 @@ class BugTrackerBugResource(CommonResource):
         ProjectResource, 'project', full=True, null=True)
 
     class Meta:
-        queryset = models.BugTrackerBug.objects.all()
+        queryset = models.BugTrackerBug.objects.select_related('project').all()
         list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
         fields = ['uuid', 'bug_number', 'project', 'created_at', 'updated_at']
@@ -458,10 +461,10 @@ class KnownBugRegexResource(CommonResource):
     bug = fields.ForeignKey(BugResource, 'bug', null=True)
     bugoccurrences = fields.ToManyField(
         'oilserver.api.resources.BugOccurrenceResource',
-        'bugoccurrence_set', full=True, null=True)
+        'bugoccurrence_set', null=True)
 
     class Meta:
-        queryset = models.KnownBugRegex.objects.all()
+        queryset = models.KnownBugRegex.objects.select_related('bug').all()
         list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
         fields = ['bug', 'uuid', 'regex', 'targetfileglobs',
