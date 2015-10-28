@@ -69,17 +69,18 @@ class Weebl(object):
                 raise UnexpectedStatusCode(msg)
         return response
 
-    def get_objects(self, obj, params=None):
-        return self.get_instances(obj, params=params).get('objects')
+    def get_objects(self, obj, params=None, query=None):
+        return self.get_instances(
+            obj, params=params, query=query).get('objects')
 
-    def get_instances(self, obj, params=None):
+    def get_instances(self, obj, params=None, query=None):
         """Returns a single instance from the url that is made up of the
         base_url and the given 'obj' path, where obj is the part of the url
         that follows the base_url (e.g. base_url is http://www.foo.bar/ and the
         obj is foobar in this url: http://www.foo.bar/foobar/).
         """
         response = self.make_request(
-            'get', url=self.make_url(obj), params=params)
+            'get', url=self.make_url(obj, query=query), params=params)
         try:
             return response.json()
         except ValueError:
@@ -105,8 +106,7 @@ class Weebl(object):
             filter_by += "{}={}".format(fltr[0], fltr[1])
             if num != (len(filters) - 1):
                 filter_by += "&"
-        url = self.make_url(obj, query=filter_by)
-        return self.get_objects(url)
+        return self.get_objects(obj, query=filter_by)
 
     def update_instance(self, url, **kwargs):
         response = self.make_request('put', url=url, data=json.dumps(kwargs))
