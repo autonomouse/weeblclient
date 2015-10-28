@@ -1,4 +1,11 @@
-weeblclient (1.0.0) precise; urgency=medium
+weeblclient (1.0.2) precise; urgency=medium
+
+   * Fix for filter method doubling the base of the url. 
+   * Added get_pipeline_from_uuid method to weebl client
+
+  -- Darren Hoyland <darren.hoyland@canonical.com>  Wed, 28 Oct 2015 22:45:57 +0000
+
+weeblclient (1.0.1) precise; urgency=medium
 
    * Added tests for uploading and downloading regexes/bugs.
    * Fixed regex/bugs upload and download so that doberman gets all of the bugs database.
