@@ -1,5 +1,12 @@
 weeblclient (1.0.0) precise; urgency=medium
 
+   * Added tests for uploading and downloading regexes/bugs.
+   * Fixed regex/bugs upload and download so that doberman gets all of the bugs database.
+
+  -- Darren Hoyland <darren.hoyland@canonical.com>  Wed, 28 Oct 2015 13:54:21 +0000
+
+weeblclient (1.0.0) precise; urgency=medium
+
    * Fixed weeblclient so works with new models and resource files - does not do as much hand-holding now, for example, checking for existence before instance creation has been removed, so this now needs to be done by whatever is calling the client.
    * Allows doberman to get bug info in the expected format.
    * Client now also has tests. (Client is still lacking docstrings to document how to use it).

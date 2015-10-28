@@ -1,4 +1,3 @@
-import yaml
 import json
 import requests
 import six
@@ -6,11 +5,11 @@ if six.PY3:
     from urllib.parse import urljoin
 else:
     from urlparse import urljoin
+import urllib2
 from datetime import datetime
 from weeblclient.weebl_python2 import utils
 from requests.exceptions import ConnectionError
-from weeblclient.weebl_python2.exception import (
-    UnexpectedStatusCode, MissingData)
+from weeblclient.weebl_python2.exception import UnexpectedStatusCode
 
 
 class Weebl(object):
@@ -35,6 +34,8 @@ class Weebl(object):
     def make_url(self, *path_list, **kwargs):
         query = kwargs.get('query')
         path = "/".join([item.lstrip('/').rstrip('/') for item in path_list])
+        if "api/v1/" in path:
+            path = path[7:]
         url = urljoin(self.base_url, path) + '/'
         if query is not None:
             return url + query
@@ -107,6 +108,15 @@ class Weebl(object):
         url = self.make_url(obj, query=filter_by)
         return self.get_objects(url)
 
+    def update_instance(self, url, **kwargs):
+        response = self.make_request('put', url=url, data=json.dumps(kwargs))
+        try:
+            return response.json()
+        except ValueError:
+            return []
+        except UnexpectedStatusCode:
+            return []
+
     def _pk_uri(self, resource, value):
         return "/api/%s/%s/%s/" % (
             self.weebl_api_version, resource, value)
@@ -149,8 +159,19 @@ class Weebl(object):
                 self.LOG.error(
                     msg.format(self.env_name, self.uuid, env_name))
                 self.env_name = env_name
+            else:
+                self.LOG.info("Environment name: '{}'".format(self.env_name))
             return
         self.create_environment(self.env_name, self.uuid)
+
+    def set_up_new_jenkins(self, jenkins_host):
+        jenkins_uuid = self._get_jenkins_uuid()
+        if self.jenkins_exists(jenkins_uuid):
+            self.LOG.info(
+                "Jenkins exists for environment with UUID: {}".format(
+                    self.uuid))
+            return
+        self.create_jenkins(self.uuid, jenkins_host)
 
     def get_bug_info(self, force_refresh=True):
         self.LOG.info("Downloading bug regexs from Weebl: {}"
@@ -161,52 +182,64 @@ class Weebl(object):
         return utils.munge_bug_info_data(
             targetfileglobs, knownbugregexes, bugs)
 
-    def upload_bugs_from_yaml(self, sample_mock_db_yaml):
-        self.LOG.info("Uploading bugs from {} to Weebl @ {}".format(
-                      sample_mock_db_yaml, self.weebl_url))
-        with open(sample_mock_db_yaml, 'r') as f:
-            db = yaml.load(f.read())
-        for count, (lp_bug_no, entry) in enumerate(db['bugs'].items()):
-            if lp_bug_no == 'GenericBug_Ignore':
-                continue
-            summary = entry['description']
-            if summary in [None, '']:
-                msg = "Bug number {} is missing a summary in {}!"
-                raise MissingData(msg.format(lp_bug_no, sample_mock_db_yaml))
-            entry.pop('category')
-            entry.pop('description')
-            for job, job_entry in entry.items():
-                for item in job_entry:
-                    for targetfileglob, value in item.iteritems():
-                        regex_list = value['regexp']
-                        for regex in regex_list:
-                            if not self.bugtrackerbug_exists(lp_bug_no):
-                                self.create_bugtrackerbug(lp_bug_no)
-                            bugtrackerbug =\
-                                self.get_bugtrackerbug_from_bug_number(
-                                    lp_bug_no)
+    def upload_bugs_from_bugs_dictionary(self, bugs_dict,
+                                         include_generics=False):
+        self.LOG.info("Uploading bugs to Weebl @ {}".format(self.weebl_url))
+        entry_list = utils.generate_bug_entries(bugs_dict, include_generics)
+        for count, entry in enumerate(entry_list):
+            if not self.bugtrackerbug_exists(entry.lp_bug_no):
+                self.create_bugtrackerbug(entry.lp_bug_no)
+            bugtrackerbug_resource =\
+                self.get_bugtrackerbug_from_bug_number(entry.lp_bug_no)
 
-                            job_resource = [self.get_job_from_job_type(job)]
-                            tfile_exists = self.targetfileglob_exists(
-                                targetfileglob)
-                            if not tfile_exists:
-                                self.create_targetfileglob(
-                                    targetfileglob, job_resource)
-                            t_file_glob_resource =\
-                                self.get_targetfileglob_from_glob(
-                                    targetfileglob)
+            job_resource = self.get_job_from_job_type(entry.job)
+            if not self.targetfileglob_exists(entry.targetfileglob):
+                self.create_targetfileglob(
+                    entry.targetfileglob, [job_resource])
+            t_file_glob_resource = self.get_targetfileglob_from_glob(
+                entry.targetfileglob)
 
-                            if not self.knownbugregex_exists(regex):
-                                self.create_knownbugregex(
-                                    t_file_glob_resource, regex)
-                            regex_resource =\
-                                self.get_knownbugregex_from_regex(regex)
+            if not self.knownbugregex_exists(entry.regex):
+                self.create_knownbugregex([t_file_glob_resource], entry.regex)
+            regex_resource = self.get_knownbugregex_from_regex(entry.regex)
+            tfiles = self.get_knownbugregex_target_files(regex_resource)
+            if t_file_glob_resource not in tfiles:
+                self.update_knownbugregex_with_new_target_file(
+                    t_file_glob_resource, regex_resource)
 
-                            if not self.bug_exists(summary):
-                                self.create_bug(
-                                    summary, bugtrackerbug, regex_resource)
-            print("{}. {} - {}".format(count + 1, lp_bug_no, summary))
+            jobtypes = self.get_targetfileglob_jobtypes(t_file_glob_resource)
+            if job_resource not in jobtypes:
+                self.update_targetfileglob_with_new_jobtype(
+                    job_resource, t_file_glob_resource)
+
+            if not self.bug_exists(entry.summary):
+                self.create_bug(
+                    entry.summary, bugtrackerbug_resource, [regex_resource])
+            else:
+                bug_resource = self.get_bug_from_summary(entry.summary)
+                bug_regexes = self.get_bug_regexes(bug_resource)
+                if regex_resource not in bug_regexes:
+                    self.update_bug_with_new_bug_regexes(
+                        regex_resource, bug_resource)
+            print("{}. {} - {} ({}: {})".format(
+                  count + 1, entry.lp_bug_no, entry.summary, entry.job,
+                  entry.targetfileglob))
         print("\n{} bugs uploaded.\n".format(count + 1))
+
+    def clear_target_files_and_jobs_from_known_bug_regexes(self):
+        for idx, knownbugregex in enumerate(self.get_objects("knownbugregex")):
+            count = idx + 1
+            self.LOG.info("Regex {} dissassociated from its target files/jobs."
+                          .format(count))
+            regex_resource = knownbugregex['resource_uri']
+            for targetfileglob_resource in knownbugregex['targetfileglobs']:
+                # Clear jobs from TargetFleGlob:
+                targetfileglob_url = self.make_url(targetfileglob_resource)
+                self.update_instance(targetfileglob_url, jobtypes=[])
+            # Clear target files from KnownBugRegex:
+            regex_url = self.make_url(regex_resource)
+            self.update_instance(regex_url, targetfileglobs=[])
+        self.LOG.info("All {} KnownBugRegexes dissassociated.".format(count))
 
     # Model CRUD Operations (In Alphabetical Order):
     # Bug
@@ -227,6 +260,22 @@ class Weebl(object):
             data['knownbugregex'] = knownbugregex_list
         self.make_request('post', url=url, data=json.dumps(data))
 
+    def get_bug_from_summary(self, summary):
+        bug_instances = self.get_instance_data(
+            'bug', 'summary', 'summary', summary)
+        if bug_instances is not None:
+            if summary in [str(bug.get('summary')) for bug in bug_instances]:
+                return bug_instances[0]['resource_uri']
+
+    def get_bug_regexes(self, bug_resource):
+        return self.get_instances(bug_resource)['knownbugregex']
+
+    def update_bug_with_new_bug_regexes(self, regex_resource, bug_resource):
+        regex_list = self.get_bug_regexes(bug_resource)
+        regex_list.append(regex_resource)
+        url = self.make_url(bug_resource)
+        self.update_instance(url, knownbugregex=regex_list)
+
     # Bug Occurrence
     def bugoccurrence_exists(self, build_uuid, regex_uuid):
         bugoccurrence_instances = self.filter_instances(
@@ -235,7 +284,6 @@ class Weebl(object):
         return len(bugoccurrence_instances) > 0
 
     def create_bugoccurrence(self, build_uuid, regex_uuid):
-        # Create Bug Occurrence:
         url = self.make_url("bugoccurrence")
         data = {
             'build': self._pk_uri('build', build_uuid),
@@ -253,7 +301,6 @@ class Weebl(object):
                                     'bugtracker_bug_number', int(bug_number))
 
     def create_bugtrackerbug(self, bug_number):
-        # Create bugtrackerbug:
         url = self.make_url("bugtrackerbug")
         data = {"bug_number": bug_number}
         response = self.make_request('post', url=url, data=json.dumps(data))
@@ -261,8 +308,7 @@ class Weebl(object):
 
     def get_bugtrackerbug_from_bug_number(self, bug_number):
         bugtrackerbug_instances = self.get_instance_data(
-            'bugtrackerbug', 'bug_number', 'bugtrackerbug_bug_number',
-            bug_number)
+            'bugtrackerbug', 'bug_number', 'bug_number', bug_number)
         if bugtrackerbug_instances is not None:
             if bug_number in [str(btbugs.get('bug_number')) for btbugs in
                               bugtrackerbug_instances]:
@@ -276,7 +322,6 @@ class Weebl(object):
     def create_build(self, build_id, pipeline, jobtype, buildstatus,
                      build_started_at=None, build_finished_at=None,
                      ts_format="%Y-%m-%d %H:%M:%SZ"):
-        # Create build:
         url = self.make_url("build")
         data = {
             'build_id': build_id,
@@ -311,7 +356,6 @@ class Weebl(object):
     def update_build(self, build_id, pipeline, jobtype, buildstatus,
                      build_started_at=None, build_finished_at=None,
                      ts_format="%Y-%m-%d %H:%M:%SZ"):
-        # Update build:
         url = self.make_url("build", build_id)
         data = {
             'pipeline': self._pk_uri('pipeline', pipeline),
@@ -376,14 +420,18 @@ class Weebl(object):
             env_name, env_uuid))
 
     def get_env_name_from_uuid(self, uuid):
-            url = self.make_url("environment", uuid)
-            response = self.make_request('get', url=url)
-            return response.json().get('name')
+        url = self.make_url("environment", uuid)
+        response = self.make_request('get', url=url)
+        return response.json().get('name')
 
     def get_env_uuid_from_name(self, name):
-            url = self.make_url("environment", "by_name", name)
-            response = self.make_request('get', url=url)
-            return response.json().get('uuid')
+        url = self.make_url("environment", "by_name", name)
+        response = self.make_request('get', url=url)
+        return response.json().get('uuid')
+
+    def update_environment(self, uuid, **kwargs):
+        url = self.make_url("environment", uuid)
+        self.update_instance(url, **kwargs)
 
     # Jenkins
     def jenkins_exists(self, jenkins_uuid):
@@ -417,15 +465,6 @@ class Weebl(object):
         response = self.make_request('put', url=url, data=json.dumps({}))
         return response.json().get('uuid')
 
-    def set_up_new_jenkins(self, jenkins_host):
-        jenkins_uuid = self._get_jenkins_uuid()
-        if self.jenkins_exists(jenkins_uuid):
-            self.LOG.info(
-                "Jenkins exists for environment with UUID: {}".format(
-                    self.uuid))
-            return
-        self.create_jenkins(self.uuid, jenkins_host)
-
     # Job
     def get_job_from_job_type(self, job_type):
         url = self.make_url("jobtype", job_type)
@@ -449,6 +488,17 @@ class Weebl(object):
             if regex in [str(kbregex.get('regex')) for kbregex in
                          knownbugregex_instances]:
                 return knownbugregex_instances[0]['resource_uri']
+
+    def get_knownbugregex_target_files(self, regex_resource):
+        tfiles = self.get_instances(regex_resource)['targetfileglobs']
+        return [urllib2.unquote(tfile) for tfile in tfiles]
+
+    def update_knownbugregex_with_new_target_file(self, t_file_glob_resource,
+                                                  regex_resource):
+        tfile_list = self.get_knownbugregex_target_files(regex_resource)
+        tfile_list.append(t_file_glob_resource)
+        url = self.make_url(regex_resource)
+        self.update_instance(url, targetfileglobs=tfile_list)
 
     # Pipeline
     def pipeline_exists(self, pipeline_id):
@@ -519,7 +569,6 @@ class Weebl(object):
             glob_pattern)
 
     def create_targetfileglob(self, glob_pattern, jobtypes_list=None):
-        # Create targetfileglob:
         data = {"glob_pattern": glob_pattern, }
 
         if jobtypes_list is not None:
@@ -530,9 +579,20 @@ class Weebl(object):
 
     def get_targetfileglob_from_glob(self, targetfileglob):
         targetfileglob_instances = self.get_instance_data(
-            'targetfileglob', 'glob_pattern', 'targetfileglob_glob_pattern',
-            targetfileglob)
+            'targetfileglob', 'glob_pattern', 'glob_pattern', targetfileglob)
+
         if targetfileglob_instances is not None:
             if targetfileglob in [str(tfile.get('glob_pattern')) for tfile in
                                   targetfileglob_instances]:
-                return targetfileglob_instances[0]['resource_uri']
+                return urllib2.unquote(
+                    targetfileglob_instances[0]['resource_uri'])
+
+    def get_targetfileglob_jobtypes(self, t_file_glob_resource):
+        return self.get_instances(t_file_glob_resource)['jobtypes']
+
+    def update_targetfileglob_with_new_jobtype(self, job_resource,
+                                               t_file_glob_resource):
+        job_list = self.get_targetfileglob_jobtypes(t_file_glob_resource)
+        job_list.append(job_resource)
+        url = self.make_url(t_file_glob_resource)
+        self.update_instance(url, jobtypes=job_list)

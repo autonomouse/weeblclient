@@ -3,7 +3,9 @@ import random
 import string
 import logging
 import subprocess
+from fnmatch import fnmatch
 from datetime import datetime
+from collections import namedtuple
 
 _config = []
 _loggers = {}
@@ -90,29 +92,30 @@ def build_dict_of_linked_items(target_file_globs, known_bug_regexes, wbugs):
     tfile_list = []
     for weebl_bug in wbugs:
         lp_bug = weebl_bug['bugtrackerbug']['bug_number']
-        for targetfileglob in target_file_globs:
-            tfile = targetfileglob['glob_pattern']
-            if tfile not in tfile_list:
-                tfile_list.append(tfile)
-            jobs = targetfileglob.get('jobtypes', [])
-            if jobs == []:
-                continue
-            for job in jobs:
-                job_type = job[16:-1]
-                for kbr_resource in weebl_bug['knownbugregex']:
-                    for knownbugregex in known_bug_regexes:
-                        if kbr_resource == knownbugregex['resource_uri']:
-                            filesaffected = knownbugregex.get(
-                                'targetfileglobs')
-                            matching_tfiles = [file for file in filesaffected
-                                               if tfile in file]
-                            if matching_tfiles == []:
-                                continue
-                            regex = knownbugregex['regex']
-                            if regex not in regex_dict:
-                                regex_dict[regex] = []
-                            regex_dict[regex].append((tfile, job_type, lp_bug))
-    return regex_dict, tfile_list
+        for kbr_resource in weebl_bug['knownbugregex']:
+            for knownbugregex in known_bug_regexes:
+                if kbr_resource == knownbugregex['resource_uri']:
+                    filesaffected = knownbugregex.get(
+                        'targetfileglobs')
+                    affected_file_globs = []
+                    for affected_file in filesaffected:
+                        filename = affected_file.rstrip('/').split('/')[-1]
+                        affected_file_globs.extend(
+                            [targetfile for targetfile in target_file_globs if
+                             fnmatch(filename, targetfile['glob_pattern'])])
+
+                    if affected_file_globs == []:
+                        continue
+                    regex = knownbugregex['regex']
+                    if regex not in regex_dict:
+                        regex_dict[regex] = []
+                    for tfile in affected_file_globs:
+                        for job in tfile['jobtypes']:
+                            job_type = job[16:-1]
+                            regex_dict[regex].append((tfile['glob_pattern'],
+                                                      job_type, lp_bug))
+                            tfile_list.append(tfile['glob_pattern'])
+    return regex_dict, set(tfile_list)
 
 
 def build_bug_info_dict(regex_dict, tfile_list, wbugs):
@@ -127,6 +130,7 @@ def build_bug_info_dict(regex_dict, tfile_list, wbugs):
                 for linked_info in linked_info_list:
                     if lp_bug != linked_info[2]:
                         continue
+
                     if tfile != linked_info[0]:
                         continue
                     job_type = linked_info[1]
@@ -134,15 +138,49 @@ def build_bug_info_dict(regex_dict, tfile_list, wbugs):
                         bug_info['bugs'][lp_bug] = {}
                     if job_type not in bug_info['bugs'][lp_bug]:
                         bug_info['bugs'][lp_bug][job_type] = []
-
                     subdict = bug_info['bugs'][lp_bug][job_type]
                     if subdict == []:
                         subdict.append({})
                         idx = 0
                     else:
-                        idx = [idx for idx, xxx in enumerate(bug_info['bugs']
-                               [lp_bug][job_type]) if tfile in xxx][0]
+                        idxs = [idx for idx, info in enumerate(subdict) if
+                                tfile in info]
+                        if idxs != []:
+                            # So the target file is in the list at this index:
+                            idx = idxs[0]
+                        else:
+                            idx = 0
                     if tfile not in subdict[idx]:
                         subdict[idx][tfile] = {'regexp': []}
                     subdict[idx][tfile]['regexp'].append(regex)
     return bug_info
+
+
+def generate_bug_entries(bugs_dict, include_generics):
+    Entry = namedtuple('Entry', [
+        'lp_bug_no', 'job', 'targetfileglob', 'regex', 'summary'])
+    entry_list = []
+    for lp_bug_no, entry in bugs_dict['bugs'].items():
+        if not include_generics:
+            if lp_bug_no == 'GenericBug_Ignore':
+                continue
+        summary = entry.get('description')
+        try:
+            entry.pop('description')
+        except KeyError:
+            pass
+        try:
+            entry.pop('category')
+        except KeyError:
+            pass
+        for job, job_entry in entry.items():
+            for item in job_entry:
+                for targetfileglob, value in item.iteritems():
+                    regex_list = value['regexp']
+                    for regex in regex_list:
+                        if summary in [None, '']:
+                            summary = regex
+                        entry = Entry(lp_bug_no, job, targetfileglob,
+                                      regex, summary)
+                        entry_list.append(entry)
+    return entry_list

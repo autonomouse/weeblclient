@@ -8,26 +8,29 @@ class WeeblClientTests(testtools.TestCase):
 
 class WeeblClientUtilsTests(testtools.TestCase):
     def test_build_dict_of_linked_items(self):
+        file1 = utils.generate_random_string()
+        file2 = utils.generate_random_string()
+        unused_file = utils.generate_random_string()
         target_file_globs = [
-            {'glob_pattern': 'juju_status.yaml',
+            {'glob_pattern': file1,
              'jobtypes': ['/api/v1/jobtype/pipeline_deploy/'],
-             'resource_uri': '/api/v1/targetfileglob/juju_status.yaml/'},
-            {'glob_pattern': 'console.txt',
+             'resource_uri': '/api/v1/targetfileglob/{}/'.format(file1)},
+            {'glob_pattern': file2,
              'jobtypes': ['/api/v1/jobtype/pipeline_deploy/'],
-             'resource_uri': '/api/v1/targetfileglob/console.txt/'},
-            {'glob_pattern': 'tempest_xunit.xml',
+             'resource_uri': '/api/v1/targetfileglob/{}/'.format(file2)},
+            {'glob_pattern': unused_file,
              'jobtypes': ['/api/v1/jobtype/test_tempest_smoke/'],
-             'resource_uri': '/api/v1/targetfileglob/tempest_xunit.xml/'}]
+             'resource_uri': '/api/v1/targetfileglob/{}/'.format(unused_file)}]
         known_bug_regexes = [
             {'bug': '/api/v1/bug/bug1/',
              'regex': 're_1',
              'resource_uri': '/api/v1/knownbugregex/kbr1/',
-             'targetfileglobs': ['/api/v1/targetfileglob/juju_status.yaml/'],
+             'targetfileglobs': ['/api/v1/targetfileglob/{}/'.format(file1)],
              'uuid': 'kbr1'},
             {'bug': '/api/v1/bug/bug2/',
              'regex': 're_2',
              'resource_uri': '/api/v1/knownbugregex/kbr2/',
-             'targetfileglobs': ['/api/v1/targetfileglob/console.txt/'],
+             'targetfileglobs': ['/api/v1/targetfileglob/{}/'.format(file2)],
              'uuid': 'kbr2'}, ]
         bugs = [
             {'bugtrackerbug': {'bug_number': 1,
@@ -47,13 +50,12 @@ class WeeblClientUtilsTests(testtools.TestCase):
             target_file_globs, known_bug_regexes, bugs)
 
         ideal_regex_dict = {
-            're_1': [('juju_status.yaml', 'pipeline_deploy', 1)],
-            're_2': [('console.txt', 'pipeline_deploy', 2)]}
-        ideal_tfile_list = ['juju_status.yaml',
-                            'console.txt',
-                            'tempest_xunit.xml']
+            're_1': [(file1, 'pipeline_deploy', 1)],
+            're_2': [(file2, 'pipeline_deploy', 2)]}
+        ideal_tfile_list = set([file1, file2])
         self.assertEqual(ideal_regex_dict, regex_dict)
         self.assertEqual(ideal_tfile_list, tfile_list)
+        self.assertNotIn(unused_file, tfile_list)
 
     def test_build_bug_info_dict(self):
         regex_dict = {'re_1': [('tempest_xunit.xml', 'test_tempest_smoke', 1)],
@@ -78,3 +80,44 @@ class WeeblClientUtilsTests(testtools.TestCase):
             }}
 
         self.assertEqual(ideal_output, output)
+
+    def test_generate_bug_entries_no_generics(self):
+        include_generics = False
+        job1 = utils.generate_random_string()
+        job2 = utils.generate_random_string()
+        job3 = utils.generate_random_string()
+        regex1 = utils.generate_random_string()
+        regex2 = utils.generate_random_string()
+        regex3 = utils.generate_random_string()
+        bugs_dict = {'bugs': {
+            '0001': {
+                job1: [{'console.txt': {'regexp': [regex1]}}],
+                job2: [{'console.txt': {'regexp': [regex1]}}],
+                job3: [{'console.txt': {'regexp': [regex1]}}]},
+            '0002': {
+                job1: [{'console.txt': {'regexp': [regex2]}}],
+                },
+            '0003': {
+                job2: [{'some.yaml': {'regexp': [regex3]}}],
+                },
+            '0004': {
+                job1: [{'console.txt': {'regexp': [regex1]}}],
+                },
+            }
+        }
+        entry_list = utils.generate_bug_entries(bugs_dict, include_generics)
+        self.assertEqual(len(entry_list), 6)
+        self.assertEqual(len([entry for entry in entry_list if
+                         entry.lp_bug_no == '0001']), 3)
+        self.assertEqual(len([entry for entry in entry_list if
+                         entry.lp_bug_no == '0002']), 1)
+        self.assertEqual(len([entry for entry in entry_list if
+                         entry.lp_bug_no == '0003']), 1)
+        self.assertEqual(len([entry for entry in entry_list if
+                         entry.lp_bug_no == '0004']), 1)
+        self.assertEqual(set([entry.job for entry in entry_list if
+                         entry.lp_bug_no == '0001']), set([job2, job1, job3]))
+        self.assertEqual(set([entry.targetfileglob for entry in entry_list]),
+                         set(['some.yaml', 'console.txt']))
+        self.assertEqual(set([entry.regex for entry in entry_list if
+                         entry.lp_bug_no == '0001']), set([regex1]))
