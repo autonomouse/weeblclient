@@ -553,6 +553,15 @@ class Weebl(object):
             raise Exception(msg)
         return returned_pipeline
 
+    def get_pipeline_from_uuid(self, uuid):
+        pipeline_instances = self.get_instance_data(
+            'pipeline', 'uuid', 'uuid', uuid)
+
+        if pipeline_instances is not None:
+            if uuid in [str(pipeline.get('uuid')) for pipeline in
+                            pipeline_instances]:
+                return pipeline_instances[0]['resource_uri']
+
     def update_completed_pipeline(self, pipeline_id, completed_at=None):
         if completed_at is None:
             completed_at = datetime.now()
