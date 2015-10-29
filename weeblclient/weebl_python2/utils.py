@@ -107,13 +107,15 @@ def build_dict_of_linked_items(target_file_globs, known_bug_regexes, wbugs):
                     if affected_file_globs == []:
                         continue
                     regex = knownbugregex['regex']
+                    regex_uuid = knownbugregex['uuid']
                     if regex not in regex_dict:
                         regex_dict[regex] = []
                     for tfile in affected_file_globs:
                         for job in tfile['jobtypes']:
                             job_type = job[16:-1]
-                            regex_dict[regex].append((tfile['glob_pattern'],
-                                                      job_type, lp_bug))
+                            regex_dict[regex].append((
+                                tfile['glob_pattern'], job_type, lp_bug,
+                                regex_uuid))
                             tfile_list.append(tfile['glob_pattern'])
     return regex_dict, set(tfile_list)
 
@@ -135,7 +137,8 @@ def build_bug_info_dict(regex_dict, tfile_list, wbugs):
                         continue
                     job_type = linked_info[1]
                     if lp_bug not in bug_info['bugs']:
-                        bug_info['bugs'][lp_bug] = {}
+                        regex_uuid = linked_info[3]
+                        bug_info['bugs'][lp_bug] = {'regex_uuid': regex_uuid}
                     if job_type not in bug_info['bugs'][lp_bug]:
                         bug_info['bugs'][lp_bug][job_type] = []
                     subdict = bug_info['bugs'][lp_bug][job_type]

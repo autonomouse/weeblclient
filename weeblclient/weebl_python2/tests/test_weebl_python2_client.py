@@ -50,18 +50,21 @@ class WeeblClientUtilsTests(testtools.TestCase):
             target_file_globs, known_bug_regexes, bugs)
 
         ideal_regex_dict = {
-            're_1': [(file1, 'pipeline_deploy', 1)],
-            're_2': [(file2, 'pipeline_deploy', 2)]}
+            're_1': [(file1, 'pipeline_deploy', 1, 'kbr1')],
+            're_2': [(file2, 'pipeline_deploy', 2, 'kbr2')]}
         ideal_tfile_list = set([file1, file2])
         self.assertEqual(ideal_regex_dict, regex_dict)
         self.assertEqual(ideal_tfile_list, tfile_list)
         self.assertNotIn(unused_file, tfile_list)
 
     def test_build_bug_info_dict(self):
-        regex_dict = {'re_1': [('tempest_xunit.xml', 'test_tempest_smoke', 1)],
-                      're_2': [('console.txt', 'pipeline_deploy', 2),
-                               ('juju_status.yaml', 'pipeline_prepare', 2),
-                               ('juju_status.yaml', 'pipeline_prepare', 3), ]}
+        regex_dict = {'re_1': [('tempest_xunit.xml', 'test_tempest_smoke', 1,
+                                'kbr1')],
+                      're_2': [('console.txt', 'pipeline_deploy', 2, 'kbr2'),
+                               ('juju_status.yaml', 'pipeline_prepare', 2,
+                                'kbr2'),
+                               ('juju_status.yaml', 'pipeline_prepare', 3,
+                                'kbr2'), ]}
         tfile_list = ['juju_status.yaml', 'console.txt', 'tempest_xunit.xml', ]
         wbugs = [{'bugtrackerbug': {'bug_number': 1}},
                  {'bugtrackerbug': {'bug_number': 2}},
@@ -69,14 +72,17 @@ class WeeblClientUtilsTests(testtools.TestCase):
         output = utils.build_bug_info_dict(regex_dict, tfile_list, wbugs)
 
         ideal_output = {'bugs': {
-            1: {'test_tempest_smoke': [
-                {'tempest_xunit.xml': {'regexp': ['re_1']}}]},
-            2: {'pipeline_deploy': [
-                {'console.txt': {'regexp': ['re_2']}}],
+            1: {'regex_uuid': 'kbr1',
+                'test_tempest_smoke': [
+                    {'tempest_xunit.xml': {'regexp': ['re_1']}}]},
+            2: {'regex_uuid': 'kbr2',
+                'pipeline_deploy': [
+                    {'console.txt': {'regexp': ['re_2']}}],
                 'pipeline_prepare': [
-                {'juju_status.yaml': {'regexp': ['re_2']}}]},
-            3: {'pipeline_prepare': [
-                {'juju_status.yaml': {'regexp': ['re_2']}}]}
+                    {'juju_status.yaml': {'regexp': ['re_2']}}]},
+            3: {'regex_uuid': 'kbr2',
+                'pipeline_prepare': [
+                    {'juju_status.yaml': {'regexp': ['re_2']}}]}
             }}
 
         self.assertEqual(ideal_output, output)
