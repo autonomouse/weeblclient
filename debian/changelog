@@ -1,3 +1,11 @@
+weebl (1.0.4) precise; urgency=medium
+
+  * Now installs on wily
+  * Can now log in via Canonical's SSO
+  * Enabled Django's admin interface
+
+ -- Darren Hoyland <darren.hoyland@canonical.com>  Wed, 04 Nov 2015 13:05:25 +0000
+
 weebl (1.0.0) precise; urgency=medium
 
   * Separate stas/builds into different modules with separate controllers.
@@ -8,7 +16,7 @@ weebl (1.0.0) precise; urgency=medium
   * Vastly simplified the API code and removed redundant tests.
   * Changed relation between Bug and BugTrackerBug from a ManyToMany to a ForeignKey.
   * Added Compute, Block Storage, Image Storage, Database models.
-  * Fix for running on Apache - All javascript libraries can now imported into static. 
+  * Fix for running on Apache - All javascript libraries can now imported into static.
   * Added Project model.
   * Invoke (tasks.py) improvements.
   * Table sorting now works.
@@ -31,13 +39,13 @@ weebl (0.7.1) precise; urgency=medium
 
 weebl (0.7.0) vivid; urgency=medium
 
-  * Added BugOccurrence model, API and tests 
+  * Added BugOccurrence model, API and tests
 
  -- Darren Hoyland <darren.hoyland@canonical.com>  Tue, 08 Sep 2015 11:26:18 +0100
- 
+
  weebl (0.6.0) vivid; urgency=medium
 
-  * Added BugTrackerBug model, API and tests 
+  * Added BugTrackerBug model, API and tests
 
  -- Darren Hoyland <darren.hoyland@canonical.com>  Tue, 08 Sep 2015 11:26:18 +0100
 
@@ -66,4 +74,3 @@ weebl (0.2.0) vivid; urgency=low
   * Added a changelog
 
  -- Darren Hoyland <darren.hoyland@canonical.com>  Thu, 27 Aug 2015 09:35:31 +0100
-

@@ -1,3 +1,9 @@
+weeblclient (1.0.4) precise; urgency=medium
+
+  * Fix for instance_exists methods that were being called incorrectly
+
+ -- Darren Hoyland <darren.hoyland@canonical.com>  Wed, 04 Nov 2015 13:05:25 +0000
+
 weeblclient (1.0.3) precise; urgency=medium
 
    * Readded regex_uuid to bugs dict (missed it out in refactor).
@@ -6,7 +12,7 @@ weeblclient (1.0.3) precise; urgency=medium
 
 weeblclient (1.0.2) precise; urgency=medium
 
-   * Fix for filter method doubling the base of the url. 
+   * Fix for filter method doubling the base of the url.
    * Added get_pipeline_from_uuid method to weebl client
 
   -- Darren Hoyland <darren.hoyland@canonical.com>  Wed, 28 Oct 2015 22:45:57 +0000
