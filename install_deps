@@ -48,7 +48,11 @@ fi
 echo "Installing packages via pip3"
 pip3 install django-tastypie-swagger django-extensions
 
-echo "(Run 'invoke install_npm_pkgs' to install packages via npm)"
+echo "Installing packages via npm"
+jslibs_dir="weebl/oilserver/static/js/jslibs/"
+mkdir -p $jslibs_dir
+npm install --prefix $jslibs_dir d3 nvd3 angular-nvd3
+chown -R $SUDO_ID:$SUDO_GID $jslibs_dir
 
 echo "Done"
 # unset https_proxy
