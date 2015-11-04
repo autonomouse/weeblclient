@@ -244,7 +244,7 @@ class Weebl(object):
     # Model CRUD Operations (In Alphabetical Order):
     # Bug
     def bug_exists(self, summary):
-        return self.instance_exists('bug', 'summary', 'bug_summary', summary)
+        return self.instance_exists('bug', 'summary', 'summary', summary)
 
     def create_bug(self, summary, bugtrackerbug=None, knownbugregex_list=None):
         # Create bug:
@@ -298,7 +298,7 @@ class Weebl(object):
     # Bug Tracker Bug
     def bugtrackerbug_exists(self, bug_number):
         return self.instance_exists('bugtrackerbug', 'bug_number',
-                                    'bugtracker_bug_number', int(bug_number))
+                                    'bug_number', int(bug_number))
 
     def create_bugtrackerbug(self, bug_number):
         url = self.make_url("bugtrackerbug")
@@ -316,8 +316,7 @@ class Weebl(object):
 
     # Build
     def build_exists(self, build_uuid):
-        return self.instance_exists(
-            'build', 'uuid', 'build_uuid', build_uuid)
+        return self.instance_exists('build', 'uuid', 'uuid', build_uuid)
 
     def create_build(self, build_id, pipeline, jobtype, buildstatus,
                      build_started_at=None, build_finished_at=None,
@@ -407,8 +406,7 @@ class Weebl(object):
 
     # Environment
     def environment_exists(self, env_uuid):
-        return self.instance_exists(
-            'environment', 'uuid', 'environment_uuid', env_uuid)
+        return self.instance_exists('environment', 'uuid', 'uuid', env_uuid)
 
     def create_environment(self, env_name, env_uuid):
         url = self.make_url("environment")
@@ -435,8 +433,7 @@ class Weebl(object):
 
     # Jenkins
     def jenkins_exists(self, jenkins_uuid):
-        return self.instance_exists(
-            'jenkins', 'uuid', 'jenkins_uuid', jenkins_uuid)
+        return self.instance_exists('jenkins', 'uuid', 'uuid', jenkins_uuid)
 
     def create_jenkins(self, env_uuid, jenkins_host, default_status='up'):
         url = self.make_url("jenkins")
@@ -502,8 +499,7 @@ class Weebl(object):
 
     # Pipeline
     def pipeline_exists(self, pipeline_id):
-        return self.instance_exists(
-            'pipeline', 'uuid', 'pipeline_uuid', pipeline_id)
+        return self.instance_exists('pipeline', 'uuid', 'uuid', pipeline_id)
 
     def create_pipeline(self,
                         pipeline_id,
@@ -573,9 +569,8 @@ class Weebl(object):
 
     # Target File Glob
     def targetfileglob_exists(self, glob_pattern):
-        return self.instance_exists(
-            'targetfileglob', 'glob_pattern', 'targetfileglob_glob_pattern',
-            glob_pattern)
+        return self.instance_exists('targetfileglob', 'glob_pattern',
+                                    'glob_pattern', glob_pattern)
 
     def create_targetfileglob(self, glob_pattern, jobtypes_list=None):
         data = {"glob_pattern": glob_pattern, }
