@@ -258,6 +258,10 @@ def check_if_database_exists(database, pwd):
     return exists
 
 def destroy_db(database, pwd, force=False, backup=True):
+    if not check_if_database_exists(database, pwd):
+        print("Database '{}' does not exist!".format(database))
+        return
+
     if backup:
         backup_to = backup_database(database, force)
 

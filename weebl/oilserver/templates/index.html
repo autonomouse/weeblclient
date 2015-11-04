@@ -29,21 +29,31 @@
                     <ul id="main-nav" class="nav">
                     </ul>
                     <ul id="right-nav" class="nav">
+
+                        <!-- User Menu -->
                         <li id="user-link">
-                            <a href="">
-                            <img src="{{ STATIC_URL }}img/icons/user_dark.png" alt="" class="normal">
-                            <img src="{{ STATIC_URL }}img/icons/user_light.png" alt="" class="hover">
-                            User
-                            </a>
-                            <ul class="nav" id="user-options">
-                                <li>
-                                    <a data-ng-class="{ active: page == 'account' }" href="{% url 'index' %}">Account</a>
-                                </li>
-                                <li>
-                                    <a href="{% url 'index' %}">Logout</a>
-                                </li>
-                            </ul>
+                            {% if user.is_authenticated %}
+                                <a href="">
+                                    <img src="{{ STATIC_URL }}img/icons/user_dark.png" alt="" class="normal">
+                                    <img src="{{ STATIC_URL }}img/icons/user_light.png" alt="" class="hover">
+                                    {{ user.get_full_name }}
+                                </a>
+                                <ul class="nav" id="user-options">
+                                    {% if user.is_staff %}
+                                        <li>
+                                            <a href="{{ site }}/admin/">Admin</a>
+                                        </li>
+                                    {% endif %}
+                                    <li>
+                                        <a href='{{ site }}/logout'>Logout</a>
+                                    </li>
+                                </ul>
+                            {% else %}
+                                <a href="{{ site }}{% url 'social:begin' 'launchpad' %}">Login</a>
+                            {% endif %}
+
                         </li>
+
                     </ul>
                 </nav>
                 <div class="nav-toggles">
@@ -239,7 +249,6 @@
                                     </div>
 
                                 <!------------------------------------------------>
-
                                 </div>
                             </div>
                         </div>

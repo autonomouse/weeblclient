@@ -43,6 +43,7 @@ INSTALLED_APPS = (
     'tastypie',
     'tastypie_swagger',
     'django_extensions',
+    'social.apps.django_app.default',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -54,6 +55,13 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
+
+AUTHENTICATION_BACKENDS = (
+    'social.backends.launchpad.LaunchpadOpenId',
+)
+
+LOGIN_REDIRECT_URL = '/'
+SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/'
 
 ROOT_URLCONF = 'weebl.urls'
 

@@ -2,6 +2,7 @@ from django.conf.urls import patterns, include, url
 from tastypie.api import Api
 from oilserver.api import resources
 from weebl.__init__ import __api_version__
+from django.contrib import admin
 
 
 v_api = Api(api_name=__api_version__)
@@ -35,4 +36,8 @@ urlpatterns = patterns('',
                                    namespace='api_docs'),
                            kwargs={"tastypie_api_module": "weebl.urls.v_api",
                                    "namespace": "api_docs",
-                                   "version": __api_version__}),)
+                                   "version": __api_version__}),
+                       url(r'', include('social.apps.django_app.urls',
+                           namespace='social')),
+                       url(r'^admin/', include(admin.site.urls)),
+                       )

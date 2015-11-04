@@ -30,6 +30,9 @@ apt-get -y --no-upgrade install \
     npm \
     python3-pyparsing \
     python3-pydot \
+    python3-social-auth \
+    python3-requests-oauthlib \
+    python3-openid \
     --fix-missing
 
 # Wily has a weird mix of python3.4 and python3.5. pip3 installs dependencies

@@ -55,6 +55,10 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
+AUTHENTICATION_BACKENDS = (
+    'social.backends.launchpad.LaunchpadOpenId',
+)
+
 ROOT_URLCONF = 'weebl.urls'
 
 WSGI_APPLICATION = 'weebl.wsgi.application'
