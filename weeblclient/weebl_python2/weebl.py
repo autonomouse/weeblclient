@@ -41,7 +41,7 @@ class Weebl(object):
             return url + query
         return url
 
-    def make_request(self, method, raise_exception=True, **payload):
+    def make_request(self, method, raise_exception=False, **payload):
         payload['headers'] = self.headers
         # payload['auth'] = self.weebl_auth
         try:
