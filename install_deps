@@ -33,6 +33,7 @@ apt-get -y --no-upgrade install \
     python3-social-auth \
     python3-requests-oauthlib \
     python3-openid \
+    python3-bs4 \
     --fix-missing
 
 # Wily has a weird mix of python3.4 and python3.5. pip3 installs dependencies
@@ -49,7 +50,7 @@ echo "Installing packages via pip3"
 pip3 install django-tastypie-swagger django-extensions
 
 echo "Installing packages via npm"
-jslibs_dir="weebl/oilserver/static/js/jslibs/"
+jslibs_dir="weebl/oilserver/static"
 mkdir -p $jslibs_dir
 npm install --prefix $jslibs_dir d3 nvd3 angular-nvd3
 chown -R $SUDO_ID:$SUDO_GID $jslibs_dir

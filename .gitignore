@@ -30,10 +30,13 @@ weebl/oilserver/static/tastypie_swagger/
 
 # Angular files copied from /usr/share/javascript/angular.js/
 
-weebl/oilserver/static/js/jslibs/angular.js
-weebl/oilserver/static/js/jslibs/jquery
-weebl/oilserver/static/js/jslibs/yui3
-weebl/oilserver/static/js/jslibs/node_modules/
+weebl/oilserver/static/*
+!weebl/oilserver/static/css/
+!weebl/oilserver/static/fonts/
+!weebl/oilserver/static/img/
+!weebl/oilserver/static/js/
+!weebl/oilserver/static/oilserver/
 
 # Remote access files:
+
 test-catalog-auth.json

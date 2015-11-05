@@ -57,7 +57,7 @@ MIDDLEWARE_CLASSES = (
 )
 
 AUTHENTICATION_BACKENDS = (
-    'social.backends.launchpad.LaunchpadOpenId',
+    'social.backends.ubuntu.UbuntuOpenId',
 )
 
 LOGIN_REDIRECT_URL = '/'
@@ -108,7 +108,7 @@ API_LIMIT_PER_PAGE = 0
 STATICFILES_DIRS = (
     "/usr/share/javascript/jquery/",
     "/usr/share/javascript/angular.js/",
-    "/usr/share/javascript/yui3/"
+    "/usr/share/javascript/yui3/",
 )
 
 GRAPH_MODELS = {

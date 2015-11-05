@@ -1,15 +1,15 @@
 import json
 import requests
 import six
-if six.PY3:
-    from urllib.parse import urljoin
-else:
-    from urlparse import urljoin
 import urllib2
 from datetime import datetime
 from weeblclient.weebl_python2 import utils
 from requests.exceptions import ConnectionError
 from weeblclient.weebl_python2.exception import UnexpectedStatusCode
+if six.PY3:
+    from urllib.parse import urljoin
+else:
+    from urlparse import urljoin
 
 
 class Weebl(object):

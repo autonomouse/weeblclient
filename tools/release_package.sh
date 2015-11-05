@@ -10,6 +10,7 @@ dch -b -D $distro \
   --newversion ${version}~git${git_commit}~${distro}-0ubuntu1 \
   "PPA build."
 debcommit
+git clean -xdf
 fakeroot debian/rules get-orig-source
 debuild -sa -S
 rc=$?

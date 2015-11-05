@@ -21,7 +21,7 @@ class StatusChecker():
         oil_state = 'up'
         oil_situation = []
 
-        #initial_status = environment.jenkins.servicestatus.name
+        # initial_status = environment.jenkins.servicestatus.name
         last_active = environment.jenkins.servicestatus_updated_at
         delta, time_msg = self.calc_time_since_last_checkin(last_active)
 

@@ -9,6 +9,7 @@ from invoke import task, run
 from datetime import datetime
 
 application = 'weebl'
+python3_version = '/usr/bin/python3.4'
 preamble = "WEEBL_ROOT=`pwd` PYTHONPATH=$PYTHONPATH:`pwd`"
 apps = ['oilserver']
 postgres_user = "postgres"
@@ -25,15 +26,6 @@ sites_available_location = "/etc/apache2/sites-available/weebl.conf"
 file_loc = os.path.dirname(os.path.abspath(__file__))
 deploy_path = "{}/{}".format(file_loc, application)  # change
 setup_file_loc = "setup.py"
-jslibs_src_dir = "/usr/share/javascript/"
-jslibs_dest_dir = os.path.join(file_loc, "weebl/oilserver/static/js/jslibs/")
-jslibs_files = ['jquery/jquery.js',
-                'angular.js/angular.js',
-                'angular.js/angular-route.js',
-                'angular.js/angular-cookies.js',
-                'angular.js/angular-resource.js',
-                'yui3/yui-base/yui-base-min.js',
-                ]
 https_proxy = "http://91.189.89.33:3128"
 
 ''' REQUIRES install_deps to have been run first. '''
@@ -45,23 +37,21 @@ def list():
     run('invoke --help')
 
 @task(help={'database': "Type test or production",
-            'server': "Defaults to Apache. Can alternatively user 'runserver'",
-            'ip-addr': "IP to run server on. Defaults to 127.0.0.1.",
-            'port': "Port to run server on. Defaults to 8000.",
-            'quick': "Do not copy system angular files."})
-def go(database, server="apache", ip_addr="127.0.0.1", port=8000, quick=False):
+        'server': "Defaults to Apache. Can alternatively user 'runserver'",
+        'ip-addr': "IP to run server on. Defaults to 127.0.0.1.",
+        'port': "Port to run server on. Defaults to 8000.", })
+def go(database, server="apache", ip_addr="127.0.0.1", port=8000):
     """Set up and run weebl using either a test or a production database."""
-    if quick is not True:
-        copy_system_angularjs()
+    manage_static_files()
     initialise_database(database)
+    set_permissions('.')
     deploy(ip_addr, port, server)
 
-@task(help={'quick': "Do not copy system angular files."})
-def run_tests(quick=False):
+@task
+def run_tests():
     """Run unit, functional, and lint tests for each app."""
     destroy_db(test_db_name, test_pwd, force=True, backup=False)
-    if quick is not True:
-        copy_system_angularjs()
+    manage_static_files()
     initialise_database("test")
     load_fixtures()
     run_lint_tests()
@@ -114,7 +104,8 @@ def backup_database(database, force=False):
     timestamp = datetime.now().strftime("%Y_%m_%d__%H_%M_%S")
     backup_to = "Database_backup__{}__{}.json".format(database, timestamp)
     try:
-        run("{}/manage.py dumpdata > {}".format(application, backup_to))
+        run("{} {}/manage.py dumpdata > {}".format(
+            python3_version, application, backup_to))
     except:
         msg = "Could not back up {0} database{1}."
         if force is True:
@@ -127,17 +118,19 @@ def backup_database(database, force=False):
 @task(help={'fixture': "Fixture to load into database"})
 def load_fixtures(fixture="initial_settings.yaml"):
     print("Adding data from {} into database".format(fixture))
-    run('{}/manage.py loaddata "{}"'.format(application, fixture))
+    run('{} {}/manage.py loaddata "{}"'.format(
+        python3_version, application, fixture))
 
 @task()
 def fake_data():
     initialise_database("production")
     print("Creating fake data...")
-    run('{}/manage.py fake_data'.format(application))
+    run('{} {}/manage.py fake_data'.format(python3_version, application))
 
 @task(help={'filetype': "Format of output file (defaults to .png)"})
 def schema(filetype="png"):
-    run('{0}/manage.py graph_models -X TimeStampedBaseModel -a > {0}.dot'.format(application))
+    run('{0}/manage.py graph_models -X TimeStampedBaseModel -a > {0}.dot'
+        .format(application))
     run('dot -T{1} {0}.dot -o {0}_schema.{1}'.format(application, filetype))
     run('rm {}.dot'.format(application))
     print("Schema generated at {0}_schema.{1}".format(application, filetype))
@@ -157,8 +150,10 @@ def initialise_database(database):
 
 def migrate():
     """Make migrations and migrate."""
-    run("{}/manage.py makemigrations".format(application), pty=True)
-    run("{}/manage.py migrate".format(application), pty=True)
+    run("{} {}/manage.py makemigrations".format(python3_version, application),
+        pty=True)
+    run("{} {}/manage.py migrate".format(python3_version, application),
+        pty=True)
 
 def create_production_db():
     create_db_and_user(prdctn_db_name, prdctn_user, prdctn_pwd)
@@ -167,8 +162,9 @@ def create_test_db():
     create_db_and_user(test_db_name, test_user, test_pwd)
 
 def migrate_individual_app(application, app):
-    run('{}/manage.py makemigrations {}'.format(application, app))
-    run('{}/manage.py migrate {}'.format(application, app))
+    run('{} {}/manage.py makemigrations {}'.format(
+        python3_version, application, app))
+    run('{} {}/manage.py migrate {}'.format(python3_version, application, app))
 
 def destroy_test_data(force):
     rusure = "Are you sure you want to drop the test database and user?! (y/N)"
@@ -320,10 +316,12 @@ def run_unit_tests(app=None):
     try:
         if app is None:
             print("Running unit tests")
-            run("{}/manage.py test".format(application), pty=True)
+            run("{} {}/manage.py test".format(python3_version, application),
+                pty=True)
         else:
             print("Running functional and unit tests for {}...".format(app))
-            run("{}/manage.py test {}".format(application, app), pty=True)
+            run("{} {}/manage.py test {}".format(
+                python3_version, application, app), pty=True)
         print('OK')
     except Exception as e:
         print("Some tests failed")
@@ -336,9 +334,9 @@ def run_lint_tests():
 def lint_weebl():
     print("Running flake8 lint tests on weebl code...")
     try:
-        cmd = "/usr/bin/python3 -m flake8 --exclude={0}/tests/,"
-        cmd += "{0}/oilserver/migrations/ {0} --ignore=F403"
-        run(cmd.format(application), pty=True)
+        cmd = "{1} -m flake8 --exclude={0}/tests/,"
+        cmd += "{0}/{0}/wsgi.py,{0}/oilserver/migrations/ {0} --ignore=F403"
+        run(cmd.format(application, python3_version), pty=True)
         print('OK')
     except Exception as e:
         print("Some tests failed")
@@ -388,8 +386,8 @@ def deploy(ipaddr=None, port=None, server="apache"):
         deploy_with_runserver(ipaddr, port)
 
 def deploy_with_runserver(ipaddr, port):
-    result = run('{} {}/manage.py runserver {}:{}'.format(preamble,
-                 application, ipaddr, port), pty=True)
+    result = run('{} {} {}/manage.py runserver {}:{}'.format(preamble,
+                 python3_version, application, ipaddr, port), pty=True)
 
 def deploy_with_apache(apacheconf, deployloc, application, wsgifile="wsgi.py",
                        static_dir="oilserver/static", user_group = "www-data"):
@@ -445,13 +443,32 @@ def mkdir(directory):
             if not os.path.isdir(directory):
                 raise
 
-def copy_system_angularjs():
-    """Copies Angularjs files from system dir (installed via the install_deps
+def manage_static_files():
+    """Copies static files from system dir (installed via the install_deps
     script) and copies them to local folder (which is in the gitignore file).
     This obviously assumes that install_deps has been run first.
     """
-    for jslibs_js in jslibs_files:
-        src = "{}{}".format(jslibs_src_dir, jslibs_js)
-        dest = "{}{}".format(jslibs_dest_dir, jslibs_js)
-        mkdir(os.path.dirname(dest))
-        shutil.copy2(src, dest)
+    run('{} {} {}/manage.py collectstatic --noinput'.format(
+        preamble, python3_version, application))
+
+def set_permissions(folder):
+    """Walk through the weebl folder and change the owner of any files or
+    folders owned by root to the user who is running weebl. This is because
+    some folders such as __pycache__ often end up being owned by root and would
+    otherwise mean that tools/release_package would need to be run as sudo as
+    well in order for git clean to work.
+    """
+    sudo_id = os.environ.get('SUDO_ID', 1000)
+    sudo_gid = os.environ.get('SUDO_GID', 1000)
+
+    print("Removing root permissions from weebl subdirectories...")
+    for dirpath, _, filenames in os.walk(folder):
+        if os.stat(dirpath).st_uid == 0:
+            chown(sudo_id, sudo_gid, dirpath)
+            for filename in filenames:
+                fpath = os.path.abspath(os.path.join(dirpath, filename))
+                chown(sudo_id, sudo_gid, fpath)
+    print("done.")
+
+def chown(uid, gid, dirpath):
+    run("sudo chown {}:{} {}".format(uid, gid, dirpath))
