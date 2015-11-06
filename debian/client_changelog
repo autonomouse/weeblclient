@@ -1,3 +1,10 @@
+weeblclient (1.0.6) precise; urgency=medium
+
+  * Now uses InstanceAlreadyExists exception.
+  * Implemented the calls needed to create each of the parameters that Pipeline creation requires.
+
+ -- Darren Hoyland <darren.hoyland@canonical.com>  Fri, 06 Nov 2015 17:36:55 +0000
+
 weeblclient (1.0.5) precise; urgency=medium
 
   * Make install_deps work for wily.
