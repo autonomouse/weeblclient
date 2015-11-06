@@ -60,7 +60,7 @@ class Weebl(object):
             raise(e)
 
         # If response code isn't 2xx:
-        msg = "{} request to {} returned a status code of {})
+        msg = "{} request to {} returned a status code of {}"
         if str(response.status_code)[0] == '500':
             if 'duplicate key value violates unique' in response.text:
                 obj = payload['url'].rstrip('/').split('/')[-2]
@@ -668,4 +668,3 @@ class Weebl(object):
         data = {"name": name, }
         url = self.make_url("ubuntuversion")
         self.make_request('post', url=url, data=json.dumps(data))
-        
