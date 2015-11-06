@@ -5,7 +5,8 @@ import urllib2
 from datetime import datetime
 from weeblclient.weebl_python2 import utils
 from requests.exceptions import ConnectionError
-from weeblclient.weebl_python2.exception import UnexpectedStatusCode
+from weeblclient.weebl_python2.exception import (
+    UnexpectedStatusCode, InstanceAlreadyExists)
 if six.PY3:
     from urllib.parse import urljoin
 else:
@@ -41,7 +42,7 @@ class Weebl(object):
             return url + query
         return url
 
-    def make_request(self, method, raise_exception=False, **payload):
+    def make_request(self, method, **payload):
         payload['headers'] = self.headers
         # payload['auth'] = self.weebl_auth
         try:
@@ -56,17 +57,20 @@ class Weebl(object):
         except ConnectionError as e:
             msg = "Could not connect to Weebl server {}:\n\n {}\n".format(
                 payload['url'], e)
-            self.LOG.error(msg)
-            if raise_exception:
-                raise(e)
+            raise(e)
 
         # If response code isn't 2xx:
+        msg = "{} request to {} returned a status code of {})
+        if str(response.status_code)[0] == '500':
+            if 'duplicate key value violates unique' in response.text:
+                obj = payload['url'].rstrip('/').split('/')[-2]
+                msg += " - {} already exists."
+                msg.format(method, payload['url'], response.status_code, obj)
+                raise InstanceAlreadyExists(msg)
         if str(response.status_code)[0] != '2':
-            msg = "Request returned a status code of {}:\n\n {}\n".format(
-                response.status_code, response.text)
-            self.LOG.error(msg)
-            if raise_exception:
-                raise UnexpectedStatusCode(msg)
+            msg += ":\n\n {}\n".format(method, payload['url'],
+                                       response.status_code, response.text)
+            raise UnexpectedStatusCode(msg)
         return response
 
     def get_objects(self, obj, params=None, query=None):
