@@ -4,3 +4,7 @@ class UnexpectedStatusCode(Exception):
 
 class MissingData(Exception):
     pass
+
+
+class UnrecognisedInstance(Exception):
+    pass
