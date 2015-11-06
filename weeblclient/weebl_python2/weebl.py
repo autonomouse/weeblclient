@@ -61,16 +61,16 @@ class Weebl(object):
 
         # If response code isn't 2xx:
         msg = "{} request to {} returned a status code of {}"
-        if str(response.status_code)[0] == '500':
-            if 'duplicate key value violates unique' in response.text:
+        err_str = 'duplicate key value violates'
+        if str(response.status_code) == '500' and err_str in response.text:
                 obj = payload['url'].rstrip('/').split('/')[-2]
                 msg += " - {} already exists."
                 msg.format(method, payload['url'], response.status_code, obj)
                 raise InstanceAlreadyExists(msg)
         if str(response.status_code)[0] != '2':
-            msg += ":\n\n {}\n".format(method, payload['url'],
-                                       response.status_code, response.text)
-            raise UnexpectedStatusCode(msg)
+            msg += ":\n\n {}\n"
+            raise UnexpectedStatusCode(msg.format(method, payload['url'],
+                                       response.status_code, response.text))
         return response
 
     def get_objects(self, obj, params=None, query=None):
