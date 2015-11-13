@@ -62,6 +62,7 @@ class Weebl(object):
             self.LOG.error(msg)
             if raise_exception:
                 raise(e)
+            return
 
         # If response code isn't 2xx:
         if str(response.status_code)[0] != '2':
@@ -246,6 +247,7 @@ class Weebl(object):
 
 
 
+
     ##############################################################
 
 
@@ -255,14 +257,15 @@ class Weebl(object):
         try:
             default_build_exctr = self.get_list_of_buildexecutors()[0]
         except IndexError as e:
-            raise Exception("There are no buildexecutors yet! Please add some.")
+            raise Exception(
+                "There are no buildexecutors yet! Please add some.")
 
         if unformatted_timestamp is None:
             timestamp = self.get_date_from_pipelines_processed(doberman_dir)
-        timestamp = unformatted_timestamp.replace('_', ' ')
         self.create_pipelines_and_builds_from_paabn(
             doberman_dir, timestamp, default_build_exctr)
         self.process_pabb_file(doberman_dir, default_build_exctr)
+        import ipdb; ipdb.set_trace()
         self.create_bugs_and_bugoccurrences_from_triage_files(
             doberman_dir, default_build_exctr)
 
@@ -285,18 +288,24 @@ class Weebl(object):
             paabn = yaml.load(f.read())
 
         for pipeline, builds in paabn.items():
-            self.create_pipeline(pipeline, build_executor_name)
+            try:
+                self.create_pipeline(pipeline, build_executor_name)
+            except InstanceAlreadyExists as e:
+                pass
+
             for job_name, build_id in builds.items():
                 if build_id is not None:
                     # Assume build_status was 'success' for now; Update later:
-                    if timestamp is not None:
-                        self.create_build(
-                            build_id, pipeline, job_name, 'success',
-                            build_finished_at=timestamp)
-                    else:
-                        self.create_build(
-                            build_id, pipeline, job_name, 'success')
-
+                    try:
+                        if timestamp is not None:
+                            self.create_build(
+                                build_id, pipeline, job_name, 'success',
+                                build_finished_at=timestamp)
+                        else:
+                            self.create_build(
+                                build_id, pipeline, job_name, 'success')
+                    except InstanceAlreadyExists as e:
+                        pass
 
     def process_pabb_file(self, doberman_dir, build_executor_name):
         pabb_file = os.path.join(
@@ -327,16 +336,19 @@ class Weebl(object):
                                    [1].split('/')[0])
 
                     # Use first job
-                    job_instance = self.filter_instances("job_type", [
+                    job_instance = self.filter_instances("jobtype", [
                         ('target_file_glob__name', target_file)])[0]
 
                     # Get build
                     build_instance = self.filter_instances("build", [
                         ('pipeline__uuid', pipeline),
-                        ('job_type__name', job_instance['name'])])[0]
+                        ('jobtype__name', job_instance['name'])])[0]
 
                     # Create bug occurrence
-                    self.create_bugoccurrence(build_instance['uuid'], regex_uuid)
+                    try:
+                        self.create_bugoccurrence(build_instance['uuid'], regex_uuid)
+                    except InstanceAlreadyExists as e:
+                        pass
                 except Exception as e:
                     self.LOG.error("Error processing pipeline: {} for {}\n{}"
                                    .format(pipeline, bugtrackerbug, e))
@@ -344,7 +356,7 @@ class Weebl(object):
 
     def create_bugs_and_bugoccurrences_from_triage_files(self, doberman_dir,
                                                          build_executor_name):
-        for job in self.get_list_of_job_types():
+        for job in self.get_list_of_jobtypes():
             # Auto-triaged_unfiled_bugs file: Only present when has unfileds:
             self.process_autotriage(doberman_dir, job, build_executor_name)
 
@@ -362,7 +374,7 @@ class Weebl(object):
         for pipeline, unfiled_bugs in autotriage['pipelines'].items():
 
             if not self.pipeline_exists(pipeline):
-                self.create_build_executor(build_executor_name)
+                self.create_buildexecutor(build_executor_name)
                 self.create_pipeline(pipeline, build_executor_name)
             processed = []
             for unfiled_bug, details in unfiled_bugs.items():
@@ -412,7 +424,7 @@ class Weebl(object):
             build_status = trg['status']
             build_id = trg['build']
             self.create_service_status(build_status)
-            job_resource = self.create_job_type(job)
+            job_resource = self.create_jobtype(job)
             build_uuid = self.create_build(
                 build_id, pipeline, job, build_status)
             for lp_bug_no, details in trg['bugs'].items():
