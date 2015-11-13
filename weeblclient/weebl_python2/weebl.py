@@ -8,7 +8,7 @@ from datetime import datetime
 from weeblclient.weebl_python2 import utils
 from requests.exceptions import ConnectionError
 from weeblclient.weebl_python2.exception import (
-    UnexpectedStatusCode, UnrecognisedInstance)
+    UnexpectedStatusCode, UnrecognisedInstance, InstanceAlreadyExists)
 if six.PY3:
     from urllib.parse import urljoin
 else:
@@ -44,7 +44,7 @@ class Weebl(object):
             return url + query
         return url
 
-    def make_request(self, method, raise_exception=False, **payload):
+    def make_request(self, method, **payload):
         payload['headers'] = self.headers
         # payload['auth'] = self.weebl_auth
         try:
@@ -65,12 +65,17 @@ class Weebl(object):
             return
 
         # If response code isn't 2xx:
+        msg = "{} request to {} returned a status code of {}"
+        err_str = 'duplicate key value violates'
+        if str(response.status_code) == '500' and err_str in response.text:
+                obj = payload['url'].rstrip('/').split('/')[-2]
+                msg += " - {} already exists."
+                msg.format(method, payload['url'], response.status_code, obj)
+                raise InstanceAlreadyExists(msg)
         if str(response.status_code)[0] != '2':
-            msg = "Request returned a status code of {}:\n\n {}\n".format(
-                response.status_code, response.text)
-            self.LOG.error(msg)
-            if raise_exception:
-                raise UnexpectedStatusCode(msg)
+            msg += ":\n\n {}\n"
+            raise UnexpectedStatusCode(msg.format(method, payload['url'],
+                                       response.status_code, response.text))
         return response
 
     def get_objects(self, obj, params=None, query=None):
@@ -475,6 +480,15 @@ class Weebl(object):
 
 
     # Model CRUD Operations (In Alphabetical Order):
+    # Block Storage
+    def blockstorage_exists(self, name):
+        return self.instance_exists('blockstorage', 'name', 'name', name)
+
+    def create_blockstorage(self, name):
+        data = {"name": name, }
+        url = self.make_url("blockstorage")
+        self.make_request('post', url=url, data=json.dumps(data))
+
     # Bug
     def bug_exists(self, summary):
         return self.instance_exists('bug', 'summary', 'summary', summary)
@@ -640,6 +654,24 @@ class Weebl(object):
         else:
             return objects[0].get('uuid')
 
+    # Compute Version
+    def compute_exists(self, name):
+        return self.instance_exists('compute', 'name', 'name', name)
+
+    def create_compute(self, name):
+        data = {"name": name, }
+        url = self.make_url("compute")
+        self.make_request('post', url=url, data=json.dumps(data))
+
+    # Database Version
+    def database_exists(self, name):
+        return self.instance_exists('database', 'name', 'name', name)
+
+    def create_database(self, name):
+        data = {"name": name, }
+        url = self.make_url("database")
+        self.make_request('post', url=url, data=json.dumps(data))
+
     # Environment
     def environment_exists(self, env_uuid):
         return self.instance_exists('environment', 'uuid', 'uuid', env_uuid)
@@ -666,6 +698,15 @@ class Weebl(object):
     def update_environment(self, uuid, **kwargs):
         url = self.make_url("environment", uuid)
         self.update_instance(url, **kwargs)
+
+    # Image Storage Version
+    def imagestorage_exists(self, name):
+        return self.instance_exists('imagestorage', 'name', 'name', name)
+
+    def create_imagestorage(self, name):
+        data = {"name": name, }
+        url = self.make_url("imagestorage")
+        self.make_request('post', url=url, data=json.dumps(data))
 
     # Jenkins
     def jenkins_exists(self, jenkins_uuid):
@@ -735,6 +776,15 @@ class Weebl(object):
         tfile_list.append(t_file_glob_resource)
         url = self.make_url(regex_resource)
         self.update_instance(url, targetfileglobs=tfile_list)
+
+    # Openstack Version
+    def openstackversion_exists(self, name):
+        return self.instance_exists('openstackversion', 'name', 'name', name)
+
+    def create_openstackversion(self, name):
+        data = {"name": name, }
+        url = self.make_url("openstackversion")
+        self.make_request('post', url=url, data=json.dumps(data))
 
     # Pipeline
     def pipeline_exists(self, pipeline_id):
@@ -812,6 +862,15 @@ class Weebl(object):
         response = self.make_request('put', url=url, data=json.dumps(data))
         return response.json().get('completed_at')
 
+    # SDN Version
+    def sdn_exists(self, name):
+        return self.instance_exists('sdn', 'name', 'name', name)
+
+    def create_sdn(self, name):
+        data = {"name": name, }
+        url = self.make_url("sdn")
+        self.make_request('post', url=url, data=json.dumps(data))
+
     # Target File Glob
     def targetfileglob_exists(self, glob_pattern):
         return self.instance_exists('targetfileglob', 'glob_pattern',
@@ -845,3 +904,12 @@ class Weebl(object):
         job_list.append(job_resource)
         url = self.make_url(t_file_glob_resource)
         self.update_instance(url, jobtypes=job_list)
+
+    # Ubuntu Version
+    def ubuntuversion_exists(self, name):
+        return self.instance_exists('ubuntuversion', 'name', 'name', name)
+
+    def create_ubuntuversion(self, name):
+        data = {"name": name, }
+        url = self.make_url("ubuntuversion")
+        self.make_request('post', url=url, data=json.dumps(data))
