@@ -280,6 +280,7 @@ class Weebl(object):
 
     def create_pipelines_and_builds_from_paabn(self, doberman_dir, timestamp,
                                                build_executor_name):
+        print("Loading from %s" % (doberman_dir))
         paabn_file = os.path.join(
             doberman_dir, 'pipelines_and_associated_build_numbers.yml')
         if not os.path.exists(paabn_file):
@@ -317,11 +318,16 @@ class Weebl(object):
         for bugtrackerbug, pipelines in pabb.items():
             if 'unfiled' in bugtrackerbug:
                 continue
+            if bugtrackerbug == 'GenericBug_Ignore':
+                continue
             for pipeline in pipelines:
                 try:
                     # Get bugtrackerbug:
-                    btb_instance = self.filter_instances("bug", [
-                        ('bugtrackerbug__bug_number', bugtrackerbug)])[0]
+                    btbugs = self.filter_instances("bug", [
+                        ('bugtrackerbug__bug_number', bugtrackerbug)])
+                    if len(btbugs) == 0:
+                        continue
+                    btb_instance = btbugs[0]
 
                     # Use first regex:
                     regex_resource = btb_instance['knownbugregex'][0]

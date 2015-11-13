@@ -4,7 +4,8 @@ import pytz
 import parsedatetime as pdt
 from weeblclient.weebl_python2.weebl import Weebl
 
-data_dir = "/home/darren/triage/production_data/gen_oil_stats/builds"
+# Alter data_dir as appropriate:
+data_dir = "/home/ubuntu/production_data/gen_oil_stats/builds"
 
 weebl = Weebl("124591ef-361d-4a33-a756-fa79b3b7a1f8",
               "production",
