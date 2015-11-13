@@ -1,9 +1,12 @@
 import os
+import re
+import six
 import yaml
 import json
-import requests
-import six
+import fnmatch
 import urllib2
+import requests
+from dateutil import parser
 from datetime import datetime
 from weeblclient.weebl_python2 import utils
 from requests.exceptions import ConnectionError
@@ -60,9 +63,7 @@ class Weebl(object):
             msg = "Could not connect to Weebl server {}:\n\n {}\n".format(
                 payload['url'], e)
             self.LOG.error(msg)
-            if raise_exception:
-                raise(e)
-            return
+            raise(e)
 
         # If response code isn't 2xx:
         msg = "{} request to {} returned a status code of {}"
@@ -257,7 +258,7 @@ class Weebl(object):
             all_build_exctrs = self.get_list_of_buildexecutors()
             default_build_exctr = ('master' if 'master' in all_build_exctrs
                                    else all_build_exctrs[0])
-        except IndexError as e:
+        except IndexError:
             raise Exception(
                 "There are no buildexecutors yet! Please add some.")
 
@@ -276,7 +277,6 @@ class Weebl(object):
         with open(pp_file, 'r') as f:
             pp_text = f.read()
         return parser.parse(pp_text.split('\n')[1])
-
 
     def create_pipelines_and_builds_from_paabn(self, doberman_dir, timestamp,
                                                build_executor_name):
@@ -305,7 +305,7 @@ class Weebl(object):
                         else:
                             self.create_build(
                                 build_id, pipeline, job_name, 'success')
-                    except InstanceAlreadyExists as e:
+                    except InstanceAlreadyExists:
                         pass
 
     def process_pabb_file(self, doberman_dir, build_executor_name):
@@ -331,15 +331,16 @@ class Weebl(object):
 
                     # Use first regex:
                     regex_resource = btb_instance['knownbugregex'][0]
-                    regex_uuid = (regex_resource.split('knownbugregex/')
-                                          [1].split('/')[0])
+                    regex_uuid =\
+                        regex_resource.split('knownbugregex/')[1].split('/')[0]
                     regex_instance = self.filter_instances("knownbugregex", [
                         ('uuid', regex_uuid)])[0]
 
                     # Get target file:
                     target_file_resource = regex_instance['targetfileglobs'][0]
-                    target_file = (target_file_resource.split('targetfileglob/')
-                                   [1].split('/')[0])
+                    target_file = (
+                        target_file_resource.split('targetfileglob/')[1]
+                        .split('/')[0])
 
                     # Use first job
                     job_instance = self.filter_instances("jobtype", [
@@ -415,7 +416,6 @@ class Weebl(object):
                                 build['build_id'], dup_pipeline)
                             self.create_bugoccurrence(build_uuid, regex_uuid)
 
-
     def process_triage_file(self, doberman_dir, job, build_executor_name):
         triage_file = os.path.join(
             doberman_dir, "triage_{}.yml".format(job))
@@ -435,8 +435,9 @@ class Weebl(object):
             build_uuid = self.create_build(
                 build_id, pipeline, job, build_status)
             for lp_bug_no, details in trg['bugs'].items():
-                if ('GenericBug_Ignore' not in lp_bug_no and
-                    'unfiled' not in lp_bug_no):
+                not_generic = 'GenericBug_Ignore' not in lp_bug_no
+                not_unfiled = 'unfiled' not in lp_bug_no
+                if not_generic and not_unfiled:
                     bugtrackerbug = self.create_bugtrackerbug(
                             lp_bug_no)
                     for targetfileglob, regexs in details['regexps'].items():
@@ -454,7 +455,6 @@ class Weebl(object):
                                       [1].split('/')[0])
                         self.create_bugoccurrence(build_uuid, regex_uuid)
 
-
     def apply_all_regexes_to_text(self, text, target_file):
         knownbugregex_instances = self.get_instances("knownbugregex")
 
@@ -470,7 +470,7 @@ class Weebl(object):
                 return
             matches = re.compile(regex, re.DOTALL).findall(text)
             if len(matches) > 0:
-                print('match!!! ' + regex )
+                print('match!!! ' + regex)
 
                 msg = "Unfiled bug matched to {}:\n{}"
                 self.LOG.info(msg.format(regex_uuid, regex))
