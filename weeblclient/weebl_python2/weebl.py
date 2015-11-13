@@ -65,8 +65,8 @@ class Weebl(object):
         if str(response.status_code) == '500' and err_str in response.text:
                 obj = payload['url'].rstrip('/').split('/')[-2]
                 msg += " - {} already exists."
-                msg.format(method, payload['url'], response.status_code, obj)
-                raise InstanceAlreadyExists(msg)
+                raise InstanceAlreadyExists(msg.format(
+                    method, payload['url'], response.status_code, obj))
         if str(response.status_code)[0] != '2':
             msg += ":\n\n {}\n"
             raise UnexpectedStatusCode(msg.format(method, payload['url'],
