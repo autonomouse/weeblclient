@@ -255,6 +255,9 @@ class Weebl(object):
         url = self.make_url("blockstorage")
         self.make_request('post', url=url, data=json.dumps(data))
 
+    def get_blockstorage_from_name(self, name):
+        return self._pk_uri('blockstorage', name)
+
     # Bug
     def bug_exists(self, summary):
         return self.instance_exists('bug', 'summary', 'summary', summary)
@@ -426,6 +429,9 @@ class Weebl(object):
         url = self.make_url("compute")
         self.make_request('post', url=url, data=json.dumps(data))
 
+    def get_compute_from_name(self, name):
+        return self._pk_uri('compute', name)
+
     # Database Version
     def database_exists(self, name):
         return self.instance_exists('database', 'name', 'name', name)
@@ -434,6 +440,9 @@ class Weebl(object):
         data = {"name": name, }
         url = self.make_url("database")
         self.make_request('post', url=url, data=json.dumps(data))
+
+    def get_database_from_name(self, name):
+        return self._pk_uri('database', name)
 
     # Environment
     def environment_exists(self, env_uuid):
@@ -470,6 +479,9 @@ class Weebl(object):
         data = {"name": name, }
         url = self.make_url("imagestorage")
         self.make_request('post', url=url, data=json.dumps(data))
+
+    def get_imagestorage_from_name(self, name):
+        return self._pk_uri('imagestorage', name)
 
     # Jenkins
     def jenkins_exists(self, jenkins_uuid):
@@ -545,6 +557,9 @@ class Weebl(object):
         data = {"name": name, }
         url = self.make_url("openstackversion")
         self.make_request('post', url=url, data=json.dumps(data))
+
+    def get_openstackversion_from_name(self, name):
+        return self._pk_uri('openstackversion', name)
 
     # Pipeline
     def pipeline_exists(self, pipeline_id):
@@ -626,6 +641,9 @@ class Weebl(object):
         url = self.make_url("sdn")
         self.make_request('post', url=url, data=json.dumps(data))
 
+    def get_sdn_from_name(self, name):
+        return self._pk_uri('sdn', name)
+
     # Target File Glob
     def targetfileglob_exists(self, glob_pattern):
         return self.instance_exists('targetfileglob', 'glob_pattern',
@@ -668,3 +686,6 @@ class Weebl(object):
         data = {"name": name, }
         url = self.make_url("ubuntuversion")
         self.make_request('post', url=url, data=json.dumps(data))
+
+    def get_ubuntuversion_from_name(self, name):
+        return self._pk_uri('ubuntuversion', name)
