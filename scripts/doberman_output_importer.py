@@ -18,7 +18,6 @@ for doberman_out_folder in os.listdir(data_dir):
             data_dir, doberman_out_folder, "archive/artifacts")
     else:
         output_dir = full_path
-
     timestamp = None
     try:
         val = pdt.Calendar(pdt.Constants(usePyICU=False)).parse(

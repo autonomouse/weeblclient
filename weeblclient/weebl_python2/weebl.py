@@ -70,8 +70,8 @@ class Weebl(object):
         if str(response.status_code) == '500' and err_str in response.text:
                 obj = payload['url'].rstrip('/').split('/')[-2]
                 msg += " - {} already exists."
-                msg.format(method, payload['url'], response.status_code, obj)
-                raise InstanceAlreadyExists(msg)
+                raise InstanceAlreadyExists(msg.format(
+                    method, payload['url'], response.status_code, obj))
         if str(response.status_code)[0] != '2':
             msg += ":\n\n {}\n"
             raise UnexpectedStatusCode(msg.format(method, payload['url'],
@@ -235,7 +235,7 @@ class Weebl(object):
                   entry.targetfileglob))
         print("\n{} bugs uploaded.\n".format(count + 1))
 
-    def clear_target_files_and_jobs_from_known_bug_regexes(self):
+    def clear_target_files_and_jobs_from_knownbugregexes(self):
         for idx, knownbugregex in enumerate(self.get_objects("knownbugregex")):
             count = idx + 1
             self.LOG.info("Regex {} dissassociated from its target files/jobs."
@@ -250,17 +250,13 @@ class Weebl(object):
             self.update_instance(regex_url, targetfileglobs=[])
         self.LOG.info("All {} KnownBugRegexes dissassociated.".format(count))
 
-
-
-
-    ##############################################################
-
-
     def import_data_from_doberman_output_folder(self,
                                                 doberman_dir,
                                                 unformatted_timestamp=None):
         try:
-            default_build_exctr = self.get_list_of_buildexecutors()[0]
+            all_build_exctrs = self.get_list_of_buildexecutors()
+            default_build_exctr = ('master' if 'master' in all_build_exctrs
+                                   else all_build_exctrs[0])
         except IndexError as e:
             raise Exception(
                 "There are no buildexecutors yet! Please add some.")
@@ -270,7 +266,6 @@ class Weebl(object):
         self.create_pipelines_and_builds_from_paabn(
             doberman_dir, timestamp, default_build_exctr)
         self.process_pabb_file(doberman_dir, default_build_exctr)
-        import ipdb; ipdb.set_trace()
         self.create_bugs_and_bugoccurrences_from_triage_files(
             doberman_dir, default_build_exctr)
 
@@ -329,20 +324,20 @@ class Weebl(object):
                         ('bugtrackerbug__bug_number', bugtrackerbug)])[0]
 
                     # Use first regex:
-                    regex_resource = btb_instance['known_bug_regex'][0]
-                    regex_uuid = (regex_resource.split('known_bug_regex/')
+                    regex_resource = btb_instance['knownbugregex'][0]
+                    regex_uuid = (regex_resource.split('knownbugregex/')
                                           [1].split('/')[0])
-                    regex_instance = self.filter_instances("known_bug_regex", [
+                    regex_instance = self.filter_instances("knownbugregex", [
                         ('uuid', regex_uuid)])[0]
 
                     # Get target file:
-                    target_file_resource = regex_instance['target_file_globs'][0]
-                    target_file = (target_file_resource.split('target_file_glob/')
+                    target_file_resource = regex_instance['targetfileglobs'][0]
+                    target_file = (target_file_resource.split('targetfileglob/')
                                    [1].split('/')[0])
 
                     # Use first job
                     job_instance = self.filter_instances("jobtype", [
-                        ('target_file_glob__name', target_file)])[0]
+                        ('targetfileglob__name', target_file)])[0]
 
                     # Get build
                     build_instance = self.filter_instances("build", [
@@ -351,7 +346,8 @@ class Weebl(object):
 
                     # Create bug occurrence
                     try:
-                        self.create_bugoccurrence(build_instance['uuid'], regex_uuid)
+                        self.create_bugoccurrence(
+                            build_instance['uuid'], regex_uuid)
                     except InstanceAlreadyExists as e:
                         pass
                 except Exception as e:
@@ -361,7 +357,7 @@ class Weebl(object):
 
     def create_bugs_and_bugoccurrences_from_triage_files(self, doberman_dir,
                                                          build_executor_name):
-        for job in self.get_list_of_jobtypes():
+        for job in self.get_list_of_job_types():
             # Auto-triaged_unfiled_bugs file: Only present when has unfileds:
             self.process_autotriage(doberman_dir, job, build_executor_name)
 
@@ -385,7 +381,7 @@ class Weebl(object):
             for unfiled_bug, details in unfiled_bugs.items():
                 build_id = details['build']
                 job_name = details['job']
-                build_status = details['status']
+                build_status = details['status'].lower()
                 group = (build_id, job_name, build_status)
                 if group not in processed:
                     tstamp = datetime.strptime(
@@ -437,32 +433,32 @@ class Weebl(object):
                     'unfiled' not in lp_bug_no):
                     bugtrackerbug = self.create_bugtrackerbug(
                             lp_bug_no)
-                    for target_file_glob, regexs in details['regexps'].items():
-                        self.create_target_file_glob(
-                            target_file_glob, job_resource)
+                    for targetfileglob, regexs in details['regexps'].items():
+                        self.create_targetfileglob(
+                            targetfileglob, job_resource)
                         re = regexs['regexp'][0]
                         t_file_glob_resource = self._pk_uri(
-                            'target_file_glob', target_file_glob)
-                        regex_resource = self.create_known_bug_regex(
+                            'targetfileglob', targetfileglob)
+                        regex_resource = self.create_knownbugregex(
                             t_file_glob_resource, re)
                         summary = re  # Just use regex as summary for now...
                         self.create_bug(
                             summary, bugtrackerbug, regex_resource)
-                        regex_uuid = (regex_resource.split('known_bug_regex/')
+                        regex_uuid = (regex_resource.split('knownbugregex/')
                                       [1].split('/')[0])
                         self.create_bugoccurrence(build_uuid, regex_uuid)
 
 
     def apply_all_regexes_to_text(self, text, target_file):
-        known_bug_regex_instances = self.get_instances("known_bug_regex")
+        knownbugregex_instances = self.get_instances("knownbugregex")
 
-        for known_bug_regex in known_bug_regex_instances:
-            regex = known_bug_regex['regex']
-            regex_uuid = known_bug_regex['uuid']
-            target_file_globs = [
-                tf.split('/api/v1/target_file_glob/')[1][:-1] for tf in
-                known_bug_regex['target_file_globs']]
-            matching_tfiles = [glob for glob in target_file_globs if
+        for knownbugregex in knownbugregex_instances:
+            regex = knownbugregex['regex']
+            regex_uuid = knownbugregex['uuid']
+            targetfileglobs = [
+                tf.split('/api/v1/targetfileglob/')[1][:-1] for tf in
+                knownbugregex['targetfileglobs']]
+            matching_tfiles = [glob for glob in targetfileglobs if
                                fnmatch(target_file, glob)]
             if len(matching_tfiles) <= 0:
                 return
@@ -474,10 +470,6 @@ class Weebl(object):
                 self.LOG.info(msg.format(regex_uuid, regex))
                 return regex_uuid
                 return
-
-    ###############################################################
-
-
 
     # Model CRUD Operations (In Alphabetical Order):
     # Block Storage
