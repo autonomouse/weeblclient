@@ -625,7 +625,7 @@ class Weebl(object):
 
     def update_completed_pipeline(self, pipeline_id, completed_at=None):
         if completed_at is None:
-            completed_at = datetime.now()
+            completed_at = str(datetime.now())
         url = self.make_url("pipeline", pipeline_id)
         data = {'pipeline': pipeline_id,
                 'completed_at': completed_at}
