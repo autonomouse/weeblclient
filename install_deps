@@ -34,6 +34,7 @@ apt-get -y --no-upgrade install \
     python3-requests-oauthlib \
     python3-openid \
     python3-bs4 \
+    nginx-full \
     --fix-missing
 
 # Wily has a weird mix of python3.4 and python3.5. pip3 installs dependencies
