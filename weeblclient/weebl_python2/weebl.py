@@ -291,7 +291,7 @@ class Weebl(object):
         for pipeline, builds in paabn.items():
             try:
                 self.create_pipeline(pipeline, build_executor_name)
-            except InstanceAlreadyExists as e:
+            except InstanceAlreadyExists:
                 pass
 
             for job_name, build_id in builds.items():
@@ -676,7 +676,6 @@ class Weebl(object):
         data = {"name": name, }
         url = self.make_url("database")
         self.make_request('post', url=url, data=json.dumps(data))
-
 
     def get_database_from_name(self, name):
         return self._pk_uri('database', name)
