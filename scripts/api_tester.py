@@ -2,16 +2,20 @@
 from weeblclient.weebl_python2.weebl import Weebl
 from pprint import pprint
 
-username = 'oil-ci-bot'
-apikey = '8aa0ca63966d78b3099b2759289f239ffdc9d7b6'
+username = '' # Enter your username here (e.g. oil-ci-bot)
+apikey = ''  # Enter api_key (e.g. 8aa0ca63966d78b3099b2759289f239ffdc9d7b6)
+             # (Please note: That isn't the real api_key for oil-ci-bot!)
 
-weebl_url = "http://localhost:8000"
-# weebl_url = "http://10.245.0.14"
+weebl_url = "http://10.245.0.14"
 jenkins_host = "http://oil-jenkins.canonical.com"
 
 # Production:
 # environment_name = "production"
 # environment_uuid = "124591ef-361d-4a33-a756-fa79b3b7a1f8"
+
+# Staging:
+# environment_name = "prod_staging"
+# environment_uuid = "76fbbe93-192a-4a96-b1e2-dbada08fa5db"
 
 # Integration:
 environment_name = "integration"
