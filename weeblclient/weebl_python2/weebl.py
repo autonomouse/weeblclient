@@ -1,12 +1,17 @@
-import json
-import requests
+import os
+import re
 import six
+import yaml
+import json
+import fnmatch
 import urllib2
+import requests
+from dateutil import parser
 from datetime import datetime
 from weeblclient.weebl_python2 import utils
 from requests.exceptions import ConnectionError
 from weeblclient.weebl_python2.exception import (
-    UnexpectedStatusCode, InstanceAlreadyExists)
+    UnexpectedStatusCode, InstanceAlreadyExists, UnrecognisedInstance)
 if six.PY3:
     from urllib.parse import urljoin
 else:
@@ -57,6 +62,7 @@ class Weebl(object):
         except ConnectionError as e:
             msg = "Could not connect to Weebl server {}:\n\n {}\n".format(
                 payload['url'], e)
+            self.LOG.error(msg)
             raise(e)
 
         # If response code isn't 2xx:
@@ -230,7 +236,7 @@ class Weebl(object):
                   entry.targetfileglob))
         print("\n{} bugs uploaded.\n".format(count + 1))
 
-    def clear_target_files_and_jobs_from_known_bug_regexes(self):
+    def clear_target_files_and_jobs_from_knownbugregexes(self):
         for idx, knownbugregex in enumerate(self.get_objects("knownbugregex")):
             count = idx + 1
             self.LOG.info("Regex {} dissassociated from its target files/jobs."
@@ -244,6 +250,232 @@ class Weebl(object):
             regex_url = self.make_url(regex_resource)
             self.update_instance(regex_url, targetfileglobs=[])
         self.LOG.info("All {} KnownBugRegexes dissassociated.".format(count))
+
+    def import_data_from_doberman_output_folder(self,
+                                                doberman_dir,
+                                                unformatted_timestamp=None):
+        try:
+            all_build_exctrs = self.get_list_of_buildexecutors()
+            default_build_exctr = ('master' if 'master' in all_build_exctrs
+                                   else all_build_exctrs[0])
+        except IndexError:
+            raise Exception(
+                "There are no buildexecutors yet! Please add some.")
+
+        if unformatted_timestamp is None:
+            timestamp = self.get_date_from_pipelines_processed(doberman_dir)
+        self.create_pipelines_and_builds_from_paabn(
+            doberman_dir, timestamp, default_build_exctr)
+        self.process_pabb_file(doberman_dir, default_build_exctr)
+        self.create_bugs_and_bugoccurrences_from_triage_files(
+            doberman_dir, default_build_exctr)
+
+    def get_date_from_pipelines_processed(self, doberman_dir):
+        pp_file = os.path.join(doberman_dir, 'pipelines_processed.yaml')
+        if not os.path.exists(pp_file):
+            return
+        with open(pp_file, 'r') as f:
+            pp_text = f.read()
+        return parser.parse(pp_text.split('\n')[1])
+
+    def create_pipelines_and_builds_from_paabn(self, doberman_dir, timestamp,
+                                               build_executor_name):
+        print("Loading from %s" % (doberman_dir))
+        paabn_file = os.path.join(
+            doberman_dir, 'pipelines_and_associated_build_numbers.yml')
+        if not os.path.exists(paabn_file):
+            return
+        with open(paabn_file, 'r') as f:
+            paabn = yaml.load(f.read())
+
+        for pipeline, builds in paabn.items():
+            try:
+                self.create_pipeline(pipeline, build_executor_name)
+            except InstanceAlreadyExists as e:
+                pass
+
+            for job_name, build_id in builds.items():
+                if build_id is not None:
+                    # Assume build_status was 'success' for now; Update later:
+                    try:
+                        if timestamp is not None:
+                            self.create_build(
+                                build_id, pipeline, job_name, 'success',
+                                build_finished_at=timestamp)
+                        else:
+                            self.create_build(
+                                build_id, pipeline, job_name, 'success')
+                    except InstanceAlreadyExists:
+                        pass
+
+    def process_pabb_file(self, doberman_dir, build_executor_name):
+        pabb_file = os.path.join(
+            doberman_dir, "pipelines_affected_by_bug.yml")
+        if not os.path.exists(pabb_file):
+            return
+        with open(pabb_file, 'r') as f:
+            pabb = yaml.load(f.read())
+        for bugtrackerbug, pipelines in pabb.items():
+            if 'unfiled' in bugtrackerbug:
+                continue
+            if bugtrackerbug == 'GenericBug_Ignore':
+                continue
+            for pipeline in pipelines:
+                try:
+                    # Get bugtrackerbug:
+                    btbugs = self.filter_instances("bug", [
+                        ('bugtrackerbug__bug_number', bugtrackerbug)])
+                    if len(btbugs) == 0:
+                        continue
+                    btb_instance = btbugs[0]
+
+                    # Use first regex:
+                    regex_resource = btb_instance['knownbugregex'][0]
+                    regex_uuid =\
+                        regex_resource.split('knownbugregex/')[1].split('/')[0]
+                    regex_instance = self.filter_instances("knownbugregex", [
+                        ('uuid', regex_uuid)])[0]
+
+                    # Get target file:
+                    target_file_resource = regex_instance['targetfileglobs'][0]
+                    target_file = (
+                        target_file_resource.split('targetfileglob/')[1]
+                        .split('/')[0])
+
+                    # Use first job
+                    job_instance = self.filter_instances("jobtype", [
+                        ('targetfileglob__name', target_file)])[0]
+
+                    # Get build
+                    build_instance = self.filter_instances("build", [
+                        ('pipeline__uuid', pipeline),
+                        ('jobtype__name', job_instance['name'])])[0]
+
+                    # Create bug occurrence
+                    try:
+                        self.create_bugoccurrence(
+                            build_instance['uuid'], regex_uuid)
+                    except InstanceAlreadyExists as e:
+                        pass
+                except Exception as e:
+                    self.LOG.error("Error processing pipeline: {} for {}\n{}"
+                                   .format(pipeline, bugtrackerbug, e))
+                    continue
+
+    def create_bugs_and_bugoccurrences_from_triage_files(self, doberman_dir,
+                                                         build_executor_name):
+        for job in self.get_list_of_job_types():
+            # Auto-triaged_unfiled_bugs file: Only present when has unfileds:
+            self.process_autotriage(doberman_dir, job, build_executor_name)
+
+            # Triage file: Only present in newer doberman versions:
+            self.process_triage_file(doberman_dir, job, build_executor_name)
+
+    def process_autotriage(self, doberman_dir, job, build_executor_name):
+        autotriage_file = os.path.join(
+            doberman_dir, "auto-triaged_unfiled_bugs.yml")
+        if not os.path.exists(autotriage_file):
+            return
+        with open(autotriage_file, 'r') as f:
+            autotriage = yaml.load(f.read())
+
+        for pipeline, unfiled_bugs in autotriage['pipelines'].items():
+
+            if not self.pipeline_exists(pipeline):
+                self.create_buildexecutor(build_executor_name)
+                self.create_pipeline(pipeline, build_executor_name)
+            processed = []
+            for unfiled_bug, details in unfiled_bugs.items():
+                build_id = details['build']
+                job_name = details['job']
+                build_status = details['status'].lower()
+                group = (build_id, job_name, build_status)
+                if group not in processed:
+                    tstamp = datetime.strptime(
+                        details['Crude-Analysis timestamp'].split('.')[0],
+                        '%Y-%b-%d %H:%M:%S')
+                    self.update_build(build_id, pipeline, job_name,
+                                      build_status, build_finished_at=tstamp)
+                    processed.append(group)
+
+                #
+                target_file = details['additional info'].get('target file')
+                if target_file is None:
+                    continue
+                regex_uuid = self.apply_all_regexes_to_text(
+                    details['match text'], target_file)
+                if regex_uuid is None:
+                    continue
+
+                for dup_pipeline in details['duplicates']:
+                    if self.pipeline_exists(dup_pipeline):
+                        build_instances = self.filter_instances(
+                            "build", [('pipeline__uuid', dup_pipeline)])
+                        for build in build_instances:
+                            build_uuid = self.build_exists(
+                                build['build_id'], dup_pipeline)
+                            self.create_bugoccurrence(build_uuid, regex_uuid)
+
+    def process_triage_file(self, doberman_dir, job, build_executor_name):
+        triage_file = os.path.join(
+            doberman_dir, "triage_{}.yml".format(job))
+        if not os.path.exists(triage_file):
+            return
+        with open(triage_file, 'r') as f:
+            triage = yaml.load(f.read())
+
+        for pipeline, trg in triage['pipeline'].items():
+            self.LOG.info("Processing {} for {} job.".format(
+                pipeline, job))
+            self.create_pipeline(pipeline, build_executor_name)
+            build_status = trg['status']
+            build_id = trg['build']
+            self.create_service_status(build_status)
+            job_resource = self.create_jobtype(job)
+            build_uuid = self.create_build(
+                build_id, pipeline, job, build_status)
+            for lp_bug_no, details in trg['bugs'].items():
+                not_generic = 'GenericBug_Ignore' not in lp_bug_no
+                not_unfiled = 'unfiled' not in lp_bug_no
+                if not_generic and not_unfiled:
+                    bugtrackerbug = self.create_bugtrackerbug(
+                            lp_bug_no)
+                    for targetfileglob, regexs in details['regexps'].items():
+                        self.create_targetfileglob(
+                            targetfileglob, job_resource)
+                        re = regexs['regexp'][0]
+                        t_file_glob_resource = self._pk_uri(
+                            'targetfileglob', targetfileglob)
+                        regex_resource = self.create_knownbugregex(
+                            t_file_glob_resource, re)
+                        summary = re  # Just use regex as summary for now...
+                        self.create_bug(
+                            summary, bugtrackerbug, regex_resource)
+                        regex_uuid = (regex_resource.split('knownbugregex/')
+                                      [1].split('/')[0])
+                        self.create_bugoccurrence(build_uuid, regex_uuid)
+
+    def apply_all_regexes_to_text(self, text, target_file):
+        knownbugregex_instances = self.get_instances("knownbugregex")
+
+        for knownbugregex in knownbugregex_instances:
+            regex = knownbugregex['regex']
+            regex_uuid = knownbugregex['uuid']
+            targetfileglobs = [
+                tf.split('/api/v1/targetfileglob/')[1][:-1] for tf in
+                knownbugregex['targetfileglobs']]
+            matching_tfiles = [glob for glob in targetfileglobs if
+                               fnmatch(target_file, glob)]
+            if len(matching_tfiles) <= 0:
+                return
+            matches = re.compile(regex, re.DOTALL).findall(text)
+            if len(matches) > 0:
+                print('match!!! ' + regex)
+
+                msg = "Unfiled bug matched to {}:\n{}"
+                self.LOG.info(msg.format(regex_uuid, regex))
+                return regex_uuid
+                return
 
     # Model CRUD Operations (In Alphabetical Order):
     # Block Storage
@@ -391,6 +623,9 @@ class Weebl(object):
         return build_uuid
 
     # Build Executor
+    def get_list_of_buildexecutors(self):
+        return [bld_ex['name'] for bld_ex in self.get_objects('buildexecutor')]
+
     def buildexecutor_exists(self, name):
         buildexecutor_instances = self.filter_instances(
             "buildexecutor", [
@@ -401,6 +636,7 @@ class Weebl(object):
         return len(buildexecutor_instances) > 0
 
     def create_buildexecutor(self, buildexecutor_name):
+        buildexecutor_name = buildexecutor_name.lstrip('(').rstrip(')')
         jenkins_resource_uri = self._pk_uri(
             'jenkins', self._get_jenkins_uuid())
         url = self.make_url("buildexecutor")
@@ -440,6 +676,7 @@ class Weebl(object):
         data = {"name": name, }
         url = self.make_url("database")
         self.make_request('post', url=url, data=json.dumps(data))
+
 
     def get_database_from_name(self, name):
         return self._pk_uri('database', name)
@@ -515,6 +752,9 @@ class Weebl(object):
         return response.json().get('uuid')
 
     # Job
+    def get_list_of_job_types(self):
+        return [job['name'] for job in self.get_objects('jobtype')]
+
     def get_job_from_job_type(self, job_type):
         url = self.make_url("jobtype", job_type)
         response = self.make_request('get', url=url)
@@ -578,6 +818,11 @@ class Weebl(object):
         # Get Build Executor:
         buildexecutor = self.get_buildexecutor_uuid_from_name(
             buildexecutor_name)
+
+        if buildexecutor is None:
+            msg = "Cannot create pipeline - unknown build executor: '{}'"
+            self.LOG.error(msg.format(buildexecutor_name))
+            raise UnrecognisedInstance(msg.format(buildexecutor_name))
 
         # Create pipeline:
         url = self.make_url("pipeline")

@@ -8,3 +8,7 @@ class InstanceAlreadyExists(Exception):
 
 class MissingData(Exception):
     pass
+
+
+class UnrecognisedInstance(Exception):
+    pass
