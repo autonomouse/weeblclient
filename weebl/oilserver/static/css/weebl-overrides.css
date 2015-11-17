@@ -12,3 +12,11 @@ a.external {
     padding-right: 13px;
     background-position: 100% top;
 }
+
+.page-header .page-header__title{
+    font-size:2em;
+    width:auto;padding:10px 0;
+    margin:0;
+    float:left;
+    font-size:30px;
+}

@@ -62,15 +62,14 @@
                 </div>
             </header>
             <main id="body">
-                <div data-ng-controller="overviewController as overview">
+                <div data-ng-controller="successRateController as successRate">
                     <header class="page-header margin-bottom" data-maas-sticky-header>
                         <div class="inner-wrapper">
                             <h1 class="page-header__title">
-                                {$ $parent.site $}
                                 <span class="page-header__title--identicator" id="bulk-actions">
                                     <a href=""
-                                        data-ng-class="{ active: currentpage === 'overview' }"
-                                        data-ng-click="toggleTab('overview')">Overview</a>
+                                        data-ng-class="{ active: currentpage === 'successRate' }"
+                                        data-ng-click="toggleTab('successRate')">Success Rate</a>
                                     <span class="divide"></span>
                                     <a href=""
                                         data-ng-class="{ active: currentpage === 'bugs' }"
@@ -93,17 +92,17 @@
                                 <h4 class="accordion__tab-title maas-accordion-tab active">Date</h4>
                                 <div class="accordion__tab-content">
                                     <ul class="accordion__tab-list">
-                                        <li class="accordion__tab-item" data-ng-class="{ active: isFilterActive('date', 'Last 24 Hours', 'overview') }">
-                                            <a class="accordion__tab-link" href="" data-ng-click="updateFilter('date', 'Last 24 Hours', 'overview')">Last 24 Hours</a>
+                                        <li class="accordion__tab-item" data-ng-class="{ active: isFilterActive('date', 'Last 24 Hours', 'successRate') }">
+                                            <a class="accordion__tab-link" href="" data-ng-click="updateFilter('date', 'Last 24 Hours', 'successRate')">Last 24 Hours</a>
                                         </li>
-                                        <li class="accordion__tab-item" data-ng-class="{ active: isFilterActive('date', 'Last 7 Days', 'overview') }">
-                                            <a class="accordion__tab-link" href="" data-ng-click="updateFilter('date', 'Last 7 Days', 'overview')">Last 7 Days</a>
+                                        <li class="accordion__tab-item" data-ng-class="{ active: isFilterActive('date', 'Last 7 Days', 'successRate') }">
+                                            <a class="accordion__tab-link" href="" data-ng-click="updateFilter('date', 'Last 7 Days', 'successRate')">Last 7 Days</a>
                                         </li>
-                                        <li class="accordion__tab-item" data-ng-class="{ active: isFilterActive('date', 'Last 30 Days', 'overview') }">
-                                            <a class="accordion__tab-link" href="" data-ng-click="updateFilter('date', 'Last 30 Days', 'overview')">Last 30 Days</a>
+                                        <li class="accordion__tab-item" data-ng-class="{ active: isFilterActive('date', 'Last 30 Days', 'successRate') }">
+                                            <a class="accordion__tab-link" href="" data-ng-click="updateFilter('date', 'Last 30 Days', 'successRate')">Last 30 Days</a>
                                         </li>
-                                        <li class="accordion__tab-item" data-ng-class="{ active: isFilterActive('date', 'Last Year', 'overview') }">
-                                            <a class="accordion__tab-link" href="" data-ng-click="updateFilter('date', 'Last Year', 'overview')">Last Year</a>
+                                        <li class="accordion__tab-item" data-ng-class="{ active: isFilterActive('date', 'Last Year', 'successRate') }">
+                                            <a class="accordion__tab-link" href="" data-ng-click="updateFilter('date', 'Last Year', 'successRate')">Last Year</a>
                                         </li>
                                     </ul>
                                 </div>
@@ -112,8 +111,8 @@
                                 <h4 class="accordion__tab-title maas-accordion-tab">OpenStack Release</h4>
                                 <div class="accordion__tab-content">
                                     <ul class="accordion__tab-list">
-                                        <li class="accordion__tab-item" data-ng-repeat="release in metadata.openstack_release | orderBy:['name']"  data-ng-class="{ active: isFilterActive('openstack_release', release.name, 'overview') }">
-                                            <a class="accordion__tab-link" href="" data-ng-click="updateFilter('openstack_release', release.name, 'overview')">{$ release.name $}</a>
+                                        <li class="accordion__tab-item" data-ng-repeat="release in metadata.openstack_release | orderBy:['name']"  data-ng-class="{ active: isFilterActive('openstack_release', release.name, 'successRate') }">
+                                            <a class="accordion__tab-link" href="" data-ng-click="updateFilter('openstack_release', release.name, 'successRate')">{$ release.name $}</a>
                                         </li>
                                     </ul>
                                 </div>
@@ -122,8 +121,8 @@
                                 <h4 class="accordion__tab-title maas-accordion-tab">Ubuntu Release</h4>
                                 <div class="accordion__tab-content">
                                     <ul class="accordion__tab-list">
-                                        <li class="accordion__tab-item" data-ng-repeat="release in metadata.ubuntu_release | orderBy:['name']"  data-ng-class="{ active: isFilterActive('ubuntu_release', release.name, 'overview') }">
-                                            <a class="accordion__tab-link" href="" data-ng-click="updateFilter('ubuntu_release', release.name, 'overview')">{$ release.name $} ({$ release.number $})</a>
+                                        <li class="accordion__tab-item" data-ng-repeat="release in metadata.ubuntu_release | orderBy:['name']"  data-ng-class="{ active: isFilterActive('ubuntu_release', release.name, 'successRate') }">
+                                            <a class="accordion__tab-link" href="" data-ng-click="updateFilter('ubuntu_release', release.name, 'successRate')">{$ release.name $} ({$ release.number $})</a>
                                         </li>
                                     </ul>
                                 </div>
@@ -132,8 +131,8 @@
                                 <h4 class="accordion__tab-title maas-accordion-tab">Compute</h4>
                                 <div class="accordion__tab-content">
                                     <ul class="accordion__tab-list">
-                                        <li class="accordion__tab-item" data-ng-repeat="compute in metadata.compute | orderBy:['name']"  data-ng-class="{ active: isFilterActive('compute', compute.name, 'overview') }">
-                                            <a class="accordion__tab-link" href="" data-ng-click="updateFilter('compute', compute.name, 'overview')">{$ compute.name $}</a>
+                                        <li class="accordion__tab-item" data-ng-repeat="compute in metadata.compute | orderBy:['name']"  data-ng-class="{ active: isFilterActive('compute', compute.name, 'successRate') }">
+                                            <a class="accordion__tab-link" href="" data-ng-click="updateFilter('compute', compute.name, 'successRate')">{$ compute.name $}</a>
                                         </li>
                                     </ul>
                                 </div>
@@ -142,8 +141,8 @@
                                 <h4 class="accordion__tab-title maas-accordion-tab">Networking</h4>
                                 <div class="accordion__tab-content">
                                     <ul class="accordion__tab-list">
-                                        <li class="accordion__tab-item" data-ng-repeat="sdn in metadata.networking | orderBy:['name']"  data-ng-class="{ active: isFilterActive('networking', sdn.name, 'overview') }">
-                                            <a class="accordion__tab-link" href="" data-ng-click="updateFilter('networking', sdn.name, 'overview')">{$ sdn.name $}</a>
+                                        <li class="accordion__tab-item" data-ng-repeat="sdn in metadata.networking | orderBy:['name']"  data-ng-class="{ active: isFilterActive('networking', sdn.name, 'successRate') }">
+                                            <a class="accordion__tab-link" href="" data-ng-click="updateFilter('networking', sdn.name, 'successRate')">{$ sdn.name $}</a>
                                         </li>
                                     </ul>
                                 </div>
@@ -152,8 +151,8 @@
                                 <h4 class="accordion__tab-title maas-accordion-tab" ng-class="active">Block Storage</h4>
                                 <div class="accordion__tab-content">
                                     <ul class="accordion__tab-list">
-                                        <li class="accordion__tab-item" data-ng-repeat="blockstorage in metadata.blockstorage | orderBy:['name']"  data-ng-class="{ active: isFilterActive('blockstorage', blockstorage.name, 'overview') }">
-                                            <a class="accordion__tab-link" href="" data-ng-click="updateFilter('blockstorage', blockstorage.name, 'overview')">{$ blockstorage.name $}</a>
+                                        <li class="accordion__tab-item" data-ng-repeat="blockstorage in metadata.blockstorage | orderBy:['name']"  data-ng-class="{ active: isFilterActive('blockstorage', blockstorage.name, 'successRate') }">
+                                            <a class="accordion__tab-link" href="" data-ng-click="updateFilter('blockstorage', blockstorage.name, 'successRate')">{$ blockstorage.name $}</a>
                                         </li>
                                     </ul>
                                 </div>
@@ -162,8 +161,8 @@
                                 <h4 class="accordion__tab-title maas-accordion-tab">Image Storage</h4>
                                 <div class="accordion__tab-content">
                                     <ul class="accordion__tab-list">
-                                        <li class="accordion__tab-item" data-ng-repeat="imagestorage in metadata.imagestorage | orderBy:['name']"  data-ng-class="{ active: isFilterActive('imagestorage', imagestorage.name, 'overview') }">
-                                            <a class="accordion__tab-link" href="" data-ng-click="updateFilter('imagestorage', imagestorage.name, 'overview')">{$ imagestorage.name $}</a>
+                                        <li class="accordion__tab-item" data-ng-repeat="imagestorage in metadata.imagestorage | orderBy:['name']"  data-ng-class="{ active: isFilterActive('imagestorage', imagestorage.name, 'successRate') }">
+                                            <a class="accordion__tab-link" href="" data-ng-click="updateFilter('imagestorage', imagestorage.name, 'successRate')">{$ imagestorage.name $}</a>
                                         </li>
                                     </ul>
                                 </div>
@@ -172,8 +171,8 @@
                                 <h4 class="accordion__tab-title maas-accordion-tab">Database</h4>
                                 <div class="accordion__tab-content">
                                     <ul class="accordion__tab-list">
-                                        <li class="accordion__tab-item" data-ng-repeat="database in metadata.database | orderBy:['name']"  data-ng-class="{ active: isFilterActive('database', database.name, 'overview') }">
-                                            <a class="accordion__tab-link" href="" data-ng-click="updateFilter('database', database.name, 'overview')">{$ database.name $}</a>
+                                        <li class="accordion__tab-item" data-ng-repeat="database in metadata.database | orderBy:['name']"  data-ng-class="{ active: isFilterActive('database', database.name, 'successRate') }">
+                                            <a class="accordion__tab-link" href="" data-ng-click="updateFilter('database', database.name, 'successRate')">{$ database.name $}</a>
                                         </li>
                                     </ul>
                                 </div>
@@ -189,7 +188,7 @@
                                 <div id="content" class="nine-col last-col">
                                     <div id="search-bar" class="search">
                                         <input
-                                            type="search" placeholder="Search pipelines" class="search__input"
+                                            type="search" placeholder="Search test runs" class="search__input"
                                             data-ng-model="search" data-ng-change="updateSearch()"
                                             data-ng-class="{ error: !searchValid }"/>
                                         <input type="submit" class="search__submit"
@@ -200,11 +199,11 @@
 
                                 <!------------------------------------------------>
 
-                                <div data-ng-show="currentpage === 'overview'">
+                                <div data-ng-show="currentpage === 'successRate'">
                                     <div class="nine-col last-col">
-                                        <nvd3 options="overview.stack_bar_options"
-                                            data="overview.stack_bar_data"
-                                            config="overview.stack_bar_config"
+                                        <nvd3 options="successRate.stack_bar_options"
+                                            data="successRate.stack_bar_data"
+                                            config="successRate.stack_bar_config"
                                             ></nvd3>
                                     </div>
                                 </div>

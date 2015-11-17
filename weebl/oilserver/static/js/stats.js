@@ -1,8 +1,7 @@
 var app = angular.module('weebl');
-
-app.controller('overviewController', [
-    '$scope', '$rootScope', 'buildsRetriever', 'UserService', 'bugsRetriever', 'SearchService', 'metadataRetriever',
-    function($scope, $rootScope, buildsRetriever, UserService, bugsRetriever, SearchService, metadataRetriever) {
+app.controller('successRateController', [
+    '$scope', '$rootScope', 'buildsRetriever', 'bugsRetriever', 'SearchService', 'metadataRetriever',
+    function($scope, $rootScope, buildsRetriever, bugsRetriever, SearchService, metadataRetriever) {
         binding = this;
         binding.user = $scope.this.user;
         binding.apikey = $scope.this.apikey;
@@ -12,9 +11,9 @@ app.controller('overviewController', [
         $scope.metadata = {};
 
         $scope.tabs = {};
-        $scope.tabs.overview = {};
-        $scope.tabs.overview.pagetitle = "Overview";
-        $scope.tabs.overview.currentpage = "overview";
+        $scope.tabs.successRate = {};
+        $scope.tabs.successRate.pagetitle = "successRate";
+        $scope.tabs.successRate.currentpage = "successRate";
         $scope.tabs.bugs = {};
         $scope.tabs.bugs.pagetitle = "Bugs";
         $scope.tabs.bugs.currentpage = "bugs";
@@ -141,10 +140,7 @@ app.controller('overviewController', [
         };
 
         metadataRetriever.refresh($scope);
-        $scope.updateFilter('date', 'Last 24 Hours', 'overview');
-        $scope.toggleTab('overview');
+        $scope.updateFilter('date', 'Last 24 Hours', 'successRate');
+        $scope.toggleTab('successRate');
         $scope.sortTable('occurrence_count', 'bugs');
-
-        //$scope.users = UserService.query();
-        $scope.scopey = UserService.get({build_id: 1});
     }]);

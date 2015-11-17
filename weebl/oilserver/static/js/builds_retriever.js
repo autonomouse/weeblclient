@@ -56,7 +56,7 @@ app.factory('buildsRetriever', ['$http', '$q', function($http, $q) {
                     axisLabel: 'Job Name'
                 },
                 yAxis: {
-                    axisLabel: 'Pipeline Count',
+                    axisLabel: 'Test Run Count',
                     tickFormat: function(d) {
                         return d3.format(',d')(d);
                     }
@@ -65,7 +65,7 @@ app.factory('buildsRetriever', ['$http', '$q', function($http, $q) {
             },
             title: {
                 enable: true,
-                text: "Showing successes per job of " + total + " matching pipelines.",
+                text: "Showing successes per job of " + total + " matching test runs.",
                 css: {
                     width: "nullpx",
                     textAlign: "center"
@@ -76,20 +76,20 @@ app.factory('buildsRetriever', ['$http', '$q', function($http, $q) {
 
         var stack_bar_data = [
             {
-                key: "Pipeline Success",
+                key: "Test Run Success",
                 values: [
                     {
-                        "label" : "Pipeline Deploy" ,
+                        "label" : "Deploy Openstack" ,
                         "value" : pass_deploy_count,
                         "color" : "#77216F"
                     } ,
                     {
-                        "label" : "Pipeline Prepare" ,
+                        "label" : "Configure Openstack for test" ,
                         "value" : pass_prepare_count,
                         "color" : "#6E3C61"
                     } ,
                     {
-                        "label" : "Guest OS Test" ,
+                        "label" : "SSH to guest instance",
                         "value" : pass_test_cloud_image_count,
                         "color" : "#411934"
                     }
