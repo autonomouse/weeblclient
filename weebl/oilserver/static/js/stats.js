@@ -4,6 +4,8 @@ app.controller('overviewController', [
     '$scope', '$rootScope', 'buildsRetriever', 'UserService', 'bugsRetriever', 'SearchService', 'metadataRetriever',
     function($scope, $rootScope, buildsRetriever, UserService, bugsRetriever, SearchService, metadataRetriever) {
         binding = this;
+        binding.user = $scope.this.user;
+        binding.apikey = $scope.this.apikey;
         $scope.filters = SearchService.getEmptyFilter();
         $scope.bugs = {};
 

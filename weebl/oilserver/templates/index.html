@@ -17,7 +17,7 @@
         {% include "js-conf.html" %}
     </head>
 
-    <body data-ng-init="site = 'OIL'">
+    <body data-ng-init="site = 'OIL'; user = '{{ user.username }}'; apikey = '{{ user.api_key.key }}'">
         <div class="wrapper maas-wrapper">
             <header class="banner global fixed" role="banner">
                 <nav role="navigation" class="nav-primary nav-right">
@@ -68,7 +68,6 @@
                             <h1 class="page-header__title">
                                 {$ $parent.site $}
                                 <span class="page-header__title--identicator" id="bulk-actions">
-                                    <!-- XXX blake_r 2015-02-19 - Need to add e2e test. -->
                                     <a href=""
                                         data-ng-class="{ active: currentpage === 'overview' }"
                                         data-ng-click="toggleTab('overview')">Overview</a>
