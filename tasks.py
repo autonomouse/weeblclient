@@ -22,7 +22,6 @@ test_db_name = "test_bugs_database"
 prdctn_db_name = "bugs_database"
 test_settings = "test_settings"
 prdctn_settings = "settings"
-sites_available_location = "/etc/apache2/sites-available/weebl.conf"
 file_loc = os.path.dirname(os.path.abspath(__file__))
 deploy_path = "{}/{}".format(file_loc, application)  # change
 setup_file_loc = "setup.py"
@@ -37,10 +36,10 @@ def list():
     run('invoke --help')
 
 @task(help={'database': "Type test or production",
-        'server': "Defaults to Apache. Can alternatively user 'runserver'",
+        'server': "Defaults to 'runserver'",
         'ip-addr': "IP to run server on. Defaults to 127.0.0.1.",
         'port': "Port to run server on. Defaults to 8000.", })
-def go(database, server="apache", ip_addr="127.0.0.1", port=8000):
+def go(database, server="runserver", ip_addr="127.0.0.1", port=8000):
     """Set up and run weebl using either a test or a production database."""
     manage_static_files()
     initialise_database(database)
@@ -379,60 +378,13 @@ def yes_no(val):
 def i_am_sure(val):
     return True if val.lower() == "i am sure" else False
 
-def deploy(ipaddr=None, port=None, server="apache"):
-    if server == "apache":
-        deploy_with_apache(sites_available_location, deploy_path, application)
-    else:
+def deploy(ipaddr=None, port=None, server="runserver"):
+    if server == "runserver":
         deploy_with_runserver(ipaddr, port)
 
 def deploy_with_runserver(ipaddr, port):
     result = run('{} {} {}/manage.py runserver {}:{}'.format(preamble,
                  python3_version, application, ipaddr, port), pty=True)
-
-def deploy_with_apache(apacheconf, deployloc, application, wsgifile="wsgi.py",
-                       static_dir="oilserver/static", user_group = "www-data"):
-    """Writes apache conf file and restarts the service."""
-
-    with open(setup_file_loc, 'r') as su:
-        author_email_list = [admin for admin in su.readlines() if
-                             'author_email' in admin]
-    pattern = re.compile("<.*>")
-    author_email = pattern.findall(str(author_email_list[0]))[0][1:-1]
-
-    a2conf = "ServerName {2}\n"
-    a2conf += "LogLevel debug\n"
-    a2conf += "\n"
-    a2conf += "\n"
-    a2conf += "Alias /static {0}/{3}\n"
-    a2conf += "<Directory {0}/{3}>\n"
-    a2conf += "     Require all granted\n"
-    a2conf += "</Directory>\n"
-    a2conf += "\n"
-    a2conf += "<Directory {0}/{2}>\n"
-    a2conf += "    <Files {1}>\n"
-    a2conf += "        Require all granted\n"
-    a2conf += "    </Files>\n"
-    a2conf += "</Directory>\n"
-    a2conf += "\n"
-    a2conf += "WSGIDaemonProcess weebl user={6} group={6} python-path={0}"
-    a2conf += "\n"
-    a2conf += "WSGIProcessGroup weebl\n"
-    a2conf += "WSGIScriptAlias / {0}/{2}/{1}\n"
-    a2conf += "\n"
-    a2conf += "ServerAdmin {4}\n"
-    a2conf += "ErrorLog {5}/error.log\n"
-    a2conf += "CustomLog {5}/access.log combined\n"
-    a2conf = a2conf.format(deployloc, wsgifile, application, static_dir,
-                           author_email, "${APACHE_LOG_DIR}", user_group)
-
-    with open(apacheconf, 'w') as apache_conf_file:
-        print(a2conf, file=apache_conf_file)
-
-    run("sudo apache2ctl -t") # == 'Syntax OK'
-    run("sudo a2enmod wsgi") # == "Module wsgi already enabled"
-    run("sudo a2ensite weebl.conf") #
-    run("sudo service apache2 reload")
-    run("sudo service apache2 restart")
 
 def mkdir(directory):
     """ Make a directory, check and throw an error if failed. """

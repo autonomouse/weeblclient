@@ -14,11 +14,9 @@ apt-get -y --no-upgrade install \
     python3-mimeparse \
     python3-dateutil \
     python3-requests \
-    apache2 \
     python \
     python-selenium \
     python3-flake8 \
-    libapache2-mod-wsgi-py3 \
     pandoc \
     python3-pytest \
     python3-freezegun \
