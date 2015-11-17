@@ -10,7 +10,6 @@ data_dir = "/home/ubuntu/production_data/gen_oil_stats/builds"
 weebl = Weebl("124591ef-361d-4a33-a756-fa79b3b7a1f8",
               "production",
               weebl_url="http://10.245.0.14")
-              #weebl_url="http://localhost:8000")
 
 for doberman_out_folder in os.listdir(data_dir):
     full_path = os.path.join(data_dir, doberman_out_folder)

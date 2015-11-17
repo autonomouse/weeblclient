@@ -633,6 +633,7 @@ class Weebl(object):
         return len(buildexecutor_instances) > 0
 
     def create_buildexecutor(self, buildexecutor_name):
+        buildexecutor_name = buildexecutor_name.lstrip('(').rstrip(')')
         jenkins_resource_uri = self._pk_uri(
             'jenkins', self._get_jenkins_uuid())
         url = self.make_url("buildexecutor")
