@@ -1,8 +1,8 @@
 var app = angular.module('weebl');
 
 app.controller('overviewController', [
-    '$scope', '$rootScope', 'buildsRetriever', 'bugsRetriever', 'SearchService', 'metadataRetriever',
-    function($scope, $rootScope, buildsRetriever, bugsRetriever, SearchService, metadataRetriever) {
+    '$scope', '$rootScope', 'buildsRetriever', 'UserService', 'bugsRetriever', 'SearchService', 'metadataRetriever',
+    function($scope, $rootScope, buildsRetriever, UserService, bugsRetriever, SearchService, metadataRetriever) {
         binding = this;
         $scope.filters = SearchService.getEmptyFilter();
         $scope.bugs = {};
@@ -142,4 +142,7 @@ app.controller('overviewController', [
         $scope.updateFilter('date', 'Last 24 Hours', 'overview');
         $scope.toggleTab('overview');
         $scope.sortTable('occurrence_count', 'bugs');
+
+        //$scope.users = UserService.query();
+        $scope.scopey = UserService.get({build_id: 1});
     }]);

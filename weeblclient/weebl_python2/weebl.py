@@ -16,18 +16,19 @@ else:
 class Weebl(object):
     """Weebl API wrapper class."""
 
-    def __init__(self, uuid, env_name,
+    def __init__(self, uuid, env_name, username=None, apikey=None,
                  weebl_url="http://10.245.0.14",
-                 weebl_api_ver="v1",
-                 weebl_auth=('weebl', 'passweebl')):
+                 weebl_api_ver="v1"):
         self.LOG = utils.get_logger("weeblSDK_python2")
         self.env_name = env_name
         self.uuid = uuid
         self.weebl_api_version = weebl_api_ver
         self.weebl_url = weebl_url
-        self.weebl_auth = weebl_auth
         self.headers = {"content-type": "application/json",
                         "limit": None}
+        if username is not None:
+            self.headers["Authorization"] =\
+                "ApiKey {}:{}".format(username, apikey)
         self.resource_url = "/api/{}/".format(weebl_api_ver)
         self.base_url = urljoin(weebl_url, self.resource_url)
         self._jenkins_uuid = None
@@ -44,7 +45,6 @@ class Weebl(object):
 
     def make_request(self, method, **payload):
         payload['headers'] = self.headers
-        # payload['auth'] = self.weebl_auth
         try:
             if method == 'get':
                 response = requests.get(**payload)

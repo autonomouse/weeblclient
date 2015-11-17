@@ -1,7 +1,8 @@
 import utils
 from tastypie import fields
 from tastypie.resources import ModelResource, ALL, ALL_WITH_RELATIONS
-from tastypie.authorization import Authorization
+from tastypie.authorization import DjangoAuthorization
+from tastypie.authentication import ApiKeyAuthentication
 from tastypie.utils import trailing_slash
 from django.conf.urls import url
 from oilserver import models
@@ -68,7 +69,8 @@ class EnvironmentResource(CommonResource):
         list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
         fields = ['uuid', 'name']
-        authorization = Authorization()
+        authorization = DjangoAuthorization()
+        authentication = ApiKeyAuthentication()
         always_return_data = True
         filtering = {'uuid': ('exact',)}
         detail_uri_name = 'uuid'
@@ -101,7 +103,8 @@ class ServiceStatusResource(CommonResource):
         list_allowed_methods = ['get']  # all items
         detail_allowed_methods = ['get']  # individual
         fields = ['name', 'description']
-        authorization = Authorization()
+        authorization = DjangoAuthorization()
+        authentication = ApiKeyAuthentication()
         always_return_data = True
         filtering = {'name': ('exact',), }
         detail_uri_name = 'name'
@@ -117,7 +120,8 @@ class JenkinsResource(CommonResource):
                   'internal_access_url', 'servicestatus_updated_at', 'uuid']
         list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
-        authorization = Authorization()
+        authorization = DjangoAuthorization()
+        authentication = ApiKeyAuthentication()
         always_return_data = True
         filtering = {
             'environment': ALL_WITH_RELATIONS,
@@ -141,7 +145,8 @@ class BuildExecutorResource(CommonResource):
         fields = ['name', 'uuid', 'jenkins']
         list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
-        authorization = Authorization()
+        authorization = DjangoAuthorization()
+        authentication = ApiKeyAuthentication()
         always_return_data = True
         filtering = {'jenkins': ALL_WITH_RELATIONS,
                      'name': ALL,
@@ -156,7 +161,8 @@ class UbuntuVersionResource(CommonResource):
         list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
         fields = ['name', 'number']
-        authorization = Authorization()
+        authorization = DjangoAuthorization()
+        authentication = ApiKeyAuthentication()
         always_return_data = True
         filtering = {'name': ALL, }
         detail_uri_name = 'name'
@@ -169,7 +175,8 @@ class OpenstackVersionResource(CommonResource):
         list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
         fields = ['name']
-        authorization = Authorization()
+        authorization = DjangoAuthorization()
+        authentication = ApiKeyAuthentication()
         always_return_data = True
         filtering = {'name': ALL, }
         detail_uri_name = 'name'
@@ -183,7 +190,8 @@ class SDNResource(CommonResource):
         list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
         fields = ['name']
-        authorization = Authorization()
+        authorization = DjangoAuthorization()
+        authentication = ApiKeyAuthentication()
         always_return_data = True
         filtering = {'name': ALL, }
         detail_uri_name = 'name'
@@ -196,7 +204,8 @@ class ComputeResource(CommonResource):
         list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
         fields = ['name']
-        authorization = Authorization()
+        authorization = DjangoAuthorization()
+        authentication = ApiKeyAuthentication()
         always_return_data = True
         filtering = {'name': ALL, }
         detail_uri_name = 'name'
@@ -209,7 +218,8 @@ class BlockStorageResource(CommonResource):
         list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
         fields = ['name']
-        authorization = Authorization()
+        authorization = DjangoAuthorization()
+        authentication = ApiKeyAuthentication()
         always_return_data = True
         filtering = {'name': ALL, }
         detail_uri_name = 'name'
@@ -222,7 +232,8 @@ class ImageStorageResource(CommonResource):
         list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
         fields = ['name']
-        authorization = Authorization()
+        authorization = DjangoAuthorization()
+        authentication = ApiKeyAuthentication()
         always_return_data = True
         filtering = {'name': ALL, }
         detail_uri_name = 'name'
@@ -235,7 +246,8 @@ class DatabaseResource(CommonResource):
         list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
         fields = ['name']
-        authorization = Authorization()
+        authorization = DjangoAuthorization()
+        authentication = ApiKeyAuthentication()
         always_return_data = True
         filtering = {'name': ALL, }
         detail_uri_name = 'name'
@@ -267,7 +279,8 @@ class PipelineResource(CommonResource):
                   'imagestorage', 'database']
         list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
-        authorization = Authorization()
+        authorization = DjangoAuthorization()
+        authentication = ApiKeyAuthentication()
         always_return_data = True
         filtering = {'uuid': ALL,
                      'completed_at': ALL,
@@ -289,7 +302,8 @@ class BuildStatusResource(CommonResource):
         list_allowed_methods = ['get']  # all items
         detail_allowed_methods = ['get']  # individual
         fields = ['name', 'description']
-        authorization = Authorization()
+        authorization = DjangoAuthorization()
+        authentication = ApiKeyAuthentication()
         always_return_data = True
         filtering = {'name': ALL, }
         detail_uri_name = 'name'
@@ -302,7 +316,8 @@ class JobTypeResource(CommonResource):
         list_allowed_methods = ['get']  # all items
         detail_allowed_methods = ['get']  # individual
         fields = ['name', 'description']
-        authorization = Authorization()
+        authorization = DjangoAuthorization()
+        authentication = ApiKeyAuthentication()
         always_return_data = True
         filtering = {'name': ALL, }
         detail_uri_name = 'name'
@@ -321,7 +336,8 @@ class BuildResource(CommonResource):
         fields = ['uuid', 'build_id', 'artifact_location', 'build_started_at',
                   'build_finished_at', 'build_analysed_at', 'pipeline',
                   'buildstatus', 'jobtype']
-        authorization = Authorization()
+        authorization = DjangoAuthorization()
+        authentication = ApiKeyAuthentication()
         always_return_data = True
         filtering = {'uuid': ALL,
                      'build_id': ALL,
@@ -340,7 +356,8 @@ class TargetFileGlobResource(CommonResource):
         list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
         fields = ['glob_pattern', 'jobtypes']
-        authorization = Authorization()
+        authorization = DjangoAuthorization()
+        authentication = ApiKeyAuthentication()
         always_return_data = True
         filtering = {'glob_pattern': ALL,
                      'jobtypes': ALL_WITH_RELATIONS, }
@@ -354,7 +371,8 @@ class ProjectResource(CommonResource):
         list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
         fields = ['name', 'bug_tracker']
-        authorization = Authorization()
+        authorization = DjangoAuthorization()
+        authentication = ApiKeyAuthentication()
         always_return_data = True
         filtering = {'name': ALL, }
         detail_uri_name = 'name'
@@ -417,7 +435,8 @@ class BugResource(CommonResource):
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
         fields = ['uuid', 'summary', 'description', 'knownbugregex',
                   'bugtrackerbug', 'created_at', 'updated_at']
-        authorization = Authorization()
+        authorization = DjangoAuthorization()
+        authentication = ApiKeyAuthentication()
         always_return_data = True
         filtering = {'summary': ('contains', 'exact'),
                      'knownbugregex': ALL_WITH_RELATIONS,
@@ -449,7 +468,8 @@ class BugTrackerBugResource(CommonResource):
         list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
         fields = ['uuid', 'bug_number', 'project', 'created_at', 'updated_at']
-        authorization = Authorization()
+        authorization = DjangoAuthorization()
+        authentication = ApiKeyAuthentication()
         always_return_data = True
         filtering = {'bug_number': ALL, }
         detail_uri_name = 'uuid'
@@ -469,7 +489,8 @@ class KnownBugRegexResource(CommonResource):
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
         fields = ['bug', 'uuid', 'regex', 'targetfileglobs',
                   'created_at', 'updated_at']
-        authorization = Authorization()
+        authorization = DjangoAuthorization()
+        authentication = ApiKeyAuthentication()
         always_return_data = True
         filtering = {'uuid': ALL,
                      'regex': ALL,
@@ -487,7 +508,8 @@ class BugOccurrenceResource(CommonResource):
         list_allowed_methods = ['get', 'post', 'delete']  # all items
         detail_allowed_methods = ['get', 'post', 'put', 'delete']  # individual
         fields = ['uuid', 'build', 'regex', 'created_at', 'updated_at']
-        authorization = Authorization()
+        authorization = DjangoAuthorization()
+        authentication = ApiKeyAuthentication()
         always_return_data = True
         filtering = {'uuid': ALL,
                      'build': ALL_WITH_RELATIONS,

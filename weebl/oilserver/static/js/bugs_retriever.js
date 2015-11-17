@@ -1,6 +1,7 @@
 app.factory('bugsRetriever', ['$http', function($http) {
+
   var refresh = function(scope, pipeline_filters) {
-    var url = "/api/v1/bug/";
+    var url = "/api/v1/bug/?username=?username=DarrenHoyland\&api_key=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
     parameters = {};
     for (var filter in pipeline_filters) {
         key = "knownbugregex__bugoccurrences__build__pipeline__" + filter;

@@ -11,7 +11,7 @@ app.factory('metadataRetriever', ['$http', function($http) {
 
     var refresh = function(scope) {
         for (var key in enum_fields) {
-            var url = "/api/v1/" + enum_fields[key] + "/";
+            var url = "/api/v1/" + enum_fields[key] + "/?username=DarrenHoyland\&api_key=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
             (function(actual_key) {
                 $http.get(url).success(function(data) {
                     scope.metadata[actual_key] = data.objects;

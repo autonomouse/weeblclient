@@ -1,6 +1,7 @@
 app.factory('buildsRetriever', ['$http', '$q', function($http, $q) {
+
   var refresh = function(scope, pipeline_filters) {
-    var url = "/api/v1/build/";
+    var url = "/api/v1/build/?username=DarrenHoyland\&api_key=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 
     function create_params(jobtype_name, buildstatus_name) {
         var parameters = {

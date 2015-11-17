@@ -1,1 +1,1 @@
-var app = angular.module('weebl', ['nvd3']);
+var app = angular.module('weebl', ['nvd3', 'ngResource']);

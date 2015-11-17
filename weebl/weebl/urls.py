@@ -28,16 +28,15 @@ v_api.register(resources.ImageStorageResource())
 v_api.register(resources.DatabaseResource())
 v_api.register(resources.ProjectResource())
 
-urlpatterns = patterns('',
-                       url(r'^', include('oilserver.urls')),
-                       url(r'^api/', include(v_api.urls)),
-                       url(r'api/',
-                           include('tastypie_swagger.urls',
-                                   namespace='api_docs'),
-                           kwargs={"tastypie_api_module": "weebl.urls.v_api",
-                                   "namespace": "api_docs",
-                                   "version": __api_version__}),
-                       url(r'', include('social.apps.django_app.urls',
-                           namespace='social')),
-                       url(r'^admin/', include(admin.site.urls)),
-                       )
+urlpatterns = patterns(
+    '',
+    url(r'^', include('oilserver.urls')),
+    url(r'^api/', include(v_api.urls)),
+    url(r'api/', include('tastypie_swagger.urls',
+                         namespace='api_docs'),
+                         kwargs={"tastypie_api_module": "weebl.urls.v_api",
+                                 "namespace": "api_docs",
+                                 "version": __api_version__}),
+    url(r'', include('social.apps.django_app.urls', namespace='social')),
+    url(r'^admin/', include(admin.site.urls)),
+    )
