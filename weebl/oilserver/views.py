@@ -3,7 +3,6 @@ from django.contrib.auth import logout
 from django.shortcuts import redirect
 
 
-
 def main_page(request):
     return render(request, 'index.html')
 

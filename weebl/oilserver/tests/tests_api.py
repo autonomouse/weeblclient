@@ -36,10 +36,12 @@ class CommonResourceTest(ResourceTests):
     CommonResource isn't a concrete resource, so we can't test it
     directly. These tests will run against resources that inherit it.
     """
+
     def test_get_meta_only(self):
         """Ensure only meta is returned when meta_only flag is in request."""
         url = '/api/%s/servicestatus/?meta_only=true' % (self.version)
-        response = self.api_client.get(url, format='json')
+        response = self.api_client.get(
+            url, format='json', authentication=self.get_credentials())
         response_dict = self.deserialize(response)
         self.assertEqual(response.status_code, 200,
                          msg="Incorrect status code")
@@ -50,10 +52,11 @@ class EnvironmentResourceTest(ResourceTests):
     def test_get_specific_environment_by_name(self):
         """GET a specific environment instance by its name."""
         name = "mock_production"
-        r_dict0 = self.make_environment(name)
+        r_dict0 = self.make_environment_via_api(name)
         response = self.api_client.get('/api/{}/environment/by_name/{}/'
                                        .format(self.version, name),
-                                       format='json')
+                                       format='json',
+                                       authentication=self.get_credentials())
         r_dict1 = self.deserialize(response)
 
         self.assertEqual(r_dict0, r_dict1)
@@ -65,7 +68,8 @@ class BugResourceTest(ResourceTests):
 
     def retrieve_bug(self, uuid):
         url = '/api/%s/bug/%s/' % (self.version, uuid)
-        response = self.api_client.get(url, format='json')
+        response = self.api_client.get(
+            url, format='json', authentication=self.get_credentials())
         self.assertEqual(
             response.status_code, 200, msg='Incorrect status code')
         response_dict = self.deserialize(response)
@@ -79,7 +83,8 @@ class BugResourceTest(ResourceTests):
         bugoccurrence = make_bugoccurrence()
         url = '/api/%s/bug/?knownbugregex__bugoccurrences__uuid=%s' % (
             self.version, bugoccurrence.uuid)
-        response = self.api_client.get(url, format='json')
+        response = self.api_client.get(
+            url, format='json', authentication=self.get_credentials())
         self.assertEqual(response.status_code, 200,
                          msg="Incorrect status code")
         response_dict = self.deserialize(response)

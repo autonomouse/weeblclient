@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.db import models
 from tastypie.models import create_api_key
 
+
 class OilserverConfig(AppConfig):
 
     name = 'oilserver'

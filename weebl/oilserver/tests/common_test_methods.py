@@ -4,6 +4,7 @@ from weebl import urls
 from django.test import TestCase
 from tastypie.test import ResourceTestCase
 from oilserver import models
+from django.contrib.auth.models import User
 
 
 class WeeblTestCase(TestCase):
@@ -14,15 +15,33 @@ class ResourceTests(ResourceTestCase):
     version = urls.v_api.api_name
     fixtures = ['initial_settings.yaml']
 
+    def setUp(self):
+        super(ResourceTests, self).setUp()
+
+        # Create mock user:
+        self.username = 'mock_user'
+        email = "{}@example.com".format(self.username)
+        user = User.objects.create_user(self.username, email)
+        user.is_superuser = True
+        user.is_admin = True
+        user.is_staff = True
+        user.save()
+        self.api_key = User.objects.get(username=self.username).api_key.key
+
+    def get_credentials(self):
+        return self.create_apikey(
+            username=self.username, api_key=self.api_key)
+
     def post_create_instance(self, model, data):
         response = self.api_client.post(
-            '/api/{}/{}/'.format(self.version, model), data=data)
+            '/api/{}/{}/'.format(self.version, model), data=data,
+            authentication=self.get_credentials())
         return (self.deserialize(response), response.status_code)
 
     def post_create_instance_without_status_code(self, model, data):
         return self.post_create_instance(model, data)[0]
 
-    def make_environment(self, name=None):
+    def make_environment_via_api(self, name=None):
         if name is None:
             name = utils.generate_random_string()
         data = {'name': name}
@@ -30,9 +49,10 @@ class ResourceTests(ResourceTestCase):
             'environment', data=data)
 
 
-def make_environment():
-    environment = models.Environment(
-        name=utils.generate_random_string())
+def make_environment(name=None):
+    if name is None:
+        name = utils.generate_random_string()
+    environment = models.Environment(name=name)
     environment.save()
     return environment
 
