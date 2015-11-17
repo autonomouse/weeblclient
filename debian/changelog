@@ -1,91 +1,50 @@
-weebl (1.0.7) precise; urgency=medium
+weeblclient (1.0.6) precise; urgency=medium
 
-  * Added some get_by_name methods 
+  * Now uses InstanceAlreadyExists exception.
+  * Implemented the calls needed to create each of the parameters that Pipeline creation requires.
 
- -- Darren Hoyland <darren.hoyland@canonical.com>  Fri, 13 Nov 2015 17:46:31 +0000
+ -- Darren Hoyland <darren.hoyland@canonical.com>  Fri, 06 Nov 2015 17:36:55 +0000
 
-weebl (1.0.5) precise; urgency=medium
+weeblclient (1.0.5) precise; urgency=medium
 
   * Make install_deps work for wily.
-  * Log in with SSO. Admins to be added manually.
+  * Instance_exists were being called incorrectly - fixed.
   * Run npm install in install_deps.
-  * Fixes for moving to wily and tidied up static files.
+  * No longer raises an error if unexpected status code - now that we're not checking if exists first, it makes it too noisy. The errors are still logged.
 
  -- Darren Hoyland <darren.hoyland@canonical.com>  Thu, 05 Nov 2015 16:17:43 +0000
 
-weebl (1.0.4) precise; urgency=medium
+weeblclient (1.0.4) precise; urgency=medium
 
-  * Now installs on wily
-  * Can now log in via Canonical's SSO
-  * Enabled Django's admin interface
+  * Fix for instance_exists methods that were being called incorrectly
 
  -- Darren Hoyland <darren.hoyland@canonical.com>  Wed, 04 Nov 2015 13:05:25 +0000
 
-weebl (1.0.0) precise; urgency=medium
+weeblclient (1.0.3) precise; urgency=medium
 
-  * Separate stas/builds into different modules with separate controllers.
-  * UI improvements.
-  * Filters now work.
-  * Added fake_data command to generate test data.
-  * Removed django views and view tests - now fully reliant on AngularJS for UI.
-  * Vastly simplified the API code and removed redundant tests.
-  * Changed relation between Bug and BugTrackerBug from a ManyToMany to a ForeignKey.
-  * Added Compute, Block Storage, Image Storage, Database models.
-  * Fix for running on Apache - All javascript libraries can now imported into static.
-  * Added Project model.
-  * Invoke (tasks.py) improvements.
-  * Table sorting now works.
-  * Fixed migrations file 0001.
-  * Renamed many models fields and API variables to not use underscores to maintain consistent naming across weebl, django and tastypie.
+   * Readded regex_uuid to bugs dict (missed it out in refactor).
 
- -- Darren Hoyland <darren.hoyland@canonical.com>  Thu, 22 Oct 2015 09:45:32 +0100
+  -- Darren Hoyland <darren.hoyland@canonical.com>  Wed, 29 Oct 2015 18:00:01 +0000
 
-weebl (0.7.2) precise; urgency=medium
+weeblclient (1.0.2) precise; urgency=medium
 
-  * Added filtering for REST API on EnvironmentResource, JenkinsResource, BuildExecutorResource, PipelineResource, BuildResource, TargetFileGlobResource, KnownBugRegexResource and BugOccurrenceResource.
+   * Fix for filter method doubling the base of the url.
+   * Added get_pipeline_from_uuid method to weebl client
 
- -- Darren Hoyland <darren.hoyland@canonical.com>  Thu, 17 Sep 2015 08:55:00 -0400
+  -- Darren Hoyland <darren.hoyland@canonical.com>  Wed, 28 Oct 2015 22:45:57 +0000
 
-weebl (0.7.1) precise; urgency=medium
+weeblclient (1.0.1) precise; urgency=medium
 
-  * Add client-side python API
+   * Added tests for uploading and downloading regexes/bugs.
+   * Fixed regex/bugs upload and download so that doberman gets all of the bugs database.
 
- -- Greg Lutostanski <gregory.lutostanski@canonical.com>  Tue, 15 Sep 2015 12:30:18 +0400
+  -- Darren Hoyland <darren.hoyland@canonical.com>  Wed, 28 Oct 2015 13:54:21 +0000
 
-weebl (0.7.0) vivid; urgency=medium
+weeblclient (1.0.0) precise; urgency=medium
 
-  * Added BugOccurrence model, API and tests
+   * Fixed weeblclient so works with new models and resource files - does not do as much hand-holding now, for example, checking for existence before instance creation has been removed, so this now needs to be done by whatever is calling the client.
+   * Allows doberman to get bug info in the expected format.
+   * Client now also has tests. (Client is still lacking docstrings to document how to use it).
+   * Version bumped to 1.0.0 because weebl server is now accepting real data. Please keep this version number as 1.x.x unless the API version (currently at v1) is also increased to v2 in weebl
 
- -- Darren Hoyland <darren.hoyland@canonical.com>  Tue, 08 Sep 2015 11:26:18 +0100
-
- weebl (0.6.0) vivid; urgency=medium
-
-  * Added BugTrackerBug model, API and tests
-
- -- Darren Hoyland <darren.hoyland@canonical.com>  Tue, 08 Sep 2015 11:26:18 +0100
-
-weebl (0.5.0) vivid; urgency=medium
-
-  * Added Bug model, API and tests
-
- -- Darren Hoyland <darren.hoyland@canonical.com>  Mon, 07 Sep 2015 22:05:23 +0100
-
-weebl (0.4.0) vivid; urgency=medium
-
-  * Added KnownBugRegex model, API and tests
-  * Also added a BaseModel with timestamp data, but this is only linked into the KnownBugRegex model for now
-
- -- Darren Hoyland <darren.hoyland@canonical.com>  Wed, 02 Sep 2015 14:35:39 +0100
-
-weebl (0.3.0) vivid; urgency=medium
-
-  * Added TargetFileGlob model, API and tests
-
- -- Darren Hoyland <darren.hoyland@canonical.com>  Tue, 01 Sep 2015 10:29:24 +0100
-
-weebl (0.2.0) vivid; urgency=low
-
-  * Added Environment and BuildExecutor models, API and tests
-  * Added a changelog
-
- -- Darren Hoyland <darren.hoyland@canonical.com>  Thu, 27 Aug 2015 09:35:31 +0100
+  -- Darren Hoyland <darren.hoyland@canonical.com>  Thu, 22 Oct 2015 09:45:32 +0100

@@ -13,5 +13,5 @@ override_dh_install:
 	echo
 
 get-orig-source:
-	git archive --format tar.gz HEAD -o ../weebl_${VERS}.orig.tar.gz
+	git archive --format tar.gz HEAD -o ../weeblclient_${VERS}.orig.tar.gz
 	dh_auto_clean

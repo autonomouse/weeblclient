@@ -1,5 +1,5 @@
 #!/bin/bash
-# Should be run from top of source tree with local weebl_client in PYTHONPATH
+# Should be run from top of source tree with local weeblclient in PYTHONPATH
 rm -rf *.egg-info
 [[ -n "$(git status --porcelain)" ]] && echo "Repo not clean" && exit 1
 distro=${1:-"precise"}
@@ -18,4 +18,4 @@ rc=$?
 git reset --hard HEAD
 rm -rf *.egg-info
 [[ ! $rc ]] && echo "Build failed" && exit 1
-echo "Run: dput ppa:canonical-ci/oil-ci ../weebl*git${git_commit}*.changes"
+echo "Run: dput ppa:canonical-ci/oil-ci ../weeblclient*git${git_commit}*.changes"
