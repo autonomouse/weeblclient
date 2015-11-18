@@ -21,7 +21,10 @@ jenkins_host = "http://oil-jenkins.canonical.com"
 environment_name = "integration"
 environment_uuid = "7c82e43a-f5d6-47fb-ad9c-7d45c7ff48a7"
 
-weebl = Weebl(environment_uuid, environment_name, username, apikey,
+weebl = Weebl(environment_uuid, 
+              environment_name, 
+              username, 
+              apikey,
               weebl_url=weebl_url)
 weebl.weeblify_environment(jenkins_host)
 

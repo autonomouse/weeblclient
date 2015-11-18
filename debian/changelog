@@ -1,3 +1,12 @@
+weeblclient (1.0.8) precise; urgency=medium
+
+  * Fix for datetime being passed as an object rather than a string.
+  * REST API will now require the user to provide their username and a weebl-generated token, referred to as an 'apikey'. The apikey is auto-generated when a user logs in, but it can be changed from the admin page.
+  * A script for importing hsitorical data from old doberman output files and associated weeblclient changes.
+  * New bugs uploader script (scripts/updatabase.py). Also deleted old version (scripts/bugs_uploader.py).
+
+ -- Darren Hoyland <darren.hoyland@canonical.com>  Wed, 18 Nov 2015 11:41:56 +0000
+
 weeblclient (1.0.6) precise; urgency=medium
 
   * Now uses InstanceAlreadyExists exception.
