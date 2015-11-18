@@ -11,7 +11,11 @@ from datetime import datetime
 from weeblclient.weebl_python2 import utils
 from requests.exceptions import ConnectionError
 from weeblclient.weebl_python2.exception import (
-    UnexpectedStatusCode, InstanceAlreadyExists, UnrecognisedInstance)
+    UnexpectedStatusCode,
+    InstanceAlreadyExists,
+    UnrecognisedInstance,
+    UnauthorisedAPIRequest
+)
 if six.PY3:
     from urllib.parse import urljoin
 else:
@@ -24,6 +28,7 @@ class Weebl(object):
     def __init__(self, uuid, env_name, username=None, apikey=None,
                  weebl_url="http://10.245.0.14",
                  weebl_api_ver="v1"):
+        self.username = username
         self.LOG = utils.get_logger("weeblSDK_python2")
         self.env_name = env_name
         self.uuid = uuid
@@ -68,11 +73,15 @@ class Weebl(object):
         # If response code isn't 2xx:
         msg = "{} request to {} returned a status code of {}"
         err_str = 'duplicate key value violates'
-        if str(response.status_code) == '500' and err_str in response.text:
-                obj = payload['url'].rstrip('/').split('/')[-2]
-                msg += " - {} already exists."
-                raise InstanceAlreadyExists(msg.format(
-                    method, payload['url'], response.status_code, obj))
+        if str(response.status_code) == '401':
+            msg = "{} is not authorised to make this {} request to {}.".format(
+                self.username, method, payload['url'])
+            raise UnauthorisedAPIRequest(msg)
+        elif str(response.status_code) == '500' and err_str in response.text:
+            obj = payload['url'].rstrip('/').split('/')[-2]
+            msg += " - {} already exists."
+            raise InstanceAlreadyExists(msg.format(
+                method, payload['url'], response.status_code, obj))
         if str(response.status_code)[0] != '2':
             msg += ":\n\n {}\n"
             raise UnexpectedStatusCode(msg.format(method, payload['url'],

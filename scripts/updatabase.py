@@ -5,8 +5,12 @@ from weeblclient.weebl_python2.weebl import Weebl
 from weeblclient.weebl_python2.weebl import utils
 
 
+username = '' # Enter your username here (e.g. CanonicalOilCiBot)
+apikey = ''  # Enter api_key (e.g. 8aa0ca63966d78b3099b2759289f239ffdc9d7b6)
+             # (Please note: That isn't the real api_key for oil-ci-bot!)
+
 default_jenkins_host = "http://oil-jenkins.canonical.com"
-default_mockDB = "/usr/share/doberman/samples/mock_database.yml"
+default_mockDB = "/home/darren/Repositories/Canonical/doberman/trunk/samples/mock_database.yml"
 default_environment_name = "production"
 default_environment_uuid = "124591ef-361d-4a33-a756-fa79b3b7a1f8"
 default_weebl_url = "http://10.245.0.14"
@@ -62,7 +66,11 @@ def find_new_or_alterated_bugs(local_db, remote_db):
 
 def main():
     args = parse()
-    weebl = Weebl(args.uuid, args.name, weebl_url=args.weebl)
+    weebl = Weebl(args.uuid,
+                  args.name,
+                  username=username,
+                  apikey=apikey,
+                  weebl_url=default_weebl_url)
     weebl.weeblify_environment(args.jenkins)
     with open(args.file, 'r') as f:
         db = yaml.load(f.read())

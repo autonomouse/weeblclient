@@ -12,3 +12,7 @@ class MissingData(Exception):
 
 class UnrecognisedInstance(Exception):
     pass
+
+
+class UnauthorisedAPIRequest(Exception):
+    pass
