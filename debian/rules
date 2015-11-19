@@ -1,7 +1,7 @@
 #!/usr/bin/make -f
 
 export DH_VERBOSE=1
-VERS=$(shell dpkg-parsechangelog | sed -rne 's,^Version: ([^-]+).*,\1,p')
+VERS=$(shell dpkg-parsechangelog | sed -rne 's,^Version: (.*)-0ubuntu1.*,\1,p')
 
 %:
 	dh $@ --with python2
