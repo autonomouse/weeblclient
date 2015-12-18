@@ -447,8 +447,7 @@ class Weebl(object):
                 not_generic = 'GenericBug_Ignore' not in lp_bug_no
                 not_unfiled = 'unfiled' not in lp_bug_no
                 if not_generic and not_unfiled:
-                    bugtrackerbug = self.create_bugtrackerbug(
-                            lp_bug_no)
+                    bugtrackerbug = self.create_bugtrackerbug(lp_bug_no)
                     for targetfileglob, regexs in details['regexps'].items():
                         self.create_targetfileglob(
                             targetfileglob, job_resource)
@@ -728,6 +727,20 @@ class Weebl(object):
     def get_imagestorage_from_name(self, name):
         return self._pk_uri('imagestorage', name)
 
+    # InternalContact
+    def internalcontact_exists(self, name):
+        return self.instance_exists('internalcontact', 'name', 'name', name)
+
+    def create_internalcontact(self, name, staffdirectoryurl=None):
+        data = {'name': name, }
+        if staffdirectoryurl is not None:
+            data['staffdirectoryurl'] = staffdirectoryurl
+        url = self.make_url("internalcontact")
+        self.make_request('post', url=url, data=json.dumps(data))
+
+    def get_internalcontact_from_name(self, name):
+        return self._pk_uri('internalcontact', name)
+
     # Jenkins
     def jenkins_exists(self, jenkins_uuid):
         return self.instance_exists('jenkins', 'uuid', 'uuid', jenkins_uuid)
@@ -796,6 +809,20 @@ class Weebl(object):
         tfile_list.append(t_file_glob_resource)
         url = self.make_url(regex_resource)
         self.update_instance(url, targetfileglobs=tfile_list)
+
+    # Machine Configuration
+    def machineconfiguration_exists(self, uuid):
+        return self.instance_exists(
+            'machineconfiguration', 'uuid', 'uuid', uuid)
+
+    def create_machineconfiguration(self, uuid, machine=None, pipeline=None):
+        data = {"uuid": uuid, }
+        if machine is not None:
+            data['machine'] = machine
+        if pipeline is not None:
+            data['pipeline'] = pipeline
+        url = self.make_url("machineconfiguration")
+        self.make_request('post', url=url, data=json.dumps(data))
 
     # Openstack Version
     def openstackversion_exists(self, name):
@@ -885,6 +912,35 @@ class Weebl(object):
         response = self.make_request('put', url=url, data=json.dumps(data))
         return response.json().get('completed_at')
 
+    def update_pipeline(self, pipeline_id, **data):
+        url = self.make_url("pipeline", pipeline_id)
+        response = self.make_request('put', url=url, data=json.dumps(data))
+        return response.json()
+
+    # Product Under Test
+    def get_list_of_products(self):
+        return [product['name'] for product in
+                self.get_objects('productundertest')]
+
+    def productundertest_exists(self, name):
+        return self.instance_exists('productundertest', 'name', 'name', name)
+
+    def create_productundertest(self, name, project=None, vendor=None, internalcontact=None, machine_list=None):
+        data = {"name": name, }
+        if project is not None:
+            data['project'] = project
+        if vendor is not None:
+            data['vendor'] = vendor
+        if internalcontact is not None:
+            data['internalcontact'] = internalcontact
+        if machine_list is not None:
+            data['machine_list'] = machine_list
+        url = self.make_url("productundertest")
+        self.make_request('post', url=url, data=json.dumps(data))
+
+    def get_productundertest_from_name(self, name):
+        return self._pk_uri('productundertest', name)
+
     # SDN Version
     def sdn_exists(self, name):
         return self.instance_exists('sdn', 'name', 'name', name)
@@ -942,3 +998,18 @@ class Weebl(object):
 
     def get_ubuntuversion_from_name(self, name):
         return self._pk_uri('ubuntuversion', name)
+
+    # Vendor
+    def get_list_of_vendors(self):
+        return [vendor['name'] for vendor in self.get_objects('vendor')]
+
+    def vendor_exists(self, name):
+        return self.instance_exists('vendor', 'name', 'name', name)
+
+    def create_vendor(self, name):
+        data = {"name": name, }
+        url = self.make_url("vendor")
+        self.make_request('post', url=url, data=json.dumps(data))
+
+    def get_vendor_from_name(self, name):
+        return self._pk_uri('vendor', name)
