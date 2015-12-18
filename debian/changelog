@@ -1,3 +1,21 @@
+weeblclient (1.1.0) precise; urgency=medium
+
+  * Added get_xxx_from_name methods.
+  * UI changes to accomodate api authentication via ApiKey.
+  * Removed the 'OIL' in the white bar. 
+  * Made the white bar smaller. 
+  * Stopped using 'pipeline'. Now uses 'test run' instead. 
+  * Pipeline Deploy is now 'Deploy Openstack'. 
+  * Pipeline Prepare is now 'Configure Openstack for test'. 
+  * Guest OS Test is now 'SSH to guest instance'. 
+  * Fixes so scripts can work with the API and the client reports an UnauthorisedAPIRequest error if the user isn't authorised.
+  * Use git describe for version.
+  * Added methods for InternalContact, Machine Configuration, Product Under Test, and Vendor. 
+  * Allows pipeline info to be updated via client.update_pipeline(pipeline_id, ...).
+  * Added missing build deps
+
+ -- Darren Hoyland <darren.hoyland@canonical.com>  Fri, 18 Dec 2015 12:46:01 +0000
+
 weeblclient (1.0.8) precise; urgency=medium
 
   * Fix for datetime being passed as an object rather than a string.
