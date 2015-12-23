@@ -810,19 +810,48 @@ class Weebl(object):
         url = self.make_url(regex_resource)
         self.update_instance(url, targetfileglobs=tfile_list)
 
+    # Machine
+    def machine_exists(self, uuid):
+        return self.instance_exists(
+            'machine', 'uuid', 'uuid', uuid)
+
+    def create_machine(self, hostname):
+        data = {"hostname": hostname, }
+        url = self.make_url("machine")
+        self.make_request('post', url=url, data=json.dumps(data))
+
+    def get_machine_from_hostname(self, hostname):
+        url = self.make_url("machine")
+        url_with_args = "{}?hostname={}".format(url, hostname)
+        response = self.make_request('get', url=url_with_args)
+        objects = response.json()['objects']
+        if objects == []:
+            return
+        else:
+            return self._pk_uri("machine", objects[0].get('uuid'))
+
+
     # Machine Configuration
     def machineconfiguration_exists(self, uuid):
         return self.instance_exists(
             'machineconfiguration', 'uuid', 'uuid', uuid)
 
-    def create_machineconfiguration(self, uuid, machine=None, pipeline=None):
-        data = {"uuid": uuid, }
+    def create_machineconfiguration(self, machine=None, pipeline=None,
+                                    productundertest_list=None):
+        data = {}
         if machine is not None:
             data['machine'] = machine
         if pipeline is not None:
             data['pipeline'] = pipeline
+        if productundertest_list is not None:
+            data['productundertest'] = productundertest_list
         url = self.make_url("machineconfiguration")
         self.make_request('post', url=url, data=json.dumps(data))
+
+    def update_machineconfiguration(self, uuid, **data):
+        url = self.make_url("machineconfiguration", uuid)
+        response = self.make_request('put', url=url, data=json.dumps(data))
+        return response.json()
 
     # Openstack Version
     def openstackversion_exists(self, name):
@@ -925,7 +954,8 @@ class Weebl(object):
     def productundertest_exists(self, name):
         return self.instance_exists('productundertest', 'name', 'name', name)
 
-    def create_productundertest(self, name, project=None, vendor=None, internalcontact=None, machine_list=None):
+    def create_productundertest(self, name, project=None, vendor=None,
+                                internalcontact=None):
         data = {"name": name, }
         if project is not None:
             data['project'] = project
@@ -933,13 +963,18 @@ class Weebl(object):
             data['vendor'] = vendor
         if internalcontact is not None:
             data['internalcontact'] = internalcontact
-        if machine_list is not None:
-            data['machine_list'] = machine_list
         url = self.make_url("productundertest")
         self.make_request('post', url=url, data=json.dumps(data))
 
     def get_productundertest_from_name(self, name):
-        return self._pk_uri('productundertest', name)
+        url = self.make_url("productundertest")
+        url_with_args = "{}?name={}".format(url, name)
+        response = self.make_request('get', url=url_with_args)
+        objects = response.json()['objects']
+        if objects == []:
+            return
+        else:
+            return self._pk_uri("productundertest", objects[0].get('uuid'))
 
     # SDN Version
     def sdn_exists(self, name):
