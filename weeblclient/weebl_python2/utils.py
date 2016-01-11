@@ -95,8 +95,7 @@ def build_dict_of_linked_items(target_file_globs, known_bug_regexes, wbugs):
         for kbr_resource in weebl_bug['knownbugregex']:
             for knownbugregex in known_bug_regexes:
                 if kbr_resource == knownbugregex['resource_uri']:
-                    filesaffected = knownbugregex.get(
-                        'targetfileglobs')[0]['glob_pattern']
+                    filesaffected = knownbugregex.get('targetfileglobs')[0]['glob_pattern']
                     if type(filesaffected) is not list:
                         filesaffected = [filesaffected]
                     affected_file_globs = []
