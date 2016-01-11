@@ -13,24 +13,24 @@ class WeeblClientUtilsTests(testtools.TestCase):
         unused_file = utils.generate_random_string()
         target_file_globs = [
             {'glob_pattern': file1,
-             'jobtypes': [{'name': 'pipeline_deploy'}],
-             'resource_uri': {'glob_pattern': file1}},
+             'jobtypes': ['/api/v1/jobtype/pipeline_deploy/'],
+             'resource_uri': '/api/v1/targetfileglob/{}/'.format(file1)},
             {'glob_pattern': file2,
-             'jobtypes': [{'name': 'pipeline_deploy'}],
-             'resource_uri': {'glob_pattern': file2}},
+             'jobtypes': ['/api/v1/jobtype/pipeline_deploy/'],
+             'resource_uri': '/api/v1/targetfileglob/{}/'.format(file2)},
             {'glob_pattern': unused_file,
-             'jobtypes': [{'name': 'test_tempest_smoke'}],
-             'resource_uri': {'glob_pattern': unused_file}}]
+             'jobtypes': ['/api/v1/jobtype/test_tempest_smoke/'],
+             'resource_uri': '/api/v1/targetfileglob/{}/'.format(unused_file)}]
         known_bug_regexes = [
             {'bug': '/api/v1/bug/bug1/',
              'regex': 're_1',
              'resource_uri': '/api/v1/knownbugregex/kbr1/',
-             'targetfileglobs': [{'glob_pattern': file1}],
+             'targetfileglobs': ['/api/v1/targetfileglob/{}/'.format(file1)],
              'uuid': 'kbr1'},
             {'bug': '/api/v1/bug/bug2/',
              'regex': 're_2',
              'resource_uri': '/api/v1/knownbugregex/kbr2/',
-             'targetfileglobs': [{'glob_pattern': file2}],
+             'targetfileglobs': ['/api/v1/targetfileglob/{}/'.format(file2)],
              'uuid': 'kbr2'}, ]
         bugs = [
             {'bugtrackerbug': {'bug_number': 1,

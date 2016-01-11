@@ -6,7 +6,6 @@ username = '' # Enter your username here (e.g. CanonicalOilCiBot)
 apikey = ''  # Enter api_key (e.g. 8aa0ca63966d78b3099b2759289f239ffdc9d7b6)
              # (Please note: That isn't the real api_key for oil-ci-bot!)
 
-#weebl_url = "http://localhost:8000"
 weebl_url = "http://10.245.0.14"
 jenkins_host = "http://oil-jenkins.canonical.com"
 
@@ -27,18 +26,6 @@ weebl = Weebl(environment_uuid,
               username=username,
               apikey=apikey,
               weebl_url=weebl_url)
-#weebl.weeblify_environment(jenkins_host)
+weebl.weeblify_environment(jenkins_host)
 
-def display(obj, keyname):
-    print('')
-    print(obj + "s:")
-    print('')
-    pprint(sorted(list(set([instance[keyname]
-           for instance in weebl.get_instances(obj)['objects']]))))
-    print("-----------------------------------")
-    print('')
-
-display('environment', 'name')
-display('buildexecutor', 'name')
-
-# import ipdb; ipdb.set_trace()
+pprint(weebl.get_instances('environment'))

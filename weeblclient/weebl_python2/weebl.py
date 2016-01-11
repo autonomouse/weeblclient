@@ -870,8 +870,8 @@ class Weebl(object):
         return self.instance_exists('pipeline', 'uuid', 'uuid', pipeline_id)
 
     def create_pipeline(self,
+                        pipeline_id,
                         buildexecutor_name,
-                        pipeline_id=None,
                         ubuntuversion=None,
                         openstackversion=None,
                         sdn=None,
@@ -890,9 +890,10 @@ class Weebl(object):
 
         # Create pipeline:
         url = self.make_url("pipeline")
-        data = {'buildexecutor': self._pk_uri('buildexecutor', buildexecutor)}
-        if pipeline_id is not None:
-            data['uuid'] = pipeline_id
+        data = {
+            'buildexecutor': self._pk_uri('buildexecutor', buildexecutor),
+            'uuid': pipeline_id, }
+
         if ubuntuversion is not None:
             data['ubuntuversion'] = ubuntuversion
         if openstackversion is not None:
