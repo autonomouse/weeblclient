@@ -28,4 +28,13 @@ weebl = Weebl(environment_uuid,
               weebl_url=weebl_url)
 weebl.weeblify_environment(jenkins_host)
 
-pprint(weebl.get_instances('environment'))
+def display(obj, keyname):
+    print('')
+    print(obj + "s:")
+    print('')
+    pprint({instance[keyname] for instance in weebl.get_instances(obj)['objects']})
+    print("-----------------------------------")
+    print('')
+
+display('environment', 'name')
+display('buildexecutor', 'name')
