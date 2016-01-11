@@ -96,7 +96,9 @@ def build_dict_of_linked_items(target_file_globs, known_bug_regexes, wbugs):
             for knownbugregex in known_bug_regexes:
                 if kbr_resource == knownbugregex['resource_uri']:
                     filesaffected = knownbugregex.get(
-                        'targetfileglobs')
+                        'targetfileglobs')[0]['glob_pattern']
+                    if type(filesaffected) is not list:
+                        filesaffected = [filesaffected]
                     affected_file_globs = []
                     for affected_file in filesaffected:
                         filename = affected_file.rstrip('/').split('/')[-1]
@@ -112,7 +114,7 @@ def build_dict_of_linked_items(target_file_globs, known_bug_regexes, wbugs):
                         regex_dict[regex] = []
                     for tfile in affected_file_globs:
                         for job in tfile['jobtypes']:
-                            job_type = job[16:-1]
+                            job_type = job['name']
                             regex_dict[regex].append((
                                 tfile['glob_pattern'], job_type, lp_bug,
                                 regex_uuid))
