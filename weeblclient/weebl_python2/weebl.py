@@ -299,7 +299,9 @@ class Weebl(object):
 
         for pipeline, builds in paabn.items():
             try:
-                self.create_pipeline(pipeline, build_executor_name)
+                self.create_pipeline(
+                    buildexecutor_name=build_executor_name,
+                    pipeline_id=pipeline)
             except InstanceAlreadyExists:
                 pass
 
@@ -392,7 +394,9 @@ class Weebl(object):
 
             if not self.pipeline_exists(pipeline):
                 self.create_buildexecutor(build_executor_name)
-                self.create_pipeline(pipeline, build_executor_name)
+                self.create_pipeline(
+                    buildexecutor_name=build_executor_name,
+                    pipeline_id=pipeline)
             processed = []
             for unfiled_bug, details in unfiled_bugs.items():
                 build_id = details['build']
@@ -436,7 +440,9 @@ class Weebl(object):
         for pipeline, trg in triage['pipeline'].items():
             self.LOG.info("Processing {} for {} job.".format(
                 pipeline, job))
-            self.create_pipeline(pipeline, build_executor_name)
+            self.create_pipeline(
+                buildexecutor_name=build_executor_name,
+                pipeline_id=pipeline)
             build_status = trg['status']
             build_id = trg['build']
             self.create_service_status(build_status)
