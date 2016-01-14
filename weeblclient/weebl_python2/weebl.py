@@ -916,16 +916,6 @@ class Weebl(object):
 
         response = self.make_request('post', url=url, data=json.dumps(data))
         returned_pipeline = response.json().get('uuid')
-
-        # Error if pipelines do not match:
-        if returned_pipeline != pipeline_id:
-            msg = ("Pipeline created on weebl does not match: {} != {}"
-                   .format(pipeline_id, returned_pipeline))
-            self.LOG.error(msg)
-            raise Exception(msg)
-        else:
-            self.LOG.info("Pipeline {} successfully created in Weebl db"
-                          .format(pipeline_id))
         return returned_pipeline
 
     def get_pipeline_from_uuid(self, uuid):
