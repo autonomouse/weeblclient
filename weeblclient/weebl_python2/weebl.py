@@ -1146,3 +1146,14 @@ class Weebl(object):
 
     def get_vendor_from_name(self, name):
         return self._pk_uri('vendor', name)
+
+    def get_job_history(self, environment_uuid, start_date=None):
+        params = {
+            'uuid': environment_uuid,
+            'include_job_history': True,
+        }
+        if start_date is not None:
+            params['history_start_date'] = start_date
+
+        [environment] = self.get_objects('environment', params=params)
+        return environment['job_history']
