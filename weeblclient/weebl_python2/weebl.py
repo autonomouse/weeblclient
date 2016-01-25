@@ -23,7 +23,26 @@ else:
 
 
 class Weebl(object):
-    """Weebl API wrapper class."""
+    """Weebl API wrapper class.
+
+    This class provides a wrapper around the Python2 weeblclient REST API and
+    includes helper methods to enable easier interaction with the Weebl server.
+
+    Attributes:
+        LOG: An instance of the Logger class.
+        env_name: A string that holds the name of the environment (e.g.
+            "production" or "staging")
+        uuid: A string containing the UUID representing the environment.
+        weebl_api_version: A string representing the version of weebl api used
+            by this client.
+        weebl_url: The url where weebl is hosted.
+        headers: A dictionary holding the headers sent along with each API
+            request.
+        resource_url: A string representing the basis of the resource_uri
+            without the initial url part.
+        base_url: A string representing the basis of the resource_uri (with
+            url).
+    """
 
     def __init__(self, uuid, env_name, username=None, apikey=None,
                  weebl_url="http://10.245.0.14",
@@ -497,6 +516,16 @@ class Weebl(object):
         return self.instance_exists('blockstorage', 'name', 'name', name)
 
     def create_blockstorage(self, name):
+        """Creates a new instance of the 'BlockStorage' model.
+
+        Args:
+            name: A string containing the name of the block storage.
+
+        Raises:
+            ConnectionError: An error will occur if the client cannot connect
+                to weebl.
+
+        """
         data = {"name": name, }
         url = self.make_url("blockstorage")
         self.make_request('post', url=url, data=json.dumps(data))
@@ -509,6 +538,20 @@ class Weebl(object):
         return self.instance_exists('bug', 'summary', 'summary', summary)
 
     def create_bug(self, summary, bugtrackerbug=None, knownbugregex_list=None):
+        """Creates a new instance of the 'Bug' model.
+
+        Args:
+            summary: A string containing a summary of the bug.
+            bugtrackerbug: A string containing the resource uri of the
+                associated bug tracker bug.
+            knownbugregex_list: A list of strings containing the resource uris
+                for each associated known bug regex.
+
+        Raises:
+            ConnectionError: An error will occur if the client cannot connect
+                to weebl.
+
+        """
         # Create bug:
         url = self.make_url("bug")
         data = {}
@@ -546,6 +589,23 @@ class Weebl(object):
         return len(bugoccurrence_instances) > 0
 
     def create_bugoccurrence(self, build_uuid, regex_uuid):
+        """Creates a new instance of the 'BugOccurrence' model.
+
+        Args:
+            build_uuid: A string containing the UUID of the associated build.
+            regex_uuid: A string containing the UUID of the associated known
+                bug regex.
+
+        Raises:
+            ConnectionError: An error will occur if the client cannot connect
+                to weebl.
+
+        FIXME: This is inconsitent with other create_* methods in the
+        API - we may need to replace this method with one which takes in
+        resource_uris instead of UUIDs, or maybe have both and rename this as
+        create_bugoccurrence_uuids or something..?
+
+        """
         url = self.make_url("bugoccurrence")
         data = {
             'build': self._pk_uri('build', build_uuid),
@@ -563,6 +623,21 @@ class Weebl(object):
                                     'bug_number', int(bug_number))
 
     def create_bugtrackerbug(self, bug_number):
+        """Creates a new instance of the 'BugTrackerBug' model.
+
+        Args:
+            bug_number: A string containing the bug number of the associated
+                bug.
+
+        Raises:
+            ConnectionError: An error will occur if the client cannot connect
+                to weebl.
+
+        FIXME: This is inconsitent with the other create_* methods in the
+        API - we may need to replace this method with one which takes in
+        a resource_uri instead of a bug_number.
+
+        """
         url = self.make_url("bugtrackerbug")
         data = {"bug_number": bug_number}
         response = self.make_request('post', url=url, data=json.dumps(data))
@@ -885,6 +960,34 @@ class Weebl(object):
                         blockstorage=None,
                         imagestorage=None,
                         database=None):
+        """Creates a new instance of the 'Pipeline' model.
+
+        Args:
+            buildexecutor_name: A required string representing the name of the
+                BuildExecutor.
+            pipeline_id: An optional UUID string used to identify the pipeline
+                may be provided. This will otherwise be auto-generated.
+            ubuntuversion: An optional string used to identify the version of
+                ubuntu used.
+            openstackversion: An optional string used to identify the version
+                of openstack used.
+            sdn: An optional string used to identify the sdn used.
+            compute: An optional string used to identify the compute used.
+            blockstorage: An optional string used to identify the blockstorage
+                used.
+            imagestorage: An optional string used to identify the imagestorage
+                used.
+            database: An optional string used to identify the database used.
+
+        Returns:
+            A string representing the pipeline (this should be the same as the
+                one given for pipeline_id).
+
+        Raises:
+            Exception: An error will occur if the pipeline given and the
+                pipeline returned do not match.
+
+        """
         # Get Build Executor:
         buildexecutor = self.get_buildexecutor_uuid_from_name(
             buildexecutor_name)
