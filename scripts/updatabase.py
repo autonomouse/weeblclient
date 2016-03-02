@@ -9,11 +9,11 @@ username = '' # Enter your username here (e.g. CanonicalOilCiBot)
 apikey = ''  # Enter api_key (e.g. 8aa0ca63966d78b3099b2759289f239ffdc9d7b6)
              # (Please note: That isn't the real api_key for oil-ci-bot!)
 
-default_jenkins_host = "http://oil-jenkins.canonical.com"
+default_jenkins_host = "http://10.245.162.43:8080/"
 default_mockDB = "/home/darren/Repositories/Canonical/doberman/trunk/samples/mock_database.yml"
-default_environment_name = "production"
-default_environment_uuid = "124591ef-361d-4a33-a756-fa79b3b7a1f8"
-default_weebl_url = "http://10.245.0.14"
+default_environment_name = "integration"
+default_environment_uuid = "7c82e43a-f5d6-47fb-ad9c-7d45c7ff48a7"
+default_weebl_url = "http://10.245.162.53/"
 
 def parse():
     parser = argparse.ArgumentParser(description='Upload bugs to Weebl.')
