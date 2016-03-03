@@ -50,8 +50,13 @@ def find_new_or_alterated_bugs(local_db, remote_db):
                             break
                         for target_file_glob, value in item.items():
                             for regex in value['regexp']:
-                                if [thing for thing in remote_data[job] if regex not in thing[target_file_glob]['regexp']] != []:
-                                    different = True
+                                for datum in remote_data[job]:
+                                    if target_file_glob not in datum:
+                                        continue
+                                    remote_regex =\
+                                        datum[target_file_glob]['regexp']
+                                    if regex not in remote_regex:
+                                        different = True
             if different:
                 altered_bug_nums.append(remote_bugno)
 

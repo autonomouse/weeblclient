@@ -148,6 +148,7 @@ class Weebl(object):
 
     def update_instance(self, url, **kwargs):
         response = self.make_request('put', url=url, data=json.dumps(kwargs))
+
         try:
             return response.json()
         except ValueError:
@@ -882,7 +883,7 @@ class Weebl(object):
 
     def get_knownbugregex_target_files(self, regex_resource):
         tfiles = self.get_instances(regex_resource)['targetfileglobs']
-        return [urllib2.unquote(tfile) for tfile in tfiles]
+        return [urllib2.unquote(tfile['glob_pattern']) for tfile in tfiles]
 
     def update_knownbugregex_with_new_target_file(self, t_file_glob_resource,
                                                   regex_resource):
