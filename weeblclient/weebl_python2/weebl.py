@@ -912,7 +912,6 @@ class Weebl(object):
         else:
             return self._pk_uri("machine", objects[0].get('uuid'))
 
-
     # Machine Configuration
     def machineconfiguration_exists(self, uuid):
         return self.instance_exists(
@@ -1044,6 +1043,19 @@ class Weebl(object):
         url = self.make_url("pipeline", pipeline_id)
         response = self.make_request('put', url=url, data=json.dumps(data))
         return response.json()
+
+    def upload_bundle_image(self, pipeline_id, image):
+        url = self.make_url("pipeline", pipeline_id, "bundleimage")
+        files = {'bundleimage': open(image, 'rb')}
+        # bypass self.make_request and call requests.post directly
+        # because self.make_requests doesn't support a multipart file upload
+        response = requests.post(url=url, files=files)
+        return response.json()
+
+    def get_bundle_image(self, pipeline_id):
+        url = self.make_url("pipeline", pipeline_id, "bundleimage")[:-1]
+        response = self.make_request('get', url=url)
+        return response.content
 
     # Product Under Test
     def get_list_of_products(self):
