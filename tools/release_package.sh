@@ -16,4 +16,4 @@ rc=$?
 git reset --hard HEAD
 rm -rf *.egg-info
 [[ ! $rc ]] && echo "Build failed" && exit 1
-echo "Run: dput ppa:canonical-ci/oil-ci ../weeblclient_${full_version}_source.changes"
+echo "Run: dput ppa:oil-ci/integration ../weeblclient_${full_version}_source.changes"
