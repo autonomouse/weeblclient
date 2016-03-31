@@ -599,28 +599,22 @@ class Weebl(object):
                               ('regex__uuid', regex_uuid)])
         return len(bugoccurrence_instances) > 0
 
-    def create_bugoccurrence(self, build_uuid, regex_uuid):
+    def create_bugoccurrence(self, testcaseinstance_uri, knownbugregex_uri):
         """Creates a new instance of the 'BugOccurrence' model.
 
         Args:
-            build_uuid: A string containing the UUID of the associated build.
-            regex_uuid: A string containing the UUID of the associated known
-                bug regex.
+            testcaseinstance_uri: A string containing the testcaseinstance uri.
+            knownbugregex_uri: A string containing the knownbugregex uri.
 
         Raises:
             ConnectionError: An error will occur if the client cannot connect
                 to weebl.
 
-        FIXME: This is inconsitent with other create_* methods in the
-        API - we may need to replace this method with one which takes in
-        resource_uris instead of UUIDs, or maybe have both and rename this as
-        create_bugoccurrence_uuids or something..?
-
         """
         url = self.make_url("bugoccurrence")
         data = {
-            'build': self._pk_uri('build', build_uuid),
-            'regex': self._pk_uri('knownbugregex', regex_uuid)
+            'testcaseinstance': testcaseinstance_uri,
+            'knownbugregex_uri': knownbugregex_uri,
         }
         response = self.make_request('post', url=url, data=json.dumps(data))
         bugoccurrence_uuid = response.json().get('uuid')
@@ -921,6 +915,9 @@ class Weebl(object):
         data = {"targetfileglobs": glob_patterns_list,
                 "regex": regex}
         self.make_request('post', url=url, data=json.dumps(data))
+
+    def get_knownbugregex_resource_uri_from_regex_uuid(self, regex_uuid):
+        return self._pk_uri('knownbugregex', regex_uuid)
 
     def get_knownbugregex_from_regex(self, regex):
         knownbugregex_instances = self.get_instance_data(
