@@ -112,13 +112,23 @@ class Weebl(object):
             obj, params=params, query=query).get('objects')
 
     def get_instances(self, obj, params=None, query=None):
-        """Returns a single instance from the url that is made up of the
+        """Returns instance(s) from the url that is made up of the
         base_url and the given 'obj' path, where obj is the part of the url
         that follows the base_url (e.g. base_url is http://www.foo.bar/ and the
         obj is foobar in this url: http://www.foo.bar/foobar/).
         """
         response = self.make_request(
             'get', url=self.make_url(obj, query=query), params=params)
+        return self.respond(response)
+
+    def get_instances_from_url(self, url, params=None):
+        """Returns instance(s) from the given url."""
+        response = self.make_request('get', url=url, params=params)
+        return self.respond(response)
+
+    def respond(self, response):
+        """Returns json from the response or catches the usual errors.
+        """
         try:
             return response.json()
         except ValueError:
@@ -656,18 +666,48 @@ class Weebl(object):
     def build_exists(self, build_uuid):
         return self.instance_exists('build', 'uuid', 'uuid', build_uuid)
 
-    def create_build(self, build_id, pipeline, jobtype, buildstatus,
-                     build_started_at=None, build_finished_at=None,
-                     ts_format="%Y-%m-%d %H:%M:%SZ"):
+    def create_build(self, build_id, pipeline, jobtype, testcase_uuid,
+                     testcaseinstancestatus, build_started_at=None,
+                     build_finished_at=None, ts_format="%Y-%m-%d %H:%M:%SZ"):
+        """Creates a new instance of the 'Build' model.
+
+        Please note that all builds will have at least one testcase which
+        repesents whether or not the build ran successfully. In these cases,
+        the testframework, testcaseclass, and testcase names will be given the
+        same name as the jobtype. If the job has multiple sub-tests, there will
+        also be one or more appropriately named testframeworks,
+        testcaseclasses, and testcases.
+
+        Args:
+            build_id: A string containing the build number.
+            pipeline: A UUID string used to identify the pipeline.
+            jobtype: A string containing the name of the job of which the
+                build is an instance.
+            testcase_uuid: A UUID string used to identify the testcase.
+            testcaseinstancestatus: A string containing the outcome of the
+                build.
+            build_started_at: A string containing a timestamp representing the
+                time the build started.
+            build_finished_at: A string containing a timestamp representing
+                the time the build ended.
+            ts_format: A string containing the start and end timestamps format.
+
+        Raises:
+            ConnectionError: An error will occur if the client cannot connect
+                to weebl.
+
+        """
+
+        # Create the build:
         url = self.make_url("build")
         data = {
             'build_id': build_id,
             'pipeline': self._pk_uri('pipeline', pipeline),
-            'buildstatus': self._pk_uri('buildstatus', buildstatus),
-            'jobtype': self._pk_uri('jobtype', jobtype)}
-        if build_started_at:
-            data['build_started_at'] =\
-                utils.convert_timestamp_to_string(build_started_at, ts_format)
+            'jobtype': self._pk_uri('jobtype', jobtype), }
+        if build_started_at is None:
+            build_started_at = datetime.now()
+        data['build_started_at'] =\
+            utils.convert_timestamp_to_string(build_started_at, ts_format)
         if build_finished_at:
             data['build_finished_at'] =\
                 utils.convert_timestamp_to_string(build_finished_at, ts_format)
@@ -677,39 +717,48 @@ class Weebl(object):
         build_uuid = response_data['uuid']
         self.LOG.info("Build {} successfully created (build uuid: {})"
                       .format(build_id, build_uuid))
+
+        # Create testcaseinstance and associate the build:
+        self.create_testcaseinstance(
+            build_uuid, testcase_uuid, pipeline, testcaseinstancestatus)
+
         return build_uuid
 
     def get_build_uuid_from_build_id_and_pipeline(self, build_id,
                                                   pipeline_uuid):
         build_instances = self.filter_instances(
             "build", [('build_id', build_id),
-                      ('pipeline_uuid', pipeline_uuid)])
+                      ('pipeline__uuid', pipeline_uuid)])
         if build_instances is not None:
             if build_id in [str(build.get('build_id')) for build in
                             build_instances]:
                 return build_instances[0]['resource_uri']
         return False
 
-    def update_build(self, build_id, pipeline, jobtype, buildstatus,
-                     build_started_at=None, build_finished_at=None,
-                     ts_format="%Y-%m-%d %H:%M:%SZ"):
+    def update_build(self, build_id, pipeline, jobtype, testcase_uuid,
+                     testcaseinstancestatus, build_started_at=None,
+                     build_finished_at=None, ts_format="%Y-%m-%d %H:%M:%SZ"):
         url = self.make_url("build", build_id)
         data = {
             'pipeline': self._pk_uri('pipeline', pipeline),
-            'buildstatus': self._pk_uri('buildstatus', buildstatus),
-            'jobtype': self._pk_uri('jobtype', jobtype)}
+            'jobtype': self._pk_uri('jobtype', jobtype),
+        }
         if build_started_at:
             data['build_started_at'] =\
                 utils.convert_timestamp_to_string(build_started_at, ts_format)
-        if build_finished_at:
-            data['build_finished_at'] =\
-                utils.convert_timestamp_to_string(build_finished_at, ts_format)
+        if build_finished_at is None:
+            build_finished_at = datetime.now()
+        data['build_finished_at'] =\
+            utils.convert_timestamp_to_string(build_finished_at, ts_format)
 
         response = self.make_request('put', url=url, data=json.dumps(data))
         response_data = response.json()
         build_uuid = response_data['uuid']
-        self.LOG.info("Build {} successfully created (build uuid: {})"
-                      .format(build_id, build_uuid))
+        tci_uuid = self.get_testcaseinstance_uuid_from_build_id_testcase_uuid(
+            build_id, testcase_uuid)
+        self.update_testcaseinstance(tci_uuid, testcaseinstancestatus)
+        msg = "Build {} successfully updated (build uuid: {}, status: {})"
+        self.LOG.info(msg.format(build_id, build_uuid, testcaseinstancestatus))
         return build_uuid
 
     # Build Executor
@@ -1132,6 +1181,190 @@ class Weebl(object):
         job_list.append(job_resource)
         url = self.make_url(t_file_glob_resource)
         self.update_instance(url, jobtypes=job_list)
+
+    # TestCase
+    def testcase_exists(self, testcase_uuid):
+        return self.instance_exists('testcase', 'uuid', 'uuid', testcase_uuid)
+
+    def get_testcase_uuid_from_name_and_testcaseclass_uuid(self, name,
+                                                           testcaseclass_uuid):
+        testcase_instance = self.filter_instances("testcase", [
+            ('name', name), ('testcaseclass_uuid', testcaseclass_uuid), ])
+        return testcase_instance[0]['uuid']
+
+    def create_testcase(self, name, testcaseclass_uuid):
+        """Creates a new instance of the 'TestCase' model.
+
+        Args:
+            name: A string containing the name of the testcaseclass.
+            testcaseclass_uuid: A string containing the uuid of the
+                testcaseclass.
+
+        Raises:
+            ConnectionError: An error will occur if the client cannot connect
+                to weebl.
+            UnrecognisedInstance: An error will occur if there is not a
+                TestFramework that matches the given name and version.
+
+        """
+
+        url = self.make_url("testcase")
+        data = {
+            'name': name,
+            'testcaseclass': self._pk_uri('testcaseclass', testcaseclass_uuid),
+        }
+
+        response = self.make_request('post', url=url, data=json.dumps(data))
+        response_data = response.json()
+        self.LOG.info("The {} TestCase was created successfully.".format(
+            response_data['name']))
+        return response_data['uuid']
+
+    # TestCaseClass
+    def testcaseclass_exists(self, testcaseclass_uuid):
+        return self.instance_exists(
+            'testcaseclass', 'uuid', 'uuid', testcaseclass_uuid)
+
+    def get_testcaseclass_uuid_from_name_testfw_uuid(self, name,
+                                                     testframework_uuid):
+        testcaseclass_instance = self.filter_instances("testcaseclass", [
+            ('name', name), ('testframework__uuid', testframework_uuid), ])
+        return testcaseclass_instance[0]['uuid']
+
+    def create_testcaseclass(self, name, testframework_uuid):
+        """Creates a new instance of the 'TestCaseClass' model.
+
+        Args:
+            name: A string containing the name of the test framework.
+            testframework_uuid: A string containing the uuid of the test
+                framework of which this TestCaseClass is a part.
+
+        Raises:
+            ConnectionError: An error will occur if the client cannot connect
+                to weebl.
+            UnrecognisedInstance: An error will occur if there is not a
+                TestFramework that matches the given name and version.
+
+        """
+
+        url = self.make_url("testcaseclass")
+        data = {
+            'name': name,
+            'testframework': self._pk_uri('testframework', testframework_uuid),
+        }
+
+        response = self.make_request('post', url=url, data=json.dumps(data))
+        response_data = response.json()
+        self.LOG.info("The {} TestCaseClass was created successfully."
+                      .format(response_data['name']))
+        return response_data['uuid']
+
+    # TestCaseInstance
+    def testcaseinstance_exists(self, testcaseinstance_uuid):
+        return self.instance_exists(
+            'testcaseinstance', 'uuid', 'uuid', testcaseinstance_uuid)
+
+    def get_testcaseinstance_uuid_from_build_id_testcase_uuid(self, build_id,
+                                                              testcase_uuid):
+        testcaseinstance = self.filter_instances("testcaseinstance", [
+            ('build__build_id', build_id), ('testcase__uuid', testcase_uuid)])
+        return testcaseinstance[0]['uuid']
+
+    def create_testcaseinstance(self, build_uuid, testcase_uuid, pipeline_uuid,
+                                testcaseinstancestatus):
+        """Creates a new instance of the 'TestCase' model.
+
+        Args:
+            build_uuid: A UUID string used to identify the build.
+            testcase_uuid: A UUID string used to identify the testcase.
+            pipeline_uuid: A UUID string used to identify the pipeline.
+            testcaseinstancestatus: A string containing the testcaseinstance
+                status.
+
+        Raises:
+            ConnectionError: An error will occur if the client cannot connect
+                to weebl.
+            UnrecognisedInstance: An error will occur if there is not a
+                TestFramework that matches the given name and version.
+
+        """
+
+        url = self.make_url("testcaseinstance")
+        data = {
+            'testcase': self._pk_uri('testcase', testcase_uuid),
+            'testcaseinstancestatus': self._pk_uri(
+                'testcaseinstancestatus', testcaseinstancestatus),
+            'build': self._pk_uri('build', build_uuid),
+        }
+
+        response = self.make_request('post', url=url, data=json.dumps(data))
+        response_data = response.json()
+        self.LOG.info("TestCaseInstance with uuid: {} created successfully."
+                      .format(response_data['uuid']))
+        return response_data['uuid']
+
+    def update_testcaseinstance(self, testcaseinstance_uuid,
+                                testcaseinstancestatus):
+        url = self.make_url("testcaseinstance", testcaseinstance_uuid)
+        tci_pk = self._pk_uri('testcaseinstancestatus', testcaseinstancestatus)
+        data = {'testcaseinstancestatus': tci_pk, }
+        response = self.make_request('put', url=url, data=json.dumps(data))
+        response_data = response.json()
+        return response_data['uuid']
+
+    def get_testcaseinstance_resource_uri(self, build_id, testcase_name,
+                                          testcaseclass_name,
+                                          testframework_name,
+                                          testframework_version):
+        testframework_uuid =\
+            self.get_testframework_uuid_from_name_and_ver(
+                testframework_name, testframework_version)
+        testcaseclass_uuid =\
+            self.get_testcaseclass_uuid_from_name_testfw_uuid(
+                testcaseclass_name, testframework_uuid)
+        testcase_uuid =\
+            self.get_testcase_uuid_from_name_and_testcaseclass_uuid(
+                testcase_name, testcaseclass_uuid)
+        testcaseinstance_uuid =\
+            self.get_testcaseinstance_uuid_from_build_id_testcase_uuid(
+                testcase_uuid, build_id)
+        return self._pk_uri('testcaseinstance', testcaseinstance_uuid)
+
+    # TestFramework
+    def testframework_exists(self, testframework_uuid):
+        return self.instance_exists(
+            'testframework', 'uuid', 'uuid', testframework_uuid)
+
+    def get_testframework_uuid_from_name_and_ver(self, name, version):
+        return self.filter_instances("testframework", [('name', name),
+                                     ('version', version), ])[0]['uuid']
+
+    def create_testframework(self, name, description=None,
+                             version='notapplicable'):
+        """Creates a new instance of the 'TestFramework' model.
+
+        Args:
+            name: A string containing the name of the test framework.
+            description: A string describing the test framework.
+            version: A string containing the version of the test framework.
+
+        Raises:
+            ConnectionError: An error will occur if the client cannot connect
+                to weebl.
+
+        """
+
+        url = self.make_url("testframework")
+        data = {'name': name,
+                'version': version, }
+        if description:
+            data['description'] = description
+
+        response = self.make_request('post', url=url, data=json.dumps(data))
+        response_data = response.json()
+        self.LOG.info("The {} TestFramework was created successfully."
+                      .format(response_data['name']))
+        return response_data['uuid']
 
     # Ubuntu Version
     def ubuntuversion_exists(self, name):
