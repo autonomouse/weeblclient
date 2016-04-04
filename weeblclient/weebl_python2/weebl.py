@@ -906,6 +906,63 @@ class Weebl(object):
         response = self.make_request('get', url=url)
         return response.json()['resource_uri']
 
+    # JujuService
+    def get_list_of_jujuservices(self):
+        return [jujuservice['name'] for jujuservice in
+                self.get_objects('jujuservice')]
+
+    def jujuservice_exists(self, name):
+        return self.instance_exists('jujuservice', 'name', 'name', name)
+
+    def create_jujuservice(self, name, productundertest=None):
+        """Creates a new instance of the 'JujuService' model.
+
+        Args:
+            name: A string containing a summary of the juju service.
+            productundertest: A string containing the resource uri of the
+                associated product under test.
+
+        Raises:
+            ConnectionError: An error will occur if the client cannot connect
+                to weebl.
+
+        """
+
+        url = self.make_url("jujuservice")
+        data = {"name": name}
+        if productundertest is not None:
+            data['productundertest'] = productundertest
+        self.make_request('post', url=url, data=json.dumps(data))
+
+    # JujuServiceDeployment
+    def jujuservicedeployment_exists(self, jujuservicedeployment_uuid):
+        return self.instance_exists('jujuservicedeployment', 'uuid', 'uuid',
+                                    jujuservicedeployment_uuid)
+
+    def create_jujuservicedeployment(self, name, jujuservice_uri=None):
+        """Creates a new instance of the 'jujuservicedeployment' model.
+
+        Args:
+            name: A string containing a summary of the juju service deployment.
+            jujuservice_uri: A string containing the resource uri of the
+                associated juju service.
+
+        Raises:
+            ConnectionError: An error will occur if the client cannot connect
+                to weebl.
+
+        """
+
+        url = self.make_url("jujuservicedeployment")
+        data = {"name": name}
+        if jujuservice_uri is not None:
+            data['jujuservice'] = jujuservice_uri
+        response = self.make_request('post', url=url, data=json.dumps(data))
+        response_data = response.json()
+        self.LOG.info("jujuservicedeployment (uuid: {}) created successfully."
+                      .format(response_data['uuid']))
+        return response_data['uuid']
+
     # KnownBugRegex
     def knownbugregex_exists(self, regex):
         return self.instance_exists('knownbugregex', 'regex', 'regex', regex)
@@ -1132,6 +1189,99 @@ class Weebl(object):
             return
         else:
             return self._pk_uri("productundertest", objects[0].get('uuid'))
+
+    # Project
+    def get_list_of_projects(self):
+        return [project['name'] for project in self.get_objects('project')]
+
+    def project_exists(self, name):
+        return self.instance_exists('project', 'name', 'name', name)
+
+    def create_project(self, name):
+        data = {"name": name, }
+        url = self.make_url("project")
+        self.make_request('post', url=url, data=json.dumps(data))
+
+    # Report
+    def get_list_of_reports(self):
+        return [report['name'] for report in self.get_objects('report')]
+
+    def report_exists(self, uuid):
+        return self.instance_exists('report', 'uuid', 'uuid', uuid)
+
+    def create_report(self, name, productundertest_list=None):
+        """Creates a new instance of the 'Report' model.
+
+        Args:
+            name: A string containing the name of the report.
+            productundertest_list: A list of strings containing the resource
+                uris for each associated product under test.
+
+        Raises:
+            ConnectionError: An error will occur if the client cannot connect
+                to weebl.
+
+        """
+
+        url = self.make_url("report")
+        data = {"name": name}
+        if productundertest_list is not None:
+            data['productundertest'] = productundertest_list
+        self.make_request('post', url=url, data=json.dumps(data))
+
+    # ReportPeriod
+    def get_list_of_reportperiods(self):
+        return [reportperiod['name'] for reportperiod in
+                self.get_objects('reportperiod')]
+
+    def reportperiod_exists(self, uuid):
+        return self.instance_exists('reportperiod', 'uuid', 'uuid', uuid)
+
+    def create_reportperiod(self, name, reportinstance_list=None):
+        """Creates a new instance of the 'ReportPeriod' model.
+
+        Args:
+            name: A string containing the name of the report period.
+            reportinstance_list: A string containing the resource uri of the
+                associated report instance.
+
+        Raises:
+            ConnectionError: An error will occur if the client cannot connect
+                to weebl.
+
+        """
+
+        url = self.make_url("reportperiod")
+        data = {"name": name}
+        if reportinstance_list is not None:
+            data['reportinstance'] = reportinstance_list
+        self.make_request('post', url=url, data=json.dumps(data))
+
+    # ReportInstance
+    def reportinstance_exists(self, uuid):
+        return self.instance_exists('reportinstance', 'uuid', 'uuid', uuid)
+
+    def create_reportinstance(self, report=None, reportperiod=None):
+        """Creates a new instance of the 'ReportInstance' model.
+
+        Args:
+            report: A string containing the resource uri of the report.
+            reportperiod: A string containing the resource uri of the
+                report period.
+
+        Raises:
+            ConnectionError: An error will occur if the client cannot connect
+                to weebl.
+
+        """
+
+        url = self.make_url("reportinstance")
+        data = {}
+        if report is not None:
+            data['report'] = report
+        if reportperiod is not None:
+            data['reportperiod'] = reportperiod
+        self.make_request('post', url=url, data=json.dumps(data))
 
     # SDN Version
     def sdn_exists(self, name):
