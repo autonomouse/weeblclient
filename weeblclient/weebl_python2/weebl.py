@@ -726,7 +726,7 @@ class Weebl(object):
         if build_instances is not None:
             if build_id in [str(build.get('build_id')) for build in
                             build_instances]:
-                return build_instances[0]['resource_uri']
+                return build_instances[0]['uuid']
         return False
 
     def update_build(self, build_id, pipeline, jobtype, testcase_uuid,
