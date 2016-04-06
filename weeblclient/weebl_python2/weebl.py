@@ -732,7 +732,9 @@ class Weebl(object):
     def update_build(self, build_id, pipeline, jobtype, testcase_uuid,
                      testcaseinstancestatus, build_started_at=None,
                      build_finished_at=None, ts_format="%Y-%m-%d %H:%M:%SZ"):
-        url = self.make_url("build", build_id)
+        build_uuid = self.get_build_uuid_from_build_id_and_pipeline(
+            build_id, pipeline)
+        url = self.make_url("build", build_uuid)
         data = {
             'pipeline': self._pk_uri('pipeline', pipeline),
             'jobtype': self._pk_uri('jobtype', jobtype),
