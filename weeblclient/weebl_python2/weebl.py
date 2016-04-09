@@ -1358,6 +1358,39 @@ class Weebl(object):
     def get_ubuntuversion_from_name(self, name):
         return self._pk_uri('ubuntuversion', name)
 
+    # Unit
+    def unit_exists(self, unit_uuid):
+        return self.instance_exists('unit', 'uuid', 'uuid', unit_uuid)
+
+    def create_unit(self, number, machineconfiguration_uri=None,
+                    jujuservicedeployment_uri=None):
+        """Creates a new instance of the 'Unit' model.
+
+        Args:
+            number: A string containing the number of the unit.
+            machineconfiguration_uri: A string containing the resource uri of
+                the associated machine configuration.
+            jujuservicedeployment_uri: A string containing the resource uri of
+                the associated juju service deployment.
+
+        Raises:
+            ConnectionError: An error will occur if the client cannot connect
+                to weebl.
+
+        """
+
+        url = self.make_url("unit")
+        data = {"number": number}
+        if machineconfiguration_uri is not None:
+            data['machineconfiguration'] = machineconfiguration_uri
+        if jujuservicedeployment_uri is not None:
+            data['jujuservicedeployment'] = jujuservicedeployment_uri
+        response = self.make_request('post', url=url, data=json.dumps(data))
+        response_data = response.json()
+        self.LOG.info("unit (uuid: {}) created successfully."
+                      .format(response_data['uuid']))
+        return response_data['uuid']
+
     # Vendor
     def get_list_of_vendors(self):
         return [vendor['name'] for vendor in self.get_objects('vendor')]
