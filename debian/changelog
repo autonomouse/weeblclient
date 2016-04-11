@@ -1,3 +1,12 @@
+weeblclient (1.2.0) trusty; urgency=medium
+
+  * API breaking changes
+  * Is now compatible with builds as tests 
+  * Now also supports Unit, JujuService, JujuServiceDeployment, Project, Report, ReportPeriod, ReportInstance.
+  * API clean up
+
+ -- Darren Hoyland <darren.hoyland@canonical.com>  Mon, 11 Apr 2016 18:03:38 +0100
+
 weeblclient (1.1.0) precise; urgency=medium
 
   * Added get_xxx_from_name methods.
