@@ -1316,8 +1316,13 @@ class Weebl(object):
             'testframework', 'uuid', 'uuid', testframework_uuid)
 
     def get_testframework_uuid_from_name_and_ver(self, name, version):
-        return self.filter_instances("testframework", [('name', name),
-                                     ('version', version), ])[0]['uuid']
+        try:
+            testframeworks = self.filter_instances(
+                "testframework", [('name', name), ('version', version), ])
+            return testframeworks[0]['uuid']
+        except IndexError:
+            msg = "No testframeworks found with name: {} and version: {}"
+            raise UnrecognisedInstance(msg.format(name, version))
 
     def create_testframework(self, name, description=None,
                              version='notapplicable'):
