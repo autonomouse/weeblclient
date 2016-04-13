@@ -1,12 +1,9 @@
-import os
 import re
 import six
-import yaml
 import json
-import fnmatch
 import urllib2
 import requests
-from dateutil import parser
+from fnmatch import fnmatch
 from datetime import datetime
 from weeblclient.weebl_python2 import utils
 from requests.exceptions import ConnectionError
@@ -230,105 +227,6 @@ class Weebl(object):
         bugs = self.get_objects("bug")
         return utils.munge_bug_info_data(
             targetfileglobs, knownbugregexes, bugs)
-
-    def upload_bugs_from_bugs_dictionary(self, bugs_dict,
-                                         include_generics=False):
-        self.LOG.info("Uploading bugs to Weebl @ {}".format(self.weebl_url))
-        entry_list = utils.generate_bug_entries(bugs_dict, include_generics)
-        for count, entry in enumerate(entry_list):
-            if not self.bugtrackerbug_exists(entry.lp_bug_no):
-                self.create_bugtrackerbug(entry.lp_bug_no)
-            bugtrackerbug_resource =\
-                self.get_bugtrackerbug_from_bug_number(entry.lp_bug_no)
-
-            job_resource = self.get_job_from_job_type(entry.job)
-            if not self.targetfileglob_exists(entry.targetfileglob):
-                self.create_targetfileglob(
-                    entry.targetfileglob, [job_resource])
-            t_file_glob_resource = self.get_targetfileglob_from_glob(
-                entry.targetfileglob)
-
-            if not self.knownbugregex_exists(entry.regex):
-                self.create_knownbugregex([t_file_glob_resource], entry.regex)
-            regex_resource = self.get_knownbugregex_from_regex(entry.regex)
-            tfiles = self.get_knownbugregex_target_files(regex_resource)
-            if t_file_glob_resource not in tfiles:
-                self.update_knownbugregex_with_new_target_file(
-                    t_file_glob_resource, regex_resource)
-
-            jobtypes = self.get_targetfileglob_jobtypes(t_file_glob_resource)
-            if job_resource not in jobtypes:
-                self.update_targetfileglob_with_new_jobtype(
-                    job_resource, t_file_glob_resource)
-
-            if not self.bug_exists(entry.summary):
-                self.create_bug(
-                    entry.summary, bugtrackerbug_resource, [regex_resource])
-            else:
-                bug_resource = self.get_bug_from_summary(entry.summary)
-                bug_regexes = self.get_bug_regexes(bug_resource)
-                if regex_resource not in bug_regexes:
-                    self.update_bug_with_new_bug_regexes(
-                        regex_resource, bug_resource)
-            print("{}. {} - {} ({}: {})".format(
-                  count + 1, entry.lp_bug_no, entry.summary, entry.job,
-                  entry.targetfileglob))
-        print("\n{} bugs uploaded.\n".format(count + 1))
-
-    def clear_target_files_and_jobs_from_knownbugregexes(self):
-        for idx, knownbugregex in enumerate(self.get_objects("knownbugregex")):
-            count = idx + 1
-            self.LOG.info("Regex {} dissassociated from its target files/jobs."
-                          .format(count))
-            regex_resource = knownbugregex['resource_uri']
-            for targetfileglob_resource in knownbugregex['targetfileglobs']:
-                # Clear jobs from TargetFleGlob:
-                targetfileglob_url = self.make_url(targetfileglob_resource)
-                self.update_instance(targetfileglob_url, jobtypes=[])
-            # Clear target files from KnownBugRegex:
-            regex_url = self.make_url(regex_resource)
-            self.update_instance(regex_url, targetfileglobs=[])
-        self.LOG.info("All {} KnownBugRegexes dissassociated.".format(count))
-
-    def get_date_from_pipelines_processed(self, doberman_dir):
-        pp_file = os.path.join(doberman_dir, 'pipelines_processed.yaml')
-        if not os.path.exists(pp_file):
-            return
-        with open(pp_file, 'r') as f:
-            pp_text = f.read()
-        return parser.parse(pp_text.split('\n')[1])
-
-    def create_pipelines_and_builds_from_paabn(self, doberman_dir, timestamp,
-                                               build_executor_name):
-        print("Loading from %s" % (doberman_dir))
-        paabn_file = os.path.join(
-            doberman_dir, 'pipelines_and_associated_build_numbers.yml')
-        if not os.path.exists(paabn_file):
-            return
-        with open(paabn_file, 'r') as f:
-            paabn = yaml.load(f.read())
-
-        for pipeline, builds in paabn.items():
-            try:
-                self.create_pipeline(
-                    buildexecutor_name=build_executor_name,
-                    pipeline_id=pipeline)
-            except InstanceAlreadyExists:
-                pass
-
-            for job_name, build_id in builds.items():
-                if build_id is not None:
-                    # Assume build_status was 'success' for now; Update later:
-                    try:
-                        if timestamp is not None:
-                            self.create_build(
-                                build_id, pipeline, job_name, 'success',
-                                build_finished_at=timestamp)
-                        else:
-                            self.create_build(
-                                build_id, pipeline, job_name, 'success')
-                    except InstanceAlreadyExists:
-                        pass
 
     def apply_all_regexes_to_text(self, text, target_file):
         knownbugregex_instances = self.get_instances("knownbugregex")
@@ -575,7 +473,8 @@ class Weebl(object):
             if build_id in [str(build.get('build_id')) for build in
                             build_instances]:
                 return build_instances[0]['uuid']
-        return False
+        msg = "No build with build_id = {} & pipeline_uuid = {}"
+        raise UnrecognisedInstance(msg.format(build_id, pipeline_uuid))
 
     def update_build(self, build_id, pipeline, jobtype, testcase_uuid,
                      testcaseinstancestatus, build_started_at=None,
@@ -1187,7 +1086,11 @@ class Weebl(object):
                                                            testcaseclass_uuid):
         testcase_instance = self.filter_instances("testcase", [
             ('name', name), ('testcaseclass_uuid', testcaseclass_uuid), ])
-        return testcase_instance[0]['uuid']
+        try:
+            return testcase_instance[0]['uuid']
+        except IndexError:
+            msg = "No testcases found with name: {} and testcaseclass uuid: {}"
+            raise UnrecognisedInstance(msg.format(name, testcaseclass_uuid))
 
     def create_testcase(self, name, testcaseclass_uuid):
         """Creates a new instance of the 'TestCase' model.
@@ -1223,7 +1126,7 @@ class Weebl(object):
             testcase_uuid =\
                 self.get_testcase_uuid_from_name_and_testcaseclass_uuid(
                     name=name, testcaseclass_uuid=testcaseclass_uuid)
-        except IndexError:
+        except UnrecognisedInstance:
             testcase_uuid = self.create_testcase(
                 name=name, testcaseclass_uuid=testcaseclass_uuid)
         return testcase_uuid
@@ -1237,7 +1140,12 @@ class Weebl(object):
                                                      testframework_uuid):
         testcaseclass_instance = self.filter_instances("testcaseclass", [
             ('name', name), ('testframework__uuid', testframework_uuid), ])
-        return testcaseclass_instance[0]['uuid']
+        try:
+            return testcaseclass_instance[0]['uuid']
+        except IndexError:
+            msg = "No testframeworks found with name: {} and "
+            msg += "testframework uuid: {}"
+            raise UnrecognisedInstance(msg.format(name, testframework_uuid))
 
     def create_testcaseclass(self, name, testframework_uuid):
         """Creates a new instance of the 'TestCaseClass' model.
@@ -1273,7 +1181,7 @@ class Weebl(object):
             testcaseclass_uuid =\
                 self.get_testcaseclass_uuid_from_name_testfw_uuid(
                     name=name, testframework_uuid=testframework_uuid)
-        except IndexError:
+        except UnrecognisedInstance:
             testcaseclass_uuid = self.create_testcaseclass(
                 name=name, testframework_uuid=testframework_uuid)
         return testcaseclass_uuid
@@ -1396,7 +1304,7 @@ class Weebl(object):
             testframework_uuid =\
                 self.get_testframework_uuid_from_name_and_ver(
                     name=name, version=version)
-        except IndexError:
+        except UnrecognisedInstance:
             testframework_uuid = self.create_testframework(
                 name=name, version=version)
         return testframework_uuid
