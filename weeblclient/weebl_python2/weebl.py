@@ -352,6 +352,23 @@ class Weebl(object):
                 return regex_uuid
                 return
 
+    def set_up_test_framework_caseclass_and_case(self, testframework_name,
+                                                 version, testcaseclass_name,
+                                                 testcase_name):
+        testframework_uuid = self.get_or_create_testframework(
+            name=testframework_name, version=version)
+        testcaseclass_uuid = self.get_or_create_testcaseclass(
+            name=testcaseclass_name, testframework_uuid=testframework_uuid)
+        return self.get_or_create_testcase(
+            name=testcase_name, testcaseclass_uuid=testcaseclass_uuid)
+
+    def set_up_build_framework_case_and_class(self, jobtype):
+        # Version is only appropriate for test frameworks, use "notapplicable"
+        # for builds:
+        return self.set_up_test_framework_caseclass_and_case(
+            testframework_name=jobtype, version="notapplicable",
+            testcaseclass_name=jobtype, testcase_name=jobtype)
+
     # Model CRUD Operations (In Alphabetical Order):
     # Block Storage
     def blockstorage_exists(self, name):
@@ -1200,6 +1217,17 @@ class Weebl(object):
             response_data['name']))
         return response_data['uuid']
 
+    def get_or_create_testcase(self, name, testcaseclass_uuid):
+        """ Try to create testcase """
+        try:
+            testcase_uuid =\
+                self.get_testcase_uuid_from_name_and_testcaseclass_uuid(
+                    name=name, testcaseclass_uuid=testcaseclass_uuid)
+        except IndexError:
+            testcase_uuid = self.create_testcase(
+                name=name, testcaseclass_uuid=testcaseclass_uuid)
+        return testcase_uuid
+
     # TestCaseClass
     def testcaseclass_exists(self, testcaseclass_uuid):
         return self.instance_exists(
@@ -1238,6 +1266,17 @@ class Weebl(object):
         self.LOG.info("The {} TestCaseClass was created successfully."
                       .format(response_data['name']))
         return response_data['uuid']
+
+    def get_or_create_testcaseclass(self, name, testframework_uuid):
+        """ Try to create testcaseclass """
+        try:
+            testcaseclass_uuid =\
+                self.get_testcaseclass_uuid_from_name_testfw_uuid(
+                    name=name, testframework_uuid=testframework_uuid)
+        except IndexError:
+            testcaseclass_uuid = self.create_testcaseclass(
+                name=name, testframework_uuid=testframework_uuid)
+        return testcaseclass_uuid
 
     # TestCaseInstance
     def testcaseinstance_exists(self, testcaseinstance_uuid):
@@ -1350,6 +1389,17 @@ class Weebl(object):
         self.LOG.info("The {} TestFramework was created successfully."
                       .format(response_data['name']))
         return response_data['uuid']
+
+    def get_or_create_testframework(self, name, version):
+        """ Try to create testframework """
+        try:
+            testframework_uuid =\
+                self.get_testframework_uuid_from_name_and_ver(
+                    name=name, version=version)
+        except IndexError:
+            testframework_uuid = self.create_testframework(
+                name=name, version=version)
+        return testframework_uuid
 
     # Ubuntu Version
     def ubuntuversion_exists(self, name):
