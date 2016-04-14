@@ -802,6 +802,16 @@ class Weebl(object):
     def pipeline_exists(self, pipeline_id):
         return self.instance_exists('pipeline', 'uuid', 'uuid', pipeline_id)
 
+    def get_pipeline_uuid_from_env_job_and_build(self, env_uuid, jobtype,
+                                                 build_id):
+        pipeline_instances = self.filter_instances("pipeline", [
+            ('build__build_id', build_id),
+            ('build__jobtype__name', jobtype),
+            ('buildexecutor__jenkins__environment__uuid', env_uuid)])
+        if pipeline_instances is None:
+            return False
+        return pipeline_instances[0]['uuid']
+
     def create_pipeline(self,
                         buildexecutor_name,
                         pipeline_id=None,
@@ -1201,7 +1211,6 @@ class Weebl(object):
             msg = "No testframeworks found with build_id: {} and testcase: {}"
             raise UnrecognisedInstance(msg.format(build_id, testcase_uuid))
 
-
     def create_testcaseinstance(self, build_uuid, testcase_uuid, pipeline_uuid,
                                 testcaseinstancestatus):
         """Creates a new instance of the 'TestCase' model.
@@ -1260,7 +1269,10 @@ class Weebl(object):
         testcaseinstance_uuid =\
             self.get_testcaseinstance_uuid_from_build_id_testcase_uuid(
                 testcase_uuid, build_id)
-        return self._pk_uri('testcaseinstance', testcaseinstance_uuid)
+        return self.get_testcaseinstance_uri_from_uuid(testcaseinstance_uuid)
+
+    def get_testcaseinstance_uri_from_uuid(self, uuid):
+        return self._pk_uri('testcaseinstance', uuid)
 
     # TestFramework
     def testframework_exists(self, testframework_uuid):
