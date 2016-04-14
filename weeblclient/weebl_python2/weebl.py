@@ -360,7 +360,7 @@ class Weebl(object):
         url = self.make_url("bugoccurrence")
         data = {
             'testcaseinstance': testcaseinstance_uri,
-            'knownbugregex_uri': knownbugregex_uri,
+            'regex': knownbugregex_uri,
         }
         response = self.make_request('post', url=url, data=json.dumps(data))
         bugoccurrence_uuid = response.json().get('uuid')

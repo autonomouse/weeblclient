@@ -40,3 +40,9 @@ weebl/oilserver/static/*
 # Remote access files:
 
 test-catalog-auth.json
+
+
+# scripts secrets file
+
+scripts/weebl_secrets.py
+
