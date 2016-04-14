@@ -1195,7 +1195,12 @@ class Weebl(object):
                                                               testcase_uuid):
         testcaseinstance = self.filter_instances("testcaseinstance", [
             ('build__build_id', build_id), ('testcase__uuid', testcase_uuid)])
-        return testcaseinstance[0]['uuid']
+        try:
+            return testcaseinstance[0]['uuid']
+        except IndexError:
+            msg = "No testframeworks found with build_id: {} and testcase: {}"
+            raise UnrecognisedInstance(msg.format(build_id, testcase_uuid))
+
 
     def create_testcaseinstance(self, build_uuid, testcase_uuid, pipeline_uuid,
                                 testcaseinstancestatus):
