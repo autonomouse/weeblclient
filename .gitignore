@@ -42,7 +42,7 @@ weebl/oilserver/static/*
 test-catalog-auth.json
 
 
-# scripts secrets file
+# scripts secrets files:
 
 scripts/weebl_secrets.py
-
+scripts/env_selector.py
