@@ -1,39 +1,25 @@
 #! /usr/bin/env python2
 from weeblclient.weebl_python2.weebl import Weebl
 from pprint import pprint
+from env_selector import environment_settings
+# create an env_selector.py file in this directory with an environment_settings
+# directory containing the details of each env, similar to the following:
+#environment_settings = {
+#    'local': {
+#        'weebl_url': "http://localhost:8000",
+#        'jenkins_host': "http://jenkins.url",
+#        'environment_name': "Local Environment",
+#        'environment_uuid': "00aa0aa0-a0aa-00a0-0a00-aa0000a0aaa0",
+#    },
+#}
+# This env_selector.py file will be ignored by git
+from weebl_secrets import username, apikey
+# create a weebl_secrets.py file in this directory with two lines in it:
+# username = 'xxx'
+# apikey = 'xxxxxxxxxxxx'
+# This weebl_secrets.py file will be ignored by git
 
 environment = 'local'
-username = '' # Enter your username here (e.g. CanonicalOilCiBot)
-apikey = ''  # Enter api_key (e.g. 8aa0ca63966d78b3099b2759289f239ffdc9d7b6)
-             # (Please note: That isn't the real api_key for oil-ci-bot!)
-
-environment_settings = {
-    'production': {
-        'weebl_url': "http://10.245.0.14",
-        'jenkins_host': "http://oil-jenkins.canonical.com",
-        'environment_name': "production",
-        'environment_uuid': "124591ef-361d-4a33-a756-fa79b3b7a1f8",
-    },
-    'staging': {
-        'weebl_url': "http://10.245.0.14",
-        'jenkins_host': "http://oil-jenkins.staging.canonical.com/",
-        'environment_name': "prod_staging",
-        'environment_uuid': "76fbbe93-192a-4a96-b1e2-dbada08fa5db",
-    },
-    'integration': {
-        'weebl_url': "http://10.245.162.53",
-        'jenkins_host': "http://10.245.162.43:8080",
-        'environment_name': "integration",
-        'environment_uuid': "7c82e43a-f5d6-47fb-ad9c-7d45c7ff48a7",
-    },
-    'local': {
-        'weebl_url': "http://localhost:8000",
-        'jenkins_host': "http://oil-jenkins.canonical.com",
-        'environment_name': "Sample Environment 2",
-        'environment_uuid': "97cd0ea8-e0cc-43a7-8e93-af4797e1adf1",
-    },
-}
-# Please note: the environment_uuid is liable to change with each fake_data cmd
 
 weebl = Weebl(environment_settings[environment]['environment_uuid'],
               environment_settings[environment]['environment_name'],
