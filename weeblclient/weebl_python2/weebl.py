@@ -481,7 +481,7 @@ class Weebl(object):
                      testcaseinstancestatus, build_started_at=None,
                      build_finished_at=None, ts_format="%Y-%m-%d %H:%M:%SZ"):
         build_uuid = self.get_build_uuid_from_build_id_job_and_pipeline(
-            build_id, pipeline)
+            build_id, jobtype, pipeline)
         url = self.make_url("build", build_uuid)
         data = {
             'pipeline': self._pk_uri('pipeline', pipeline),
