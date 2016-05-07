@@ -464,14 +464,15 @@ class Weebl(object):
 
         return build_uuid
 
-    def get_build_uuid_from_build_id_and_pipeline(self, build_id,
-                                                  pipeline_uuid):
-        build_instances = self.filter_instances(
-            "build", [('build_id', build_id),
-                      ('pipeline__uuid', pipeline_uuid)])
+    def get_build_uuid_from_build_id_job_and_pipeline(self, build_id, jobtype,
+                                                      pipeline_uuid):
+        build_instances = self.filter_instances("build", [
+            ('build_id', build_id),
+            ('jobtype__name', jobtype),
+            ('pipeline__uuid', pipeline_uuid)])
         if build_instances is not None:
-            if build_id in [str(build.get('build_id')) for build in
-                            build_instances]:
+            if str(build_id) in [str(build.get('build_id')) for build in
+                                 build_instances]:
                 return build_instances[0]['uuid']
         msg = "No build with build_id = {} & pipeline_uuid = {}"
         raise UnrecognisedInstance(msg.format(build_id, pipeline_uuid))
@@ -479,7 +480,7 @@ class Weebl(object):
     def update_build(self, build_id, pipeline, jobtype, testcase_uuid,
                      testcaseinstancestatus, build_started_at=None,
                      build_finished_at=None, ts_format="%Y-%m-%d %H:%M:%SZ"):
-        build_uuid = self.get_build_uuid_from_build_id_and_pipeline(
+        build_uuid = self.get_build_uuid_from_build_id_job_and_pipeline(
             build_id, pipeline)
         url = self.make_url("build", build_uuid)
         data = {
