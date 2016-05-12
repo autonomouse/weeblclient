@@ -1269,7 +1269,7 @@ class Weebl(object):
                 testcase_name, testcaseclass_uuid)
         testcaseinstance_uuid =\
             self.get_testcaseinstance_uuid_from_build_id_testcase_uuid(
-                testcase_uuid, build_id)
+                build_id, testcase_uuid)
         return self.get_testcaseinstance_uri_from_uuid(testcaseinstance_uuid)
 
     def get_testcaseinstance_uri_from_uuid(self, uuid):
