@@ -163,9 +163,22 @@ class Weebl(object):
         except UnexpectedStatusCode:
             return []
 
-    def _pk_uri(self, resource, value):
+    def pk_uri(self, resource, value):
+        """ This method builds a resource uri for a given model. The Weebl API
+        does not tend to use the primary key of a model resource for its uri,
+        instead they usually use a model's uuid or name.
+        """
         return "/api/%s/%s/%s/" % (
             self.weebl_api_version, resource, value)
+
+    def get_pk_from_resource_uri(self, resource_uri):
+        """ This method is basically the inverse of the pk_uri method. It gets
+        the endpoint name from the resource uri. The endpoint name is the
+        primary key by default, but weebl usually overrides this with the uuid
+        of the model. In some cases when there isn't a uuid, "name" is often
+        used instead.
+        """
+        return resource_uri.rstrip('/').split('/')[-1]
 
     # Set Up:
     def weeblify_environment(self, jenkins_host, ci_server_api=None):
@@ -288,7 +301,7 @@ class Weebl(object):
         self.make_request('post', url=url, data=json.dumps(data))
 
     def get_blockstorage_from_name(self, name):
-        return self._pk_uri('blockstorage', name)
+        return self.pk_uri('blockstorage', name)
 
     # Bug
     def bug_exists(self, summary):
@@ -442,8 +455,8 @@ class Weebl(object):
         url = self.make_url("build")
         data = {
             'build_id': build_id,
-            'pipeline': self._pk_uri('pipeline', pipeline),
-            'jobtype': self._pk_uri('jobtype', jobtype), }
+            'pipeline': self.pk_uri('pipeline', pipeline),
+            'jobtype': self.pk_uri('jobtype', jobtype), }
         if build_started_at is None:
             build_started_at = datetime.now()
         data['build_started_at'] =\
@@ -484,8 +497,8 @@ class Weebl(object):
             build_id, jobtype, pipeline)
         url = self.make_url("build", build_uuid)
         data = {
-            'pipeline': self._pk_uri('pipeline', pipeline),
-            'jobtype': self._pk_uri('jobtype', jobtype),
+            'pipeline': self.pk_uri('pipeline', pipeline),
+            'jobtype': self.pk_uri('jobtype', jobtype),
         }
         if build_started_at:
             data['build_started_at'] =\
@@ -520,7 +533,7 @@ class Weebl(object):
 
     def create_buildexecutor(self, buildexecutor_name):
         buildexecutor_name = buildexecutor_name.lstrip('(').rstrip(')')
-        jenkins_resource_uri = self._pk_uri(
+        jenkins_resource_uri = self.pk_uri(
             'jenkins', self._get_jenkins_uuid())
         url = self.make_url("buildexecutor")
         data = {'name': buildexecutor_name,
@@ -549,7 +562,7 @@ class Weebl(object):
         self.make_request('post', url=url, data=json.dumps(data))
 
     def get_compute_from_name(self, name):
-        return self._pk_uri('compute', name)
+        return self.pk_uri('compute', name)
 
     # Database Version
     def database_exists(self, name):
@@ -561,7 +574,7 @@ class Weebl(object):
         self.make_request('post', url=url, data=json.dumps(data))
 
     def get_database_from_name(self, name):
-        return self._pk_uri('database', name)
+        return self.pk_uri('database', name)
 
     # Environment
     def environment_exists(self, env_uuid):
@@ -600,7 +613,7 @@ class Weebl(object):
         self.make_request('post', url=url, data=json.dumps(data))
 
     def get_imagestorage_from_name(self, name):
-        return self._pk_uri('imagestorage', name)
+        return self.pk_uri('imagestorage', name)
 
     # InternalContact
     def internalcontact_exists(self, name):
@@ -614,7 +627,7 @@ class Weebl(object):
         self.make_request('post', url=url, data=json.dumps(data))
 
     def get_internalcontact_from_name(self, name):
-        return self._pk_uri('internalcontact', name)
+        return self.pk_uri('internalcontact', name)
 
     # Jenkins
     def jenkins_exists(self, jenkins_uuid):
@@ -623,10 +636,10 @@ class Weebl(object):
     def create_jenkins(self, env_uuid, jenkins_host, default_status='up'):
         url = self.make_url("jenkins")
         data = {
-            'environment': self._pk_uri('environment', env_uuid),
+            'environment': self.pk_uri('environment', env_uuid),
             'external_access_url': jenkins_host,
             'internal_access_url': jenkins_host,
-            'servicestatus': self._pk_uri('servicestatus', default_status),
+            'servicestatus': self.pk_uri('servicestatus', default_status),
         }
         self.make_request('post', url=url, data=json.dumps(data))
         self.LOG.info("Set up new jenkins '{}' for environment {}".format(
@@ -724,7 +737,7 @@ class Weebl(object):
         self.make_request('post', url=url, data=json.dumps(data))
 
     def get_knownbugregex_resource_uri_from_regex_uuid(self, regex_uuid):
-        return self._pk_uri('knownbugregex', regex_uuid)
+        return self.pk_uri('knownbugregex', regex_uuid)
 
     def get_knownbugregex_from_regex(self, regex):
         knownbugregex_instances = self.get_instance_data(
@@ -763,7 +776,7 @@ class Weebl(object):
         if objects == []:
             return
         else:
-            return self._pk_uri("machine", objects[0].get('uuid'))
+            return self.pk_uri("machine", objects[0].get('uuid'))
 
     # Machine Configuration
     def machineconfiguration_exists(self, uuid):
@@ -797,7 +810,7 @@ class Weebl(object):
         self.make_request('post', url=url, data=json.dumps(data))
 
     def get_openstackversion_from_name(self, name):
-        return self._pk_uri('openstackversion', name)
+        return self.pk_uri('openstackversion', name)
 
     # Pipeline
     def pipeline_exists(self, pipeline_id):
@@ -862,7 +875,7 @@ class Weebl(object):
 
         # Create pipeline:
         url = self.make_url("pipeline")
-        data = {'buildexecutor': self._pk_uri('buildexecutor', buildexecutor)}
+        data = {'buildexecutor': self.pk_uri('buildexecutor', buildexecutor)}
         if pipeline_id is not None:
             data['uuid'] = pipeline_id
         if ubuntuversion is not None:
@@ -948,7 +961,7 @@ class Weebl(object):
         if objects == []:
             return
         else:
-            return self._pk_uri("productundertest", objects[0].get('uuid'))
+            return self.pk_uri("productundertest", objects[0].get('uuid'))
 
     # Project
     def get_list_of_projects(self):
@@ -1053,7 +1066,7 @@ class Weebl(object):
         self.make_request('post', url=url, data=json.dumps(data))
 
     def get_sdn_from_name(self, name):
-        return self._pk_uri('sdn', name)
+        return self.pk_uri('sdn', name)
 
     # Target File Glob
     def targetfileglob_exists(self, glob_pattern):
@@ -1122,7 +1135,7 @@ class Weebl(object):
         url = self.make_url("testcase")
         data = {
             'name': name,
-            'testcaseclass': self._pk_uri('testcaseclass', testcaseclass_uuid),
+            'testcaseclass': self.pk_uri('testcaseclass', testcaseclass_uuid),
         }
 
         response = self.make_request('post', url=url, data=json.dumps(data))
@@ -1177,7 +1190,7 @@ class Weebl(object):
         url = self.make_url("testcaseclass")
         data = {
             'name': name,
-            'testframework': self._pk_uri('testframework', testframework_uuid),
+            'testframework': self.pk_uri('testframework', testframework_uuid),
         }
 
         response = self.make_request('post', url=url, data=json.dumps(data))
@@ -1233,10 +1246,10 @@ class Weebl(object):
 
         url = self.make_url("testcaseinstance")
         data = {
-            'testcase': self._pk_uri('testcase', testcase_uuid),
-            'testcaseinstancestatus': self._pk_uri(
+            'testcase': self.pk_uri('testcase', testcase_uuid),
+            'testcaseinstancestatus': self.pk_uri(
                 'testcaseinstancestatus', testcaseinstancestatus),
-            'build': self._pk_uri('build', build_uuid),
+            'build': self.pk_uri('build', build_uuid),
         }
 
         response = self.make_request('post', url=url, data=json.dumps(data))
@@ -1248,11 +1261,19 @@ class Weebl(object):
     def update_testcaseinstance(self, testcaseinstance_uuid,
                                 testcaseinstancestatus):
         url = self.make_url("testcaseinstance", testcaseinstance_uuid)
-        tci_pk = self._pk_uri('testcaseinstancestatus', testcaseinstancestatus)
+        tci_pk = self.pk_uri('testcaseinstancestatus', testcaseinstancestatus)
         data = {'testcaseinstancestatus': tci_pk, }
         response = self.make_request('put', url=url, data=json.dumps(data))
         response_data = response.json()
         return response_data['uuid']
+
+    def get_testcaseinstance_uuid(self, build_id, testcase_name,
+                                  testcaseclass_name, testframework_name,
+                                  testframework_version):
+        testcaseinstance_resource_uri = self.get_testcaseinstance_resource_uri(
+            build_id, testcase_name, testcaseclass_name, testframework_name,
+            testframework_version)
+        return self.get_pk_from_resource_uri(testcaseinstance_resource_uri)
 
     def get_testcaseinstance_resource_uri(self, build_id, testcase_name,
                                           testcaseclass_name,
@@ -1273,7 +1294,7 @@ class Weebl(object):
         return self.get_testcaseinstance_uri_from_uuid(testcaseinstance_uuid)
 
     def get_testcaseinstance_uri_from_uuid(self, uuid):
-        return self._pk_uri('testcaseinstance', uuid)
+        return self.pk_uri('testcaseinstance', uuid)
 
     # TestFramework
     def testframework_exists(self, testframework_uuid):
@@ -1337,7 +1358,7 @@ class Weebl(object):
         self.make_request('post', url=url, data=json.dumps(data))
 
     def get_ubuntuversion_from_name(self, name):
-        return self._pk_uri('ubuntuversion', name)
+        return self.pk_uri('ubuntuversion', name)
 
     # Unit
     def unit_exists(self, unit_uuid):
@@ -1385,7 +1406,7 @@ class Weebl(object):
         self.make_request('post', url=url, data=json.dumps(data))
 
     def get_vendor_from_name(self, name):
-        return self._pk_uri('vendor', name)
+        return self.pk_uri('vendor', name)
 
     def get_job_history(self, environment_uuid, start_date=None):
         params = {
