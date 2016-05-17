@@ -270,8 +270,9 @@ class Weebl(object):
             name=testframework_name, version=version)
         testcaseclass_uuid = self.get_or_create_testcaseclass(
             name=testcaseclass_name, testframework_uuid=testframework_uuid)
-        return self.get_or_create_testcase(
+        testcase_uuid = self.get_or_create_testcase(
             name=testcase_name, testcaseclass_uuid=testcaseclass_uuid)
+        return testcase_uuid
 
     def set_up_build_framework_case_and_class(self, jobtype):
         # Version is only appropriate for test frameworks, use "notapplicable"
@@ -1153,6 +1154,8 @@ class Weebl(object):
         except UnrecognisedInstance:
             testcase_uuid = self.create_testcase(
                 name=name, testcaseclass_uuid=testcaseclass_uuid)
+        self.LOG.info("Testcase '{}', uuid: : {}".format(
+            name, testcase_uuid))
         return testcase_uuid
 
     # TestCaseClass
@@ -1208,6 +1211,8 @@ class Weebl(object):
         except UnrecognisedInstance:
             testcaseclass_uuid = self.create_testcaseclass(
                 name=name, testframework_uuid=testframework_uuid)
+        self.LOG.info("TestCaseClass '{}', uuid: : {}".format(
+            name, testcaseclass_uuid))
         return testcaseclass_uuid
 
     # TestCaseInstance
@@ -1346,6 +1351,8 @@ class Weebl(object):
         except UnrecognisedInstance:
             testframework_uuid = self.create_testframework(
                 name=name, version=version)
+        self.LOG.info("Testframework '{}', version '{}', uuid: : {}".format(
+            name, version, testframework_uuid))
         return testframework_uuid
 
     # Ubuntu Version
