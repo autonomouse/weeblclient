@@ -256,12 +256,9 @@ class Weebl(object):
                 return
             matches = re.compile(regex, re.DOTALL).findall(text)
             if len(matches) > 0:
-                print('match!!! ' + regex)
-
                 msg = "Unfiled bug matched to {}:\n{}"
                 self.LOG.info(msg.format(regex_uuid, regex))
                 return regex_uuid
-                return
 
     def set_up_test_framework_caseclass_and_case(self, testframework_name,
                                                  version, testcaseclass_name,
@@ -270,9 +267,8 @@ class Weebl(object):
             name=testframework_name, version=version)
         testcaseclass_uuid = self.get_or_create_testcaseclass(
             name=testcaseclass_name, testframework_uuid=testframework_uuid)
-        testcase_uuid = self.get_or_create_testcase(
+        return self.get_or_create_testcase(
             name=testcase_name, testcaseclass_uuid=testcaseclass_uuid)
-        return testcase_uuid
 
     def set_up_build_framework_case_and_class(self, jobtype):
         # Version is only appropriate for test frameworks, use "notapplicable"
@@ -1227,8 +1223,32 @@ class Weebl(object):
         try:
             return testcaseinstance[0]['uuid']
         except IndexError:
-            msg = "No testframeworks found with build_id: {} and testcase: {}"
+            msg = "No testcaseinstance found with build_id: {} and testcase: {}"
             raise UnrecognisedInstance(msg.format(build_id, testcase_uuid))
+
+    def get_or_create_testcaseinstance(self, build_id, build_uuid, testcase_uuid,
+                                       pipeline_uuid, testcaseinstancestatus):
+        """Tries to create a new instance of the 'TestCase' model
+        if one doesn't already exist.
+
+        Args:
+            build_id: A string containing the build number.
+            build_uuid: A UUID string used to identify the build.
+            testcase_uuid: A UUID string used to identify the testcase.
+            pipeline_uuid: A UUID string used to identify the pipeline.
+            testcaseinstancestatus: A string containing the testcaseinstance
+                status.
+        """
+
+        try:
+            testcaseinstance_uuid =\
+                self.get_testcaseinstance_uuid_from_build_id_testcase_uuid(
+                    build_id, testcase_uuid)
+        except UnrecognisedInstance:
+            testcaseinstance_uuid = self.create_testcaseinstance(build_uuid,
+                                        testcase_uuid, pipeline_uuid,
+                                        testcaseinstancestatus)
+        return testcaseinstance_uuid
 
     def create_testcaseinstance(self, build_uuid, testcase_uuid, pipeline_uuid,
                                 testcaseinstancestatus):
