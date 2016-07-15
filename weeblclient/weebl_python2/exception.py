@@ -16,3 +16,7 @@ class UnrecognisedInstance(Exception):
 
 class UnauthorisedAPIRequest(Exception):
     pass
+
+
+class BundleNotAnnotated(Exception):
+    pass
