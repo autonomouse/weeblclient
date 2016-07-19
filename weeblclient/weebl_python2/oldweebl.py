@@ -370,10 +370,10 @@ class OldWeebl(object):
 
     def get_build_uuid_from_build_id_job_and_pipeline(self, build_id, jobtype,
                                                       pipeline_uuid):
-        build_instances = self.filter_instances("build", [
-            ('build_id', build_id),
-            ('jobtype__name', jobtype),
-            ('pipeline__uuid', pipeline_uuid)])
+        build_instances = self.filter_instances(
+            "build", {'build_id': build_id, 'jobtype__name': jobtype,
+                      'pipeline__uuid': pipeline_uuid}
+        )
         if build_instances:
             if build_id in [str(build.get('build_id')) for build in
                             build_instances]:
