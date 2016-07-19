@@ -123,7 +123,7 @@ class OldWeebl(object):
 
     def set_up_new_buildexecutors(self, ci_server_api):
         newly_created_buildexecutors = []
-        for buildexecutor in ci_server_api.get_nodes().items():
+        for buildexecutor in ci_server_api.get_nodes().iteritems():
             name = buildexecutor[0]
             if self.buildexecutor_exists(name):
                 continue
