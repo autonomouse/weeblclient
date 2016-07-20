@@ -70,8 +70,7 @@ class Weebl(object):
 
         """
         buildexecutor = self.resources.buildexecutor.get(
-            name=buildexecutor_name, jenkins__environment__uuid=self.uuid,
-            _ensure_correct=False)
+            name=buildexecutor_name, jenkins__environment__uuid=self.uuid)
 
         versionconfiguration = None
         if ubuntuversion_name is not None and openstackversion_name is not None:

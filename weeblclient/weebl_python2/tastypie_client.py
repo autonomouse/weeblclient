@@ -241,7 +241,7 @@ class ResourceObject(MutableMapping):
     def save(self):
         if self.__orig != self.data:
             self.resource_client.make_request(
-                'put', url=self.resource_uri,
+                'put', url=self.resource_client.make_url(self.resource_uri),
                 data=json.dumps(self.data, cls=ExtendedJsonEncoder))
             self.__orig = copy(self.data)
 
