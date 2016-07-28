@@ -32,6 +32,8 @@ class Requester(object):
             self.headers["Authorization"] =\
                 "ApiKey {}:{}".format(username, apikey)
         self.LOG = utils.get_logger("tastypie_client.Requester")
+        msg = "Communicating with Weebl at {} via user: {}"
+        self.LOG.info(msg.format(base_uri, username))
 
     def make_relative_url(self, *path_list, **kwargs):
         def path_join(parts):
