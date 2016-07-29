@@ -30,11 +30,13 @@ class Weebl(object):
         self.uuid = uuid
         resource_url = "/api/{}/".format(weebl_api_ver)
         base_url = urljoin(weebl_url, resource_url)
+        self.LOG = utils.get_logger("weeblclient")
+        msg = "Communicating with '{}' Weebl at {} via user: {}"
+        self.LOG.info(msg.format(env_name, base_url, username))
         requester = Requester(base_url, username, apikey)
         self.resources = ApiClient(requester, URI_FIELD_OVERRIDES)
         self.oldweebl = OldWeebl(uuid, env_name, username, apikey, weebl_url,
                                  weebl_api_ver)
-        self.LOG = utils.get_logger("weeblclient")
 
     # deprecate oldweebl calls with a warning, so we can track and replace them
     def __getattr__(self, attr):
