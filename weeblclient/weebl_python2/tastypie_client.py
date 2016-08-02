@@ -132,6 +132,8 @@ class ResourceClient(object):
                 key = key + '__' + value.resource_client.uri_field
                 value = value.uri_field_value
             # TODO: elif isinstance(value, list): ... of ResourceObjects
+            key = requests.utils.quote(str(key), safe='')
+            value = requests.utils.quote(str(value), safe='')
             return (key, value)
 
         filters = copy(filters)
