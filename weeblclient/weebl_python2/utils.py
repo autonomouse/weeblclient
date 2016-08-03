@@ -99,6 +99,8 @@ def munge_bug_info_data(known_bug_regexes):
         known_bug_regex_regex = known_bug_regex['regex']
         try:
             lp_bug = known_bug_regex['bug']['bugtrackerbug']['bug_number']
+        except TypeError:
+            continue
         except KeyError:
             continue
         for glob in known_bug_regex['targetfileglobs']:
