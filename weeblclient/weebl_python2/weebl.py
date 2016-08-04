@@ -90,8 +90,11 @@ class Weebl(object):
             versionconfiguration=versionconfiguration)['uuid']
 
     def get_bug_info(self, force_refresh=True):
-        self.LOG.info("Downloading bug regexes from Weebl")
-        return utils.munge_bug_info_data(self.resources.knownbugregex.objects())
+        bugs_dict = utils.munge_bug_info_data(
+            self.resources.knownbugregex.objects())
+        self.LOG.info("Downloaded {} bugs and associated regexes from Weebl."
+                      .format(len(bugs_dict['bugs'])))
+        return bugs_dict
 
     def get_job_history(self, environment_uuid, start_date=None):
         params = {
