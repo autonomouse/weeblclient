@@ -112,14 +112,14 @@ def munge_bug_info_data(known_bug_regexes):
             job_names = [jobtype.get('name')
                          for jobtype in glob.get('jobtypes')]
             for job_name in job_names:
-                job_entry = {
+                job_entry = {target_file_glob: {
                     'regexp': [known_bug_regex_regex],
-                    'uuids': [known_bug_regex_uuid]
+                    'uuids': [known_bug_regex_uuid]}
                 }
                 # top level regex_uuid is wrong, but doberman expects it, so...
-                bug_dict_partial = \
-                    {lp_bug: {job_name: [job_entry],
-                              'regex_uuid': known_bug_regex_uuid}}
+                bug_dict_partial = {
+                    lp_bug: {job_name: [job_entry],
+                             'regex_uuid': known_bug_regex_uuid}}
                 bugs_dict = merge_dict(bugs_dict, bug_dict_partial)
 
     return {'bugs': bugs_dict}

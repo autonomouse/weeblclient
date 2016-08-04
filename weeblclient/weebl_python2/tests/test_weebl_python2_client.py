@@ -41,17 +41,20 @@ class WeeblClientUtilsTests(testtools.TestCase):
           u'uuid': u'bb14eb84-4708-43ad-a8dc-81137aded083'}]
 
         output = utils.munge_bug_info_data(regexes)
-
         ideal_output = {'bugs': {
             905638: {
                 u'pipeline_start':
-                    [{'regexp': [u'45886{93802}-62702(52772)'],
-                      'uuids': [u'63fedc7e-ca8f-4a12-9de9-3fd81ecd2e72']}],
+                    [{'console.txt':
+                        {'regexp': [u'45886{93802}-62702(52772)'],
+                          'uuids': [u'63fedc7e-ca8f-4a12-9de9-3fd81ecd2e72']}
+                    }],
                 'regex_uuid': u'63fedc7e-ca8f-4a12-9de9-3fd81ecd2e72'},
             1578891: {
                 u'pipeline_deploy':
-                    [{'regexp': [u'13539{94476}-97589(5091)'],
-                      'uuids': [u'bb14eb84-4708-43ad-a8dc-81137aded083']}],
+                    [{'juju_debug_log.txt':
+                        {'regexp': [u'13539{94476}-97589(5091)'],
+                          'uuids': [u'bb14eb84-4708-43ad-a8dc-81137aded083']}
+                    }],
                 'regex_uuid': u'bb14eb84-4708-43ad-a8dc-81137aded083'}}}
 
         self.assertEqual(ideal_output, output)
