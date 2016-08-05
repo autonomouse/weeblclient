@@ -703,6 +703,7 @@ class OldWeebl(object):
         # bypass self.make_request and call requests.post directly
         # because self.make_requests doesn't support a multipart file upload
         response = requests.post(url=url, files=files)
+        response.raise_for_status()
         return response.json()
 
     def get_bundle_image(self, pipeline_id):
