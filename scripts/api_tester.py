@@ -10,21 +10,18 @@ from env_selector import environment_settings
 #        'jenkins_host': "http://jenkins.url",
 #        'environment_name': "Local Environment",
 #        'environment_uuid': "00aa0aa0-a0aa-00a0-0a00-aa0000a0aaa0",
+#        'username': 'xxx',
+#        'apikey': 'xxxxxxxxxxxx'
 #    },
 #}
 # This env_selector.py file will be ignored by git
-from weebl_secrets import username, apikey
-# create a weebl_secrets.py file in this directory with two lines in it:
-# username = 'xxx'
-# apikey = 'xxxxxxxxxxxx'
-# This weebl_secrets.py file will be ignored by git
 
 environment = 'local'
 
 weebl = Weebl(environment_settings[environment]['environment_uuid'],
               environment_settings[environment]['environment_name'],
-              username=username,
-              apikey=apikey,
+              username=environment_settings[environment]['username'],
+              apikey=environment_settings[environment]['apikey'],
               weebl_url=environment_settings[environment]['weebl_url'])
 weebl.weeblify_environment(environment_settings[environment]['jenkins_host'])
 
