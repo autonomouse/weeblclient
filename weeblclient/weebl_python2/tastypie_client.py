@@ -170,8 +170,10 @@ class ResourceClient(object):
         response = self.make_request(
             'get', url=self._kwargs_to_filters(limit=1, **kwargs))
         value = response.json()
-        if 'meta' not in value or value['meta'].get('total_count') != 1:
-            raise ValueError('Did not get one object back from request')
+        if 'meta' not in value or value['meta'].get('total_count') < 1:
+            raise ValueError('Did not get any objects back from request')
+        elif value['meta'].get('total_count') > 1:
+            raise ValueError('Got more than one object back from request')
         value = value['objects'][0]
         # check all kwargs are in returned response if we don't have related
         # data or related ('__') keys in our query

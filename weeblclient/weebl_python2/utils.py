@@ -1,4 +1,5 @@
 import os
+import yaml
 import random
 import string
 import logging
@@ -153,3 +154,27 @@ def generate_bug_entries(bugs_dict, include_generics):
                                       regex, summary)
                         entry_list.append(entry)
     return entry_list
+
+
+def mkdir(directory):
+    """ Make a directory, check and throw an error if failed. """
+    if not os.path.isdir(directory):
+        try:
+            os.makedirs(directory)
+        except OSError:
+            if not os.path.isdir(directory):
+                raise
+
+
+def load_yaml(file_location):
+    with open(file_location, "r") as f:
+        return yaml.load(f)
+
+
+def write_output_yaml(output, path_to_file):
+    output_dir = os.path.dirname(path_to_file)
+    if not os.path.isdir(output_dir):
+        mkdir(output_dir)
+    stream = yaml.safe_dump(output, default_flow_style=False)
+    with open(path_to_file, 'w') as outfile:
+        outfile.write(stream.replace('\n- ', '\n\n- '))
