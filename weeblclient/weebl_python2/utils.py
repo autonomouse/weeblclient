@@ -158,6 +158,8 @@ def generate_bug_entries(bugs_dict, include_generics):
 
 def mkdir(directory):
     """ Make a directory, check and throw an error if failed. """
+    if directory in ['', None, '.']:
+        return
     if not os.path.isdir(directory):
         try:
             os.makedirs(directory)
@@ -175,4 +177,4 @@ def write_output_yaml(output, path_to_file):
     mkdir(os.path.dirname(path_to_file))
     stream = yaml.safe_dump(output, default_flow_style=False)
     with open(path_to_file, 'w') as outfile:
-        outfile.write(stream.replace('\n- ', '\n\n- '))
+        outfile.write(stream)
