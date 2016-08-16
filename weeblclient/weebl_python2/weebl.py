@@ -14,6 +14,7 @@ URI_FIELD_OVERRIDES = {
     'jobtype': 'name',
     'testcaseinstancestatus': 'name',
     'targetfileglob': 'glob_pattern',
+    'bugtrackerbug': 'bug_number',
 }
 
 
