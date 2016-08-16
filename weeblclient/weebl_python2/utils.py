@@ -158,8 +158,7 @@ def generate_bug_entries(bugs_dict, include_generics):
 
 def mkdir(directory):
     """ Make a directory, check and throw an error if failed. """
-    if directory in ['', None, '.']:
-        return
+    directory = os.path.realpath(directory)
     if not os.path.isdir(directory):
         try:
             os.makedirs(directory)
