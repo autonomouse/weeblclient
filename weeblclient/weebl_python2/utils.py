@@ -4,7 +4,6 @@ import random
 import string
 import logging
 import subprocess
-from fnmatch import fnmatch
 from datetime import datetime
 from collections import namedtuple
 from copy import deepcopy

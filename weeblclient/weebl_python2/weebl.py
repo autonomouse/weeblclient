@@ -6,7 +6,7 @@ from weeblclient.weebl_python2 import utils
 from weeblclient.weebl_python2.oldweebl import OldWeebl
 from weeblclient.weebl_python2.tastypie_client import Requester, ApiClient
 
-#uri_fields that are not based on uuid
+# uri_fields that are not based on uuid:
 URI_FIELD_OVERRIDES = {
     'servicestatus': 'name',
     'ubuntuversion': 'name',
@@ -76,7 +76,9 @@ class Weebl(object):
             name=buildexecutor_name, jenkins__environment__uuid=self.uuid)
 
         versionconfiguration = None
-        if ubuntuversion_name is not None and openstackversion_name is not None:
+        ubuntu_check = ubuntuversion_name is not None
+        openstack_check = openstackversion_name is not None
+        if ubuntu_check and openstack_check:
             ubuntuversion = self.resources.ubuntuversion.get_or_create(
                 name=ubuntuversion_name)
             openstackversion = self.resources.openstackversion.get_or_create(
@@ -125,7 +127,6 @@ class Weebl(object):
                 return True
         return False
 
-
     def push_bundle_info(self, pipeline_id, bundle, require_annotations=False):
         """Push info from a bundle (dict) for the given pipeline_id. The bundle
         can either be annotated with extra data or not. Preferably it will be
@@ -139,8 +140,8 @@ class Weebl(object):
         annotated = Weebl._check_bundle_annotated(bundle)
         if require_annotations and not annotated:
             raise BundleNotAnnotated('Given bundle is not annotated')
-
         pipeline = self.resources.pipeline.get(uuid=pipeline_id)
+
         def actual_machine_name(name):
             """recursively lookup physical machine name for lxcs"""
             lxc_prefix = 'lxc:'
@@ -152,8 +153,8 @@ class Weebl(object):
                 return actual_machine_name(name)
             except (KeyError, ValueError):
                 return name
-
         machineconfigurations = {}
+
         def push_machineconfiguration(name):
             """create or return machineconfiguration, which links to machine
             and productundertest children. Do as much as possible depending on
@@ -170,7 +171,8 @@ class Weebl(object):
                 for product in bundle['machines'][name].get('products'):
                     productundertest = self.resources.productundertest.\
                         get_or_create(name=product)
-                    productundertests_uris.append(productundertest.resource_uri)
+                    productundertests_uris.append(
+                        productundertest.resource_uri)
 
             machineconfiguration = self.resources.machineconfiguration.create(
                 machine=machine,
@@ -184,7 +186,8 @@ class Weebl(object):
             may not have children themselves. Do as much as possible depending
             on if annotations are given.
             """
-            jujuservice = self.resources.jujuservice.get_or_create(name=service)
+            jujuservice = self.resources.jujuservice.get_or_create(
+                name=service)
             charm = None
             if 'charm' in config:
                 charm = self.resources.charm.get_or_create(
@@ -196,11 +199,12 @@ class Weebl(object):
                 productundertest = \
                     self.resources.productundertest.get_or_create(
                         name=product)
-            jujuservicedeployment = self.resources.jujuservicedeployment.create(
-                pipeline=pipeline,
-                jujuservice=jujuservice,
-                charm=charm,
-                productundertest=productundertest)
+            jujuservicedeployment =\
+                self.resources.jujuservicedeployment.create(
+                    pipeline=pipeline,
+                    jujuservice=jujuservice,
+                    charm=charm,
+                    productundertest=productundertest)
             for number, unit in enumerate(config.get('to', [])):
                 machineconfiguration = push_machineconfiguration(
                     actual_machine_name(unit))

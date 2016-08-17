@@ -3,15 +3,13 @@ import json
 import requests
 from fnmatch import fnmatch
 from datetime import datetime
-from requests.exceptions import ConnectionError
 from six.moves.urllib_parse import urljoin
 from six.moves import urllib
 from weeblclient.weebl_python2 import utils
 from weeblclient.weebl_python2.exception import (
-    UnexpectedStatusCode,
-    UnrecognisedInstance,
-)
+    UnexpectedStatusCode, UnrecognisedInstance)
 from weeblclient.weebl_python2.tastypie_client import Requester
+
 
 class OldWeebl(object):
     def __init__(self, uuid, env_name, username=None, apikey=None,
@@ -303,8 +301,8 @@ class OldWeebl(object):
         if bugtrackerbug_instances is not None:
             if bug_number in [str(btbugs.get('bug_number')) for btbugs in
                               bugtrackerbug_instances]:
-                return self.pk_uri('bugtrackerbug',
-                                    bugtrackerbug_instances[0]['uuid'])
+                return self.pk_uri(
+                    'bugtrackerbug', bugtrackerbug_instances[0]['uuid'])
 
     # Build
     def build_exists(self, build_uuid):
@@ -546,7 +544,8 @@ class OldWeebl(object):
                                     jujuservicedeployment_uuid)
 
     def create_jujuservicedeployment(self, name, jujuservice_uri=None,
-            productundertest=None, unit=None, charm=None):
+                                     productundertest=None, unit=None,
+                                     charm=None):
         """Creates a new instance of the 'jujuservicedeployment' model.
 
         Args:
@@ -601,7 +600,8 @@ class OldWeebl(object):
 
     def get_knownbugregex_target_files(self, regex_resource):
         tfiles = self.get_instances(regex_resource)['targetfileglobs']
-        return [urllib.parse.unquote(tfile['glob_pattern']) for tfile in tfiles]
+        return [
+            urllib.parse.unquote(tfile['glob_pattern']) for tfile in tfiles]
 
     def update_knownbugregex_with_new_target_file(self, t_file_glob_resource,
                                                   regex_resource):
@@ -848,8 +848,9 @@ class OldWeebl(object):
         if targetfileglob_instances is not None:
             if targetfileglob in [str(tfile.get('glob_pattern')) for tfile in
                                   targetfileglob_instances]:
-                return self.pk_uri('targetfileglob',
-                               targetfileglob_instances[0]['glob_pattern'])
+                return self.pk_uri(
+                    'targetfileglob',
+                    targetfileglob_instances[0]['glob_pattern'])
 
     def get_targetfileglob_jobtypes(self, t_file_glob_resource):
         return self.get_instances(t_file_glob_resource)['jobtypes']
@@ -988,11 +989,12 @@ class OldWeebl(object):
         try:
             return testcaseinstance[0]['uuid']
         except IndexError:
-            msg = "No testcaseinstance found with build_id: {} and testcase: {}"
+            msg = "No testcaseinstance found with buildid: {} and testcase: {}"
             raise UnrecognisedInstance(msg.format(build_id, testcase_uuid))
 
-    def get_or_create_testcaseinstance(self, build_id, build_uuid, testcase_uuid,
-                                       pipeline_uuid, testcaseinstancestatus):
+    def get_or_create_testcaseinstance(self, build_id, build_uuid,
+                                       testcase_uuid, pipeline_uuid,
+                                       testcaseinstancestatus):
         """Tries to create a new instance of the 'TestCase' model
         if one doesn't already exist.
 
@@ -1010,9 +1012,9 @@ class OldWeebl(object):
                 self.get_testcaseinstance_uuid_from_build_id_testcase_uuid(
                     build_id, testcase_uuid)
         except UnrecognisedInstance:
-            testcaseinstance_uuid = self.create_testcaseinstance(build_uuid,
-                                        testcase_uuid, pipeline_uuid,
-                                        testcaseinstancestatus)
+            testcaseinstance_uuid = self.create_testcaseinstance(
+                build_uuid, testcase_uuid, pipeline_uuid,
+                testcaseinstancestatus)
         return testcaseinstance_uuid
 
     def create_testcaseinstance(self, build_uuid, testcase_uuid, pipeline_uuid,
