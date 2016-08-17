@@ -173,7 +173,7 @@ def load_yaml(file_location):
 
 
 def write_output_yaml(output, path_to_file):
-    mkdir(os.path.realpath(path_to_file))
+    mkdir(os.path.dirname(path_to_file))
     stream = yaml.safe_dump(output, default_flow_style=False)
     with open(path_to_file, 'w') as outfile:
         outfile.write(stream)
