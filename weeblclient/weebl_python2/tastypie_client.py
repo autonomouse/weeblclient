@@ -1,6 +1,7 @@
 from collections import MutableMapping
 from copy import copy
 import json
+import yaml
 import requests
 from requests.exceptions import ConnectionError
 from six.moves.urllib_parse import urlsplit, urljoin
@@ -91,24 +92,34 @@ class ApiClient(object):
     def __init__(self, requester=None, uri_field_overrides=None):
         self.requester = requester
         self.uri_field_overrides = uri_field_overrides
+        self.schema_lookup = {}
         self._populate_resources()
 
     def _populate_resources(self):
         response = \
             self.requester.make_request('get', url=self.requester.make_url())
-        for resource in response.json().keys():
-            uri_field = self.uri_field_overrides.get(resource, 'uuid')
+        for name, resource in response.json().items():
+            uri_field = self.uri_field_overrides.get(name, 'uuid')
             client = ResourceClient(requester=self.requester,
-                                    resource_name=resource,
+                                    schema=resource['schema'],
+                                    endpoint=resource['list_endpoint'],
+                                    api=self,
                                     uri_field=uri_field)
-            setattr(self, resource, client)
+            self.schema_lookup[resource['schema']] = client
+            setattr(self, name, client)
+
+    def resource_client(self, schema_url):
+        return self.schema_lookup[schema_url]
 
 
 class ResourceClient(object):
-    def __init__(self, requester=None, resource_name=None, uri_field='uuid'):
+    def __init__(self, requester=None, schema=None, endpoint=None, api=None,
+                 uri_field='uuid'):
         self.requester = requester
-        self.resource_name = resource_name
+        self.endpoint = endpoint
+        self.schema = schema
         self.uri_field = uri_field
+        self.api_lookup = api
         self.make_url = requester.make_url
         self.make_relative_url = requester.make_relative_url
         self.make_request = requester.make_request
@@ -122,7 +133,7 @@ class ResourceClient(object):
 
     def _get_fields(self):
         response = self.make_request(
-            'get', url=self.make_url(self.resource_name, 'schema'))
+            'get', url=self.make_url(self.schema))
         return response.json().get('fields')
 
     @staticmethod
@@ -150,7 +161,7 @@ class ResourceClient(object):
             filter_by = '?' + "&".join(
                 ["{}={}".format(k, v) for k, v in filters.items()]
             )
-        return self.make_url(self.resource_name, query=filter_by)
+        return self.make_url(self.endpoint, query=filter_by)
 
     def objects(self, **kwargs):
         """Return all objects that match the given kwargs"""
@@ -195,7 +206,7 @@ class ResourceClient(object):
     def create(self, **kwargs):
         """Create one object"""
         response = self.make_request(
-            'post', url=self.make_url(self.resource_name),
+            'post', url=self.make_url(self.endpoint),
             data=json.dumps(kwargs, cls=ExtendedJsonEncoder))
         return ResourceObject(data=response.json(), resource_client=self)
 
@@ -211,70 +222,139 @@ class ResourceClient(object):
 
 
 class ResourceObject(MutableMapping):
-    def __init__(self, data=None, uri=None, resource_client=None):
+    def __init__(self, data=None, uri=None, resource_client=None, load=True):
         """Create a ResourceObject from a dict representation of data"""
         self.resource_client = resource_client
-        self.data = data
+        self._data = data
         self.__orig = copy(data)
-        self.__filled = False
-        if uri is not None:
-            self.__populate_from_uri(self.resource_client.make_url(uri))
+        self.__override_resource_uri = uri
+        if load:  # only load if we are not given the data already
+            self.populate()
+        self.__resourcify_children()
+        yaml.add_representer(ResourceObject, ResourceObject.to_yaml)
+        yaml.SafeDumper.add_representer(ResourceObject, ResourceObject.to_yaml)
 
-    def __populate_from_uri(self, uri):
-        response = self.resource_client.make_request('get', url=uri)
-        self.data = response.json()
-        self.__orig = copy(self.data)
-        self.__filled = True
+    def __resourcify_children(self):
+        """If we get back some full entries for children, they will just be the
+        data without ResourceObject wrappers around them, we fix that here."""
+        def resourcify(data, schema):
+            resource_client = self.resource_client.api_lookup.resource_client(
+                schema)
+            if isinstance(data, dict):
+                return ResourceObject(
+                    data=data, uri=None, resource_client=resource_client,
+                    load=False)
+            else:
+                return ResourceObject(
+                    data=None, uri=data, resource_client=resource_client,
+                    load=False)
+
+        if not self._data:
+            return
+        for key in self._data:
+            field_data = self.resource_client.fields.get(key)
+            if field_data is None:
+                raise ValueError(
+                    "{} not a valid field in {}, add a field server-side to "
+                    "the resource".format(key, self.resource_client.schema))
+            if self._data[key] is None:
+                continue
+            if field_data['type'] == 'related':
+                schema_url = field_data['related_schema']
+                if field_data['related_type'] == 'to_many':
+                    self._data[key] = [resourcify(item, schema_url)
+                                       for item in self._data[key]]
+                else:
+                    self._data[key] = resourcify(self._data[key], schema_url)
+
+    def populate(self, force=False):
+        if force or not self._data:
+            response = self.resource_client.make_request(
+                'get', url=self.resource_client.make_url(self.resource_uri))
+            self._data = response.json()
+            self.__orig = copy(self._data)
 
     @property
     def uri_field_value(self):
-        return self.data.get(self.resource_client.uri_field)
+        return str(self.__orig.get(self.resource_client.uri_field))
 
     @property
     def resource_uri(self):
+        if self.__override_resource_uri:
+            return self.__override_resource_uri
         return self.resource_client.make_relative_url(
-            self.resource_client.resource_name, self.uri_field_value)
+            self.resource_client.endpoint, self.uri_field_value)
 
     def delete(self):
         self.resource_client.make_request(
             'delete', url=self.resource_client.make_url(self.resource_uri))
 
     def edit(self, **kwargs):
-        self.data.update(kwargs)
+        self._data.update(kwargs)
         self.save()
 
     def save(self):
-        if self.__orig != self.data:
+        if self.__orig != self._data:
             self.resource_client.make_request(
                 'put', url=self.resource_client.make_url(self.resource_uri),
-                data=json.dumps(self.data, cls=ExtendedJsonEncoder))
-            self.__orig = copy(self.data)
+                data=json.dumps(self._data, cls=ExtendedJsonEncoder))
+            self.__orig = copy(self._data)
 
-    def fill(self, force=False):
-        if force or not self.__filled:
-            self.__populate_from_uri(self.resource_uri)
+    def __repr__(self):
+        return "ResourceObject(%s, '%s')" % (str(self._data),
+                                             self.resource_uri)
+
+    def __str__(self):
+        return repr(self)
+
+    @staticmethod
+    def to_yaml(dumper, obj):
+        return dumper.represent_mapping(u'tag:yaml.org,2002:map', obj.data)
+
+    @property
+    def data(self):
+        if not self._data:
+            return self.resource_uri
+        safe_data = {}
+        for key, value in self._data.items():
+            if isinstance(value, ResourceObject):
+                value = value.data
+            if isinstance(value, list):
+                new_list = []
+                for item in value:
+                    if isinstance(item, ResourceObject):
+                        item = item.data
+                    new_list.append(item)
+                value = new_list
+            safe_data[key] = value
+        return safe_data
 
     def __getitem__(self, key):
+        self.populate()
         if key in self.resource_client.fields:
-            return self.data.get(key)
+            return self._data.get(key)
         raise ValueError('Does not have key')
 
     def __setitem__(self, key, value):
+        self.populate()
         if key in self.resource_client.fields:
             if not self.resource_client.fields[key]['readonly']:
-                self.data[key] = value
+                self._data[key] = value
                 return
         raise ValueError('Does not have key or readonly')
 
     def __delitem__(self, key):
+        self.populate()
         if key in self.resource_client.fields:
             if not self.resource_client.fields[key]['readonly']:
-                del self.data[key]
+                del self._data[key]
                 return
         raise ValueError('Does not have key or readonly')
 
     def __len__(self):
-        return len(self.data)
+        self.populate()
+        return len(self._data)
 
     def __iter__(self):
-        return iter(self.data.keys())
+        self.populate()
+        return iter(self._data.keys())
