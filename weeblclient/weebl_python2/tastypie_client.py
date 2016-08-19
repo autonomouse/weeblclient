@@ -236,7 +236,8 @@ class ResourceObject(MutableMapping):
             self.resource_client.resource_name, self.uri_field_value)
 
     def delete(self):
-        self.resource_client.make_request('delete', url=self.resource_uri)
+        self.resource_client.make_request(
+            'delete', url=self.resource_client.make_url(self.resource_uri))
 
     def edit(self, **kwargs):
         self.data.update(kwargs)
