@@ -254,9 +254,12 @@ class ResourceObject(MutableMapping):
         for key in self._data:
             field_data = self.resource_client.fields.get(key)
             if field_data is None:
+                schema = self.resource_client.schema
+                resource = schema.split('/schema')[0].split('/')[-1]
                 raise ValueError(
                     "{} not a valid field in {}, add a field server-side to "
-                    "the resource".format(key, self.resource_client.schema))
+                    "the {} resource in this instance of weebl"
+                    .format(key, schema, resource))
             if self._data[key] is None:
                 continue
             if field_data['type'] == 'related':
