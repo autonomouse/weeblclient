@@ -6,7 +6,7 @@ import logging
 import subprocess
 from datetime import datetime
 from collections import namedtuple
-from copy import deepcopy
+from copy import copy, deepcopy
 
 _config = []
 _loggers = {}
@@ -99,19 +99,15 @@ def munge_bug_info_data(known_bug_regexes):
         known_bug_regex_regex = known_bug_regex['regex']
         try:
             lp_bug = known_bug_regex['bug']['bugtrackerbug']['bug_number']
-        except TypeError:
-            continue
-        except KeyError:
+        except (TypeError, KeyError):
             continue
         for glob in known_bug_regex['targetfileglobs']:
-            if not isinstance(glob, dict):
+            try:
+                target_file_glob = glob['glob_pattern']
+            except (TypeError, KeyError):
                 continue
-            target_file_glob = glob.get('glob_pattern')
-            if target_file_glob is None:
-                continue
-            job_names = [jobtype.get('name')
-                         for jobtype in glob.get('jobtypes')]
-            for job_name in job_names:
+            for jobtype in glob['jobtypes']:
+                job_name = jobtype['name']
                 job_entry = {target_file_glob: {
                     'regexp': [known_bug_regex_regex],
                     'uuids': [known_bug_regex_uuid]}
@@ -176,3 +172,43 @@ def write_output_yaml(output, path_to_file):
     stream = yaml.safe_dump(output, default_flow_style=False)
     with open(path_to_file, 'w') as outfile:
         outfile.write(stream)
+
+
+def upload_recursive(data, resource_client):
+    """upload data recusively"""
+    data = copy(data)
+    def child_resource(schema_url):
+        return resource_client.api_lookup.resource_client(schema_url)
+
+    other_resources = {}
+    for key, value in data.items():
+        if value is None:
+            continue
+        field_data = resource_client.fields[key]
+        if field_data['type'] == 'related':
+            if field_data['related_type'] == 'to_many':
+                value = \
+                    [upload_recursive(
+                        item, child_resource(field_data['related_schema']))
+                     for item in value]
+            else:
+                value = upload_recursive(
+                    value, child_resource(field_data['related_schema']))
+            other_resources[key] = value
+            del data[key]
+
+    uniques = {key: value for key, value in data.items()
+               if resource_client.fields[key]['unique']}
+    if uniques:
+        object_ = resource_client.get_or_create(**uniques)
+    else:
+        object_ = resource_client.get_or_create(**data)
+
+    update = list(other_resources.items())
+    update.extend(data.items())
+
+    for key, value in update:
+        if not resource_client.fields[key]['readonly']:
+            object_[key] = value
+    object_.save()
+    return object_
