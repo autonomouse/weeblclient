@@ -870,7 +870,7 @@ class OldWeebl(object):
                                                            testcaseclass_uuid):
         testcase_instance = self.filter_instances(
             "testcase",
-            {'name': name, 'testcaseclass_uuid': testcaseclass_uuid})
+            {'name': name, 'testcaseclass__uuid': testcaseclass_uuid})
         try:
             return testcase_instance[0]['uuid']
         except IndexError:
