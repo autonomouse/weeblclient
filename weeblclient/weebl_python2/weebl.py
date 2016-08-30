@@ -111,9 +111,7 @@ class Weebl(object):
         # slight mangling to get into old format
         choices = []
         for choice in self.resources.configurationchoices.objects(**params):
-            runs = choice['runs']
-            del choice['runs']
-            choices.append([choice['config'], runs])
+            choices.append([choice['config'], choice['runs']])
         return choices
 
     @staticmethod
