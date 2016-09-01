@@ -375,7 +375,3 @@ class ResourceObject(MutableMapping):
     def __iter__(self):
         self.populate()
         return iter(self._data.keys())
-
-    def __eq__(self, other):
-        return self.resource_uri == other.resource_uri and \
-            self.data == other.data
