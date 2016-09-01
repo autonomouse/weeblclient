@@ -292,6 +292,15 @@ class ResourceObject(MutableMapping):
         self.resource_client.make_request(
             'delete', url=self.resource_client.make_url(self.resource_uri))
 
+    def break_all_relations(self):
+        for field, content in self.resource_client.fields.items():
+            if content['type'] == 'related' and not content['readonly']:
+                if content['related_type'] == 'to_many':
+                    self[field] = []
+                else:
+                    self[field] = None
+        self.save()
+
     def edit(self, **kwargs):
         self._data.update(kwargs)
         self.save()
