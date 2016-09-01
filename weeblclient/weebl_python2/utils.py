@@ -177,6 +177,7 @@ def write_output_yaml(output, path_to_file):
 def upload_recursive(data, resource_client):
     """upload data recusively"""
     data = copy(data)
+
     def child_resource(schema_url):
         return resource_client.api_lookup.resource_client(schema_url)
 
