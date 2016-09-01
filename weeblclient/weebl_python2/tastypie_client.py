@@ -3,6 +3,7 @@ from copy import copy
 import json
 import yaml
 import requests
+from pprint import pprint
 from requests.exceptions import ConnectionError
 from six.moves.urllib_parse import urlsplit, urljoin
 from weeblclient.weebl_python2 import utils
@@ -130,6 +131,10 @@ class ResourceClient(object):
         if self.__fields is None:
             self.__fields = self._get_fields()
         return self.__fields
+
+    @property
+    def __doc__(self):
+        return pprint(self.fields)
 
     def _get_fields(self):
         response = self.make_request(
