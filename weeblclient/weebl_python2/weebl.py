@@ -125,8 +125,7 @@ class Weebl(object):
                 return True
         return False
 
-    def push_bundle_info(self, pipeline_id, bundle, require_annotations=False,
-                         maas_product=None, juju_product=None):
+    def push_bundle_info(self, pipeline_id, bundle, require_annotations=False):
         """Push info from a bundle (dict) for the given pipeline_id. The bundle
         can either be annotated with extra data or not. Preferably it will be
         so that all extra data can be propogated. If require_annotations is
@@ -154,8 +153,7 @@ class Weebl(object):
                 return name
         machineconfigurations = {}
 
-        def push_machineconfiguration(name, maas_product=None,
-                                      juju_product=None):
+        def push_machineconfiguration(name):
             """create or return machineconfiguration, which links to machine
             and productundertest children. Do as much as possible depending on
             if annotations are given.
@@ -173,10 +171,7 @@ class Weebl(object):
                         get_or_create(name=product)
                     productundertests_uris.append(
                         productundertest.resource_uri)
-            if maas_product:
-                productundertests_uris.append(maas_product.resource_uri)
-            if juju_product:
-                productundertests_uris.append(juju_product.resource_uri)
+
             machineconfiguration = self.resources.machineconfiguration.create(
                 machine=machine,
                 productundertests=productundertests_uris)
@@ -210,8 +205,7 @@ class Weebl(object):
                     productundertest=productundertest)
             for number, unit in enumerate(config.get('to', [])):
                 machineconfiguration = push_machineconfiguration(
-                    actual_machine_name(unit),
-                    maas_product, juju_product)
+                    actual_machine_name(unit))
                 self.resources.unit.create(
                     number=number,
                     jujuservicedeployment=jujuservicedeployment,
