@@ -375,3 +375,11 @@ class ResourceObject(MutableMapping):
     def __iter__(self):
         self.populate()
         return iter(self._data.keys())
+
+    def __eq__(self, other):
+        # Only compares that the resource_uri is the same (that we are pointing
+        # at the same remote object) for comparisons in lists/otherwise where
+        # the data gotten from serverside requests may not be filled out the
+        # same but they are references to the same object.
+        return isinstance(other, ResourceObject) and \
+            self.resource_uri == other.resource_uri
