@@ -19,6 +19,8 @@ Package: python-weeblclient
 Architecture: all
 Section: python
 Depends: python-requests,
+ python-yaml,
+ python-dateutil,
  ${misc:Depends},
  ${python:Depends}
 Provides: ${python:Provides}
