@@ -1,3 +1,4 @@
+import os
 from warnings import warn
 from copy import deepcopy
 from six.moves.urllib_parse import urljoin
@@ -164,6 +165,7 @@ class Weebl(object):
             hostname = name
             if annotated:
                 hostname = bundle['machines'][name].get('host', hostname)
+            hostname = os.path.splitext(hostname)[0]  # Removes ".oil" suffix
             machine = self.resources.machine.get_or_create(hostname=hostname)
             productundertests_uris = []
             if annotated:
