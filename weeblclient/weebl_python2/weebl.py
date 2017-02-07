@@ -154,8 +154,7 @@ class Weebl(object):
                 return name
         machineconfigurations = {}
 
-        def push_machineconfiguration(name, maas_product=None,
-                                      juju_product=None):
+        def push_machineconfiguration(name):
             """create or return machineconfiguration, which links to machine
             and productundertest children. Do as much as possible depending on
             if annotations are given.
@@ -210,8 +209,7 @@ class Weebl(object):
                     productundertest=productundertest)
             for number, unit in enumerate(config.get('to', [])):
                 machineconfiguration = push_machineconfiguration(
-                    actual_machine_name(unit),
-                    maas_product, juju_product)
+                    actual_machine_name(unit))
                 self.resources.unit.create(
                     number=number,
                     jujuservicedeployment=jujuservicedeployment,
