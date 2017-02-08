@@ -8,6 +8,12 @@ You will need to know your USERNAME and APIKEY, please ask someone in #oil-devel
 
 These commands will build on each other, so best do this all in one ipython session.
 
+weebl is designed so a single instance can capture results from multiple test environments. These environments are modeled via the "Environments" model.
+
+You can add a new environment via the admin interface in the weebl UI (accessible from the dropdown box when you hover over your username in the top right.)
+
+You can get your apikey by viewing the user table in the admin interface, or by viewing the source on any page in weebl.  It shows up near the string "data.apikey".
+
 ## Set your credentials
 ```
 UUID = '<uuid>' # the uuid of the environment you are connecting to, so you don't do silly things
