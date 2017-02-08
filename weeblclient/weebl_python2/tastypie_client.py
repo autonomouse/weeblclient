@@ -101,8 +101,10 @@ class ApiClient(object):
         self.uri_field_overrides = uri_field_overrides
         self.schema_lookup = {}
         self._populate_resources()
+        self.endpoints = []
 
     def _populate_resources(self):
+        self.endpoints = []
         response = \
             self.requester.make_request('get', url=self.requester.make_url())
         for name, resource in response.json().items():
@@ -113,6 +115,7 @@ class ApiClient(object):
                                     api=self,
                                     uri_field=uri_field)
             self.schema_lookup[resource['schema']] = client
+            self.endpoints.append(name)
             setattr(self, name, client)
 
     def resource_client(self, schema_url):
