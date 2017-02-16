@@ -122,7 +122,8 @@ class Weebl(object):
         if 'machines' not in bundle:
             return False
         for service_config in bundle['services'].values():
-            if 'products' in service_config and service_config['products']:
+            if 'annotations' in service_config and \
+                    'products' in service_config['annotations']:
                 return True
         return False
 
@@ -169,7 +170,9 @@ class Weebl(object):
             machine = self.resources.machine.get_or_create(hostname=hostname)
             productundertests_uris = []
             if annotated:
-                for product in bundle['machines'][name].get('products'):
+                products = bundle['machines'][name].get(
+                    'annotations', {}).get('products')
+                for product in products:
                     productundertest = self.resources.productundertest.\
                         get_or_create(name=product)
                     productundertests_uris.append(
@@ -197,18 +200,23 @@ class Weebl(object):
                 charm = self.resources.charm.get_or_create(
                     name=service, charm_source_url=config['charm'])
             productundertest = None
-            if annotated and 'products' in config and config['products']:
+            success = True
+            if annotated and 'annotations' in config:
                 # FIXME: Need ManyToMany jujuservicedeployment <-> PUT
-                product = config['products'][0]
-                productundertest = \
-                    self.resources.productundertest.get_or_create(
-                        name=product)
+                products = config['annotations'].get('products')
+                if products:
+                    productundertest = \
+                        self.resources.productundertest.get_or_create(
+                            name=products[0])
+                if 'success' in config['annotations']:
+                    success = config['annotations']['success']
             jujuservicedeployment =\
                 self.resources.jujuservicedeployment.create(
                     pipeline=pipeline,
                     jujuservice=jujuservice,
                     charm=charm,
-                    productundertest=productundertest)
+                    productundertest=productundertest,
+                    success=success)
             for number, unit in enumerate(config.get('to', [])):
                 machineconfiguration = push_machineconfiguration(
                     actual_machine_name(unit))
