@@ -1,0 +1,4 @@
+jenkinsapi
+pyyaml
+requests
+six
