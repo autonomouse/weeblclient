@@ -1,5 +1,5 @@
 import testtools
-from weeblclient.weebl_python2.weebl import utils
+from weeblclient.weebl import utils
 
 
 class WeeblClientTests(testtools.TestCase):

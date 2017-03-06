@@ -5,10 +5,10 @@ from fnmatch import fnmatch
 from datetime import datetime
 from six.moves.urllib_parse import urljoin
 from six.moves import urllib
-from weeblclient.weebl_python2 import utils
-from weeblclient.weebl_python2.exception import (
+from weeblclient import utils
+from weeblclient.exception import (
     UnexpectedStatusCode, UnrecognisedInstance)
-from weeblclient.weebl_python2.tastypie_client import Requester
+from weeblclient.tastypie_client import Requester
 
 
 class OldWeebl(object):

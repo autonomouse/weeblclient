@@ -1,11 +1,9 @@
-#!/usr/bin/python
 from setuptools import setup, find_packages
 import weeblclient
-from weeblclient import weebl_python2
 
 setup(
     name="weeblclient",
-    version=weebl_python2.__version__,
+    version=weeblclient.__version__,
     description="Web App for OIL client",
     author="Darren Hoyland",
     author_email="<darren.hoyland@canonical.com>",

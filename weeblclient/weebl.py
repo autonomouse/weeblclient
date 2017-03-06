@@ -2,10 +2,10 @@ import os
 from warnings import warn
 from copy import deepcopy
 from six.moves.urllib_parse import urljoin
-from weeblclient.weebl_python2.exception import BundleNotAnnotated
-from weeblclient.weebl_python2 import utils
-from weeblclient.weebl_python2.oldweebl import OldWeebl
-from weeblclient.weebl_python2.tastypie_client import Requester, ApiClient
+from weeblclient.exception import BundleNotAnnotated
+from weeblclient import utils
+from weeblclient.oldweebl import OldWeebl
+from weeblclient.tastypie_client import Requester, ApiClient
 
 # uri_fields that are not based on uuid:
 URI_FIELD_OVERRIDES = {

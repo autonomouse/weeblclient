@@ -4,6 +4,7 @@ import random
 import string
 import logging
 import subprocess
+from lxml import etree
 from datetime import datetime
 from collections import namedtuple
 from copy import copy, deepcopy
@@ -213,3 +214,27 @@ def upload_recursive(data, resource_client):
             object_[key] = value
     object_.save()
     return object_
+
+def get_next_test_data(test_output_file):
+    if test_output_file.endswith('.xml'):
+        next_test_data = get_next_testcase_xml_element(test_output_file)
+        return next_test_data if next_test_data is not None else []
+    return []
+
+def get_next_testcase_xml_element(test_output_file):
+    p = etree.XMLParser(huge_tree=True)
+    et = etree.parse(test_output_file, parser=p)
+    doc = et.getroot()
+    for testcase in doc.xpath('./testcase'):
+        data = {}
+        data['testcaseclass_name'] = testcase.get('classname')
+        data['testcase_name'] = testcase.get('name')
+        results = testcase.getchildren()
+        if len(results) == 0:
+            data['testcaseinstancestatus'] = 'success'
+        else:
+            data['testcaseinstancestatus'] = testcase.getchildren()[0].tag
+            # workaround for junitxml/subunit 'skip' status issue
+            if data['testcaseinstancestatus'] == 'skip':
+                data['testcaseinstancestatus'] = 'skipped'
+        yield data

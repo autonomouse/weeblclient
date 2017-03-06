@@ -6,12 +6,9 @@ import requests
 from pprint import pprint
 from requests.exceptions import ConnectionError
 from six.moves.urllib_parse import urlsplit, urljoin
-from weeblclient.weebl_python2 import utils
-from weeblclient.weebl_python2.exception import (
-    UnexpectedStatusCode,
-    InstanceAlreadyExists,
-    UnauthorisedAPIRequest,
-)
+from weeblclient import utils
+from weeblclient.exception import (
+    UnexpectedStatusCode, InstanceAlreadyExists, UnauthorisedAPIRequest)
 
 
 class ExtendedJsonEncoder(json.JSONEncoder):
