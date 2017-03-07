@@ -1,7 +1,7 @@
 #!/bin/bash -e
-PROJECTS="weeblclient/weeblclient"
+PROJECTS="weeblclient"
 
-for project in $PROJECTS; do 
+for project in $PROJECTS; do
     echo "Testing $project"
     if echo "$@" | grep -q "lint" ; then
       echo "Running flake8 lint tests..."
