@@ -11,6 +11,7 @@ Build-Depends: debhelper (>= 9.0.0),
  python-setuptools,
  python-six,
  python-yaml,
+ python-lxml,
  python-dateutil,
 Standards-Version: 3.9.5
 XS-Python-Version: >= 2.6
@@ -20,6 +21,7 @@ Architecture: all
 Section: python
 Depends: python-requests,
  python-yaml,
+ python-lxml,
  python-dateutil,
  ${misc:Depends},
  ${python:Depends}
