@@ -16,6 +16,8 @@ URI_FIELD_OVERRIDES = {
     'testcaseinstancestatus': 'name',
     'targetfileglob': 'glob_pattern',
     'bugtrackerbug': 'bug_number',
+    'solution': 'cdo_checksum',
+    'solutiontag': 'name',
 }
 
 
