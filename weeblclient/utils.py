@@ -1,3 +1,4 @@
+import re
 import os
 import yaml
 import random
@@ -215,13 +216,22 @@ def upload_recursive(data, resource_client):
     object_.save()
     return object_
 
+
 def get_next_test_data(test_output_file):
     if test_output_file.endswith('.xml'):
         next_test_data = get_next_testcase_xml_element(test_output_file)
         return next_test_data if next_test_data is not None else []
     return []
 
+
 def get_next_testcase_xml_element(test_output_file):
+    """Generator for xml file contents. Which will return and dict with keys
+    ('testcaseclass_name', 'testcase_name', 'testcaseinstancestatus').
+
+    Also for some cases where testcase_name is "setUpClass (tempest....)" and
+    testcaseclass_name is "", we fix that here with some regex munging.
+    """
+    pattern = r'(?P<testcase_name>.*Class) \((?P<testcaseclass_name>[^)]*)\)'
     p = etree.XMLParser(huge_tree=True)
     et = etree.parse(test_output_file, parser=p)
     doc = et.getroot()
@@ -229,6 +239,9 @@ def get_next_testcase_xml_element(test_output_file):
         data = {}
         data['testcaseclass_name'] = testcase.get('classname')
         data['testcase_name'] = testcase.get('name')
+        match = re.match(pattern, data['testcase_name'])
+        if match and data['testcaseclass_name'] == '':
+            data = match.groupdict().copy()
         results = testcase.getchildren()
         if len(results) == 0:
             data['testcaseinstancestatus'] = 'success'
