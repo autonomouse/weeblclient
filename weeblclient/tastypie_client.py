@@ -71,7 +71,7 @@ class Requester(object):
         payload.pop('headers')
         payload['response_code'] = response.status_code
         payload['request_type'] = response.request
-        self.LOG.info(payload)
+        self.LOG.debug(payload)
 
         # If response code isn't 2xx:
         msg = "{} request to {} returned a status code of {}"
