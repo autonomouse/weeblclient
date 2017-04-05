@@ -1,4 +1,4 @@
-from collections import MutableMapping
+from collections import MutableMapping, defaultdict
 from copy import copy
 import json
 import yaml
@@ -148,29 +148,67 @@ class ResourceClient(object):
         return response.json().get('fields')
 
     @staticmethod
-    def _filterify_resource_objects(filters):
-        def resourceobject_filter(key, value):
-            if isinstance(value, ResourceObject):
-                key = key + '__' + value.resource_client.uri_field
-                value = value.uri_field_value
-            # TODO: elif isinstance(value, list): ... of ResourceObjects
-            key = requests.utils.quote(str(key), safe='')
-            value = requests.utils.quote(str(value), safe='')
-            return (key, value)
+    def __clean_filter(filter_path, filter_value):
+        """Convert filters with ResourceObjects to filter on their primary key,
+        if given a single filter with all ResourceObjects, assume we want only
+        to exactly match all and only all, by using the __mexact filter addon
+        for tastypie.
+        returns a tuple: (fully_specified_filter: fully_reduced_values)
+            where fully_reduced_value could be a list, and fully reduced means
+            to use the resourceObjects specific pk value
+        """
+        def urlescape(object_):
+            if isinstance(object_, ResourceObject):
+                object_ = object_.uri_field_value
+            return requests.utils.quote(str(object_), safe='')
 
-        filters = copy(filters)
-        for key, value in filters.items():
-            del filters[key]
-            key, value = resourceobject_filter(key, value)
-            filters[key] = value
-        return filters
+        def filter_key_for_object(base_key, value):
+            """Given the key of a filter, if it is for a ResourceObject, append
+            the correct comparator to the end of the key."""
+            if isinstance(value, ResourceObject):
+                base_key += '__' + value.resource_client.uri_field
+            return urlescape(base_key)
+
+        if not isinstance(filter_value, list):
+            return (filter_key_for_object(filter_path, filter_value),
+                    urlescape(filter_value))
+
+        if not filter_value:  # empty list
+            return (urlescape(filter_path), [])
+
+        # we have a value that is a non-empty list at this point
+        # so we'll check if we have a consistent set of objects
+        full_filter = defaultdict(list)
+        for val in filter_value:
+            filter_ = filter_key_for_object(filter_path, val)
+            if isinstance(val, ResourceObject):
+                # we have a list of ResourceObjects and are passing
+                # them with a single filter so use __mexact filter
+                filter_ += urlescape('__mexact')
+            full_filter[filter_].append(urlescape(val))
+        if len(full_filter) > 1:
+            raise ValueError('Passed a list of objects with different '
+                             'types to create a filter: %s' % filter_value)
+        return full_filter.items()[0]
+
+    @staticmethod
+    def _filterify_resource_objects(filters):
+        cleaned_filters = set()
+        for key, value in copy(filters).items():
+            key, value = ResourceClient.__clean_filter(key, value)
+            # flatten if the values are iterable
+            if isinstance(value, list):
+                cleaned_filters.update(set([(key, item) for item in value]))
+            else:
+                cleaned_filters.add((key, value))
+        return cleaned_filters
 
     def _kwargs_to_filters(self, **filters):
         filter_by = None
         if filters:
             filters = ResourceClient._filterify_resource_objects(filters)
             filter_by = '?' + "&".join(
-                ["{}={}".format(k, v) for k, v in filters.items()]
+                ["{}={}".format(k, v) for k, v in filters]
             )
         return self.make_url(self.endpoint, query=filter_by)
 
@@ -281,12 +319,14 @@ class ResourceObject(MutableMapping):
                 else:
                     self._data[key] = resourcify(self._data[key], schema_url)
 
-    def populate(self, force=False):
+    def populate(self, force=False, resourcify=False):
         if force or not self._data:
             response = self.resource_client.make_request(
                 'get', url=self.resource_client.make_url(self.resource_uri))
             self._data = response.json()
             self.__orig = copy(self._data)
+            if resourcify:
+                self.__resourcify_children()
 
     @property
     def uri_field_value(self):
