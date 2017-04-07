@@ -2,7 +2,7 @@
 # Should be run from top of source tree with local weeblclient in PYTHONPATH
 rm -rf *.egg-info
 [[ -n "$(git status --porcelain)" ]] && echo "Repo not clean" && exit 1
-distro=${1:-"precise"}
+distro=${1:-"xenial"}
 git_version=$(git describe --dirty)
 full_version=${git_version}~${distro}-0ubuntu1
 echo $full_version
