@@ -189,7 +189,7 @@ class ResourceClient(object):
         if len(full_filter) > 1:
             raise ValueError('Passed a list of objects with different '
                              'types to create a filter: %s' % filter_value)
-        return full_filter.items()[0]
+        return list(full_filter.items())[0]
 
     @staticmethod
     def _filterify_resource_objects(filters):
